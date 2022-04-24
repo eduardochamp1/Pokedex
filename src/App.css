@@ -8,6 +8,7 @@ nav {
     flex-direction: row;
     justify-content: space-evenly;
     align-items: center;
+    background-image: linear-gradient(red, yellow, blue);
 }
 
 .navbar-img {
@@ -19,6 +20,13 @@ nav {
     margin: 0px auto;
     padding: 0 20px;
     align-items: center;
+    background: blue;
+    box-shadow: 0 5px 10px -2px gray;
+    border-bottom: 1px solid black;
+}
+
+.pokedex-header h1 {
+  font-family: 'Brush Script MT', cursive;
 }
 
 .searchbar {
@@ -28,17 +36,18 @@ nav {
 
 .searchbar input {
     padding: 10px;
-    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.25);
+    box-shadow: 1px 1px 10px 2px rgba(0, 0, 0, 0.25);
     border-radius: 3px;
     border: none;
 }
 
 .searchbar-btn button {
-    background-color: #0e6f9f;
-    border: none;
+    display: flex;
+    align-items: center;
+    background-color: #d2fae2;
     border-radius: 10px;
-    height: 44px;
-    color: white;
+    height: 30px;
+    color: black;
     padding: 10px 12px;
 }
 
@@ -58,7 +67,9 @@ nav {
 
 .pokemon-card {
   display: flex;
-  box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
+  background: #d2fae2;
+  border-style: outset;
+  box-shadow: 1px 1px 5px 3px rgba(0, 0, 0, 0.25);
   border-radius: 3px;
 }
 
@@ -114,9 +125,11 @@ nav {
 }
 
 .pokemon-heart-btn {
-  border: none;
+  border-style: groove;
+  /* border: 1px groove black; */
+  border-radius: 10px;
   background-color: white;
-  box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.25);
+  /* box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.25); */
   padding: 4px;
   cursor: pointer;
   align-items: center;
