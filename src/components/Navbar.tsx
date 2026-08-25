@@ -29,6 +29,14 @@ const Navbar = () => {
           Comparar
         </NavLink>
         <NavLink
+          to="/mapa"
+          className={({ isActive }) =>
+            "nav-link" + (isActive ? " nav-link-active" : "")
+          }
+        >
+          Mapa
+        </NavLink>
+        <NavLink
           to="/lore"
           className={({ isActive }) =>
             "nav-link" + (isActive ? " nav-link-active" : "")

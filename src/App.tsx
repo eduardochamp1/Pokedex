@@ -6,6 +6,7 @@ import DetailPage from "./pages/DetailPage";
 import FavoritesPage from "./pages/FavoritesPage";
 import ComparePage from "./pages/ComparePage";
 import LorePage from "./pages/LorePage";
+import MapPage from "./pages/MapPage";
 import { FavoriteProvider } from "./contexts/favoritesContext";
 import { useFavorites } from "./hooks/useFavorites";
 
@@ -25,6 +26,7 @@ function App() {
         <Route path="/favoritos" element={<FavoritesPage />} />
         <Route path="/comparar" element={<ComparePage />} />
         <Route path="/lore" element={<LorePage />} />
+        <Route path="/mapa" element={<MapPage />} />
         <Route path="/pokemon/:nameOrId" element={<DetailPage />} />
       </Routes>
     </FavoriteProvider>
