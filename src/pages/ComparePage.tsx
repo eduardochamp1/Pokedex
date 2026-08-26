@@ -1,193 +1,158 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import CardHero from "../components/CardHero";
+import TypeMatchup from "../components/TypeMatchup";
 import { usePokemonDetail } from "../hooks/usePokemon";
 import { useDebounce } from "../hooks/useDebounce";
 import type { Pokemon } from "../types/pokemon";
 
 const STAT_LABELS: Record<string, string> = {
   hp: "HP",
-  attack: "Ataque",
-  defense: "Defesa",
-  "special-attack": "Atq. Esp.",
-  "special-defense": "Def. Esp.",
-  speed: "Velocidade",
+  attack: "Atq",
+  defense: "Def",
+  "special-attack": "Atq Esp",
+  "special-defense": "Def Esp",
+  speed: "Vel",
 };
 
-interface SlotProps {
-  index: 0 | 1;
-  value: string;
-  onChange: (v: string) => void;
-  data: Pokemon | null | undefined;
-  isLoading: boolean;
-}
-
-const Slot = ({ index, value, onChange, data, isLoading }: SlotProps) => {
-  return (
-    <div className="compare-slot">
-      <input
-        type="search"
-        className="compare-input"
-        value={value}
-        placeholder={`Pokémon ${index + 1} (nome ou id)`}
-        onChange={(e) => onChange(e.target.value)}
-        aria-label={`Selecionar pokémon ${index + 1}`}
-      />
-      {isLoading && <div className="compare-loading">Carregando…</div>}
-      {!isLoading && data && (
-        <div
-          className="compare-card"
-          data-primary-type={data.types[0]?.type.name}
-        >
-          <img
-            src={
-              data.sprites.other?.["official-artwork"]?.front_default ??
-              data.sprites.front_default ??
-              ""
-            }
-            alt={data.name}
-            className="compare-image"
-          />
-          <div className="compare-name">
-            <Link to={`/pokemon/${data.name}`}>{data.name}</Link>
-            <span className="compare-id">#{String(data.id).padStart(3, "0")}</span>
-          </div>
-          <div className="pokemon-type">
-            {data.types.map((t) => (
-              <span
-                key={t.type.name}
-                className="pokemon-type-text"
-                data-type={t.type.name}
-              >
-                {t.type.name}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-      {!isLoading && value && data === null && (
-        <div className="compare-empty">Não encontrado.</div>
-      )}
-    </div>
-  );
-};
+const totalOf = (p: Pokemon) => p.stats.reduce((s, x) => s + x.base_stat, 0);
 
 const ComparePage = () => {
   const [left, setLeft] = useState("bulbasaur");
   const [right, setRight] = useState("charmander");
-
   const leftDeb = useDebounce(left.trim(), 350);
   const rightDeb = useDebounce(right.trim(), 350);
-
   const leftQ = usePokemonDetail(leftDeb || undefined);
   const rightQ = usePokemonDetail(rightDeb || undefined);
+  const both = leftQ.data && rightQ.data ? ([leftQ.data, rightQ.data] as const) : null;
 
-  const both = leftQ.data && rightQ.data ? [leftQ.data, rightQ.data] : null;
+  const swap = () => {
+    setLeft(right);
+    setRight(left);
+  };
 
   return (
-    <div className="compare-container">
-      <h1 className="compare-title">Comparar</h1>
-      <div className="compare-grid">
-        <Slot
-          index={0}
+    <div className="compare-shell">
+      <h1 className="compare-title">Arena</h1>
+
+      <div className="compare-inputs">
+        <input
           value={left}
-          onChange={setLeft}
-          data={leftQ.data}
-          isLoading={leftQ.isFetching}
+          onChange={(e) => setLeft(e.target.value)}
+          placeholder="Pokémon 1"
+          aria-label="Selecionar pokémon 1"
         />
-        <Slot
-          index={1}
+        <button
+          type="button"
+          className="compare-swap"
+          onClick={swap}
+          aria-label="Trocar posições"
+        >
+          ⇄
+        </button>
+        <input
           value={right}
-          onChange={setRight}
-          data={rightQ.data}
-          isLoading={rightQ.isFetching}
+          onChange={(e) => setRight(e.target.value)}
+          placeholder="Pokémon 2"
+          aria-label="Selecionar pokémon 2"
         />
       </div>
 
+      <div className="compare-arena">
+        <div className="compare-slot">
+          {leftQ.data && <CardHero pokemon={leftQ.data} />}
+        </div>
+        <div className="compare-slot">
+          {rightQ.data && <CardHero pokemon={rightQ.data} />}
+        </div>
+      </div>
+
       {both && (
-        <section className="detail-section">
-          <h2>Status base</h2>
-          <ul className="compare-stats">
-            {both[0].stats.map((s, i) => {
-              const label = STAT_LABELS[s.stat.name] ?? s.stat.name;
-              const leftVal = s.base_stat;
-              const rightVal = both[1].stats[i]?.base_stat ?? 0;
-              const max = Math.max(leftVal, rightVal, 1);
-              const leftPct = (leftVal / max) * 100;
-              const rightPct = (rightVal / max) * 100;
-              const leftWins = leftVal > rightVal;
-              const rightWins = rightVal > leftVal;
-              return (
-                <li key={s.stat.name} className="compare-stat">
-                  <span
-                    className={
-                      "compare-stat-value left" +
-                      (leftWins ? " winner" : rightWins ? " loser" : "")
-                    }
-                  >
-                    {leftVal}
-                  </span>
-                  <span className="compare-stat-bar-wrap">
-                    <span className="compare-stat-bar left">
-                      <span
-                        className="compare-stat-bar-fill left"
-                        style={{ width: `${leftPct}%` }}
-                      />
+        <>
+          <section className="compare-section">
+            <h2>Status base</h2>
+            <ul className="compare-stats">
+              {both[0].stats.map((s, i) => {
+                const label = STAT_LABELS[s.stat.name] ?? s.stat.name;
+                const lv = s.base_stat;
+                const rv = both[1].stats[i]?.base_stat ?? 0;
+                const max = Math.max(lv, rv, 1);
+                return (
+                  <li key={s.stat.name}>
+                    <span
+                      className={
+                        "compare-value left" + (lv > rv ? " winner" : "")
+                      }
+                    >
+                      {lv}
                     </span>
-                    <span className="compare-stat-label">{label}</span>
-                    <span className="compare-stat-bar right">
-                      <span
-                        className="compare-stat-bar-fill right"
-                        style={{ width: `${rightPct}%` }}
-                      />
+                    <span className="compare-bar-wrap">
+                      <span className="compare-bar left">
+                        <span style={{ width: `${(lv / max) * 100}%` }} />
+                      </span>
+                      <span className="compare-label">{label}</span>
+                      <span className="compare-bar right">
+                        <span style={{ width: `${(rv / max) * 100}%` }} />
+                      </span>
                     </span>
-                  </span>
-                  <span
-                    className={
-                      "compare-stat-value right" +
-                      (rightWins ? " winner" : leftWins ? " loser" : "")
-                    }
-                  >
-                    {rightVal}
-                  </span>
-                </li>
-              );
-            })}
-            <li className="compare-stat compare-total">
-              <span
-                className={
-                  "compare-stat-value left" +
-                  (totalOf(both[0]) > totalOf(both[1])
-                    ? " winner"
-                    : totalOf(both[0]) < totalOf(both[1])
-                    ? " loser"
-                    : "")
-                }
-              >
-                {totalOf(both[0])}
-              </span>
-              <span className="compare-stat-bar-wrap">
-                <span className="compare-stat-label compare-total-label">Total</span>
-              </span>
-              <span
-                className={
-                  "compare-stat-value right" +
-                  (totalOf(both[1]) > totalOf(both[0])
-                    ? " winner"
-                    : totalOf(both[1]) < totalOf(both[0])
-                    ? " loser"
-                    : "")
-                }
-              >
-                {totalOf(both[1])}
-              </span>
-            </li>
-          </ul>
-        </section>
+                    <span
+                      className={
+                        "compare-value right" + (rv > lv ? " winner" : "")
+                      }
+                    >
+                      {rv}
+                    </span>
+                  </li>
+                );
+              })}
+              <li className="compare-total-row">
+                <span
+                  className={
+                    "compare-value left" +
+                    (totalOf(both[0]) > totalOf(both[1]) ? " winner" : "")
+                  }
+                >
+                  {totalOf(both[0])}
+                </span>
+                <span className="compare-bar-wrap">
+                  <span className="compare-label compare-total-label">TOTAL</span>
+                </span>
+                <span
+                  className={
+                    "compare-value right" +
+                    (totalOf(both[1]) > totalOf(both[0]) ? " winner" : "")
+                  }
+                >
+                  {totalOf(both[1])}
+                </span>
+              </li>
+            </ul>
+          </section>
+
+          <section className="compare-section">
+            <h2>Efetividade</h2>
+            <div className="matchup-grid">
+              <div>
+                <h3 className="matchup-title">{both[0].name} ataca</h3>
+                <TypeMatchup
+                  attacker={both[0].types.map((t) => t.type.name)}
+                  defender={both[1].types.map((t) => t.type.name)}
+                  side="left"
+                />
+              </div>
+              <div>
+                <h3 className="matchup-title">{both[1].name} ataca</h3>
+                <TypeMatchup
+                  attacker={both[1].types.map((t) => t.type.name)}
+                  defender={both[0].types.map((t) => t.type.name)}
+                  side="right"
+                />
+              </div>
+            </div>
+          </section>
+        </>
       )}
     </div>
   );
 };
-
-const totalOf = (p: Pokemon) => p.stats.reduce((sum, s) => sum + s.base_stat, 0);
 
 export default ComparePage;
