@@ -79,75 +79,65 @@ const LorePage = () => {
   };
 
   return (
-    <div className="lore-container">
-      <header className="lore-header">
-        <h1>Universo Pokémon</h1>
-        <p className="lore-intro">
-          Cronologia, genealogia, regiões, humanos, vilões e dimensões que
-          compõem o mundo pokémon.
-        </p>
-      </header>
-
-      <div className="lore-tabs" role="tablist">
+    <div className="lore-shell">
+      <aside className="lore-sidebar">
+        <h2 className="lore-sidebar-title">Universo Pokémon</h2>
         {(Object.keys(TAB_LABELS) as Tab[]).map((t) => (
           <button
             key={t}
-            role="tab"
-            aria-selected={tab === t}
-            className={"lore-tab" + (tab === t ? " lore-tab-active" : "")}
+            className={"lore-sidebar-btn" + (tab === t ? " active" : "")}
             onClick={() => setTab(t)}
           >
             {TAB_LABELS[t]}
           </button>
         ))}
-      </div>
+      </aside>
 
-      {tab === "timeline" && (
-        <>
-          <div className="lore-filters">
-            <div className="lore-era-chips" role="tablist" aria-label="Filtrar por era">
-              <button
-                type="button"
-                className={"lore-era-chip" + (!eraFilter ? " active" : "")}
-                onClick={() => setEraFilter(undefined)}
-              >
-                Todas
-              </button>
-              {ERAS.map((era) => (
+      <main className="lore-main">
+        {tab === "timeline" && (
+          <>
+            <div className="lore-filters">
+              <div className="lore-era-chips" role="tablist" aria-label="Filtrar por era">
                 <button
-                  key={era}
                   type="button"
-                  className={"lore-era-chip" + (eraFilter === era ? " active" : "")}
-                  onClick={() => setEraFilter(era)}
+                  className={"lore-era-chip" + (!eraFilter ? " active" : "")}
+                  onClick={() => setEraFilter(undefined)}
                 >
-                  {era}
+                  Todas
                 </button>
-              ))}
-            </div>
-            {pokemonFilter && (
-              <div className="lore-active-filter">
-                Filtrando eventos de <b>{pokemonFilter}</b>
-                <button onClick={clearFilters} className="lore-clear-btn">
-                  limpar ✕
-                </button>
+                {ERAS.map((era) => (
+                  <button
+                    key={era}
+                    type="button"
+                    className={"lore-era-chip" + (eraFilter === era ? " active" : "")}
+                    onClick={() => setEraFilter(era)}
+                  >
+                    {era}
+                  </button>
+                ))}
               </div>
-            )}
-          </div>
+              {pokemonFilter && (
+                <div className="lore-active-filter">
+                  Filtrando eventos de <b>{pokemonFilter}</b>
+                  <button onClick={clearFilters} className="lore-clear-btn">
+                    limpar ✕
+                  </button>
+                </div>
+              )}
+            </div>
 
-          {ERAS.filter((era) => visibleEvents.some((e) => e.era === era)).map(
-            (era) => (
-              <section key={era} className="lore-era">
-                <h2 className="lore-era-title">{era}</h2>
-                <ol className="lore-timeline">
+            {ERAS.filter((era) => visibleEvents.some((e) => e.era === era)).map((era) => (
+              <section key={era} className="lore-era-section">
+                <ol className="lore-timeline-editorial">
                   {visibleEvents
                     .filter((e) => e.era === era)
                     .map((event) => (
-                      <li key={event.title} className="lore-event">
-                        <div className="lore-event-marker" aria-hidden="true" />
+                      <li key={event.title} className="lore-event-editorial">
+                        <div className="lore-event-era-mark">{era}</div>
                         <div className="lore-event-body">
                           <h3 className="lore-event-title">{event.title}</h3>
                           <p className="lore-event-text">{event.body}</p>
-                          <div className="lore-event-pokemons">
+                          <div className="lore-chips">
                             {event.pokemons.map((name) => (
                               <PokemonChip
                                 key={name}
@@ -162,57 +152,79 @@ const LorePage = () => {
                     ))}
                 </ol>
               </section>
-            )
-          )}
+            ))}
 
-          {visibleEvents.length === 0 && (
-            <div className="lore-empty">
-              Nenhum evento encontrado com esses filtros.
-              <button onClick={clearFilters} className="lore-clear-btn">
-                limpar filtros
-              </button>
-            </div>
-          )}
-        </>
-      )}
-
-      {tab === "genealogy" && (
-        <div className="genealogy-container">
-          <p className="genealogy-intro">
-            A árvore de criação — quem gerou ou moldou quem, segundo a mitologia
-            do universo pokémon.
-          </p>
-          <GenealogyTree node={GENEALOGY_TREE} byName={byName} />
-        </div>
-      )}
-
-      {tab === "generations" && (
-        <ol className="gen-timeline">
-          {GAME_GENERATIONS.map((g) => (
-            <li key={g.id} className="gen-item" style={{ ["--gen-color" as string]: g.color }}>
-              <div className="gen-marker">
-                <span className="gen-year">{g.year}</span>
-                <span className="gen-roman">{g.roman}</span>
+            {visibleEvents.length === 0 && (
+              <div className="lore-empty">
+                Nenhum evento encontrado com esses filtros.
+                <button onClick={clearFilters} className="lore-clear-btn">
+                  limpar filtros
+                </button>
               </div>
-              <div className="gen-card">
-                <h2 className="gen-title">
-                  Geração {g.roman} — <span>{g.region}</span>
-                </h2>
-                <div className="gen-games">
-                  {g.mainGames.map((game) => (
-                    <span key={game} className="gen-game-badge">{game}</span>
-                  ))}
-                </div>
-                <ul className="gen-facts">
-                  <li>
-                    <strong>Novos pokémon:</strong> {g.newPokemons} (total: {g.totalAfter})
-                  </li>
-                  <li>
-                    <strong>Novidade:</strong> {g.gimmick}
-                  </li>
-                </ul>
-                <div className="lore-event-pokemons">
-                  {g.signature.map((name) => (
+            )}
+          </>
+        )}
+
+        {tab === "genealogy" && (
+          <div className="genealogy-container">
+            <p className="genealogy-intro">
+              A árvore de criação — quem gerou ou moldou quem, segundo a mitologia
+              do universo pokémon.
+            </p>
+            <GenealogyTree node={GENEALOGY_TREE} byName={byName} />
+          </div>
+        )}
+
+        {tab === "generations" && (
+          <div className="gen-carousel-wrap">
+            <ol className="gen-carousel">
+              {GAME_GENERATIONS.map((g) => (
+                <li
+                  key={g.id}
+                  className="gen-slide"
+                  style={{ ["--gen-color" as string]: g.color }}
+                >
+                  <div className="gen-slide-year">{g.year}</div>
+                  <div className="gen-slide-roman">Geração {g.roman}</div>
+                  <div className="gen-slide-region">{g.region}</div>
+                  <div className="gen-games">
+                    {g.mainGames.map((game) => (
+                      <span key={game} className="gen-game-badge">
+                        {game}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="gen-slide-fact">{g.gimmick}</p>
+                  <div className="gen-slide-meta">
+                    <strong>{g.newPokemons}</strong> novos · total {g.totalAfter}
+                  </div>
+                  <div className="lore-chips">
+                    {g.signature.map((name) => (
+                      <PokemonChip
+                        key={name}
+                        name={name}
+                        pokemon={byName.get(name)}
+                        onFilter={() => focusPokemon(name)}
+                      />
+                    ))}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+
+        {tab === "regions" && (
+          <div className="editorial-grid">
+            {REGIONS.map((region) => (
+              <article key={region.id} className="editorial-card">
+                <h2>{region.name}</h2>
+                <p className="subtitle">
+                  Gen {region.generation} · {region.inspiration}
+                </p>
+                <p>{region.summary}</p>
+                <div className="lore-chips">
+                  {region.signature.map((name) => (
                     <PokemonChip
                       key={name}
                       name={name}
@@ -221,129 +233,98 @@ const LorePage = () => {
                     />
                   ))}
                 </div>
-              </div>
-            </li>
-          ))}
-        </ol>
-      )}
+              </article>
+            ))}
+          </div>
+        )}
 
-      {tab === "regions" && (
-        <div className="regions-grid">
-          {REGIONS.map((region) => (
-            <article key={region.id} className="region-card">
-              <div className="region-head">
-                <h2 className="region-name">{region.name}</h2>
-                <span className="region-gen">Gen {region.generation}</span>
-              </div>
-              <p className="region-inspiration">{region.inspiration}</p>
-              <p className="region-summary">{region.summary}</p>
-              <div className="lore-event-pokemons">
-                {region.signature.map((name) => (
-                  <PokemonChip
-                    key={name}
-                    name={name}
-                    pokemon={byName.get(name)}
-                    onFilter={() => focusPokemon(name)}
-                  />
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
+        {tab === "humans" && (
+          <div className="editorial-grid">
+            {HUMAN_LEGENDS.map((h) => (
+              <article key={h.name} className="editorial-card">
+                <h2>{h.name}</h2>
+                <p className="subtitle">
+                  {h.role} · {h.region}
+                </p>
+                <p>{h.summary}</p>
+                <div className="lore-chips">
+                  {h.pokemons.map((name) => (
+                    <PokemonChip
+                      key={name}
+                      name={name}
+                      pokemon={byName.get(name)}
+                      onFilter={() => focusPokemon(name)}
+                    />
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
 
-      {tab === "humans" && (
-        <div className="humans-grid">
-          {HUMAN_LEGENDS.map((h) => (
-            <article key={h.name} className="human-card">
-              <header className="human-head">
-                <h2 className="human-name">{h.name}</h2>
-                <span className="human-role">{h.role}</span>
-              </header>
-              <p className="human-region">{h.region}</p>
-              <p className="human-summary">{h.summary}</p>
-              <div className="lore-event-pokemons">
-                {h.pokemons.map((name) => (
-                  <PokemonChip
-                    key={name}
-                    name={name}
-                    pokemon={byName.get(name)}
-                    onFilter={() => focusPokemon(name)}
-                  />
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
+        {tab === "villains" && (
+          <div className="editorial-grid">
+            {VILLAIN_TEAMS.map((v) => (
+              <article
+                key={v.id}
+                className="editorial-card"
+                style={{ ["--card-accent" as string]: v.color }}
+              >
+                <h2>{v.name}</h2>
+                <p className="subtitle">
+                  {v.region} · líder: {v.leader}
+                </p>
+                <p>
+                  <strong>Motivação:</strong> {v.motivation}
+                </p>
+                <p>
+                  <strong>Desfecho:</strong> {v.fate}
+                </p>
+                <div className="lore-chips">
+                  {v.signature.map((name) => (
+                    <PokemonChip
+                      key={name}
+                      name={name}
+                      pokemon={byName.get(name)}
+                      onFilter={() => focusPokemon(name)}
+                    />
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
 
-      {tab === "villains" && (
-        <div className="villains-grid">
-          {VILLAIN_TEAMS.map((v) => (
-            <article
-              key={v.id}
-              className="villain-card"
-              style={{ ["--villain-color" as string]: v.color }}
-            >
-              <header className="villain-head">
-                <h2 className="villain-name">{v.name}</h2>
-                <span className="villain-region">{v.region}</span>
-              </header>
-              <div className="villain-leader">
-                <strong>Líder:</strong> {v.leader}
-              </div>
-              <p className="villain-summary">
-                <strong>Motivação: </strong>
-                {v.motivation}
-              </p>
-              <p className="villain-summary">
-                <strong>Desfecho: </strong>
-                {v.fate}
-              </p>
-              <div className="lore-event-pokemons">
-                {v.signature.map((name) => (
-                  <PokemonChip
-                    key={name}
-                    name={name}
-                    pokemon={byName.get(name)}
-                    onFilter={() => focusPokemon(name)}
-                  />
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
-
-      {tab === "dimensions" && (
-        <div className="dimensions-grid">
-          {DIMENSIONS.map((d) => (
-            <article
-              key={d.id}
-              className="dimension-card"
-              style={{ ["--dim-color" as string]: d.color }}
-            >
-              <div className="dimension-glow" aria-hidden="true" />
-              <h2 className="dimension-name">{d.name}</h2>
-              <div className="dimension-meta">
-                <span><strong>Regente:</strong> {d.ruler}</span>
-                <span><strong>Acesso:</strong> {d.access}</span>
-              </div>
-              <p className="dimension-summary">{d.description}</p>
-              <div className="lore-event-pokemons">
-                {d.inhabitants.map((name) => (
-                  <PokemonChip
-                    key={name}
-                    name={name}
-                    pokemon={byName.get(name)}
-                    onFilter={() => focusPokemon(name)}
-                  />
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
+        {tab === "dimensions" && (
+          <div className="editorial-grid">
+            {DIMENSIONS.map((d) => (
+              <article
+                key={d.id}
+                className="editorial-card editorial-card-dim"
+                style={{ ["--card-accent" as string]: d.color }}
+              >
+                <div className="dimension-glow" aria-hidden="true" />
+                <h2>{d.name}</h2>
+                <p className="subtitle">Regente: {d.ruler}</p>
+                <p>
+                  <strong>Acesso:</strong> {d.access}
+                </p>
+                <p>{d.description}</p>
+                <div className="lore-chips">
+                  {d.inhabitants.map((name) => (
+                    <PokemonChip
+                      key={name}
+                      name={name}
+                      pokemon={byName.get(name)}
+                      onFilter={() => focusPokemon(name)}
+                    />
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </main>
     </div>
   );
 };
@@ -360,12 +341,12 @@ const PokemonChip = ({ name, pokemon, onFilter }: ChipProps) => {
     pokemon?.sprites.front_default ??
     "";
   return (
-    <span className="lore-pokemon-chip-wrap">
-      <Link to={`/pokemon/${name}`} className="lore-pokemon-chip" title={name}>
+    <span className="lore-chip-wrap">
+      <Link to={`/pokemon/${name}`} className="lore-chip" title={name}>
         {sprite ? (
           <img src={sprite} alt={name} />
         ) : (
-          <span className="lore-pokemon-placeholder">?</span>
+          <span className="lore-chip-placeholder">?</span>
         )}
         <span>{name}</span>
       </Link>

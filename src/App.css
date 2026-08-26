@@ -1022,6 +1022,742 @@ nav {
 }
 .favorites-empty-cta:hover { transform: translateY(-2px); }
 
+/* ========= Lore shell ========= */
+.lore-shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  min-height: calc(100vh - 56px);
+}
+.lore-sidebar {
+  position: sticky;
+  top: 80px;
+  align-self: start;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 20px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.lore-sidebar-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  padding: 0 12px;
+  margin-bottom: 12px;
+}
+.lore-sidebar-btn {
+  padding: 10px 12px;
+  text-align: left;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+.lore-sidebar-btn:hover { background: var(--surface-2); color: var(--text); }
+.lore-sidebar-btn.active {
+  background: var(--surface-3);
+  color: var(--accent-alt);
+}
+.lore-main { min-width: 0; }
+
+/* Lore filters (chips of era) */
+.lore-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.lore-era-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.lore-era-chip {
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: transform var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast);
+}
+.lore-era-chip:hover {
+  border-color: var(--accent-alt);
+  transform: translateY(-1px);
+  color: var(--text);
+}
+.lore-era-chip.active {
+  background: var(--accent-alt);
+  color: #333;
+  border-color: var(--accent-alt);
+}
+.lore-active-filter {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 12px;
+  background: var(--surface-1);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  font-size: 0.8rem;
+  align-self: flex-start;
+  text-transform: capitalize;
+  color: var(--text);
+}
+.lore-clear-btn {
+  color: var(--accent-alt);
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+.lore-clear-btn:hover { background: rgba(255, 203, 5, 0.15); }
+.lore-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+}
+
+/* Lore chips (pokémon chips inside events) */
+.lore-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+.lore-chip-wrap { display: inline-flex; align-items: stretch; }
+.lore-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 4px;
+  border-radius: var(--radius-pill) 0 0 var(--radius-pill);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  transition: transform var(--dur-fast), border-color var(--dur-fast);
+}
+.lore-chip:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-alt);
+}
+.lore-chip img { width: 26px; height: 26px; object-fit: contain; }
+.lore-chip-placeholder {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--surface-3);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-dim);
+}
+.lore-chip-filter {
+  padding: 0 8px;
+  margin-left: -1px;
+  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+.lore-chip-filter:hover {
+  background: var(--accent-alt);
+  color: #333;
+  border-color: var(--accent-alt);
+}
+
+/* Timeline editorial */
+.lore-era-section { margin-bottom: 8px; }
+.lore-timeline-editorial { list-style: none; display: grid; gap: 16px; }
+.lore-event-editorial {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 20px;
+}
+.lore-event-era-mark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.7rem;
+  color: var(--accent-alt);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding-top: 20px;
+  text-align: right;
+  border-right: 2px solid var(--border);
+  padding-right: 12px;
+}
+.lore-event-editorial .lore-event-body {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 20px 24px;
+}
+.lore-event-editorial .lore-event-title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.15rem;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+.lore-event-editorial .lore-event-text {
+  line-height: 1.7;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+/* Genealogy tree */
+.genealogy-container { padding: 8px 0; }
+.genealogy-intro {
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: 20px;
+  font-family: var(--font-display);
+  font-style: italic;
+}
+.genealogy-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+}
+.genealogy-card {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 12px 18px;
+  box-shadow: var(--shadow-card);
+  max-width: 480px;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+.depth-0 > .genealogy-card {
+  background: linear-gradient(135deg, var(--accent), var(--accent-alt));
+  color: #333;
+  border: none;
+  box-shadow: var(--shadow-hero);
+}
+.depth-0 > .genealogy-card .genealogy-role,
+.depth-0 > .genealogy-card .genealogy-note,
+.depth-0 > .genealogy-card .genealogy-name { color: #333; }
+.genealogy-portrait {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.depth-0 .genealogy-portrait {
+  background: rgba(255, 255, 255, 0.35);
+}
+.genealogy-portrait img { width: 100%; height: 100%; object-fit: contain; }
+.genealogy-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+  text-align: left;
+}
+.genealogy-name {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  color: var(--text);
+}
+.genealogy-role {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  color: var(--accent);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.genealogy-note {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin: 0;
+}
+.genealogy-pulse {
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  border: 2px solid var(--accent-alt);
+  opacity: 0.5;
+  animation: genealogy-pulse 3s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes genealogy-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.05); opacity: 0.15; }
+}
+.genealogy-children {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding-top: 40px;
+  position: relative;
+}
+.genealogy-connectors {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Generations carousel */
+.gen-carousel-wrap {
+  margin: 0 -24px;
+  padding: 0 24px 8px;
+}
+.gen-carousel {
+  list-style: none;
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 12px;
+}
+.gen-slide {
+  flex: 0 0 320px;
+  scroll-snap-align: start;
+  background: var(--surface-1);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--gen-color);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.gen-slide-year {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--gen-color);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.gen-slide-roman {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+.gen-slide-region {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.2rem;
+  color: var(--text);
+}
+.gen-games { display: flex; gap: 6px; flex-wrap: wrap; }
+.gen-game-badge {
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: var(--surface-3);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.gen-slide-fact {
+  color: var(--text);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.gen-slide-meta {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.gen-slide-meta strong { color: var(--text); font-weight: 700; }
+
+/* Editorial grid (regions/humans/villains/dimensions) */
+.editorial-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+.editorial-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+}
+.editorial-card::before {
+  content: "";
+  position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: var(--card-accent, var(--accent));
+}
+.editorial-card h2 {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: var(--card-accent, var(--accent));
+  text-transform: capitalize;
+}
+.editorial-card .subtitle {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-style: italic;
+  font-family: var(--font-display);
+}
+.editorial-card p {
+  color: var(--text);
+  line-height: 1.55;
+  font-size: 0.9rem;
+  text-align: left;
+}
+.editorial-card p strong { color: var(--card-accent); font-weight: 700; }
+
+.editorial-card-dim { padding-right: 22px; }
+.editorial-card-dim .dimension-glow {
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, var(--card-accent) 0%, transparent 70%);
+  opacity: 0.25;
+  pointer-events: none;
+  border-radius: 50%;
+}
+.editorial-card-dim h2,
+.editorial-card-dim p,
+.editorial-card-dim .subtitle,
+.editorial-card-dim .lore-chips { position: relative; z-index: 1; }
+
+/* ========= World map ========= */
+.mappage-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px 20px 60px;
+}
+.mappage-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.mappage-header h1 {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
+}
+.mappage-intro {
+  color: var(--text-muted);
+  max-width: 640px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+.worldmap-wrap {
+  position: relative;
+  background: linear-gradient(180deg, #0d1f38, #0b1729);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  box-shadow: var(--shadow-hero);
+  border: 1px solid var(--border);
+}
+.worldmap-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1000 / 600;
+}
+.worldmap-region { cursor: pointer; outline: none; }
+.worldmap-region path {
+  fill: var(--region-color);
+  stroke: rgba(255, 255, 255, 0.4);
+  stroke-width: 2;
+  transition: transform var(--dur-base) var(--ease-out), filter var(--dur-base) var(--ease-out), stroke-width var(--dur-base) var(--ease-out);
+  transform-origin: center;
+  transform-box: fill-box;
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--region-color) 40%, transparent));
+}
+.worldmap-region:hover path,
+.worldmap-region.is-hover path {
+  transform: scale(1.06);
+  stroke: white;
+  stroke-width: 3;
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--region-color) 70%, transparent)) brightness(1.15);
+}
+.worldmap-region.is-selected path {
+  stroke: var(--accent-alt);
+  stroke-width: 4;
+  filter: drop-shadow(0 0 12px rgba(255, 203, 5, 0.6));
+}
+.worldmap-label {
+  fill: white;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+  text-transform: capitalize;
+}
+.worldmap-sub {
+  fill: rgba(255, 255, 255, 0.7);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 600;
+  pointer-events: none;
+}
+.particle {
+  opacity: 0;
+  animation: particle-drift 8s ease-in-out infinite;
+}
+@keyframes particle-drift {
+  0%, 100% { opacity: 0; transform: translateY(0); }
+  50% { opacity: 0.6; transform: translateY(-6px); }
+}
+
+.worldmap-tooltip {
+  position: absolute;
+  background: var(--surface-1);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  box-shadow: var(--shadow-card-hover);
+  pointer-events: none;
+  max-width: 240px;
+  z-index: 10;
+  font-size: 0.85rem;
+  animation: fadeIn 140ms ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.worldmap-tooltip-name {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent-alt);
+  margin-bottom: 2px;
+  text-transform: capitalize;
+}
+.worldmap-tooltip-info {
+  color: var(--text);
+  margin-bottom: 6px;
+  font-style: italic;
+}
+.worldmap-tooltip-hint { color: var(--text-muted); font-size: 0.75rem; }
+
+/* Map dossier */
+.mappage-detail {
+  margin-top: 24px;
+  padding: 24px;
+  background: var(--surface-1);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  border-top: 5px solid var(--region-color);
+  box-shadow: var(--shadow-card);
+  animation: slideUp 240ms ease-out;
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.mappage-dossier-head {
+  display: grid;
+  grid-template-columns: 140px 1fr auto;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.mappage-dossier-map {
+  width: 100%;
+  height: 120px;
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--region-color) 50%, transparent));
+}
+.mappage-dossier-title {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.mappage-dossier-stamp {
+  display: inline-block;
+  align-self: flex-start;
+  background: var(--surface-3);
+  border: 2px solid var(--region-color);
+  color: var(--region-color);
+  padding: 2px 10px;
+  border-radius: 3px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  transform: rotate(-3deg);
+  margin-bottom: 6px;
+}
+.mappage-detail-name {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--region-color);
+  margin-bottom: 2px;
+  text-transform: capitalize;
+  font-weight: 700;
+}
+.mappage-detail-sub {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+.mappage-close {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  transition: background var(--dur-fast), color var(--dur-fast);
+  align-self: start;
+}
+.mappage-close:hover { background: var(--region-color); color: white; }
+
+.mappage-detail-summary {
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: 20px;
+  text-align: left;
+}
+.mappage-block { margin-top: 20px; }
+.mappage-block h3 {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  color: var(--region-color);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 4px;
+  text-align: left;
+}
+.mappage-events,
+.mappage-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+  text-align: left;
+}
+.mappage-events li,
+.mappage-list li {
+  padding: 10px 14px;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  line-height: 1.5;
+  font-size: 0.9rem;
+}
+.mappage-events strong,
+.mappage-list strong {
+  color: var(--region-color);
+  font-weight: 700;
+}
+.mappage-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.mappage-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  transition: transform var(--dur-fast), border-color var(--dur-fast);
+}
+.mappage-chip:hover { transform: translateY(-2px); border-color: var(--region-color); }
+.mappage-chip img { width: 30px; height: 30px; object-fit: contain; }
+.mappage-chip-placeholder {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--surface-3);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-dim);
+}
+.mappage-link {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--region-color);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.mappage-link:hover { text-decoration: underline; }
+.mappage-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+}
+.mappage-cta {
+  padding: 10px 18px;
+  background: var(--region-color);
+  color: white;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-weight: 700;
+  transition: transform var(--dur-fast);
+}
+.mappage-cta:hover { transform: translateY(-2px); }
+
+@media (max-width: 900px) {
+  .lore-shell { grid-template-columns: 1fr; }
+  .lore-sidebar {
+    position: static;
+    flex-direction: row;
+    overflow-x: auto;
+  }
+  .lore-event-editorial { grid-template-columns: 1fr; }
+  .lore-event-era-mark {
+    text-align: left;
+    border-right: none;
+    border-bottom: 2px solid var(--border);
+    padding-right: 0;
+    padding-bottom: 6px;
+    padding-top: 0;
+  }
+  .mappage-dossier-head { grid-template-columns: 1fr; }
+}
+
 /* ========= Reduced motion ========= */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {

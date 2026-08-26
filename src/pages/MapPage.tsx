@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useMemo } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import WorldMap from "../components/WorldMap";
 import { REGIONS } from "../data/regions";
 import { REGION_SHAPES } from "../data/regionMap";
@@ -10,7 +10,12 @@ import { usePokemonsByNames } from "../hooks/usePokemon";
 import type { Pokemon } from "../types/pokemon";
 
 const MapPage = () => {
-  const [selectedId, setSelectedId] = useState<string | undefined>();
+  const [params, setParams] = useSearchParams();
+  const selectedId = params.get("region") ?? undefined;
+  const setSelectedId = (id: string | undefined) => {
+    if (id) setParams({ region: id });
+    else setParams({});
+  };
 
   const region = REGIONS.find((r) => r.id === selectedId);
   const shape = REGION_SHAPES.find((s) => s.id === selectedId);
@@ -45,8 +50,8 @@ const MapPage = () => {
       <header className="mappage-header">
         <h1>Mapa do Mundo Pokémon</h1>
         <p className="mappage-intro">
-          Passe o mouse sobre uma região para ver detalhes; clique para
-          explorar sua lore, pokémons lendários, humanos e vilões.
+          Passe o mouse sobre uma região para ver detalhes; clique para explorar
+          sua lore, pokémons lendários, humanos e vilões.
         </p>
       </header>
 
@@ -58,28 +63,36 @@ const MapPage = () => {
           style={{ ["--region-color" as string]: shape.color }}
           aria-live="polite"
         >
-          <header className="mappage-detail-head">
-            <div>
+          <div className="mappage-dossier-head">
+            <svg
+              viewBox="0 0 1000 600"
+              className="mappage-dossier-map"
+              aria-hidden="true"
+            >
+              <path d={shape.path} fill={shape.color} opacity="0.9" />
+            </svg>
+            <div className="mappage-dossier-title">
+              <span className="mappage-dossier-stamp">DOSSIER</span>
               <h2 className="mappage-detail-name">{region.name}</h2>
               <p className="mappage-detail-sub">
                 Geração {region.generation} · {region.inspiration}
               </p>
+              <button
+                type="button"
+                className="mappage-close"
+                onClick={() => setSelectedId(undefined)}
+                aria-label="Fechar detalhes"
+              >
+                ✕
+              </button>
             </div>
-            <button
-              type="button"
-              className="mappage-close"
-              onClick={() => setSelectedId(undefined)}
-              aria-label="Fechar detalhes"
-            >
-              ✕
-            </button>
-          </header>
+          </div>
 
           <p className="mappage-detail-summary">{region.summary}</p>
 
           <section className="mappage-block">
             <h3>Pokémons emblemáticos</h3>
-            <div className="lore-event-pokemons">
+            <div className="mappage-chips">
               {region.signature.map((name) => {
                 const p = byName.get(name);
                 const sprite =
@@ -90,13 +103,13 @@ const MapPage = () => {
                   <Link
                     to={`/pokemon/${name}`}
                     key={name}
-                    className="lore-pokemon-chip"
+                    className="mappage-chip"
                     title={name}
                   >
                     {sprite ? (
                       <img src={sprite} alt={name} />
                     ) : (
-                      <span className="lore-pokemon-placeholder">?</span>
+                      <span className="mappage-chip-placeholder">?</span>
                     )}
                     <span>{name}</span>
                   </Link>

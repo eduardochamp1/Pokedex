@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { REGION_SHAPES } from "../data/regionMap";
 import { REGIONS } from "../data/regions";
+import ParticleField from "./ParticleField";
 
 interface Props {
   onSelect: (regionId: string) => void;
@@ -44,6 +45,9 @@ const WorldMap = ({ onSelect, selectedId }: Props) => {
         {/* Ocean */}
         <rect width="1000" height="600" fill="url(#ocean-grad)" />
         <rect width="1000" height="600" fill="url(#grid)" />
+
+        {/* Bioluminescent particles */}
+        <ParticleField count={20} />
 
         {/* Compass */}
         <g className="worldmap-compass" transform="translate(920, 60)">
