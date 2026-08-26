@@ -1,5 +1,6 @@
-import Pokemon from "./Pokemon";
+import Card from "./Card";
 import Pagination from "./Pagination";
+import { CardSkeleton } from "./Skeleton";
 import type { Pokemon as PokemonT } from "../types/pokemon";
 
 interface Props {
@@ -21,7 +22,7 @@ const Pokedex = ({ pokemons, loading, page, setPage, totalPages }: Props) => {
   return (
     <div>
       <div className="pokedex-header">
-        <h1>Pokedex</h1>
+        <h1>Pokédex</h1>
         <Pagination
           page={page + 1}
           totalPages={totalPages}
@@ -30,11 +31,15 @@ const Pokedex = ({ pokemons, loading, page, setPage, totalPages }: Props) => {
         />
       </div>
       {loading ? (
-        <div>Carregando…</div>
+        <CardSkeleton count={10} />
       ) : (
-        <div className="pokedex-grid">
+        <div className="card-grid">
           {pokemons.map((pokemon) => (
-            <Pokemon key={pokemon.id} pokemon={pokemon} />
+            <Card
+              key={pokemon.id}
+              pokemon={pokemon}
+              linkTo={`/pokemon/${pokemon.name}`}
+            />
           ))}
         </div>
       )}

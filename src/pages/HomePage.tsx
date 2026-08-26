@@ -4,13 +4,16 @@ import Pokedex from "../components/Pokedex";
 import TypeFilter from "../components/TypeFilter";
 import GenerationFilter from "../components/GenerationFilter";
 import RarityFilter from "../components/RarityFilter";
+import CardHero from "../components/CardHero";
 import { CardSkeleton } from "../components/Skeleton";
 import { useDebounce } from "../hooks/useDebounce";
+import { useFeaturedPokemon } from "../hooks/useFeaturedPokemon";
 import {
   usePokemonList,
   usePokemonSearch,
   usePokemonsByGeneration,
   usePokemonsByNames,
+  usePokemonSpecies,
   usePokemonsByType,
 } from "../hooks/usePokemon";
 import { RARITIES, type RarityId } from "../data/rarity";
@@ -30,6 +33,9 @@ const HomePage = () => {
   const typeQuery = usePokemonsByType(typeFilter);
   const genQuery = usePokemonsByGeneration(genFilter);
 
+  const featured = useFeaturedPokemon();
+  const featuredSpecies = usePokemonSpecies(featured.data?.species.url);
+
   const rarityNames = useMemo(
     () => (rarityFilter ? RARITIES.find((r) => r.id === rarityFilter)!.names : []),
     [rarityFilter]
@@ -41,7 +47,6 @@ const HomePage = () => {
     (Boolean(typeFilter) || Boolean(genFilter) || Boolean(rarityFilter)) &&
     !isSearching;
 
-  // Cross-filter: intersect all active filter results by id.
   const filteredPokemons = useMemo(() => {
     if (!isFiltering) return [];
     const sources: number[][] = [];
@@ -51,13 +56,11 @@ const HomePage = () => {
 
     if (sources.length === 0) return [];
 
-    // Union of loaded pokemons keyed by id
     const byId = new Map<number, import("../types/pokemon").Pokemon>();
     for (const p of typeQuery.data ?? []) byId.set(p.id, p);
     for (const p of genQuery.data ?? []) byId.set(p.id, p);
     for (const p of rarityQuery.pokemons) byId.set(p.id, p);
 
-    // Intersect all id sets
     const [first, ...rest] = sources;
     const intersect = first.filter((id) => rest.every((s) => s.includes(id)));
 
@@ -67,8 +70,12 @@ const HomePage = () => {
       .sort((a, b) => a.id - b.id);
   }, [
     isFiltering,
-    typeFilter, genFilter, rarityFilter,
-    typeQuery.data, genQuery.data, rarityQuery.pokemons,
+    typeFilter,
+    genFilter,
+    rarityFilter,
+    typeQuery.data,
+    genQuery.data,
+    rarityQuery.pokemons,
   ]);
 
   let pokemons = listQuery.data?.pokemons ?? [];
@@ -100,41 +107,83 @@ const HomePage = () => {
     (isFiltering && !isFetching && pokemons.length === 0);
 
   const onTypeChange = (v: string | undefined) => {
-    setTypeFilter(v); setPage(0); setSearchInput("");
+    setTypeFilter(v);
+    setPage(0);
+    setSearchInput("");
   };
   const onGenChange = (v: number | undefined) => {
-    setGenFilter(v); setPage(0); setSearchInput("");
+    setGenFilter(v);
+    setPage(0);
+    setSearchInput("");
   };
   const onRarityChange = (v: RarityId | undefined) => {
-    setRarityFilter(v); setPage(0); setSearchInput("");
+    setRarityFilter(v);
+    setPage(0);
+    setSearchInput("");
   };
+
+  const featuredFlavor = featuredSpecies.data
+    ? (featuredSpecies.data.flavor_text_entries.find((e) => e.language.name === "en")?.flavor_text ?? "")
+        .replace(/[\f\n\r\v]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+    : "";
 
   return (
     <>
-      <div className="home-controls">
-        <Searchbar value={searchInput} onChange={setSearchInput} />
-        <TypeFilter value={typeFilter} onChange={onTypeChange} />
-        <GenerationFilter value={genFilter} onChange={onGenChange} />
-        <RarityFilter value={rarityFilter} onChange={onRarityChange} />
-      </div>
-      {notFound ? (
-        <div className="not-found-text">Nenhum pokémon encontrado.</div>
-      ) : showInitialLoading ? (
-        <>
-          <div className="pokedex-header">
-            <h1>Pokedex</h1>
+      {featured.data && (
+        <section className="home-featured">
+          <div className="home-featured-copy">
+            {featuredSpecies.data && (
+              <div className="home-featured-genus">
+                {featuredSpecies.data.genera.find((g) => g.language.name === "en")?.genus ?? "Pokémon"}
+              </div>
+            )}
+            <h2>{featured.data.name}</h2>
+            <div className="pokemon-type">
+              {featured.data.types.map((t) => (
+                <span
+                  key={t.type.name}
+                  className="card-type-dot-lg"
+                  data-type={t.type.name}
+                >
+                  {t.type.name}
+                </span>
+              ))}
+            </div>
+            {featuredFlavor && <p>"{featuredFlavor}"</p>}
           </div>
-          <CardSkeleton count={12} />
-        </>
-      ) : (
-        <Pokedex
-          pokemons={pokemons}
-          loading={isFetching && pokemons.length === 0}
-          page={currentPage}
-          setPage={setPage}
-          totalPages={totalPages}
-        />
+          <CardHero pokemon={featured.data} />
+        </section>
       )}
+
+      <div className="home-layout">
+        <aside className="home-sidebar">
+          <h3>Buscar</h3>
+          <Searchbar value={searchInput} onChange={setSearchInput} />
+          <h3>Tipo</h3>
+          <TypeFilter value={typeFilter} onChange={onTypeChange} />
+          <h3>Geração</h3>
+          <GenerationFilter value={genFilter} onChange={onGenChange} />
+          <h3>Raridade</h3>
+          <RarityFilter value={rarityFilter} onChange={onRarityChange} />
+        </aside>
+        <main>
+          {notFound ? (
+            <div className="not-found-text">Nenhum pokémon encontrado.</div>
+          ) : showInitialLoading ? (
+            <CardSkeleton count={10} />
+          ) : (
+            <Pokedex
+              pokemons={pokemons}
+              loading={isFetching && pokemons.length === 0}
+              page={currentPage}
+              setPage={setPage}
+              totalPages={totalPages}
+            />
+          )}
+        </main>
+      </div>
     </>
   );
 };
