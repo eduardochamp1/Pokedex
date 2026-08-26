@@ -500,6 +500,297 @@ nav {
   font-size: 1rem;
 }
 
+/* ========= Detail page ========= */
+.detail-shell {
+  position: relative;
+  min-height: calc(100vh - 56px);
+  padding: 40px 24px;
+}
+.detail-shell::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(
+    circle at 50% 30%,
+    color-mix(in srgb, var(--type-fill, transparent) 20%, transparent),
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+.detail-shell[data-primary-type="normal"]   { --type-fill: var(--t-normal); }
+.detail-shell[data-primary-type="fire"]     { --type-fill: var(--t-fire); }
+.detail-shell[data-primary-type="water"]    { --type-fill: var(--t-water); }
+.detail-shell[data-primary-type="electric"] { --type-fill: var(--t-electric); }
+.detail-shell[data-primary-type="grass"]    { --type-fill: var(--t-grass); }
+.detail-shell[data-primary-type="ice"]      { --type-fill: var(--t-ice); }
+.detail-shell[data-primary-type="fighting"] { --type-fill: var(--t-fighting); }
+.detail-shell[data-primary-type="poison"]   { --type-fill: var(--t-poison); }
+.detail-shell[data-primary-type="ground"]   { --type-fill: var(--t-ground); }
+.detail-shell[data-primary-type="flying"]   { --type-fill: var(--t-flying); }
+.detail-shell[data-primary-type="psychic"]  { --type-fill: var(--t-psychic); }
+.detail-shell[data-primary-type="bug"]      { --type-fill: var(--t-bug); }
+.detail-shell[data-primary-type="rock"]     { --type-fill: var(--t-rock); }
+.detail-shell[data-primary-type="ghost"]    { --type-fill: var(--t-ghost); }
+.detail-shell[data-primary-type="dragon"]   { --type-fill: var(--t-dragon); }
+.detail-shell[data-primary-type="dark"]     { --type-fill: var(--t-dark); }
+.detail-shell[data-primary-type="steel"]    { --type-fill: var(--t-steel); }
+.detail-shell[data-primary-type="fairy"]    { --type-fill: var(--t-fairy); }
+
+.detail-close {
+  position: fixed;
+  top: 72px; right: 24px;
+  z-index: 50;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 1rem;
+  transition: transform var(--dur-fast), background var(--dur-fast), color var(--dur-fast);
+}
+.detail-close:hover {
+  transform: scale(1.1);
+  background: var(--accent);
+  color: white;
+}
+
+.detail-layout {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 240px 1fr 260px;
+  grid-template-rows: auto auto auto;
+  grid-template-areas:
+    "sprites hero forms"
+    "evo     hero lore"
+    "evo     hero stats";
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.detail-panel-sprites { grid-area: sprites; }
+.detail-panel-forms   { grid-area: forms; }
+.detail-panel-evo     { grid-area: evo; }
+.detail-panel-lore    { grid-area: lore; }
+.detail-panel-stats   { grid-area: stats; }
+.detail-hero-slot {
+  grid-area: hero;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 0;
+}
+.detail-fav-btn {
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--text);
+  transition: transform var(--dur-fast), background var(--dur-fast);
+}
+.detail-fav-btn:hover {
+  background: var(--surface-3);
+  transform: translateY(-2px);
+}
+
+.detail-panel {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  min-width: 0;
+}
+.detail-panel h3 {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  color: var(--accent-alt);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 12px;
+}
+.detail-muted { color: var(--text-muted); font-size: 0.9rem; }
+
+.detail-stats { list-style: none; display: grid; gap: 8px; }
+.detail-stats li {
+  display: grid;
+  grid-template-columns: 60px 1fr 40px;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+.detail-stat-label {
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+}
+.detail-stat-bar {
+  height: 8px;
+  background: var(--surface-3);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+.detail-stat-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-alt), var(--type-fill, var(--accent)));
+  border-radius: inherit;
+  transition: width var(--dur-slow) var(--ease-out);
+}
+.detail-stat-value {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-family: var(--font-display);
+}
+.detail-stat-total {
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+  margin-top: 4px;
+  font-weight: 700;
+}
+.detail-stat-total span:last-child { color: var(--accent-alt); font-size: 1rem; }
+
+/* Sprite viewer */
+.sprite-list { list-style: none; display: grid; gap: 8px; }
+.sprite-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: var(--surface-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  transition: border-color var(--dur-fast), background var(--dur-fast);
+}
+.sprite-btn:hover { background: var(--surface-3); }
+.sprite-btn.active { border-color: var(--accent-alt); }
+.sprite-btn img { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; }
+.sprite-btn span {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* Variety switcher */
+.variety-list {
+  list-style: none;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+}
+.variety-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: stretch;
+}
+.variety-item.active .card {
+  outline: 2px solid var(--accent-alt);
+  outline-offset: 2px;
+}
+.variety-label {
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: capitalize;
+}
+.variety-fallback {
+  aspect-ratio: 2 / 3;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  display: block;
+}
+.card-mini { padding: 6px; }
+.card-mini .card-name { font-size: 0.7rem; }
+.card-mini .card-stats { display: none; }
+.card-mini .card-hp strong { font-size: 0.75rem; }
+.card-mini .card-fav { display: none; }
+.card-mini .card-artwork { min-height: 60px; }
+.card-mini .card-type-dot { width: 8px; height: 8px; }
+
+/* Evolution chain */
+.evo-chain {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px;
+}
+.evo-step { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.evo-arrow {
+  font-size: 1.4rem;
+  color: var(--accent-alt);
+  text-shadow: 0 0 8px var(--accent-alt);
+}
+.evo-card-wrap { width: 110px; }
+.evo-card-wrap.active .card {
+  outline: 2px solid var(--accent-alt);
+  outline-offset: 2px;
+  box-shadow: 0 0 20px color-mix(in srgb, var(--accent-alt) 30%, transparent);
+}
+
+/* Pokemon lore block */
+.lore-block { display: flex; flex-direction: column; gap: 12px; }
+.lore-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.lore-tag {
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: var(--surface-3);
+  color: var(--text-muted);
+}
+.lore-tag.lore-genus { color: var(--accent-alt); }
+.lore-tag.lore-rarity {
+  background: linear-gradient(90deg, var(--accent-alt), #ff9d00);
+  color: #333;
+}
+.lore-tag.lore-region {
+  color: var(--text);
+  background: var(--surface-2);
+}
+.lore-tag.lore-region:hover { color: var(--accent-alt); }
+.lore-quote {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text);
+  padding: 12px 14px;
+  border-left: 3px solid var(--accent-alt);
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+}
+
+@media (max-width: 1024px) {
+  .detail-layout {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "hero    hero"
+      "sprites forms"
+      "evo     evo"
+      "lore    lore"
+      "stats   stats";
+  }
+}
+@media (max-width: 640px) {
+  .detail-layout {
+    grid-template-columns: 1fr;
+    grid-template-areas: "hero" "sprites" "forms" "evo" "lore" "stats";
+  }
+}
+
 /* ========= Favorites ========= */
 .favorites-shell { max-width: 1000px; margin: 0 auto; padding: 32px 24px 60px; }
 .favorites-header {

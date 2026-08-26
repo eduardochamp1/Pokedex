@@ -3,74 +3,58 @@ import type { Pokemon } from "../types/pokemon";
 
 interface Props {
   pokemon: Pokemon;
+  onSelect?: (url: string | undefined) => void;
 }
 
-type Mode = "static" | "animated" | "shiny" | "animated-shiny";
-
-const SpriteViewer = ({ pokemon }: Props) => {
-  const [mode, setMode] = useState<Mode>("static");
-
-  const sources = useMemo(() => {
-    const artwork = pokemon.sprites.other?.["official-artwork"];
-    const showdown = pokemon.sprites.other?.showdown;
-    return {
-      static: artwork?.front_default ?? pokemon.sprites.front_default ?? "",
-      shiny:
-        artwork?.front_shiny ??
-        pokemon.sprites.front_shiny ??
-        pokemon.sprites.other?.home?.front_shiny ??
-        "",
-      animated: showdown?.front_default ?? "",
-      "animated-shiny": showdown?.front_shiny ?? "",
-    } as Record<Mode, string>;
-  }, [pokemon]);
-
-  const available: Mode[] = [
-    "static",
-    ...(sources.shiny ? (["shiny"] as Mode[]) : []),
-    ...(sources.animated ? (["animated"] as Mode[]) : []),
-    ...(sources["animated-shiny"] ? (["animated-shiny"] as Mode[]) : []),
-  ];
-
-  const active = sources[mode] ? mode : "static";
-  const src = sources[active];
-  const isAnimated = active.startsWith("animated");
-
-  return (
-    <div className="sprite-viewer">
-      <div className={"sprite-frame" + (isAnimated ? " sprite-frame-animated" : "")}>
-        {src ? (
-          <img
-            src={src}
-            alt={`${pokemon.name} — ${MODE_LABELS[active]}`}
-            className={"detail-image" + (isAnimated ? " detail-image-animated" : "")}
-          />
-        ) : (
-          <div className="detail-image sprite-placeholder">?</div>
-        )}
-      </div>
-      <div className="sprite-modes">
-        {available.map((m) => (
-          <button
-            key={m}
-            type="button"
-            className={"sprite-mode" + (m === active ? " sprite-mode-active" : "")}
-            onClick={() => setMode(m)}
-            aria-pressed={m === active}
-          >
-            {MODE_LABELS[m]}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-};
+type Mode = "static" | "shiny" | "animated" | "animated-shiny";
 
 const MODE_LABELS: Record<Mode, string> = {
   static: "Normal",
   shiny: "Shiny ✨",
   animated: "Animado",
-  "animated-shiny": "Animado ✨",
+  "animated-shiny": "Anim. ✨",
+};
+
+const SpriteViewer = ({ pokemon, onSelect }: Props) => {
+  const [mode, setMode] = useState<Mode>("static");
+
+  const sources = useMemo(() => {
+    const art = pokemon.sprites.other?.["official-artwork"];
+    const show = pokemon.sprites.other?.showdown;
+    return {
+      static: art?.front_default ?? pokemon.sprites.front_default ?? "",
+      shiny: art?.front_shiny ?? pokemon.sprites.front_shiny ?? "",
+      animated: show?.front_default ?? "",
+      "animated-shiny": show?.front_shiny ?? "",
+    } as Record<Mode, string>;
+  }, [pokemon]);
+
+  const available: Mode[] = (Object.keys(MODE_LABELS) as Mode[]).filter(
+    (m) => !!sources[m]
+  );
+
+  const pick = (m: Mode) => {
+    setMode(m);
+    onSelect?.(m === "static" ? undefined : sources[m]);
+  };
+
+  return (
+    <ul className="sprite-list">
+      {available.map((m) => (
+        <li key={m}>
+          <button
+            type="button"
+            className={"sprite-btn" + (m === mode ? " active" : "")}
+            onClick={() => pick(m)}
+            aria-pressed={m === mode}
+          >
+            <img src={sources[m]} alt={MODE_LABELS[m]} />
+            <span>{MODE_LABELS[m]}</span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
 };
 
 export default SpriteViewer;

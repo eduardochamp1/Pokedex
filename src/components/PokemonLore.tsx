@@ -1,18 +1,18 @@
+import { Link } from "react-router-dom";
 import type { PokemonSpecies } from "../types/pokemon";
 
 interface Props {
   species: PokemonSpecies;
 }
 
-// Prefer PT-BR, fall back to English.
-const PREFERRED_LANGS = ["pt-br", "pt", "en"];
+const LANGS = ["pt-br", "pt", "en"];
 
 function pickBest<T extends { language: { name: string } }>(
   entries: T[]
 ): T | undefined {
-  for (const lang of PREFERRED_LANGS) {
-    const found = entries.find((e) => e.language.name === lang);
-    if (found) return found;
+  for (const l of LANGS) {
+    const f = entries.find((e) => e.language.name === l);
+    if (f) return f;
   }
   return entries[0];
 }
@@ -20,12 +20,10 @@ function pickBest<T extends { language: { name: string } }>(
 const PokemonLore = ({ species }: Props) => {
   const flavor = pickBest(species.flavor_text_entries);
   const genus = pickBest(species.genera);
-
-  const rarityLabels: string[] = [];
-  if (species.is_mythical) rarityLabels.push("Mítico ✨");
-  else if (species.is_legendary) rarityLabels.push("Lendário 👑");
-  if (species.is_baby) rarityLabels.push("Bebê 🍼");
-
+  const rarity: string[] = [];
+  if (species.is_mythical) rarity.push("Mítico ✨");
+  else if (species.is_legendary) rarity.push("Lendário 👑");
+  if (species.is_baby) rarity.push("Bebê 🍼");
   const cleanFlavor = flavor?.flavor_text
     .replace(/[\f\n\r\v]/g, " ")
     .replace(/\s+/g, " ")
@@ -33,20 +31,26 @@ const PokemonLore = ({ species }: Props) => {
 
   return (
     <div className="lore-block">
-      <div className="lore-badges">
-        {genus && <span className="lore-genus">{genus.genus}</span>}
-        {rarityLabels.map((l) => (
-          <span key={l} className="lore-rarity">
-            {l}
+      <div className="lore-tags">
+        {genus && <span className="lore-tag lore-genus">{genus.genus}</span>}
+        {rarity.map((r) => (
+          <span key={r} className="lore-tag lore-rarity">
+            {r}
           </span>
         ))}
         {species.habitat && (
-          <span className="lore-habitat">
+          <span className="lore-tag lore-habitat">
             Habitat: <b>{species.habitat.name}</b>
           </span>
         )}
+        <Link
+          to={`/mapa?region=${encodeURIComponent(species.name)}`}
+          className="lore-tag lore-region"
+        >
+          ver no mapa →
+        </Link>
       </div>
-      {cleanFlavor && <p className="lore-text">{cleanFlavor}</p>}
+      {cleanFlavor && <blockquote className="lore-quote">"{cleanFlavor}"</blockquote>}
     </div>
   );
 };
