@@ -1,0 +1,60 @@
+:root {
+  /* Palco */
+  --bg: #0d0e14;
+  --surface-1: #1a1c25;
+  --surface-2: #141520;
+  --surface-3: #212433;
+  --border: #2a2c37;
+  --border-strong: #3a3d4d;
+
+  /* Texto */
+  --text: #f2f2f5;
+  --text-muted: #a1a1a6;
+  --text-dim: #6b6b70;
+
+  /* Acentos */
+  --accent: #ee1e35;
+  --accent-alt: #ffcb05;
+  --accent-hover: #ff3550;
+
+  /* Sombras */
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-card-hover: 0 16px 40px rgba(0, 0, 0, 0.6);
+  --shadow-hero: 0 24px 60px rgba(0, 0, 0, 0.7);
+
+  /* Raios */
+  --radius-card: 14px;
+  --radius-sm: 8px;
+  --radius-pill: 999px;
+
+  /* Motion */
+  --dur-fast: 120ms;
+  --dur-base: 250ms;
+  --dur-slow: 400ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* Tipos — paleta canônica (mesma do CSS antigo) */
+  --t-normal:   #a8a77a;
+  --t-fire:     #ee8130;
+  --t-water:    #6390f0;
+  --t-electric: #f7d02c;
+  --t-grass:    #7ac74c;
+  --t-ice:      #96d9d6;
+  --t-fighting: #c22e28;
+  --t-poison:   #a33ea1;
+  --t-ground:   #e2bf65;
+  --t-flying:   #a98ff3;
+  --t-psychic:  #f95587;
+  --t-bug:      #a6b91a;
+  --t-rock:     #b6a136;
+  --t-ghost:    #735797;
+  --t-dragon:   #6f35fc;
+  --t-dark:     #705746;
+  --t-steel:    #b7b7ce;
+  --t-fairy:    #d685ad;
+
+  /* Fontes */
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
