@@ -9,7 +9,7 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext .ts,.tsx",
-    "typecheck": "tsc -b --noEmit"
+    "typecheck": "tsc -b"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.102.2",
