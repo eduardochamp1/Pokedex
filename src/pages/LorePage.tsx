@@ -11,6 +11,7 @@ import { BATTLES } from "../data/battles";
 import { MYTHS } from "../data/myths";
 import { CIVILIZATIONS } from "../data/civilizations";
 import { BREEDING } from "../data/breeding";
+import { ITEMS } from "../data/items";
 import { usePokemonsByNames } from "../hooks/usePokemon";
 import GenealogyTree from "../components/GenealogyTree";
 import {
@@ -75,7 +76,8 @@ type Tab =
   | "battles"
   | "myths"
   | "civilizations"
-  | "breeding";
+  | "breeding"
+  | "items";
 
 const TAB_LABELS: Record<Tab, string> = {
   timeline: "Cronologia",
@@ -89,6 +91,7 @@ const TAB_LABELS: Record<Tab, string> = {
   myths: "Mitos",
   civilizations: "Civilizações",
   breeding: "Ovos",
+  items: "Itens",
 };
 
 function collectGenealogyNames(node: GenealogyNode, acc: string[] = []): string[] {
@@ -110,6 +113,7 @@ const allPokemonNames = Array.from(
     ...MYTHS.flatMap((m) => m.pokemons),
     ...CIVILIZATIONS.flatMap((c) => c.pokemons),
     ...BREEDING.flatMap((b) => b.pokemons),
+    ...ITEMS.flatMap((i) => i.pokemons),
   ])
 );
 
@@ -184,6 +188,11 @@ const LorePage = () => {
   );
   const visibleBreeding = useMemo(
     () => BREEDING.filter((b) => matchesPokemonFilter(b.pokemons)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [pokemonFilter]
+  );
+  const visibleItems = useMemo(
+    () => ITEMS.filter((i) => matchesPokemonFilter(i.pokemons)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [pokemonFilter]
   );
@@ -588,6 +597,57 @@ const LorePage = () => {
           </div>
         )}
 
+        {tab === "items" && (
+          <div className="items-grid">
+            {(["sagrado", "pokebola", "chave", "cristal", "livro"] as const).map((cat) => {
+              const items = visibleItems.filter((i) => i.category === cat);
+              if (items.length === 0) return null;
+              const catLabel =
+                cat === "pokebola" ? "Pokébolas lendárias" :
+                cat === "sagrado" ? "Itens sagrados" :
+                cat === "chave" ? "Itens-chave (transformações)" :
+                cat === "cristal" ? "Cristais e pedras" :
+                "Livros e diários";
+              return (
+                <section key={cat} className="items-section">
+                  <h3 className="items-cat-label">{catLabel}</h3>
+                  <div className="items-cards">
+                    {items.map((it) => (
+                      <article key={it.id} className={"item-card item-card-" + it.category}>
+                        <div className="item-emblem" aria-hidden="true">
+                          {itemEmblem(it.category)}
+                        </div>
+                        <div className="item-body">
+                          <h2>{it.name}</h2>
+                          <p>{it.summary}</p>
+                          <div className="lore-chips">
+                            {it.pokemons.map((name) => (
+                              <PokemonChip
+                                key={name}
+                                name={name}
+                                pokemon={byName.get(name)}
+                                onFilter={() => focusPokemon(name)}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
+            {visibleItems.length === 0 && (
+              <div className="lore-empty">
+                Nenhum item com <b>{pokemonFilter}</b>.
+                <button onClick={clearFilters} className="lore-clear-btn">
+                  limpar busca
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
         {tab === "breeding" && (
           <div className="breeding-grid">
             {(["grupo", "regra", "especial"] as const).map((cat) => {
@@ -761,6 +821,17 @@ const LorePage = () => {
     </div>
   );
 };
+
+function itemEmblem(cat: "pokebola" | "sagrado" | "chave" | "cristal" | "livro") {
+  const map: Record<typeof cat, string> = {
+    pokebola: "◉",
+    sagrado: "✦",
+    chave: "⚿",
+    cristal: "◆",
+    livro: "❖",
+  };
+  return map[cat];
+}
 
 interface ChipProps {
   name: string;

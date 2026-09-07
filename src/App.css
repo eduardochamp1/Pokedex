@@ -1476,6 +1476,75 @@ nav {
 .editorial-card-dim .subtitle,
 .editorial-card-dim .lore-chips { position: relative; z-index: 1; }
 
+/* Itens Lendários */
+.items-grid { display: grid; gap: 32px; }
+.items-section { display: flex; flex-direction: column; gap: 12px; }
+.items-cat-label {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent-alt);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--border);
+}
+.items-cards {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+.item-card {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 14px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  transition: transform var(--dur-fast) var(--ease-out), border-color var(--dur-fast);
+  --item-accent: var(--accent-alt);
+}
+.item-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--item-accent);
+}
+.item-card-pokebola { --item-accent: #dc0a2d; }
+.item-card-sagrado  { --item-accent: #ffcb05; }
+.item-card-chave    { --item-accent: #6f35fc; }
+.item-card-cristal  { --item-accent: #96d9d6; }
+.item-card-livro    { --item-accent: #c48d3a; }
+
+.item-emblem {
+  width: 64px; height: 64px;
+  border-radius: var(--radius-sm);
+  background:
+    radial-gradient(circle at 30% 30%, color-mix(in srgb, white 15%, transparent), transparent 60%),
+    var(--item-accent);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--item-accent) 40%, transparent);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+.item-body h2 {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--item-accent);
+  margin-bottom: 6px;
+}
+.item-body p {
+  color: var(--text);
+  line-height: 1.55;
+  font-size: 0.88rem;
+  text-align: left;
+  margin-bottom: 8px;
+}
+
 /* Breeding / Ovos */
 .breeding-grid { display: grid; gap: 32px; }
 .breeding-section { display: flex; flex-direction: column; gap: 12px; }
