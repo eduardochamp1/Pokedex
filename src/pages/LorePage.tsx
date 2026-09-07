@@ -9,7 +9,28 @@ import { VILLAIN_TEAMS } from "../data/villains";
 import { DIMENSIONS } from "../data/dimensions";
 import { usePokemonsByNames } from "../hooks/usePokemon";
 import GenealogyTree from "../components/GenealogyTree";
+import {
+  DimensionPortal,
+  HumanBadge,
+  RegionMapIcon,
+  VillainEmblem,
+} from "../components/LoreArt";
+import { REGION_SHAPES } from "../data/regionMap";
 import type { Pokemon } from "../types/pokemon";
+
+// Cor temática por humano (derivada de sua saga / pokemon principal)
+const HUMAN_COLORS: Record<string, string> = {
+  "Sir Aaron": "#c48d3a",
+  "AZ": "#7ac74c",
+  "Cyrus": "#6b4a9b",
+  "N (Natural Harmonia Gropius)": "#3d5a80",
+  "Ghetsis": "#3a3a4a",
+  "Lysandre": "#e63946",
+  "Lusamine": "#f7d02c",
+  "Cynthia": "#3a6cb0",
+  "Rei de Galar": "#c48d3a",
+  "Volo": "#735797",
+};
 
 type Tab =
   | "timeline"
@@ -216,49 +237,70 @@ const LorePage = () => {
 
         {tab === "regions" && (
           <div className="editorial-grid">
-            {REGIONS.map((region) => (
-              <article key={region.id} className="editorial-card">
-                <h2>{region.name}</h2>
-                <p className="subtitle">
-                  Gen {region.generation} · {region.inspiration}
-                </p>
-                <p>{region.summary}</p>
-                <div className="lore-chips">
-                  {region.signature.map((name) => (
-                    <PokemonChip
-                      key={name}
-                      name={name}
-                      pokemon={byName.get(name)}
-                      onFilter={() => focusPokemon(name)}
-                    />
-                  ))}
-                </div>
-              </article>
-            ))}
+            {REGIONS.map((region) => {
+              const shape = REGION_SHAPES.find((s) => s.id === region.id);
+              const color = shape?.color ?? "var(--accent)";
+              return (
+                <article
+                  key={region.id}
+                  className="editorial-card editorial-card-with-art"
+                  style={{ ["--card-accent" as string]: color }}
+                >
+                  <div className="editorial-art">
+                    <RegionMapIcon regionId={region.id} color={color} />
+                  </div>
+                  <h2>{region.name}</h2>
+                  <p className="subtitle">
+                    Gen {region.generation} · {region.inspiration}
+                  </p>
+                  <p>{region.summary}</p>
+                  <div className="lore-chips">
+                    {region.signature.map((name) => (
+                      <PokemonChip
+                        key={name}
+                        name={name}
+                        pokemon={byName.get(name)}
+                        onFilter={() => focusPokemon(name)}
+                      />
+                    ))}
+                  </div>
+                </article>
+              );
+            })}
           </div>
         )}
 
         {tab === "humans" && (
           <div className="editorial-grid">
-            {HUMAN_LEGENDS.map((h) => (
-              <article key={h.name} className="editorial-card">
-                <h2>{h.name}</h2>
-                <p className="subtitle">
-                  {h.role} · {h.region}
-                </p>
-                <p>{h.summary}</p>
-                <div className="lore-chips">
-                  {h.pokemons.map((name) => (
-                    <PokemonChip
-                      key={name}
-                      name={name}
-                      pokemon={byName.get(name)}
-                      onFilter={() => focusPokemon(name)}
-                    />
-                  ))}
-                </div>
-              </article>
-            ))}
+            {HUMAN_LEGENDS.map((h) => {
+              const color = HUMAN_COLORS[h.name] ?? "#c48d3a";
+              return (
+                <article
+                  key={h.name}
+                  className="editorial-card editorial-card-human"
+                  style={{ ["--card-accent" as string]: color }}
+                >
+                  <div className="editorial-art editorial-art-human">
+                    <HumanBadge name={h.name} color={color} />
+                  </div>
+                  <h2>{h.name}</h2>
+                  <p className="subtitle">
+                    {h.role} · {h.region}
+                  </p>
+                  <p>{h.summary}</p>
+                  <div className="lore-chips">
+                    {h.pokemons.map((name) => (
+                      <PokemonChip
+                        key={name}
+                        name={name}
+                        pokemon={byName.get(name)}
+                        onFilter={() => focusPokemon(name)}
+                      />
+                    ))}
+                  </div>
+                </article>
+              );
+            })}
           </div>
         )}
 
@@ -267,9 +309,12 @@ const LorePage = () => {
             {VILLAIN_TEAMS.map((v) => (
               <article
                 key={v.id}
-                className="editorial-card"
+                className="editorial-card editorial-card-with-art"
                 style={{ ["--card-accent" as string]: v.color }}
               >
+                <div className="editorial-art editorial-art-emblem">
+                  <VillainEmblem teamId={v.id} color={v.color} />
+                </div>
                 <h2>{v.name}</h2>
                 <p className="subtitle">
                   {v.region} · líder: {v.leader}
@@ -300,10 +345,12 @@ const LorePage = () => {
             {DIMENSIONS.map((d) => (
               <article
                 key={d.id}
-                className="editorial-card editorial-card-dim"
+                className="editorial-card editorial-card-dim editorial-card-with-art"
                 style={{ ["--card-accent" as string]: d.color }}
               >
-                <div className="dimension-glow" aria-hidden="true" />
+                <div className="editorial-art editorial-art-portal">
+                  <DimensionPortal dimId={d.id} color={d.color} />
+                </div>
                 <h2>{d.name}</h2>
                 <p className="subtitle">Regente: {d.ruler}</p>
                 <p>

@@ -1442,21 +1442,43 @@ nav {
 .editorial-card p strong { color: var(--card-accent); font-weight: 700; }
 
 .editorial-card-dim { padding-right: 22px; }
-.editorial-card-dim .dimension-glow {
-  position: absolute;
-  top: -60px;
-  right: -60px;
-  width: 200px;
-  height: 200px;
-  background: radial-gradient(circle, var(--card-accent) 0%, transparent 70%);
-  opacity: 0.25;
-  pointer-events: none;
-  border-radius: 50%;
-}
 .editorial-card-dim h2,
 .editorial-card-dim p,
 .editorial-card-dim .subtitle,
 .editorial-card-dim .lore-chips { position: relative; z-index: 1; }
+
+/* Illustration slot inside editorial cards */
+.editorial-card-with-art {
+  padding-top: 0;
+  overflow: hidden;
+}
+.editorial-art {
+  margin: 0 -20px 12px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+.editorial-art svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.lore-art-emblem { max-width: 140px; padding: 20px; }
+.lore-art-region { width: 100%; height: 140px; }
+.lore-art-portal { width: 100%; height: 120px; }
+.lore-art-human { max-width: 100px; padding: 16px; }
+
+.editorial-art-emblem { padding: 12px 0; background: color-mix(in srgb, var(--card-accent) 15%, var(--surface-2)); }
+.editorial-art-portal { padding: 0; }
+.editorial-art-human {
+  padding: 16px 0;
+  background: color-mix(in srgb, var(--card-accent) 20%, var(--surface-2));
+}
 
 /* ========= World map ========= */
 .mappage-container {
