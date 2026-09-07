@@ -1,4 +1,5 @@
 import { POKEMON_TYPES } from "../hooks/usePokemon";
+import { tType } from "../data/i18n";
 
 interface Props {
   value: string | undefined;
@@ -17,7 +18,7 @@ const TypeFilter = ({ value, onChange }: Props) => {
         <option value="">Todos</option>
         {POKEMON_TYPES.map((t) => (
           <option key={t} value={t}>
-            {t}
+            {tType(t)}
           </option>
         ))}
       </select>

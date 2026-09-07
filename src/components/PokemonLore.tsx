@@ -1,11 +1,14 @@
 import { Link } from "react-router-dom";
 import type { PokemonSpecies } from "../types/pokemon";
+import { tGenus, tHabitat } from "../data/i18n";
 
 interface Props {
   species: PokemonSpecies;
 }
 
-const LANGS = ["pt-br", "pt", "en"];
+// Prioridade: PT primeiro; se não houver, Espanhol (mais próximo pra leitor BR
+// que Inglês); fallback final EN.
+const LANGS = ["pt-br", "pt", "es-419", "es", "en"];
 
 function pickBest<T extends { language: { name: string } }>(
   entries: T[]
@@ -32,7 +35,9 @@ const PokemonLore = ({ species }: Props) => {
   return (
     <div className="lore-block">
       <div className="lore-tags">
-        {genus && <span className="lore-tag lore-genus">{genus.genus}</span>}
+        {genus && (
+          <span className="lore-tag lore-genus">{tGenus(genus.genus)}</span>
+        )}
         {rarity.map((r) => (
           <span key={r} className="lore-tag lore-rarity">
             {r}
@@ -40,7 +45,7 @@ const PokemonLore = ({ species }: Props) => {
         ))}
         {species.habitat && (
           <span className="lore-tag lore-habitat">
-            Habitat: <b>{species.habitat.name}</b>
+            Habitat: <b>{tHabitat(species.habitat.name)}</b>
           </span>
         )}
         <Link

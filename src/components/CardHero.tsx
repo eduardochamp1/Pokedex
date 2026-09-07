@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { useTiltEffect } from "../hooks/useTiltEffect";
 import { LEGENDARY, MYTHICAL } from "../data/rarity";
+import { tType } from "../data/i18n";
 import type { Pokemon } from "../types/pokemon";
 
 interface Props {
@@ -41,9 +42,9 @@ const CardHero = ({ pokemon, spriteUrl }: Props) => {
               key={t.type.name}
               className="card-type-dot card-type-dot-lg"
               data-type={t.type.name}
-              title={t.type.name}
+              title={tType(t.type.name)}
             >
-              {t.type.name}
+              {tType(t.type.name)}
             </span>
           ))}
         </div>

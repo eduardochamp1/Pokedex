@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import FavoriteContext from "../contexts/favoritesContext";
 import { useTiltEffect } from "../hooks/useTiltEffect";
 import { LEGENDARY, MYTHICAL } from "../data/rarity";
+import { tType } from "../data/i18n";
 import type { Pokemon } from "../types/pokemon";
 
 interface Props {
@@ -48,7 +49,7 @@ const Card = ({
               key={t.type.name}
               className="card-type-dot"
               data-type={t.type.name}
-              title={t.type.name}
+              title={tType(t.type.name)}
             />
           ))}
         </div>
