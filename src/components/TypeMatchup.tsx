@@ -1,4 +1,5 @@
 import { attackMultiplier, type TypeName } from "../data/typeMatchups";
+import { tType } from "../data/i18n";
 
 interface Props {
   attacker: string[];
@@ -25,7 +26,7 @@ const TypeMatchup = ({ attacker, defender, side }: Props) => {
         const m = attackMultiplier(a as TypeName, defender as TypeName[]);
         return (
           <li key={a} className="matchup-row">
-            <span className="card-type-dot-lg" data-type={a}>{a}</span>
+            <span className="card-type-dot-lg" data-type={a}>{tType(a)}</span>
             <span className="matchup-value" style={{ color: color(m) }}>
               {label(m)}
             </span>

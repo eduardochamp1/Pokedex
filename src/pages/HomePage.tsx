@@ -17,6 +17,7 @@ import {
   usePokemonsByType,
 } from "../hooks/usePokemon";
 import { RARITIES, type RarityId } from "../data/rarity";
+import { tGenus, tType } from "../data/i18n";
 
 const HomePage = () => {
   const [page, setPage] = useState(0);
@@ -123,7 +124,11 @@ const HomePage = () => {
   };
 
   const featuredFlavor = featuredSpecies.data
-    ? (featuredSpecies.data.flavor_text_entries.find((e) => e.language.name === "en")?.flavor_text ?? "")
+    ? (
+        ["pt-br", "pt", "es-419", "es", "en"]
+          .map((l) => featuredSpecies.data!.flavor_text_entries.find((e) => e.language.name === l)?.flavor_text)
+          .find(Boolean) ?? ""
+      )
         .replace(/[\f\n\r\v]/g, " ")
         .replace(/\s+/g, " ")
         .trim()
@@ -136,7 +141,12 @@ const HomePage = () => {
           <div className="home-featured-copy">
             {featuredSpecies.data && (
               <div className="home-featured-genus">
-                {featuredSpecies.data.genera.find((g) => g.language.name === "en")?.genus ?? "Pokémon"}
+                {tGenus(
+                  featuredSpecies.data.genera.find((g) => g.language.name === "pt-br")?.genus ??
+                  featuredSpecies.data.genera.find((g) => g.language.name === "pt")?.genus ??
+                  featuredSpecies.data.genera.find((g) => g.language.name === "en")?.genus ??
+                  "Pokémon"
+                )}
               </div>
             )}
             <h2>{featured.data.name}</h2>
@@ -147,7 +157,7 @@ const HomePage = () => {
                   className="card-type-dot-lg"
                   data-type={t.type.name}
                 >
-                  {t.type.name}
+                  {tType(t.type.name)}
                 </span>
               ))}
             </div>
