@@ -215,6 +215,114 @@ export const LORE_EVENTS: LoreEvent[] = [
     pokemons: ["calyrex", "glastrier", "spectrier"],
   },
 
+  // ==== EXPANSÃO: sagas modernas e eventos anexos ====
+
+  {
+    era: "Era antiga",
+    title: "As Penas Arco-íris de Ho-Oh",
+    body:
+      "Diz a lenda que Ho-Oh deixa cair sete penas de cores diferentes ao voar. Quem encontrar as sete e as levar até a Tin Tower pode invocar o pokémon lendário. Ash Ketchum viu Ho-Oh em seu primeiríssimo dia de treinador.",
+    pokemons: ["ho-oh"],
+  },
+  {
+    era: "Era antiga",
+    title: "A ilusão do castelo de Zoroark",
+    body:
+      "Zoroark tem o poder de projetar ilusões elaboradas. Séculos atrás, um Zoroark protegeu sua cria construindo com sua mente um castelo inteiro invisível — a Crown City original, hoje conhecida apenas em relatos.",
+    pokemons: ["zorua", "zoroark"],
+  },
+  {
+    era: "Reinos humanos",
+    title: "Prof. Oak e o nascimento da Pokédex",
+    body:
+      "Séculos após a domesticação dos pokémon, o Prof. Samuel Oak de Pallet Town cria o primeiro dispositivo capaz de escanear e catalogar espécies automaticamente — a Pokédex. Distribui três protótipos a jovens treinadores: Red, Blue e Green.",
+    pokemons: ["mew", "bulbasaur", "charmander", "squirtle"],
+  },
+  {
+    era: "Reinos humanos",
+    title: "Red desaparece no Mount Silver",
+    body:
+      "Após tornar-se o Champion mais jovem da história aos 11 anos, Red simplesmente sumiu. Foi encontrado três anos depois no topo do Mount Silver, em silêncio absoluto, treinando com seu Pikachu e outros parceiros contra pokémon selvagens de nível brutal.",
+    pokemons: ["pikachu", "charizard", "venusaur", "blastoise", "snorlax"],
+  },
+  {
+    era: "Reinos humanos",
+    title: "A queda da Team Rocket original",
+    body:
+      "Giovanni, líder da Team Rocket, foi derrotado em seu Ginásio de Viridian por Red. Envergonhado, se refugiou no exílio, deixando o próprio filho Silver para trás. A organização se dissolveu — só ressurge três anos depois em Johto, sem seu líder.",
+    pokemons: ["mewtwo", "persian"],
+  },
+  {
+    era: "Reinos humanos",
+    title: "Delta Episode — o meteoro sobre Hoenn",
+    body:
+      "Após os eventos de Kyogre e Groudon, cientistas de Hoenn descobrem que um meteoro colossal está em rota de colisão com o planeta. Deoxys aparece do espaço. Rayquaza absorve a Mega Pedra para atingir sua forma Mega e destruir o meteoro em pleno voo.",
+    pokemons: ["rayquaza", "deoxys"],
+  },
+  {
+    era: "Reinos humanos",
+    title: "Cyrus vaga eternamente no Mundo Distorcido",
+    body:
+      "Após ser derrotado no Spear Pillar, Cyrus é arrastado por Giratina ao Mundo Distorcido. Décadas se passam para nós; ele ainda anda por lá, sozinho, procurando alguma forma de escapar. Alguns testemunhos dizem tê-lo visto refletido em espelhos.",
+    pokemons: ["giratina"],
+  },
+  {
+    era: "Reinos humanos",
+    title: "N e o Castelo de Vidro",
+    body:
+      "A Team Plasma ergueu um castelo colossal ao redor da Pokémon League de Unova durante os eventos de Black/White. N esperava seu Champion no topo — se ele vencesse, todos os pokémon seriam libertados; se perdesse, sua filosofia estava errada. A batalha final decidiu a era.",
+    pokemons: ["reshiram", "zekrom"],
+  },
+  {
+    era: "Reinos humanos",
+    title: "Rainbow Rocket — os vilões de todas as regiões",
+    body:
+      "Em Alola, Giovanni reuniu líderes derrotados de todas as regiões (Maxie, Archie, Cyrus, Ghetsis, Lysandre) em uma dimensão paralela onde eles venceram. A Rainbow Rocket foi derrotada apenas quando o protagonista provou que a vitória do herói é a única constante.",
+    pokemons: ["mewtwo", "kyogre", "groudon", "dialga", "kyurem", "yveltal"],
+  },
+  {
+    era: "Reinos humanos",
+    title: "Wally e a captura sob orientação",
+    body:
+      "Wally, um garoto doente de Petalburg, quer aprender a capturar seu primeiro pokémon. Sob a supervisão do protagonista, captura Ralts — que depois se torna Gallade Mega e o transforma em um dos treinadores mais fortes de Hoenn.",
+    pokemons: ["ralts", "gallade"],
+  },
+  {
+    era: "Reinos humanos",
+    title: "Necrozma rouba a luz de Alola",
+    body:
+      "Necrozma se funde com Solgaleo (ou Lunala) para tornar-se Ultra Necrozma. Rouba toda a luz de Alola até o sol se apagar. Só é derrotado quando o protagonista atravessa Ultra Wormholes e o encontra em Ultra Megalopolis, sua terra natal.",
+    pokemons: ["necrozma", "solgaleo", "lunala"],
+  },
+  {
+    era: "Reinos humanos",
+    title: "Leon perde pela primeira vez",
+    body:
+      "Após anos como Champion invicto de Galar, Leon é derrotado pelo protagonista em uma partida transmitida para toda a região. O Charizard Gigantamax é vencido pela primeira vez, marcando o fim de uma era e o começo de outra.",
+    pokemons: ["charizard"],
+  },
+  {
+    era: "Passado e futuro",
+    title: "A Grande Cratera do Sul e a Área Zero",
+    body:
+      "No centro de Paldea abre-se uma cratera colossal formada por meteoritos cristalinos. Pesquisadores identificaram criaturas ali que não existem em nenhum outro lugar do mundo: variações antigas e futurísticas dos pokémon conhecidos, chamadas Paradox Pokémon.",
+    pokemons: ["koraidon", "miraidon", "terapagos"],
+  },
+  {
+    era: "Passado e futuro",
+    title: "IA de Sada e Turo",
+    body:
+      "Prof. Sada (passado) e Prof. Turo (futuro) morreram na Área Zero durante suas pesquisas. Criaram IAs de si mesmos para continuar o trabalho — mas essas IAs continuaram os planos além do razoável, obrigando seus filhos Arven a destruí-las junto do jogador.",
+    pokemons: ["koraidon", "miraidon"],
+  },
+  {
+    era: "Passado e futuro",
+    title: "Terapagos e a Ilha das Escamas",
+    body:
+      "Dentro do Terarium DLC — a bioesfera artificial de Blueberry Academy — Terapagos revela-se o pokémon original que gerou toda energia Terastal. Estava selado em uma pequena forma inofensiva por séculos, até ser reencontrado.",
+    pokemons: ["terapagos"],
+  },
+
   // ================= PASSADO E FUTURO =================
   {
     era: "Passado e futuro",
