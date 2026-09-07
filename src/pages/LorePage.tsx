@@ -7,6 +7,7 @@ import { GENEALOGY_TREE, type GenealogyNode } from "../data/genealogy";
 import { GAME_GENERATIONS } from "../data/generations";
 import { VILLAIN_TEAMS } from "../data/villains";
 import { DIMENSIONS } from "../data/dimensions";
+import { BATTLES } from "../data/battles";
 import { usePokemonsByNames } from "../hooks/usePokemon";
 import GenealogyTree from "../components/GenealogyTree";
 import {
@@ -67,7 +68,8 @@ type Tab =
   | "regions"
   | "humans"
   | "villains"
-  | "dimensions";
+  | "dimensions"
+  | "battles";
 
 const TAB_LABELS: Record<Tab, string> = {
   timeline: "Cronologia",
@@ -77,6 +79,7 @@ const TAB_LABELS: Record<Tab, string> = {
   humans: "Humanos",
   villains: "Vilões",
   dimensions: "Dimensões",
+  battles: "Batalhas",
 };
 
 function collectGenealogyNames(node: GenealogyNode, acc: string[] = []): string[] {
@@ -94,6 +97,7 @@ const allPokemonNames = Array.from(
     ...GAME_GENERATIONS.flatMap((g) => g.signature),
     ...VILLAIN_TEAMS.flatMap((v) => v.signature),
     ...DIMENSIONS.flatMap((d) => d.inhabitants),
+    ...BATTLES.flatMap((b) => b.pokemons),
   ])
 );
 
@@ -148,6 +152,11 @@ const LorePage = () => {
   );
   const visibleGenerations = useMemo(
     () => GAME_GENERATIONS.filter((g) => matchesPokemonFilter(g.signature)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [pokemonFilter]
+  );
+  const visibleBattles = useMemo(
+    () => BATTLES.filter((b) => matchesPokemonFilter(b.pokemons)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [pokemonFilter]
   );
@@ -471,6 +480,54 @@ const LorePage = () => {
                 </div>
               </article>
             ))}
+          </div>
+        )}
+
+        {tab === "battles" && (
+          <div className="battles-grid">
+            {visibleBattles.map((b) => (
+              <article
+                key={b.id}
+                className="battle-card"
+                style={{ ["--card-accent" as string]: b.color }}
+              >
+                <header className="battle-header">
+                  <div className="battle-side">
+                    <span className="battle-side-name">{b.contenders[0]}</span>
+                  </div>
+                  <div className="battle-vs" aria-hidden="true">VS</div>
+                  <div className="battle-side battle-side-right">
+                    <span className="battle-side-name">{b.contenders[1]}</span>
+                  </div>
+                </header>
+                <h2 className="battle-title">{b.title}</h2>
+                <p className="battle-location">
+                  <strong>{b.era}</strong> · {b.location}
+                </p>
+                <p className="battle-summary">{b.summary}</p>
+                <p className="battle-outcome">
+                  <strong>Resultado:</strong> {b.outcome}
+                </p>
+                <div className="lore-chips">
+                  {b.pokemons.map((name) => (
+                    <PokemonChip
+                      key={name}
+                      name={name}
+                      pokemon={byName.get(name)}
+                      onFilter={() => focusPokemon(name)}
+                    />
+                  ))}
+                </div>
+              </article>
+            ))}
+            {visibleBattles.length === 0 && (
+              <div className="lore-empty">
+                Nenhuma batalha registrada com <b>{pokemonFilter}</b>.
+                <button onClick={clearFilters} className="lore-clear-btn">
+                  limpar busca
+                </button>
+              </div>
+            )}
           </div>
         )}
 
