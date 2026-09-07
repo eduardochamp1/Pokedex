@@ -20,16 +20,44 @@ import type { Pokemon } from "../types/pokemon";
 
 // Cor temática por humano (derivada de sua saga / pokemon principal)
 const HUMAN_COLORS: Record<string, string> = {
+  // Heróis antigos
   "Sir Aaron": "#c48d3a",
   "AZ": "#7ac74c",
+  "Rei de Galar": "#c48d3a",
+  // Professores
+  "Professor Samuel Oak": "#a83a2c",
+  "Professor Elm": "#c48d3a",
+  "Professor Birch": "#7ac74c",
+  "Professor Rowan": "#3a6cb0",
+  "Professora Juniper": "#1a1a1a",
+  "Professor Sycamore": "#c8ab74",
+  "Professor Kukui": "#f7b32b",
+  "Professora Magnolia": "#3d5a80",
+  "Professores Sada e Turo": "#e63946",
+  // Vilões
   "Cyrus": "#6b4a9b",
   "N (Natural Harmonia Gropius)": "#3d5a80",
   "Ghetsis": "#3a3a4a",
   "Lysandre": "#e63946",
   "Lusamine": "#f7d02c",
-  "Cynthia": "#3a6cb0",
-  "Rei de Galar": "#c48d3a",
   "Volo": "#735797",
+  // Champions
+  "Red": "#dc0a2d",
+  "Blue Oak": "#3a6cb0",
+  "Silver": "#a1a1a6",
+  "Steven Stone": "#b7b7ce",
+  "Cynthia": "#c48d3a",
+  "Alder": "#c22e28",
+  "Iris": "#6f35fc",
+  "Diantha": "#d685ad",
+  "Hau": "#f7d02c",
+  "Leon": "#dc0a2d",
+  "Nemona": "#7ac74c",
+  // Rivais e coadjuvantes
+  "Lillie": "#96d9d6",
+  "Gladion": "#3a3a4a",
+  "Hop": "#3d5a80",
+  "Marnie": "#a33ea1",
 };
 
 type Tab =
