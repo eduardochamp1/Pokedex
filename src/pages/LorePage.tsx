@@ -9,6 +9,7 @@ import { VILLAIN_TEAMS } from "../data/villains";
 import { DIMENSIONS } from "../data/dimensions";
 import { BATTLES } from "../data/battles";
 import { MYTHS } from "../data/myths";
+import { CIVILIZATIONS } from "../data/civilizations";
 import { usePokemonsByNames } from "../hooks/usePokemon";
 import GenealogyTree from "../components/GenealogyTree";
 import {
@@ -71,7 +72,8 @@ type Tab =
   | "villains"
   | "dimensions"
   | "battles"
-  | "myths";
+  | "myths"
+  | "civilizations";
 
 const TAB_LABELS: Record<Tab, string> = {
   timeline: "Cronologia",
@@ -83,6 +85,7 @@ const TAB_LABELS: Record<Tab, string> = {
   dimensions: "Dimensões",
   battles: "Batalhas",
   myths: "Mitos",
+  civilizations: "Civilizações",
 };
 
 function collectGenealogyNames(node: GenealogyNode, acc: string[] = []): string[] {
@@ -102,6 +105,7 @@ const allPokemonNames = Array.from(
     ...DIMENSIONS.flatMap((d) => d.inhabitants),
     ...BATTLES.flatMap((b) => b.pokemons),
     ...MYTHS.flatMap((m) => m.pokemons),
+    ...CIVILIZATIONS.flatMap((c) => c.pokemons),
   ])
 );
 
@@ -166,6 +170,11 @@ const LorePage = () => {
   );
   const visibleMyths = useMemo(
     () => MYTHS.filter((m) => matchesPokemonFilter(m.pokemons)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [pokemonFilter]
+  );
+  const visibleCivilizations = useMemo(
+    () => CIVILIZATIONS.filter((c) => matchesPokemonFilter(c.pokemons)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [pokemonFilter]
   );
@@ -562,6 +571,50 @@ const LorePage = () => {
             {visibleBattles.length === 0 && (
               <div className="lore-empty">
                 Nenhuma batalha registrada com <b>{pokemonFilter}</b>.
+                <button onClick={clearFilters} className="lore-clear-btn">
+                  limpar busca
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {tab === "civilizations" && (
+          <div className="civ-grid">
+            {visibleCivilizations.map((c) => (
+              <article
+                key={c.id}
+                className="civ-card"
+                style={{ ["--card-accent" as string]: c.color ?? "#c48d3a" }}
+              >
+                <header className="civ-header">
+                  <span className="civ-stamp" aria-hidden="true">▲</span>
+                  <div>
+                    <h2 className="civ-name">{c.name}</h2>
+                    <p className="civ-loc">{c.region} · {c.age}</p>
+                  </div>
+                </header>
+                <dl className="civ-meta">
+                  <dt>Descoberta</dt>
+                  <dd>{c.discovery}</dd>
+                  <dt>Propósito</dt>
+                  <dd>{c.purpose}</dd>
+                </dl>
+                <div className="lore-chips">
+                  {c.pokemons.map((name) => (
+                    <PokemonChip
+                      key={name}
+                      name={name}
+                      pokemon={byName.get(name)}
+                      onFilter={() => focusPokemon(name)}
+                    />
+                  ))}
+                </div>
+              </article>
+            ))}
+            {visibleCivilizations.length === 0 && (
+              <div className="lore-empty">
+                Nenhuma civilização com <b>{pokemonFilter}</b>.
                 <button onClick={clearFilters} className="lore-clear-btn">
                   limpar busca
                 </button>

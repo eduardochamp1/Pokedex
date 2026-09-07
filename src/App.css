@@ -1476,6 +1476,88 @@ nav {
 .editorial-card-dim .subtitle,
 .editorial-card-dim .lore-chips { position: relative; z-index: 1; }
 
+/* Civilizações antigas — cards com estética de dossiê arqueológico */
+.civ-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+}
+.civ-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.civ-card::before {
+  content: "";
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--card-accent) 0 8px,
+    transparent 8px 12px
+  );
+}
+.civ-header {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.civ-stamp {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--card-accent);
+  color: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.civ-name {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--card-accent);
+}
+.civ-loc {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 2px;
+}
+.civ-meta {
+  display: grid;
+  gap: 8px;
+  padding: 12px 0;
+  border-top: 1px dashed var(--border);
+  border-bottom: 1px dashed var(--border);
+}
+.civ-meta dt {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.7rem;
+  color: var(--card-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+.civ-meta dd {
+  color: var(--text);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  margin: 0;
+  text-align: left;
+}
+
 /* Myths — cards horizontais com thumbnail lateral */
 .myth-grid {
   display: grid;
