@@ -6,9 +6,8 @@ interface Props {
   species: PokemonSpecies;
 }
 
-// Prioridade: PT primeiro; se não houver, Espanhol (mais próximo pra leitor BR
-// que Inglês); fallback final EN.
-const LANGS = ["pt-br", "pt", "es-419", "es", "en"];
+// Prioridade: PT primeiro; se não houver, fallback direto para EN.
+const LANGS = ["pt-br", "pt", "en"];
 
 function pickBest<T extends { language: { name: string } }>(
   entries: T[]
