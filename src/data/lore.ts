@@ -323,6 +323,114 @@ export const LORE_EVENTS: LoreEvent[] = [
     pokemons: ["terapagos"],
   },
 
+  // ==== SEGUNDA EXPANSÃO: cavernas, torres, incidentes menores ====
+
+  {
+    era: "Era antiga",
+    title: "Whirl Islands — o refúgio de Lugia",
+    body:
+      "No sudoeste de Johto, um arquipélago de quatro ilhas rochosas com correntes marítimas violentas esconde uma câmara submarina onde Lugia repousa. Só treinadores que dominam Surf, Whirlpool e Waterfall podem alcançá-lo.",
+    pokemons: ["lugia"],
+  },
+  {
+    era: "Era antiga",
+    title: "Bell Tower e as chamas sagradas",
+    body:
+      "Em Ecruteak City, a Bell Tower é o único local sagrado onde Ho-Oh permite ser visto. Sua companheira era a Brass Tower — hoje ruína queimada. Diz-se que o incêndio foi acidental; outros dizem que foi obra dos deuses.",
+    pokemons: ["ho-oh"],
+  },
+  {
+    era: "Era antiga",
+    title: "Ilex Forest e Celebi",
+    body:
+      "Nas profundezas de Ilex Forest, junto ao santuário, Celebi vive fora do tempo. Só aparece a quem tem coração puro. Já foi visto com um jovem membro da Team Rocket, o que gerou paradoxos temporais.",
+    pokemons: ["celebi"],
+  },
+  {
+    era: "Era antiga",
+    title: "As Ruínas de Alph",
+    body:
+      "Ruínas escavadas em Johto revelam paredes cobertas por 26 hieróglifos idênticos aos Unown modernos. Cada Unown corresponde a uma letra. Ninguém sabe se os Unown ensinaram o alfabeto aos humanos ou vice-versa.",
+    pokemons: ["unown"],
+  },
+  {
+    era: "Reinos humanos",
+    title: "Cinnabar Mansion — o nascimento de Mewtwo",
+    body:
+      "Na mansão abandonada de Cinnabar Island, diários encontrados por Red revelam a criação de Mewtwo. O dr. Fuji, cientista chefe, tentava clonar sua filha morta usando DNA de Mew. Mewtwo destruiu o laboratório antes de fugir.",
+    pokemons: ["mew", "mewtwo"],
+  },
+  {
+    era: "Reinos humanos",
+    title: "Silph Co. e a Master Ball",
+    body:
+      "A gigante corporativa de Saffron City desenvolveu a Master Ball — pokébola perfeita capaz de capturar qualquer pokémon. A Team Rocket invadiu a sede para roubar o protótipo. Só existe uma no mundo — o resto é lenda.",
+    pokemons: ["mewtwo"],
+  },
+  {
+    era: "Reinos humanos",
+    title: "Radio Tower Takeover — Johto",
+    body:
+      "Três anos após o colapso original, remanescentes da Team Rocket invadem a Radio Tower de Goldenrod City com um plano: enviar uma frequência que forçaria Giovanni a voltar. O plano falhou — o transmissor foi silenciado por um treinador anônimo.",
+    pokemons: ["persian"],
+  },
+  {
+    era: "Reinos humanos",
+    title: "Wailord + Relicanth = os Regis despertam",
+    body:
+      "Uma câmara secreta em Sealed Chamber só se abre quando um Wailord e um Relicanth são posicionados nas extremidades da sala. O ritual, decifrado da parede em Braille, libera Regirock, Regice e Registeel de seus tumbas.",
+    pokemons: ["wailord", "relicanth", "regirock", "regice", "registeel"],
+  },
+  {
+    era: "Reinos humanos",
+    title: "Battle Frontier — o desafio pós-Champion",
+    body:
+      "Além da Elite Four, o Battle Frontier oferecia sete Frontier Brains e regras cada vez mais brutais. Brandon (Regirock/Regice/Registeel), Anabel (Alakazam/Snorlax/Entei), Palmer (Rhyperior/Milotic/Dragonite) — os brains eram semi-lendários entre treinadores.",
+    pokemons: ["regirock", "regice", "registeel"],
+  },
+  {
+    era: "Reinos humanos",
+    title: "Shadow Lugia (XD001) — Orre",
+    body:
+      "Em Orre, a organização Cipher desenvolveu técnica para fechar o coração dos pokémon, criando Shadow Pokémon capazes de atacar humanos. O experimento mais brutal foi XD001: Shadow Lugia. Só foi purificado por um treinador solitário.",
+    pokemons: ["lugia"],
+  },
+  {
+    era: "Reinos humanos",
+    title: "Old Chateau — o menino do quadro",
+    body:
+      "Em Eterna Forest de Sinnoh, uma mansão vitoriana abandonada abriga fantasmas. À noite, um quadro pintado ganha vida: um menino de vermelho passa por corredores. Alguns dizem ver Rotom possuindo eletrodomésticos ao redor.",
+    pokemons: ["rotom", "gengar"],
+  },
+  {
+    era: "Reinos humanos",
+    title: "Hoopa e os anéis dimensionais",
+    body:
+      "Hoopa Confined é uma versão contida do verdadeiro Hoopa Unbound. Seus anéis abrem portais para qualquer lugar do mundo. Um vilarejo de Kalos foi devastado por Hoopa Unbound séculos atrás — o anel de contenção foi criado após.",
+    pokemons: ["hoopa"],
+  },
+  {
+    era: "Reinos humanos",
+    title: "Volcanion escapa da pesquisa",
+    body:
+      "Volcanion, único pokémon do tipo Fire/Water, foi capturado em um laboratório de Azoth. Após anos de estudo, escapou. Formou aliança improvável com Magearna, o pokémon-boneca criado 500 anos antes da era da Máquina Definitiva.",
+    pokemons: ["volcanion", "magearna"],
+  },
+  {
+    era: "Reinos humanos",
+    title: "Blueberry Academy e o Terarium",
+    body:
+      "Academia parceira de Naranja/Uva em Paldea. Fica em uma cúpula submarina no oceano ao leste. Dentro dela, o Terarium — bioesfera artificial com 4 biomas — abriga Terapagos e outras espécies raras aclimatadas.",
+    pokemons: ["terapagos"],
+  },
+  {
+    era: "Passado e futuro",
+    title: "The Loyal Three — Kitakami",
+    body:
+      "Na região montanhosa de Kitakami, três pokémon — Okidogi, Munkidori e Fezandipiti — eram reverenciados como heróis que expulsaram um demônio (Ogerpon). A verdade histórica é o oposto: eles eram os vilões; Ogerpon foi a heroína injustamente exilada.",
+    pokemons: ["okidogi", "munkidori", "fezandipiti", "ogerpon"],
+  },
+
   // ================= PASSADO E FUTURO =================
   {
     era: "Passado e futuro",
