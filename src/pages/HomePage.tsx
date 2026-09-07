@@ -125,7 +125,7 @@ const HomePage = () => {
 
   const featuredFlavor = featuredSpecies.data
     ? (
-        ["pt-br", "pt", "es-419", "es", "en"]
+        ["pt-br", "pt", "en"]
           .map((l) => featuredSpecies.data!.flavor_text_entries.find((e) => e.language.name === l)?.flavor_text)
           .find(Boolean) ?? ""
       )
