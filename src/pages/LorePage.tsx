@@ -81,13 +81,48 @@ const LorePage = () => {
     return m;
   }, [pokemons]);
 
+  // Case-insensitive substring match: "arc" cai em "arceus", "-mega" cai em qualquer mega
+  const matchesPokemonFilter = (list: string[]) => {
+    if (!pokemonFilter) return true;
+    const q = pokemonFilter.toLowerCase().trim();
+    if (!q) return true;
+    return list.some((n) => n.toLowerCase().includes(q));
+  };
+
   const visibleEvents = useMemo(() => {
     return LORE_EVENTS.filter((e) => {
       if (eraFilter && e.era !== eraFilter) return false;
-      if (pokemonFilter && !e.pokemons.includes(pokemonFilter)) return false;
+      if (!matchesPokemonFilter(e.pokemons)) return false;
       return true;
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eraFilter, pokemonFilter]);
+
+  const visibleRegions = useMemo(
+    () => REGIONS.filter((r) => matchesPokemonFilter(r.signature)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [pokemonFilter]
+  );
+  const visibleHumans = useMemo(
+    () => HUMAN_LEGENDS.filter((h) => matchesPokemonFilter(h.pokemons)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [pokemonFilter]
+  );
+  const visibleVillains = useMemo(
+    () => VILLAIN_TEAMS.filter((v) => matchesPokemonFilter(v.signature)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [pokemonFilter]
+  );
+  const visibleDimensions = useMemo(
+    () => DIMENSIONS.filter((d) => matchesPokemonFilter(d.inhabitants)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [pokemonFilter]
+  );
+  const visibleGenerations = useMemo(
+    () => GAME_GENERATIONS.filter((g) => matchesPokemonFilter(g.signature)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [pokemonFilter]
+  );
 
   const clearFilters = () => {
     setEraFilter(undefined);
@@ -95,7 +130,6 @@ const LorePage = () => {
   };
 
   const focusPokemon = (name: string) => {
-    setTab("timeline");
     setPokemonFilter(name);
   };
 
@@ -103,6 +137,23 @@ const LorePage = () => {
     <div className="lore-shell">
       <aside className="lore-sidebar">
         <h2 className="lore-sidebar-title">Universo Pokémon</h2>
+
+        <div className="lore-search">
+          <input
+            type="search"
+            list="lore-pokemon-names"
+            value={pokemonFilter ?? ""}
+            onChange={(e) => setPokemonFilter(e.target.value || undefined)}
+            placeholder="Buscar pokémon…"
+            aria-label="Buscar pokémon na lore"
+          />
+          <datalist id="lore-pokemon-names">
+            {allPokemonNames.map((n) => (
+              <option key={n} value={n} />
+            ))}
+          </datalist>
+        </div>
+
         {(Object.keys(TAB_LABELS) as Tab[]).map((t) => (
           <button
             key={t}
@@ -199,7 +250,7 @@ const LorePage = () => {
         {tab === "generations" && (
           <div className="gen-carousel-wrap">
             <ol className="gen-carousel">
-              {GAME_GENERATIONS.map((g) => (
+              {visibleGenerations.map((g) => (
                 <li
                   key={g.id}
                   className="gen-slide"
@@ -235,9 +286,17 @@ const LorePage = () => {
           </div>
         )}
 
+        {tab === "regions" && visibleRegions.length === 0 && (
+          <div className="lore-empty">
+            Nenhuma região com <b>{pokemonFilter}</b>.
+            <button onClick={clearFilters} className="lore-clear-btn">
+              limpar busca
+            </button>
+          </div>
+        )}
         {tab === "regions" && (
           <div className="editorial-grid">
-            {REGIONS.map((region) => {
+            {visibleRegions.map((region) => {
               const shape = REGION_SHAPES.find((s) => s.id === region.id);
               const color = shape?.color ?? "var(--accent)";
               return (
@@ -272,7 +331,7 @@ const LorePage = () => {
 
         {tab === "humans" && (
           <div className="editorial-grid">
-            {HUMAN_LEGENDS.map((h) => {
+            {visibleHumans.map((h) => {
               const color = HUMAN_COLORS[h.name] ?? "#c48d3a";
               return (
                 <article
@@ -306,7 +365,7 @@ const LorePage = () => {
 
         {tab === "villains" && (
           <div className="editorial-grid">
-            {VILLAIN_TEAMS.map((v) => (
+            {visibleVillains.map((v) => (
               <article
                 key={v.id}
                 className="editorial-card editorial-card-with-art"
@@ -342,7 +401,7 @@ const LorePage = () => {
 
         {tab === "dimensions" && (
           <div className="editorial-grid">
-            {DIMENSIONS.map((d) => (
+            {visibleDimensions.map((d) => (
               <article
                 key={d.id}
                 className="editorial-card editorial-card-dim editorial-card-with-art"

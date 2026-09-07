@@ -1054,6 +1054,35 @@ nav {
   padding: 0 12px;
   margin-bottom: 12px;
 }
+.lore-search {
+  padding: 0 4px 12px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+.lore-search input {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+}
+.lore-search input:focus {
+  outline: none;
+  border-color: var(--accent-alt);
+  box-shadow: 0 0 0 3px rgba(255, 203, 5, 0.15);
+}
+.lore-search input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  height: 12px;
+  width: 12px;
+  background: var(--text-muted);
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path d='M6 6l8 8M14 6l-8 8' stroke='black' stroke-width='2' fill='none' stroke-linecap='round'/></svg>") center/contain no-repeat;
+  cursor: pointer;
+}
 .lore-sidebar-btn {
   padding: 10px 12px;
   text-align: left;
