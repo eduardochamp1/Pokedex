@@ -417,14 +417,28 @@ const LorePage = () => {
           <div className="editorial-grid">
             {visibleHumans.map((h) => {
               const color = HUMAN_COLORS[h.name] ?? "#c48d3a";
+              const sig = h.pokemons[0] ? byName.get(h.pokemons[0]) : undefined;
+              const sigArt =
+                sig?.sprites.other?.["official-artwork"]?.front_default ??
+                sig?.sprites.front_default ??
+                "";
               return (
                 <article
                   key={h.name}
-                  className="editorial-card editorial-card-human"
+                  className="editorial-card editorial-card-human editorial-card-with-art"
                   style={{ ["--card-accent" as string]: color }}
                 >
-                  <div className="editorial-art editorial-art-human">
-                    <HumanBadge name={h.name} color={color} />
+                  <div className="editorial-art editorial-art-portrait">
+                    {sigArt && (
+                      <img
+                        src={sigArt}
+                        alt={sig?.name ?? ""}
+                        className="portrait-sprite"
+                      />
+                    )}
+                    <div className="portrait-badge">
+                      <HumanBadge name={h.name} color={color} />
+                    </div>
                   </div>
                   <h2>{h.name}</h2>
                   <p className="subtitle">
@@ -449,14 +463,29 @@ const LorePage = () => {
 
         {tab === "villains" && (
           <div className="editorial-grid">
-            {visibleVillains.map((v) => (
+            {visibleVillains.map((v) => {
+              const sig = v.signature[0] ? byName.get(v.signature[0]) : undefined;
+              const sigArt =
+                sig?.sprites.other?.["official-artwork"]?.front_default ??
+                sig?.sprites.front_default ??
+                "";
+              return (
               <article
                 key={v.id}
                 className="editorial-card editorial-card-with-art"
                 style={{ ["--card-accent" as string]: v.color }}
               >
-                <div className="editorial-art editorial-art-emblem">
-                  <VillainEmblem teamId={v.id} color={v.color} />
+                <div className="editorial-art editorial-art-portrait">
+                  {sigArt && (
+                    <img
+                      src={sigArt}
+                      alt={sig?.name ?? ""}
+                      className="portrait-sprite"
+                    />
+                  )}
+                  <div className="portrait-badge">
+                    <VillainEmblem teamId={v.id} color={v.color} />
+                  </div>
                 </div>
                 <h2>{v.name}</h2>
                 <p className="subtitle">
@@ -479,7 +508,8 @@ const LorePage = () => {
                   ))}
                 </div>
               </article>
-            ))}
+              );
+            })}
           </div>
         )}
 
