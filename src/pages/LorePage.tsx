@@ -8,6 +8,7 @@ import { GAME_GENERATIONS } from "../data/generations";
 import { VILLAIN_TEAMS } from "../data/villains";
 import { DIMENSIONS } from "../data/dimensions";
 import { BATTLES } from "../data/battles";
+import { MYTHS } from "../data/myths";
 import { usePokemonsByNames } from "../hooks/usePokemon";
 import GenealogyTree from "../components/GenealogyTree";
 import {
@@ -69,7 +70,8 @@ type Tab =
   | "humans"
   | "villains"
   | "dimensions"
-  | "battles";
+  | "battles"
+  | "myths";
 
 const TAB_LABELS: Record<Tab, string> = {
   timeline: "Cronologia",
@@ -80,6 +82,7 @@ const TAB_LABELS: Record<Tab, string> = {
   villains: "Vilões",
   dimensions: "Dimensões",
   battles: "Batalhas",
+  myths: "Mitos",
 };
 
 function collectGenealogyNames(node: GenealogyNode, acc: string[] = []): string[] {
@@ -98,6 +101,7 @@ const allPokemonNames = Array.from(
     ...VILLAIN_TEAMS.flatMap((v) => v.signature),
     ...DIMENSIONS.flatMap((d) => d.inhabitants),
     ...BATTLES.flatMap((b) => b.pokemons),
+    ...MYTHS.flatMap((m) => m.pokemons),
   ])
 );
 
@@ -157,6 +161,11 @@ const LorePage = () => {
   );
   const visibleBattles = useMemo(
     () => BATTLES.filter((b) => matchesPokemonFilter(b.pokemons)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [pokemonFilter]
+  );
+  const visibleMyths = useMemo(
+    () => MYTHS.filter((m) => matchesPokemonFilter(m.pokemons)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [pokemonFilter]
   );
@@ -553,6 +562,52 @@ const LorePage = () => {
             {visibleBattles.length === 0 && (
               <div className="lore-empty">
                 Nenhuma batalha registrada com <b>{pokemonFilter}</b>.
+                <button onClick={clearFilters} className="lore-clear-btn">
+                  limpar busca
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {tab === "myths" && (
+          <div className="myth-grid">
+            {visibleMyths.map((m) => {
+              const sig = m.pokemons[0] ? byName.get(m.pokemons[0]) : undefined;
+              const sigArt =
+                sig?.sprites.other?.["official-artwork"]?.front_default ??
+                sig?.sprites.front_default ??
+                "";
+              return (
+                <article
+                  key={m.id}
+                  className="myth-card"
+                  style={{ ["--card-accent" as string]: m.color ?? "#c48d3a" }}
+                >
+                  <div className="myth-thumb">
+                    {sigArt && <img src={sigArt} alt={sig?.name ?? ""} />}
+                  </div>
+                  <div className="myth-body">
+                    <div className="myth-region">{m.region}</div>
+                    <h2 className="myth-title">{m.title}</h2>
+                    <p className="myth-summary">{m.summary}</p>
+                    <div className="lore-chips">
+                      {m.pokemons.map((name) => (
+                        <PokemonChip
+                          key={name}
+                          name={name}
+                          pokemon={byName.get(name)}
+                          onFilter={() => focusPokemon(name)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+            {visibleMyths.length === 0 && (
+              <div className="lore-empty">
+                Nenhum mito com <b>{pokemonFilter}</b>.
                 <button onClick={clearFilters} className="lore-clear-btn">
                   limpar busca
                 </button>
