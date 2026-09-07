@@ -1,16 +1,13 @@
+import { useState } from "react";
 import { usePokemonDetail } from "./usePokemon";
+import { LEGENDARY } from "../data/rarity";
 
-const TOTAL_SPECIES = 1025;
-
-function pickIdFromDate(date: Date): number {
-  const y = date.getFullYear();
-  const m = date.getMonth() + 1;
-  const d = date.getDate();
-  const seed = y * 10000 + m * 100 + d;
-  return (seed % TOTAL_SPECIES) + 1;
+function pickRandomLegendary(): string {
+  return LEGENDARY[Math.floor(Math.random() * LEGENDARY.length)];
 }
 
 export function useFeaturedPokemon() {
-  const id = pickIdFromDate(new Date());
-  return usePokemonDetail(String(id));
+  // Initializer só roda no mount — muda a cada F5 (novo mount), estável durante uso
+  const [name] = useState<string>(pickRandomLegendary);
+  return usePokemonDetail(name);
 }
