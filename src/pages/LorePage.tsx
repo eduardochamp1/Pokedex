@@ -10,6 +10,7 @@ import { DIMENSIONS } from "../data/dimensions";
 import { BATTLES } from "../data/battles";
 import { MYTHS } from "../data/myths";
 import { CIVILIZATIONS } from "../data/civilizations";
+import { BREEDING } from "../data/breeding";
 import { usePokemonsByNames } from "../hooks/usePokemon";
 import GenealogyTree from "../components/GenealogyTree";
 import {
@@ -73,7 +74,8 @@ type Tab =
   | "dimensions"
   | "battles"
   | "myths"
-  | "civilizations";
+  | "civilizations"
+  | "breeding";
 
 const TAB_LABELS: Record<Tab, string> = {
   timeline: "Cronologia",
@@ -86,6 +88,7 @@ const TAB_LABELS: Record<Tab, string> = {
   battles: "Batalhas",
   myths: "Mitos",
   civilizations: "Civilizações",
+  breeding: "Ovos",
 };
 
 function collectGenealogyNames(node: GenealogyNode, acc: string[] = []): string[] {
@@ -106,6 +109,7 @@ const allPokemonNames = Array.from(
     ...BATTLES.flatMap((b) => b.pokemons),
     ...MYTHS.flatMap((m) => m.pokemons),
     ...CIVILIZATIONS.flatMap((c) => c.pokemons),
+    ...BREEDING.flatMap((b) => b.pokemons),
   ])
 );
 
@@ -175,6 +179,11 @@ const LorePage = () => {
   );
   const visibleCivilizations = useMemo(
     () => CIVILIZATIONS.filter((c) => matchesPokemonFilter(c.pokemons)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [pokemonFilter]
+  );
+  const visibleBreeding = useMemo(
+    () => BREEDING.filter((b) => matchesPokemonFilter(b.pokemons)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [pokemonFilter]
   );
@@ -571,6 +580,54 @@ const LorePage = () => {
             {visibleBattles.length === 0 && (
               <div className="lore-empty">
                 Nenhuma batalha registrada com <b>{pokemonFilter}</b>.
+                <button onClick={clearFilters} className="lore-clear-btn">
+                  limpar busca
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {tab === "breeding" && (
+          <div className="breeding-grid">
+            {(["grupo", "regra", "especial"] as const).map((cat) => {
+              const items = visibleBreeding.filter((b) => b.category === cat);
+              if (items.length === 0) return null;
+              const catLabel =
+                cat === "grupo" ? "Grupos de Ovos" :
+                cat === "regra" ? "Regras" : "Casos especiais";
+              return (
+                <section key={cat} className="breeding-section">
+                  <h3 className="breeding-cat-label">{catLabel}</h3>
+                  <div className="breeding-cards">
+                    {items.map((b) => (
+                      <article key={b.id} className={"breeding-card breeding-card-" + b.category}>
+                        <div className="breeding-icon" aria-hidden="true">
+                          {b.category === "grupo" ? "🥚" : b.category === "regra" ? "📜" : "✨"}
+                        </div>
+                        <div className="breeding-body">
+                          <h2>{b.title}</h2>
+                          <p>{b.summary}</p>
+                          <div className="lore-chips">
+                            {b.pokemons.map((name) => (
+                              <PokemonChip
+                                key={name}
+                                name={name}
+                                pokemon={byName.get(name)}
+                                onFilter={() => focusPokemon(name)}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
+            {visibleBreeding.length === 0 && (
+              <div className="lore-empty">
+                Nenhum grupo/regra com <b>{pokemonFilter}</b>.
                 <button onClick={clearFilters} className="lore-clear-btn">
                   limpar busca
                 </button>
