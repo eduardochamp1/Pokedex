@@ -341,6 +341,53 @@ const LorePage = () => {
                     Gen {region.generation} · {region.inspiration}
                   </p>
                   <p>{region.summary}</p>
+
+                  <dl className="region-meta">
+                    {region.professor && (
+                      <>
+                        <dt>Professor</dt>
+                        <dd>{region.professor}</dd>
+                      </>
+                    )}
+                    {region.champion && (
+                      <>
+                        <dt>Champion</dt>
+                        <dd>{region.champion}</dd>
+                      </>
+                    )}
+                    {region.eliteFour && region.eliteFour.length > 0 && (
+                      <>
+                        <dt>Elite Four</dt>
+                        <dd>{region.eliteFour.join(" · ")}</dd>
+                      </>
+                    )}
+                    {region.cities && region.cities.length > 0 && (
+                      <>
+                        <dt>Cidades</dt>
+                        <dd className="region-cities">{region.cities.join(" · ")}</dd>
+                      </>
+                    )}
+                  </dl>
+
+                  {region.gymLeaders && region.gymLeaders.length > 0 && (
+                    <div className="region-gyms">
+                      <div className="region-gyms-label">Líderes de Ginásio</div>
+                      <ul>
+                        {region.gymLeaders.map((g) => (
+                          <li key={g.name}>
+                            <span
+                              className="card-type-dot"
+                              data-type={g.type.split("/")[0]}
+                              title={g.type}
+                            />
+                            <span className="region-gym-name">{g.name}</span>
+                            {g.city && <span className="region-gym-city">{g.city}</span>}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
                   <div className="lore-chips">
                     {region.signature.map((name) => (
                       <PokemonChip

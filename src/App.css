@@ -1476,6 +1476,64 @@ nav {
 .editorial-card-dim .subtitle,
 .editorial-card-dim .lore-chips { position: relative; z-index: 1; }
 
+/* Region enriched metadata */
+.region-meta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.82rem;
+}
+.region-meta dt {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--card-accent, var(--accent));
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.7rem;
+  align-self: center;
+}
+.region-meta dd { color: var(--text); margin: 0; }
+.region-meta .region-cities {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+.region-gyms {
+  padding: 8px 0 4px;
+}
+.region-gyms-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+.region-gyms ul {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 12px;
+  padding: 0;
+}
+.region-gyms li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text);
+}
+.region-gym-name { font-weight: 500; font-family: var(--font-display); }
+.region-gym-city {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  margin-left: auto;
+}
+
 /* Illustration slot inside editorial cards */
 .editorial-card-with-art {
   padding-top: 0;
