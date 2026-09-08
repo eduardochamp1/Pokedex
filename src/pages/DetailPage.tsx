@@ -13,6 +13,7 @@ import VarietySwitcher from "../components/VarietySwitcher";
 import PokemonLore from "../components/PokemonLore";
 import PokemonMeta from "../components/PokemonMeta";
 import TypeDefense from "../components/TypeDefense";
+import AbilityList from "../components/AbilityList";
 import { DetailSkeleton } from "../components/Skeleton";
 
 const STAT_LABELS: Record<string, string> = {
@@ -137,6 +138,11 @@ const DetailPage = () => {
         <aside className="detail-panel detail-panel-defense">
           <h3>Defesas</h3>
           <TypeDefense types={pokemon.types.map((t) => t.type.name)} />
+        </aside>
+
+        <aside className="detail-panel detail-panel-abilities">
+          <h3>Habilidades</h3>
+          <AbilityList abilities={pokemon.abilities} />
         </aside>
 
         <aside className="detail-panel detail-panel-stats">
