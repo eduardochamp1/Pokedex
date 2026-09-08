@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Searchbar from "../components/Searchbar";
 import Pokedex from "../components/Pokedex";
 import TypeFilter from "../components/TypeFilter";
@@ -14,35 +15,55 @@ import {
   usePokemonSelection,
   usePokemonSpecies,
 } from "../hooks/usePokemon";
-import { type RarityId } from "../data/rarity";
 import { tGenus, tType } from "../data/i18n";
 import { pickLocalized } from "../lib/localize";
+import { sortNamesAlphabetically } from "../lib/filters";
+import {
+  parseHomeParams,
+  toSearchParams,
+  SORTS,
+  type HomeParams,
+} from "../lib/homeParams";
 
 const HomePage = () => {
-  const [page, setPage] = useState(0);
-  const [searchInput, setSearchInput] = useState("");
-  const [typeFilter, setTypeFilter] = useState<string | undefined>(undefined);
-  const [genFilter, setGenFilter] = useState<number | undefined>(undefined);
-  const [rarityFilter, setRarityFilter] = useState<RarityId | undefined>(undefined);
+  const [params, setParams] = useSearchParams();
+  const current = parseHomeParams(params);
 
+  /** Aplica uma mudanca parcial; qualquer criterio novo volta para a pagina 1. */
+  const update = (patch: Partial<HomeParams>) => {
+    const next = { ...current, ...patch };
+    if (!("page" in patch)) next.page = 0;
+    setParams(toSearchParams(next), { replace: true });
+  };
+
+  // Input local pra nao reescrever a URL a cada tecla; a busca debounced e que vai
+  // para o parametro `q`.
+  const [searchInput, setSearchInput] = useState(current.search);
   const debouncedSearch = useDebounce(searchInput.trim(), 350);
 
-  // Busca e os tres filtros se combinam por interseccao. names === null
-  // significa "nenhum criterio ativo" — cai na listagem paginada padrao.
+  useEffect(() => {
+    if (debouncedSearch !== current.search) update({ search: debouncedSearch });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch]);
+
   const selection = usePokemonSelection({
     search: debouncedSearch,
-    type: typeFilter,
-    generation: genFilter,
-    rarity: rarityFilter,
+    type: current.type,
+    generation: current.generation,
+    rarity: current.rarity,
   });
-  const selected = usePokemonPage(selection.names, page);
-  const listQuery = usePokemonList(page);
+
+  const orderedNames = useMemo(() => {
+    if (!selection.names) return null;
+    if (current.sort === "nome") return sortNamesAlphabetically(selection.names);
+    // "id" ja vem ordenado por id de usePokemonSelection.
+    return selection.names;
+  }, [selection.names, current.sort]);
+
+  const selected = usePokemonPage(orderedNames, current.page);
+  const listQuery = usePokemonList(current.page);
 
   const isSelecting = selection.names !== null;
-
-  useEffect(() => {
-    setPage(0);
-  }, [debouncedSearch, typeFilter, genFilter, rarityFilter]);
 
   const featured = useFeaturedPokemon();
   const featuredSpecies = usePokemonSpecies(featured.data?.species.url);
@@ -97,11 +118,37 @@ const HomePage = () => {
           <h3>Buscar</h3>
           <Searchbar value={searchInput} onChange={setSearchInput} />
           <h3>Tipo</h3>
-          <TypeFilter value={typeFilter} onChange={setTypeFilter} />
+          <TypeFilter
+            value={current.type}
+            onChange={(v) => update({ type: v })}
+          />
           <h3>Geração</h3>
-          <GenerationFilter value={genFilter} onChange={setGenFilter} />
+          <GenerationFilter
+            value={current.generation}
+            onChange={(v) => update({ generation: v })}
+          />
           <h3>Raridade</h3>
-          <RarityFilter value={rarityFilter} onChange={setRarityFilter} />
+          <RarityFilter
+            value={current.rarity}
+            onChange={(v) => update({ rarity: v })}
+          />
+          <h3>Ordenar</h3>
+          <div className="type-filter">
+            <label htmlFor="sort-select">Ordem:</label>
+            <select
+              id="sort-select"
+              value={current.sort}
+              onChange={(e) =>
+                update({ sort: e.target.value as HomeParams["sort"] })
+              }
+            >
+              {SORTS.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </aside>
         <main>
           {isError ? (
@@ -117,8 +164,8 @@ const HomePage = () => {
             <Pokedex
               pokemons={pokemons}
               loading={selected.isLoading && pokemons.length === 0}
-              page={page}
-              setPage={setPage}
+              page={current.page}
+              setPage={(p) => update({ page: p })}
               totalPages={totalPages}
               total={total}
             />

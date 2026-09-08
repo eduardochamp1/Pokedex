@@ -93,3 +93,8 @@ export function pageOf<T>(items: T[], page: number, perPage: number): T[] {
 export function totalPagesOf(count: number, perPage: number): number {
   return Math.max(1, Math.ceil(count / perPage));
 }
+
+/** Ordena nomes alfabeticamente (para o modo de ordenacao "nome"). */
+export function sortNamesAlphabetically(names: string[]): string[] {
+  return [...names].sort((a, b) => a.localeCompare(b));
+}
