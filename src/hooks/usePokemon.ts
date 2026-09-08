@@ -19,6 +19,7 @@ import {
   totalPagesOf,
 } from "../lib/filters";
 import { RARITIES, type RarityId } from "../data/rarity";
+import { evolutionConditionText } from "../lib/evolution";
 import type {
   EvolutionChain,
   EvolutionNode,
@@ -252,16 +253,30 @@ export function usePokemonSpecies(speciesUrl: string | undefined) {
   });
 }
 
-function flattenEvolutionChain(node: EvolutionNode): string[] {
-  const names = [node.species.name];
+export interface EvolutionStep {
+  name: string;
+  /** Condicao para chegar NESTE estagio; vazio no primeiro. */
+  condition: string;
+}
+
+function flattenEvolutionChain(
+  node: EvolutionNode,
+  condition = ""
+): EvolutionStep[] {
+  const steps: EvolutionStep[] = [{ name: node.species.name, condition }];
   for (const child of node.evolves_to) {
-    names.push(...flattenEvolutionChain(child));
+    steps.push(
+      ...flattenEvolutionChain(
+        child,
+        evolutionConditionText(child.evolution_details?.[0])
+      )
+    );
   }
-  return names;
+  return steps;
 }
 
 export function useEvolutionChain(speciesUrl: string | undefined) {
-  return useQuery<string[]>({
+  return useQuery<EvolutionStep[]>({
     queryKey: ["evolution-chain", speciesUrl],
     queryFn: async ({ signal }) => {
       if (!speciesUrl) return [];

@@ -117,7 +117,7 @@ const DetailPage = () => {
             <p className="detail-muted">Carregando…</p>
           ) : (
             <EvolutionChain
-              names={evolution.data ?? []}
+              steps={evolution.data ?? []}
               currentName={pokemon.name}
             />
           )}

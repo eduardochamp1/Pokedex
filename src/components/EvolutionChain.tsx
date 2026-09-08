@@ -2,37 +2,42 @@ import { useQueries } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { searchPokemon } from "../api";
 import Card from "./Card";
+import type { EvolutionStep } from "../hooks/usePokemon";
 import type { Pokemon } from "../types/pokemon";
 
 interface Props {
-  names: string[];
+  steps: EvolutionStep[];
   currentName?: string;
 }
 
-const EvolutionChain = ({ names, currentName }: Props) => {
+const EvolutionChain = ({ steps, currentName }: Props) => {
   const queries = useQueries({
-    queries: names.map((name) => ({
-      queryKey: ["pokemon-detail", name.toLowerCase()],
+    queries: steps.map((s) => ({
+      queryKey: ["pokemon-detail", s.name.toLowerCase()],
       queryFn: ({ signal }: { signal?: AbortSignal }) =>
-        searchPokemon(name, signal),
+        searchPokemon(s.name, signal),
       staleTime: 30 * 60 * 1000,
     })),
   });
 
-  if (names.length <= 1)
+  if (steps.length <= 1)
     return <p className="detail-muted">Esse pokémon não evolui.</p>;
 
   return (
     <div className="evo-chain">
       {queries.map((q, i) => {
         const data = q.data as Pokemon | null | undefined;
-        const name = names[i];
-        const isCurrent = name.toLowerCase() === currentName?.toLowerCase();
+        const step = steps[i];
+        const isCurrent =
+          step.name.toLowerCase() === currentName?.toLowerCase();
         return (
-          <div key={name} className="evo-step">
+          <div key={step.name} className="evo-step">
             {i > 0 && (
-              <span className="evo-arrow" aria-hidden="true">
-                →
+              <span className="evo-arrow-group" aria-hidden="true">
+                <span className="evo-arrow">→</span>
+                {step.condition && (
+                  <span className="evo-condition">{step.condition}</span>
+                )}
               </span>
             )}
             <div className={"evo-card-wrap" + (isCurrent ? " active" : "")}>
@@ -40,14 +45,11 @@ const EvolutionChain = ({ names, currentName }: Props) => {
                 <Card
                   pokemon={data}
                   variant="mini"
-                  linkTo={`/pokemon/${name}`}
+                  linkTo={`/pokemon/${step.name}`}
                   showActions={false}
                 />
               ) : (
-                <Link
-                  to={`/pokemon/${name}`}
-                  className="variety-fallback"
-                />
+                <Link to={`/pokemon/${step.name}`} className="variety-fallback" />
               )}
             </div>
           </div>

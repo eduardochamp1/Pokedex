@@ -3367,3 +3367,19 @@ nav {
   font-size: 0.78rem;
   line-height: 1.5;
 }
+
+/* ========= Condição de evolução ========= */
+.evo-arrow-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0 4px;
+}
+.evo-condition {
+  max-width: 9ch;
+  color: var(--text-dim);
+  font-size: 0.6rem;
+  line-height: 1.3;
+  text-align: center;
+}
