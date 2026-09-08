@@ -20,3 +20,11 @@ export const DetailSkeleton = () => (
     <div className="skeleton skeleton-hero" />
   </div>
 );
+
+/** Placeholder enquanto o chunk de uma rota lazy chega. */
+export const RouteFallback = () => (
+  <div className="route-fallback" role="status" aria-live="polite">
+    <span className="route-fallback-ball" aria-hidden="true" />
+    <span className="route-fallback-text">Carregando…</span>
+  </div>
+);

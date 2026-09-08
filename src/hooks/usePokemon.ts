@@ -1,12 +1,24 @@
+import { useCallback, useMemo } from "react";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import {
   fetchJsonPublic,
   getGeneration,
   getPokemonData,
+  getPokemonIndex,
   getPokemons,
   getPokemonsByType,
+  resolveName,
   searchPokemon,
 } from "../api";
+import {
+  buildNameIndex,
+  intersectNames,
+  pageOf,
+  searchNames,
+  sortNamesById,
+  totalPagesOf,
+} from "../lib/filters";
+import { RARITIES, type RarityId } from "../data/rarity";
 import type {
   EvolutionChain,
   EvolutionNode,
@@ -36,9 +48,39 @@ export type PokemonTypeName = (typeof POKEMON_TYPES)[number];
 
 export const ITEMS_PER_PAGE = 25;
 
+const HOUR = 60 * 60 * 1000;
+
 interface PagedResult {
   pokemons: Pokemon[];
   totalPages: number;
+}
+
+/** Indice completo nome -> id. Um request, cacheado por uma hora. */
+export function usePokemonIndex() {
+  const query = useQuery({
+    queryKey: ["pokemon-index"],
+    queryFn: async ({ signal }) => buildNameIndex((await getPokemonIndex(signal)).results),
+    staleTime: HOUR,
+    gcTime: HOUR,
+  });
+  const index = query.data;
+
+  /**
+   * Id da Pokedex para um nome curado. Passa por resolveName porque a lore usa
+   * nomes amigaveis ("giratina", "deoxys") e o indice guarda o slug da API
+   * ("giratina-altered", "deoxys-normal") — sem isso o chip fica sem sprite.
+   */
+  const idOf = useCallback(
+    (name: string) => index?.get(resolveName(name)),
+    [index]
+  );
+
+  return {
+    index,
+    idOf,
+    isLoading: query.isLoading,
+    isError: query.isError,
+  };
 }
 
 export function usePokemonList(page: number) {
@@ -51,7 +93,7 @@ export function usePokemonList(page: number) {
       );
       return {
         pokemons: results.filter((r): r is Pokemon => r !== null),
-        totalPages: Math.ceil(data.count / ITEMS_PER_PAGE),
+        totalPages: totalPagesOf(data.count, ITEMS_PER_PAGE),
       };
     },
     staleTime: 5 * 60 * 1000,
@@ -59,77 +101,133 @@ export function usePokemonList(page: number) {
   });
 }
 
-export function usePokemonSearch(term: string | undefined) {
-  return useQuery<Pokemon | null>({
-    queryKey: ["pokemon-search", term?.toLowerCase().trim()],
-    queryFn: ({ signal }) => searchPokemon(term!, signal),
-    enabled: Boolean(term && term.trim()),
-    staleTime: 5 * 60 * 1000,
-  });
-}
-
 export function usePokemonDetail(nameOrId: string | undefined) {
   return useQuery<Pokemon | null>({
-    queryKey: ["pokemon-detail", nameOrId?.toLowerCase()],
+    queryKey: ["pokemon-detail", nameOrId ? resolveName(nameOrId) : undefined],
     queryFn: ({ signal }) => searchPokemon(nameOrId!, signal),
     enabled: Boolean(nameOrId),
     staleTime: 30 * 60 * 1000,
   });
 }
 
-const MAX_PER_TYPE = 30;
-
-export function usePokemonsByType(typeName: string | undefined) {
-  return useQuery<Pokemon[]>({
-    queryKey: ["pokemon-by-type", typeName?.toLowerCase()],
+/**
+ * Nomes de um tipo — lista COMPLETA (um request), nao truncada.
+ * A paginacao acontece depois, em usePokemonPage.
+ */
+function useTypeNames(typeName: string | undefined) {
+  return useQuery<string[]>({
+    queryKey: ["type-names", typeName?.toLowerCase()],
     queryFn: async ({ signal }) => {
       const data = await getPokemonsByType(typeName!, signal);
       if (!data) return [];
-      const slice = data.pokemon.slice(0, MAX_PER_TYPE);
-      const results = await Promise.all(
-        slice.map((p) => getPokemonData(p.pokemon.url, signal))
-      );
-      return results.filter((r): r is Pokemon => r !== null);
+      return data.pokemon.map((p) => resolveName(p.pokemon.name));
     },
     enabled: Boolean(typeName),
-    staleTime: 10 * 60 * 1000,
+    staleTime: HOUR,
   });
 }
 
-const MAX_PER_GENERATION = 40;
-
-export function usePokemonsByGeneration(gen: number | undefined) {
-  return useQuery<Pokemon[]>({
-    queryKey: ["pokemon-by-generation", gen],
+/** Nomes de uma geracao — lista COMPLETA de especies (um request). */
+function useGenerationNames(gen: number | undefined) {
+  return useQuery<string[]>({
+    queryKey: ["generation-names", gen],
     queryFn: async ({ signal }) => {
-      if (!gen) return [];
-      const data = await getGeneration(gen, signal);
+      const data = await getGeneration(gen!, signal);
       if (!data) return [];
-      const sorted = [...data.pokemon_species].sort((a, b) => {
-        const aId = extractIdFromUrl(a.url);
-        const bId = extractIdFromUrl(b.url);
-        return aId - bId;
-      });
-      const slice = sorted.slice(0, MAX_PER_GENERATION);
-      const results = await Promise.all(
-        slice.map((s) => searchPokemon(s.name, signal))
-      );
-      return results.filter((r): r is Pokemon => r !== null);
+      return data.pokemon_species.map((s) => resolveName(s.name));
     },
     enabled: Boolean(gen),
-    staleTime: 30 * 60 * 1000,
+    staleTime: HOUR,
   });
 }
 
-function extractIdFromUrl(url: string): number {
-  const m = url.match(/\/(\d+)\/?$/);
-  return m ? Number(m[1]) : Number.MAX_SAFE_INTEGER;
+export interface SelectionCriteria {
+  search?: string;
+  type?: string;
+  generation?: number;
+  rarity?: RarityId;
+}
+
+export interface Selection {
+  /** null = nenhum filtro ativo: a Home deve usar a listagem paginada padrao. */
+  names: string[] | null;
+  isLoading: boolean;
+  isError: boolean;
+}
+
+/**
+ * Resolve busca + filtros para uma lista de nomes normalizados e ordenada por
+ * id. Cada criterio custa no maximo um request; a interseccao e local.
+ */
+export function usePokemonSelection(criteria: SelectionCriteria): Selection {
+  const { search, type, generation, rarity } = criteria;
+  const { index, isLoading: indexLoading, isError: indexError } = usePokemonIndex();
+  const typeQuery = useTypeNames(type);
+  const genQuery = useGenerationNames(generation);
+
+  const rarityNames = useMemo(() => {
+    if (!rarity) return undefined;
+    return RARITIES.find((r) => r.id === rarity)?.names.map(resolveName) ?? [];
+  }, [rarity]);
+
+  const searchQuery = search?.trim() ? search.trim() : undefined;
+  const hasCriteria = Boolean(searchQuery || type || generation || rarity);
+
+  const names = useMemo(() => {
+    if (!hasCriteria || !index) return null;
+
+    const sources: string[][] = [];
+    if (searchQuery) sources.push(searchNames(searchQuery, index));
+    if (type) sources.push(typeQuery.data ?? []);
+    if (generation) sources.push(genQuery.data ?? []);
+    if (rarityNames) sources.push(rarityNames);
+
+    return sortNamesById(intersectNames(sources), index);
+  }, [
+    hasCriteria,
+    index,
+    searchQuery,
+    type,
+    generation,
+    rarityNames,
+    typeQuery.data,
+    genQuery.data,
+  ]);
+
+  return {
+    names,
+    isLoading:
+      hasCriteria &&
+      (indexLoading ||
+        (Boolean(type) && typeQuery.isLoading) ||
+        (Boolean(generation) && genQuery.isLoading)),
+    isError: indexError || typeQuery.isError || genQuery.isError,
+  };
+}
+
+/**
+ * Busca os detalhes apenas da pagina visivel de uma selecao (25 requests por
+ * pagina, em vez de tudo de uma vez).
+ */
+export function usePokemonPage(names: string[] | null, page: number) {
+  const slice = useMemo(
+    () => (names ? pageOf(names, page, ITEMS_PER_PAGE) : []),
+    [names, page]
+  );
+  const { pokemons, isLoading, isError } = usePokemonsByNames(slice);
+  return {
+    pokemons,
+    isLoading,
+    isError,
+    totalPages: names ? totalPagesOf(names.length, ITEMS_PER_PAGE) : 1,
+    total: names?.length ?? 0,
+  };
 }
 
 export function usePokemonsByNames(names: string[]) {
   const queries = useQueries({
     queries: names.map((name) => ({
-      queryKey: ["pokemon-detail", name.toLowerCase()],
+      queryKey: ["pokemon-detail", resolveName(name)],
       queryFn: ({ signal }: { signal?: AbortSignal }) =>
         searchPokemon(name, signal),
       staleTime: 30 * 60 * 1000,
@@ -140,6 +238,7 @@ export function usePokemonsByNames(names: string[]) {
       .map((q) => q.data)
       .filter((p): p is Pokemon => Boolean(p)),
     isLoading: queries.some((q) => q.isLoading),
+    isError: queries.some((q) => q.isError),
   };
 }
 
@@ -149,7 +248,7 @@ export function usePokemonSpecies(speciesUrl: string | undefined) {
     queryFn: ({ signal }) =>
       fetchJsonPublic<PokemonSpecies>(speciesUrl!, signal),
     enabled: Boolean(speciesUrl),
-    staleTime: 60 * 60 * 1000,
+    staleTime: HOUR,
   });
 }
 
@@ -176,23 +275,10 @@ export function useEvolutionChain(speciesUrl: string | undefined) {
       return flattenEvolutionChain(chain.chain);
     },
     enabled: Boolean(speciesUrl),
-    staleTime: 60 * 60 * 1000,
+    staleTime: HOUR,
   });
 }
 
 export function useFavoritePokemons(names: string[]) {
-  const queries = useQueries({
-    queries: names.map((name) => ({
-      queryKey: ["pokemon-detail", name.toLowerCase()],
-      queryFn: ({ signal }: { signal?: AbortSignal }) =>
-        searchPokemon(name, signal),
-      staleTime: 30 * 60 * 1000,
-    })),
-  });
-  return {
-    pokemons: queries
-      .map((q) => q.data)
-      .filter((p): p is Pokemon => Boolean(p)),
-    isLoading: queries.some((q) => q.isLoading),
-  };
+  return usePokemonsByNames(names);
 }

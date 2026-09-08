@@ -6,15 +6,28 @@ interface Props {
 }
 
 const Pagination = ({ page, totalPages, onLeftClick, onRightClick }: Props) => {
+  const isFirst = page <= 1;
+  const isLast = page >= totalPages;
+
   return (
     <div className="pagination-container">
-      <button onClick={onLeftClick} aria-label="Página anterior">
+      <button
+        type="button"
+        onClick={onLeftClick}
+        disabled={isFirst}
+        aria-label="Página anterior"
+      >
         <div>🢀</div>
       </button>
       <div>
         {page} de {totalPages}
       </div>
-      <button onClick={onRightClick} aria-label="Próxima página">
+      <button
+        type="button"
+        onClick={onRightClick}
+        disabled={isLast}
+        aria-label="Próxima página"
+      >
         <div>🢂</div>
       </button>
     </div>

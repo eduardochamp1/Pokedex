@@ -1,20 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import type { GenealogyNode } from "../data/genealogy";
-import type { Pokemon } from "../types/pokemon";
+import { pixelSpriteUrl } from "../lib/sprites";
 
 interface Props {
   node: GenealogyNode;
-  byName: Map<string, Pokemon>;
+  /** Resolvedor nome -> id da Pokedex (ja normaliza apelidos). */
+  idOf: (name: string) => number | undefined;
   depth?: number;
 }
 
-const GenealogyTree = ({ node, byName, depth = 0 }: Props) => {
-  const p = byName.get(node.name);
-  const sprite =
-    p?.sprites.other?.["official-artwork"]?.front_default ??
-    p?.sprites.front_default ??
-    "";
+const GenealogyTree = ({ node, idOf, depth = 0 }: Props) => {
+  const sprite = pixelSpriteUrl(idOf(node.name));
   const rootRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const [connectors, setConnectors] = useState<
@@ -31,7 +28,7 @@ const GenealogyTree = ({ node, byName, depth = 0 }: Props) => {
         y: rootRect.bottom - wrapRect.top,
       };
       const childEls = wrapRef.current!.querySelectorAll<HTMLElement>(
-        ":scope > .genealogy-node > .genealogy-card"
+        ":scope > .genealogy-children > .genealogy-node > .genealogy-card"
       );
       const paths: typeof connectors = [];
       childEls.forEach((el) => {
@@ -56,7 +53,16 @@ const GenealogyTree = ({ node, byName, depth = 0 }: Props) => {
     <div className={"genealogy-node depth-" + depth} ref={wrapRef}>
       <div ref={rootRef} className="genealogy-card">
         <Link to={`/pokemon/${node.name}`} className="genealogy-portrait">
-          {sprite ? <img src={sprite} alt={node.name} /> : <span>?</span>}
+          {sprite ? (
+            <img
+              src={sprite}
+              alt={node.name}
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <span>?</span>
+          )}
         </Link>
         <div className="genealogy-info">
           <Link to={`/pokemon/${node.name}`} className="genealogy-name">
@@ -93,7 +99,7 @@ const GenealogyTree = ({ node, byName, depth = 0 }: Props) => {
               <GenealogyTree
                 key={c.name}
                 node={c}
-                byName={byName}
+                idOf={idOf}
                 depth={depth + 1}
               />
             ))}

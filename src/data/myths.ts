@@ -1,4 +1,6 @@
-export interface Myth {
+import type { WikiSourced } from "../lib/wiki";
+
+export interface Myth extends WikiSourced {
   id: string;
   title: string;
   region: string;
@@ -11,6 +13,7 @@ export const MYTHS: Myth[] = [
   // ==================== KANTO ====================
   {
     id: "abandoned-ship",
+    wiki: "S.S. Anne",
     title: "O barco fantasma de S.S. Anne",
     region: "Kanto",
     summary:
@@ -20,6 +23,7 @@ export const MYTHS: Myth[] = [
   },
   {
     id: "pokemon-tower",
+    wiki: "Pokémon Tower",
     title: "Pokémon Tower — o cemitério que canta",
     region: "Kanto (Lavender Town)",
     summary:
@@ -29,6 +33,7 @@ export const MYTHS: Myth[] = [
   },
   {
     id: "moon-stone-mt-moon",
+    wiki: "Mt. Moon",
     title: "As pedras da lua caídas em Mt. Moon",
     region: "Kanto",
     summary:
@@ -40,6 +45,7 @@ export const MYTHS: Myth[] = [
   // ==================== JOHTO ====================
   {
     id: "burned-tower",
+    wiki: "Burned Tower",
     title: "Brass Tower — o incêndio dos três",
     region: "Johto (Ecruteak)",
     summary:
@@ -49,6 +55,7 @@ export const MYTHS: Myth[] = [
   },
   {
     id: "sprout-tower",
+    wiki: "Sprout Tower",
     title: "Sprout Tower — o pilar oscilante",
     region: "Johto (Violet)",
     summary:
@@ -58,6 +65,7 @@ export const MYTHS: Myth[] = [
   },
   {
     id: "lake-of-rage",
+    wiki: "Lake of Rage",
     title: "O Gyarados vermelho do Lake of Rage",
     region: "Johto",
     summary:
@@ -69,6 +77,7 @@ export const MYTHS: Myth[] = [
   // ==================== HOENN ====================
   {
     id: "sky-pillar-rayquaza",
+    wiki: "Sky Pillar",
     title: "Sky Pillar — a torre até o céu",
     region: "Hoenn",
     summary:
@@ -77,6 +86,7 @@ export const MYTHS: Myth[] = [
   },
   {
     id: "mirage-island",
+    wiki: "Mirage Island",
     title: "Mirage Island — a ilha que só aparece por instantes",
     region: "Hoenn",
     summary:
@@ -86,6 +96,7 @@ export const MYTHS: Myth[] = [
   },
   {
     id: "cave-of-origin",
+    wiki: "Cave of Origin",
     title: "Cave of Origin — o portal do início",
     region: "Hoenn (Sootopolis)",
     summary:
@@ -97,6 +108,7 @@ export const MYTHS: Myth[] = [
   // ==================== SINNOH ====================
   {
     id: "solaceon-ruins",
+    wiki: "Solaceon Ruins",
     title: "Solaceon Ruins — os Unown do subterrâneo",
     region: "Sinnoh",
     summary:
@@ -106,6 +118,7 @@ export const MYTHS: Myth[] = [
   },
   {
     id: "snowpoint-temple",
+    wiki: "Snowpoint Temple",
     title: "Snowpoint Temple — o sepulcro de Regigigas",
     region: "Sinnoh",
     summary:
@@ -115,6 +128,7 @@ export const MYTHS: Myth[] = [
   },
   {
     id: "hall-of-origin",
+    wiki: "Hall of Origin",
     title: "Hall of Origin — o trono de Arceus",
     region: "Sinnoh (Mount Coronet apex)",
     summary:
@@ -126,6 +140,7 @@ export const MYTHS: Myth[] = [
   // ==================== UNOVA ====================
   {
     id: "abundant-shrine",
+    wiki: "Abundant Shrine",
     title: "Abundant Shrine — o santuário dos Kami",
     region: "Unova",
     summary:
@@ -135,6 +150,7 @@ export const MYTHS: Myth[] = [
   },
   {
     id: "relic-castle",
+    wiki: "Relic Castle",
     title: "Relic Castle — as ruínas debaixo do deserto",
     region: "Unova",
     summary:
@@ -144,6 +160,7 @@ export const MYTHS: Myth[] = [
   },
   {
     id: "dragonspiral-tower",
+    wiki: "Dragonspiral Tower",
     title: "Dragonspiral Tower — o berço do Dragão",
     region: "Unova (Icirrus)",
     summary:
@@ -155,6 +172,7 @@ export const MYTHS: Myth[] = [
   // ==================== KALOS ====================
   {
     id: "terminus-cave",
+    wiki: "Terminus Cave",
     title: "Terminus Cave — o núcleo de Zygarde",
     region: "Kalos",
     summary:
@@ -164,6 +182,7 @@ export const MYTHS: Myth[] = [
   },
   {
     id: "diamond-domain",
+    wiki: "Diamond Domain",
     title: "Diamond Domain — o palácio dos Carbink",
     region: "Kalos",
     summary:
@@ -175,6 +194,7 @@ export const MYTHS: Myth[] = [
   // ==================== ALOLA ====================
   {
     id: "ruins-of-conflict",
+    wiki: "Ruins of Conflict",
     title: "As Ruínas dos Tapus",
     region: "Alola",
     summary:
@@ -184,6 +204,7 @@ export const MYTHS: Myth[] = [
   },
   {
     id: "altar-sunne-moone",
+    wiki: "Altar of the Sunne",
     title: "Altar do Sol / Altar da Lua",
     region: "Alola (Poni Canyon)",
     summary:
@@ -195,6 +216,7 @@ export const MYTHS: Myth[] = [
   // ==================== GALAR ====================
   {
     id: "slumbering-weald",
+    wiki: "Slumbering Weald",
     title: "Slumbering Weald — a floresta enevoada",
     region: "Galar",
     summary:
@@ -204,6 +226,7 @@ export const MYTHS: Myth[] = [
   },
   {
     id: "crown-tundra-freezington",
+    wiki: "Freezington",
     title: "Freezington e o mito do Rei Corcel",
     region: "Galar (Crown Tundra)",
     summary:
@@ -215,6 +238,7 @@ export const MYTHS: Myth[] = [
   // ==================== PALDEA ====================
   {
     id: "area-zero-descent",
+    wiki: "Area Zero",
     title: "A descida à Área Zero",
     region: "Paldea",
     summary:
@@ -224,6 +248,7 @@ export const MYTHS: Myth[] = [
   },
   {
     id: "kitakami-festival",
+    wiki: "Kitakami",
     title: "Kitakami — o Festival das Máscaras",
     region: "Paldea (Kitakami DLC)",
     summary:

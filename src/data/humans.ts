@@ -1,4 +1,6 @@
-export interface HumanLegend {
+import type { WikiSourced } from "../lib/wiki";
+
+export interface HumanLegend extends WikiSourced {
   name: string;
   role: string;
   region: string;
@@ -10,6 +12,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   // ==================== HERÓIS ANTIGOS ====================
   {
     name: "Sir Aaron",
+    wiki: "Sir Aaron",
     role: "Guardião do Reino de Rota",
     region: "Kanto (lendas antigas)",
     summary:
@@ -18,6 +21,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "AZ",
+    wiki: "AZ",
     role: "Rei imortal de Kalos",
     region: "Kalos (há 3000 anos)",
     summary:
@@ -26,6 +30,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Rei de Galar",
+    wiki: "Darkest Day",
     role: "Herói do Darkest Day",
     region: "Galar (há 3000 anos)",
     summary:
@@ -36,6 +41,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   // ==================== PROFESSORES ====================
   {
     name: "Professor Samuel Oak",
+    wiki: "Professor Oak",
     role: "Pioneiro da pesquisa Pokémon",
     region: "Kanto (Pallet Town)",
     summary:
@@ -44,6 +50,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Professor Elm",
+    wiki: "Professor Elm",
     role: "Especialista em breeding",
     region: "Johto (New Bark Town)",
     summary:
@@ -52,6 +59,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Professor Birch",
+    wiki: "Professor Birch",
     role: "Estudioso de habitats",
     region: "Hoenn (Littleroot Town)",
     summary:
@@ -60,6 +68,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Professor Rowan",
+    wiki: "Professor Rowan",
     role: "Autoridade em evoluções",
     region: "Sinnoh (Sandgem Town)",
     summary:
@@ -68,6 +77,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Professora Juniper",
+    wiki: "Professor Juniper",
     role: "Origens dos pokémon",
     region: "Unova (Nuvema Town)",
     summary:
@@ -76,6 +86,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Professor Sycamore",
+    wiki: "Professor Sycamore",
     role: "Especialista em Mega Evolução",
     region: "Kalos (Lumiose City)",
     summary:
@@ -84,6 +95,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Professor Kukui",
+    wiki: "Professor Kukui",
     role: "Estudioso de Z-Moves",
     region: "Alola",
     summary:
@@ -92,6 +104,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Professora Magnolia",
+    wiki: "Professor Magnolia",
     role: "Pioneira do Dynamax",
     region: "Galar",
     summary:
@@ -100,6 +113,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Professores Sada e Turo",
+    wiki: "Professor Sada",
     role: "Pesquisadores do tempo",
     region: "Paldea (Área Zero)",
     summary:
@@ -110,6 +124,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   // ==================== VILÕES ====================
   {
     name: "Cyrus",
+    wiki: "Cyrus",
     role: "Líder do Team Galactic",
     region: "Sinnoh",
     summary:
@@ -118,6 +133,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "N (Natural Harmonia Gropius)",
+    wiki: "N",
     role: "Rei da Team Plasma",
     region: "Unova",
     summary:
@@ -126,6 +142,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Ghetsis",
+    wiki: "Ghetsis",
     role: "Verdadeiro líder da Team Plasma",
     region: "Unova",
     summary:
@@ -134,6 +151,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Lysandre",
+    wiki: "Lysandre",
     role: "Líder da Team Flare",
     region: "Kalos",
     summary:
@@ -142,6 +160,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Lusamine",
+    wiki: "Lusamine",
     role: "Presidente da Aether Foundation",
     region: "Alola",
     summary:
@@ -150,6 +169,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Volo",
+    wiki: "Volo",
     role: "Mercador ambulante de Hisui",
     region: "Hisui (Sinnoh ancestral)",
     summary:
@@ -160,6 +180,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   // ==================== CHAMPIONS ====================
   {
     name: "Red",
+    wiki: "Red",
     role: "Champion silencioso de Kanto",
     region: "Kanto",
     summary:
@@ -168,6 +189,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Blue Oak",
+    wiki: "Blue",
     role: "Ex-Champion, neto do Prof. Oak",
     region: "Kanto",
     summary:
@@ -176,6 +198,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Silver",
+    wiki: "Silver",
     role: "Rival de Johto, filho de Giovanni",
     region: "Johto",
     summary:
@@ -184,6 +207,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Steven Stone",
+    wiki: "Steven Stone",
     role: "Champion de Hoenn, geólogo",
     region: "Hoenn",
     summary:
@@ -192,6 +216,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Cynthia",
+    wiki: "Cynthia",
     role: "Champion de Sinnoh, historiadora",
     region: "Sinnoh",
     summary:
@@ -200,6 +225,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Alder",
+    wiki: "Alder",
     role: "Champion errante de Unova",
     region: "Unova",
     summary:
@@ -208,6 +234,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Iris",
+    wiki: "Iris",
     role: "Champion de Unova (BW2)",
     region: "Unova",
     summary:
@@ -216,6 +243,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Diantha",
+    wiki: "Diantha",
     role: "Champion de Kalos, atriz",
     region: "Kalos",
     summary:
@@ -224,6 +252,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Hau",
+    wiki: "Hau",
     role: "Champion inicial de Alola",
     region: "Alola",
     summary:
@@ -232,6 +261,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Leon",
+    wiki: "Leon",
     role: "Champion invicto de Galar",
     region: "Galar",
     summary:
@@ -240,6 +270,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Nemona",
+    wiki: "Nemona",
     role: "Rival e Champion de Paldea",
     region: "Paldea",
     summary:
@@ -250,6 +281,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   // ==================== RIVAIS E COADJUVANTES ====================
   {
     name: "Lillie",
+    wiki: "Lillie",
     role: "Aluna da Aether Foundation",
     region: "Alola",
     summary:
@@ -258,6 +290,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Gladion",
+    wiki: "Gladion",
     role: "Ex-Team Skull, filho de Lusamine",
     region: "Alola",
     summary:
@@ -266,6 +299,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Hop",
+    wiki: "Hop",
     role: "Rival de Galar, irmão do Champion",
     region: "Galar",
     summary:
@@ -274,6 +308,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Marnie",
+    wiki: "Marnie",
     role: "Idol e rival de Galar",
     region: "Galar",
     summary:

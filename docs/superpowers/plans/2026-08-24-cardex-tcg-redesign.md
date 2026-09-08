@@ -1,5 +1,22 @@
 # Cardex TCG Redesign — Implementation Plan
 
+> **STATUS: CONCLUÍDO** (redesign entregue até o commit `ce204fe`). Este
+> documento fica como registro histórico — os checkboxes abaixo não foram
+> marcados durante a execução. Desvios conscientes em relação ao plano:
+>
+> - `src/design/utilities.css` não foi criado; as utilitárias ficaram no `App.css`.
+> - `src/components/EditorialCard.tsx` não foi criado; os cards editoriais são
+>   classes CSS (`.editorial-card`) aplicadas direto no `LorePage`.
+> - `App.css` não ficou "só com resets globais": tem ~2.400 linhas com todos os
+>   estilos de página. Dividir em módulos continua sendo trabalho em aberto.
+> - `useFeaturedPokemon` sorteia um lendário por mount, não "baseado na data".
+> - A lore cresceu de 7 para 12 abas depois deste plano (Batalhas, Mitos,
+>   Civilizações, Ovos, Itens).
+>
+> Correções posteriores de comportamento e performance (truncamento dos filtros,
+> link do mapa, tratamento de erro, code splitting, testes, ESLint) estão no
+> README e no histórico do git, não aqui.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Reescrever a camada visual do Pokédex (React 18 + Vite + TS) para uma experiência TCG showroom, sem alterar APIs, hooks, rotas ou dados.

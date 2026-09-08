@@ -37,6 +37,14 @@ const Navbar = () => {
           Mapa
         </NavLink>
         <NavLink
+          to="/jogar"
+          className={({ isActive }) =>
+            "nav-link" + (isActive ? " nav-link-active" : "")
+          }
+        >
+          Jogar
+        </NavLink>
+        <NavLink
           to="/lore"
           className={({ isActive }) =>
             "nav-link" + (isActive ? " nav-link-active" : "")

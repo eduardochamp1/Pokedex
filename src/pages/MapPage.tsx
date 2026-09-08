@@ -6,8 +6,10 @@ import { REGION_SHAPES } from "../data/regionMap";
 import { LORE_EVENTS } from "../data/lore";
 import { HUMAN_LEGENDS } from "../data/humans";
 import { VILLAIN_TEAMS } from "../data/villains";
-import { usePokemonsByNames } from "../hooks/usePokemon";
-import type { Pokemon } from "../types/pokemon";
+import { LANDMARKS, LANDMARK_KIND_LABELS } from "../data/landmarks";
+import { usePokemonIndex } from "../hooks/usePokemon";
+import PokemonChip from "../components/PokemonChip";
+import WikiSource from "../components/WikiSource";
 
 const MapPage = () => {
   const [params, setParams] = useSearchParams();
@@ -40,10 +42,15 @@ const MapPage = () => {
     );
   }, [region]);
 
-  const allNames = REGIONS.flatMap((r) => r.signature);
-  const { pokemons } = usePokemonsByNames(allNames);
-  const byName = new Map<string, Pokemon>();
-  for (const p of pokemons) byName.set(p.name, p);
+  // Um request para o indice nome -> id; os sprites dos chips saem dele.
+  const { idOf } = usePokemonIndex();
+
+  const landmarks = useMemo(
+    () => (region ? LANDMARKS.filter((l) => l.regionId === region.id) : []),
+    [region]
+  );
+
+  const unknownRegion = Boolean(selectedId) && !region;
 
   return (
     <div className="mappage-container">
@@ -54,6 +61,13 @@ const MapPage = () => {
           sua lore, pokémons lendários, humanos e vilões.
         </p>
       </header>
+
+      {unknownRegion && (
+        <p className="mappage-notice" role="status">
+          Não encontramos a região <b>{selectedId}</b>. Escolha uma no mapa
+          abaixo.
+        </p>
+      )}
 
       <WorldMap onSelect={setSelectedId} selectedId={selectedId} />
 
@@ -89,34 +103,35 @@ const MapPage = () => {
           </div>
 
           <p className="mappage-detail-summary">{region.summary}</p>
+          <WikiSource wiki={region.wiki} />
 
           <section className="mappage-block">
             <h3>Pokémons emblemáticos</h3>
             <div className="mappage-chips">
-              {region.signature.map((name) => {
-                const p = byName.get(name);
-                const sprite =
-                  p?.sprites.other?.["official-artwork"]?.front_default ??
-                  p?.sprites.front_default ??
-                  "";
-                return (
-                  <Link
-                    to={`/pokemon/${name}`}
-                    key={name}
-                    className="mappage-chip"
-                    title={name}
-                  >
-                    {sprite ? (
-                      <img src={sprite} alt={name} />
-                    ) : (
-                      <span className="mappage-chip-placeholder">?</span>
-                    )}
-                    <span>{name}</span>
-                  </Link>
-                );
-              })}
+              {region.signature.map((name) => (
+                <PokemonChip key={name} name={name} id={idOf(name)} />
+              ))}
             </div>
           </section>
+
+          {landmarks.length > 0 && (
+            <section className="mappage-block">
+              <h3>Ilhas e locais notáveis</h3>
+              <ul className="mappage-landmarks">
+                {landmarks.map((l) => (
+                  <li key={l.id}>
+                    <span className={"landmark-kind landmark-kind-" + l.kind}>
+                      {LANDMARK_KIND_LABELS[l.kind]}
+                    </span>
+                    <div className="mappage-landmark-body">
+                      <strong>{l.name}</strong> — {l.summary}
+                      <WikiSource wiki={l.wiki} />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           {relatedEvents.length > 0 && (
             <section className="mappage-block">

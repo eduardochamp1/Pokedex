@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import CardHero from "../components/CardHero";
 import TypeMatchup from "../components/TypeMatchup";
-import { usePokemonDetail } from "../hooks/usePokemon";
+import { usePokemonDetail, usePokemonIndex } from "../hooks/usePokemon";
 import { useDebounce } from "../hooks/useDebounce";
 import type { Pokemon } from "../types/pokemon";
 
@@ -24,6 +24,24 @@ const ComparePage = () => {
   const leftQ = usePokemonDetail(leftDeb || undefined);
   const rightQ = usePokemonDetail(rightDeb || undefined);
   const both = leftQ.data && rightQ.data ? ([leftQ.data, rightQ.data] as const) : null;
+  const { index } = usePokemonIndex();
+  const suggestions = useMemo(
+    () => (index ? [...index.keys()] : []),
+    [index]
+  );
+
+  const slotStatus = (
+    query: typeof leftQ,
+    term: string
+  ): string | null => {
+    if (!term) return "Digite um nome ou id.";
+    if (query.isLoading) return "Carregando…";
+    if (query.isError) return "Não foi possível consultar a PokéAPI.";
+    if (query.isSuccess && !query.data) return `Nada encontrado para "${term}".`;
+    return null;
+  };
+  const leftStatus = slotStatus(leftQ, leftDeb);
+  const rightStatus = slotStatus(rightQ, rightDeb);
 
   const swap = () => {
     setLeft(right);
@@ -40,6 +58,7 @@ const ComparePage = () => {
           onChange={(e) => setLeft(e.target.value)}
           placeholder="Pokémon 1"
           aria-label="Selecionar pokémon 1"
+          list="compare-names"
         />
         <button
           type="button"
@@ -54,15 +73,29 @@ const ComparePage = () => {
           onChange={(e) => setRight(e.target.value)}
           placeholder="Pokémon 2"
           aria-label="Selecionar pokémon 2"
+          list="compare-names"
         />
+        <datalist id="compare-names">
+          {suggestions.map((n) => (
+            <option key={n} value={n} />
+          ))}
+        </datalist>
       </div>
 
       <div className="compare-arena">
         <div className="compare-slot">
-          {leftQ.data && <CardHero pokemon={leftQ.data} />}
+          {leftQ.data ? (
+            <CardHero pokemon={leftQ.data} />
+          ) : (
+            <p className="compare-slot-status">{leftStatus}</p>
+          )}
         </div>
         <div className="compare-slot">
-          {rightQ.data && <CardHero pokemon={rightQ.data} />}
+          {rightQ.data ? (
+            <CardHero pokemon={rightQ.data} />
+          ) : (
+            <p className="compare-slot-status">{rightStatus}</p>
+          )}
         </div>
       </div>
 

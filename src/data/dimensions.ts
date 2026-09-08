@@ -1,4 +1,6 @@
-export interface Dimension {
+import type { WikiSourced } from "../lib/wiki";
+
+export interface Dimension extends WikiSourced {
   id: string;
   name: string;
   ruler: string;
@@ -11,6 +13,7 @@ export interface Dimension {
 export const DIMENSIONS: Dimension[] = [
   {
     id: "distortion",
+    wiki: "Distortion World",
     name: "Mundo Distorcido",
     ruler: "Giratina",
     access: "Turnback Cave (Sinnoh), Torre do Céu Distorcido (Platinum).",
@@ -21,6 +24,7 @@ export const DIMENSIONS: Dimension[] = [
   },
   {
     id: "ultraspace",
+    wiki: "Ultra Space",
     name: "Ultra Espaço",
     ruler: "Necrozma (originalmente)",
     access: "Ultra Wormholes abertos pela Aether Foundation em Alola; ampliados pela obsessão de Lusamine.",
@@ -31,6 +35,7 @@ export const DIMENSIONS: Dimension[] = [
   },
   {
     id: "dreamworld",
+    wiki: "Pokémon Dream World",
     name: "Mundo dos Sonhos",
     ruler: "Musharna / Cresselia",
     access: "Entra-se através do Dream Mist de Musharna. Somente a mente vaga por lá — o corpo permanece dormindo.",
@@ -41,6 +46,7 @@ export const DIMENSIONS: Dimension[] = [
   },
   {
     id: "sinjoh",
+    wiki: "Sinjoh Ruins",
     name: "Ruínas de Sinjoh",
     ruler: "Arceus",
     access: "Cerimônia de Arceus + Ovo levado a Sinjoh Ruins na fronteira Sinnoh/Johto.",
@@ -51,6 +57,7 @@ export const DIMENSIONS: Dimension[] = [
   },
   {
     id: "hisui",
+    wiki: "Hisui",
     name: "Hisui (Sinnoh ancestral)",
     ruler: "Nenhum — era pré-humana",
     access: "Fenda espaço-temporal em Jubilife Village (Legends: Arceus).",
@@ -61,6 +68,7 @@ export const DIMENSIONS: Dimension[] = [
   },
   {
     id: "terastal",
+    wiki: "Area Zero",
     name: "Área Zero / Realm Terastal",
     ruler: "Terapagos",
     access: "Fundo da Grande Cratera do Sul, em Paldea.",
@@ -71,6 +79,7 @@ export const DIMENSIONS: Dimension[] = [
   },
   {
     id: "shadow",
+    wiki: "Reverse World",
     name: "Reverse World / Colosseum",
     ruler: "Cipher (grupo criminoso)",
     access: "Região de Orre — jogos Pokémon Colosseum e XD: Gale of Darkness.",

@@ -40,3 +40,16 @@ pnpm-debug.log*
 # Claude Code local session files
 .claude/
 CLAUDE.md
+
+# Core do emulador copiado de node_modules por scripts/copy-emulator-core.mjs
+# (predev / prebuild recriam; vem do npm, nao precisa versionar)
+public/emulator/
+
+# ROMs locais — arquivos do usuario, nunca versionados nem publicados
+# (servidos so em dev/preview por vite-plugin-local-roms.ts)
+roms/*
+!roms/README.md
+
+# Saves locais — progresso do usuario, nunca versionado nem publicado
+saves/*
+!saves/README.md

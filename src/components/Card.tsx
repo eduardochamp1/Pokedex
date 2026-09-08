@@ -55,7 +55,19 @@ const Card = ({
         </div>
       </div>
       <div className="card-artwork">
-        {artwork ? <img src={artwork} alt={pokemon.name} /> : <span>?</span>}
+        {artwork ? (
+          <img
+            src={artwork}
+            crossOrigin="anonymous"
+            alt={pokemon.name}
+            loading="lazy"
+            decoding="async"
+            width={220}
+            height={220}
+          />
+        ) : (
+          <span>?</span>
+        )}
       </div>
       <div className="card-footer">
         <div className="card-meta-row">
