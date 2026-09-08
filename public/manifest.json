@@ -1,6 +1,8 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Pokédex",
+  "name": "Pokédex — lore, mapa e emulador",
+  "description": "Pokédex completa em React com lore do universo, mapa-múndi e emulador GB/GBC/GBA.",
+  "lang": "pt-BR",
   "icons": [
     {
       "src": "favicon.ico",
@@ -10,16 +12,19 @@
     {
       "src": "logo192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
       "src": "logo512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#0d0e14",
+  "background_color": "#0d0e14"
 }
