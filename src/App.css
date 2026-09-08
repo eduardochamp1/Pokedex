@@ -563,11 +563,12 @@ nav {
   z-index: 1;
   display: grid;
   grid-template-columns: 240px 1fr 260px;
-  grid-template-rows: auto auto auto auto;
+  grid-template-rows: auto auto auto auto auto;
   grid-template-areas:
     "sprites hero forms"
     "evo     hero lore"
     "evo     hero meta"
+    "evo     hero defense"
     "evo     hero stats";
   gap: 20px;
   max-width: 1200px;
@@ -578,6 +579,7 @@ nav {
 .detail-panel-evo     { grid-area: evo; }
 .detail-panel-lore    { grid-area: lore; }
 .detail-panel-meta    { grid-area: meta; }
+.detail-panel-defense { grid-area: defense; }
 .detail-panel-stats   { grid-area: stats; }
 .detail-hero-slot {
   grid-area: hero;
@@ -787,13 +789,14 @@ nav {
       "sprites forms"
       "evo     evo"
       "lore    lore"
-      "meta    stats";
+      "meta    defense"
+      "stats   stats";
   }
 }
 @media (max-width: 640px) {
   .detail-layout {
     grid-template-columns: 1fr;
-    grid-template-areas: "hero" "sprites" "forms" "evo" "lore" "meta" "stats";
+    grid-template-areas: "hero" "sprites" "forms" "evo" "lore" "meta" "defense" "stats";
   }
 }
 
@@ -3283,4 +3286,47 @@ nav {
 }
 .detail-meta-hint {
   color: var(--text-dim);
+}
+
+/* ========= Perfil defensivo ========= */
+.defense-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.defense-row {
+  display: grid;
+  grid-template-columns: 46px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+.defense-mult {
+  padding: 3px 0;
+  border-radius: var(--radius-sm);
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.defense-row.is-weak .defense-mult {
+  color: var(--t-fire);
+  border-color: var(--t-fire);
+}
+.defense-row.is-resist .defense-mult {
+  color: var(--t-grass);
+  border-color: var(--t-grass);
+}
+.defense-row.is-immune .defense-mult {
+  color: var(--text-dim);
+  font-size: 0.62rem;
+}
+.defense-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
