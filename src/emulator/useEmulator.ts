@@ -63,7 +63,8 @@ export function useEmulator() {
   const [status, setStatus] = useState<EmulatorStatus>({ kind: "checking" });
   const [version, setVersion] = useState<string>("");
   const [roms, setRoms] = useState<RomEntry[]>([]);
-  const [localRoms, setLocalRoms] = useState<LocalRom[]>([]);
+  /** null = pasta roms/ indisponível (produção); [] = pasta vazia. */
+  const [localRoms, setLocalRoms] = useState<LocalRom[] | null>(null);
   const [saves, setSaves] = useState<string[]>([]);
   const [volume, setVolumeState] = useState(100);
   const [fastForward, setFastForwardState] = useState(1);
