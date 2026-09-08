@@ -5,6 +5,7 @@ import {
   intersectNames,
   pageOf,
   searchNames,
+  sortNamesAlphabetically,
   sortNamesById,
   totalPagesOf,
 } from "./filters";
@@ -155,5 +156,21 @@ describe("pageOf / totalPagesOf", () => {
   // Regressao: a paginacao mostrava "1 de 0" em selecao vazia.
   it("nunca devolve zero pagina", () => {
     expect(totalPagesOf(0, 25)).toBe(1);
+  });
+});
+
+describe("sortNamesAlphabetically", () => {
+  it("ordena por nome", () => {
+    expect(sortNamesAlphabetically(["pikachu", "abra", "mew"])).toEqual([
+      "abra",
+      "mew",
+      "pikachu",
+    ]);
+  });
+
+  it("nao muta a entrada", () => {
+    const input = ["b", "a"];
+    sortNamesAlphabetically(input);
+    expect(input).toEqual(["b", "a"]);
   });
 });
