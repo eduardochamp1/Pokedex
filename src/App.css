@@ -3454,3 +3454,24 @@ nav {
     display: inline;
   }
 }
+
+@media (max-width: 700px) {
+  /* O hero ocupava 800px e empurrava a listagem para 1,4 telas abaixo. */
+  .home-featured {
+    padding: 14px;
+    gap: 12px;
+  }
+  .home-featured .card-hero {
+    max-width: 210px;
+    margin: 0 auto;
+  }
+  .home-featured-copy h2 {
+    font-size: 1.4rem;
+  }
+  .home-featured-copy p {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
