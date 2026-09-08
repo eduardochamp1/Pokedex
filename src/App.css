@@ -3406,3 +3406,51 @@ nav {
 .cry-button:active {
   transform: scale(0.96);
 }
+
+/* ========= Navbar responsiva ========= */
+.nav-link-short {
+  display: none;
+}
+.nav-count {
+  margin-left: 5px;
+  padding: 0 5px;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.62rem;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 700px) {
+  /* Rolar em vez de cortar: 6 links nao cabem em 375px. */
+  .nav-links {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    flex: 1 1 auto;
+    justify-content: flex-end;
+  }
+  .nav-links::-webkit-scrollbar {
+    display: none;
+  }
+  .nav-link {
+    flex: 0 0 auto;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-link-full {
+    display: none;
+  }
+  .nav-link-short {
+    display: inline;
+    font-size: 1rem;
+  }
+  /* Só o link de favoritos tem versão curta; os outros mantêm o texto. */
+  .nav-link:not([href="/favoritos"]) .nav-link-full {
+    display: inline;
+  }
+}
