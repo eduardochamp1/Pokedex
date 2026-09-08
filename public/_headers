@@ -1,0 +1,13 @@
+# Headers para Netlify / Cloudflare Pages.
+#
+# O emulador em /jogar usa o core mGBA compilado para wasm, que roda com
+# threads. Threads exigem SharedArrayBuffer, e o navegador so libera
+# SharedArrayBuffer em pagina cross-origin isolated — o que precisa destes dois
+# headers. Sem eles o site funciona normalmente e so /jogar avisa o que falta.
+#
+# Consequencia: todo recurso cross-origin precisa ser CORS/CORP. Os sprites sao
+# locais; o artwork da PokeAPI e a folha do Google Fonts levam
+# crossorigin="anonymous".
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp

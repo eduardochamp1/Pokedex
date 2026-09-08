@@ -459,9 +459,13 @@ nav {
   justify-content: center;
   transition: background var(--dur-fast), transform var(--dur-fast);
 }
-.pagination-container button:hover {
+.pagination-container button:hover:not(:disabled) {
   background: var(--surface-3);
   transform: scale(1.05);
+}
+.pagination-container button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 /* ========= Skeleton ========= */
@@ -1356,22 +1360,15 @@ nav {
   z-index: 0;
 }
 
-/* Generations carousel */
-.gen-carousel-wrap {
-  margin: 0 -24px;
-  padding: 0 24px 8px;
-}
+/* Generations — grid vertical (não mais carrossel) */
+.gen-carousel-wrap { padding: 0; }
 .gen-carousel {
   list-style: none;
-  display: flex;
+  display: grid;
   gap: 16px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  padding-bottom: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 .gen-slide {
-  flex: 0 0 320px;
-  scroll-snap-align: start;
   background: var(--surface-1);
   border-radius: var(--radius-card);
   border: 1px solid var(--border);
@@ -2293,4 +2290,971 @@ nav {
   nav { padding: 0 14px; height: 48px; }
   .navbar-title { display: none; }
   .nav-link { padding: 6px 8px; font-size: 0.75rem; }
+}
+
+/* ========= Contador de resultados ========= */
+.pokedex-count {
+  margin-right: auto;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ========= Fallback de rota lazy ========= */
+.route-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 50vh;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+.route-fallback-ball {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--accent);
+  animation: route-spin 700ms linear infinite;
+}
+@keyframes route-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ========= 404 ========= */
+.notfound-shell {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 80px 24px;
+  text-align: center;
+}
+.notfound-code {
+  font-family: var(--font-display);
+  font-size: 5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent);
+  opacity: 0.35;
+}
+.notfound-shell h1 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  margin: 12px 0 8px;
+}
+.notfound-shell p {
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+.notfound-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  align-items: center;
+}
+.notfound-links a {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+.notfound-links a:hover { color: var(--text); }
+.notfound-cta {
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: #fff !important;
+  font-weight: 700;
+  font-size: 0.9rem !important;
+}
+.notfound-cta:hover { background: var(--accent-hover); }
+
+/* ========= Aviso de regiao inexistente no mapa ========= */
+.mappage-notice {
+  max-width: 900px;
+  margin: 0 auto 16px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  border: 1px solid var(--border-strong);
+  border-left: 3px solid var(--accent-alt);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* ========= Legenda do mapa (acesso por teclado) ========= */
+.worldmap-legend {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 16px 0 0;
+  padding: 0;
+}
+.worldmap-legend-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  transition: background var(--dur-fast), color var(--dur-fast),
+    border-color var(--dur-fast);
+}
+.worldmap-legend-btn:hover,
+.worldmap-legend-btn.is-selected {
+  background: var(--surface-3);
+  border-color: var(--region-color, var(--border-strong));
+  color: var(--text);
+}
+.worldmap-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--region-color, var(--accent));
+}
+.worldmap-legend-gen {
+  color: var(--text-dim);
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 640px) {
+  .worldmap-legend-gen { display: none; }
+  .notfound-code { font-size: 3.5rem; }
+}
+
+/* ========= Estado vazio de cada slot do comparador ========= */
+.compare-slot-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  padding: 24px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-card);
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* ========= Fonte citada nos verbetes ========= */
+.wiki-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 6px 0 2px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  transition: color var(--dur-fast), border-color var(--dur-fast),
+    background var(--dur-fast);
+}
+.wiki-source:hover {
+  color: var(--text);
+  background: var(--surface-3);
+  border-color: var(--border-strong);
+}
+.wiki-source-icon {
+  font-size: 0.62rem;
+  opacity: 0.7;
+}
+
+/* ========= Sprite oficial de item ========= */
+.item-emblem-sprite {
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px;
+}
+.item-emblem-sprite img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 2px 0 6px;
+  font-size: 0.7rem;
+}
+.item-official {
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  color: var(--text-muted);
+}
+.item-debut {
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+
+/* ========= Aba Locais ========= */
+.landmark-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.landmark-section {
+  border-left: 3px solid var(--card-accent, var(--accent));
+  padding-left: 18px;
+}
+.landmark-region-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.landmark-region-head svg {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+}
+.landmark-region-name {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  margin: 0;
+  color: var(--card-accent, var(--text));
+}
+.landmark-region-count {
+  margin: 2px 0 0;
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.landmark-cards {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+}
+.landmark-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 14px 16px;
+  transition: border-color var(--dur-fast), transform var(--dur-fast);
+}
+.landmark-card:hover {
+  border-color: var(--card-accent, var(--border-strong));
+  transform: translateY(-2px);
+}
+.landmark-card-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.landmark-name {
+  font-family: var(--font-display);
+  font-size: 0.98rem;
+  margin: 0;
+}
+.landmark-summary {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.55;
+  margin: 0;
+}
+.landmark-kind {
+  flex: 0 0 auto;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: var(--surface-3);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+.landmark-kind-ilha        { color: var(--t-water);    border-color: var(--t-water); }
+.landmark-kind-ruina       { color: var(--t-ground);   border-color: var(--t-ground); }
+.landmark-kind-caverna     { color: var(--t-rock);     border-color: var(--t-rock); }
+.landmark-kind-torre       { color: var(--t-psychic);  border-color: var(--t-psychic); }
+.landmark-kind-montanha    { color: var(--t-steel);    border-color: var(--t-steel); }
+.landmark-kind-floresta    { color: var(--t-grass);    border-color: var(--t-grass); }
+.landmark-kind-lago        { color: var(--t-ice);      border-color: var(--t-ice); }
+.landmark-kind-marco       { color: var(--accent-alt); border-color: var(--accent-alt); }
+.landmark-kind-laboratorio { color: var(--t-electric); border-color: var(--t-electric); }
+
+/* ========= Locais no dossiê do mapa ========= */
+.mappage-landmarks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.mappage-landmarks li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.mappage-landmark-body {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+.mappage-landmark-body strong {
+  color: var(--text);
+}
+.mappage-landmark-body .wiki-source {
+  display: flex;
+  width: fit-content;
+}
+
+@media (max-width: 640px) {
+  .landmark-section { padding-left: 12px; }
+  .landmark-cards { grid-template-columns: 1fr; }
+  .mappage-landmarks li { flex-direction: column; gap: 4px; }
+}
+
+/* ========= Jogar (emulador) ========= */
+.play-shell {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 20px 56px;
+}
+.play-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.play-header h1 {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  margin: 0;
+}
+.play-sub {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+.play-core {
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+.play-now {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--t-grass);
+}
+.play-now-label {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--t-grass);
+}
+.play-now strong {
+  font-size: 0.9rem;
+}
+.play-now-console {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+}
+
+/* Diagnostico e avisos */
+.play-diag {
+  margin-bottom: 18px;
+  padding: 16px 18px;
+  border-radius: var(--radius-card);
+  background: var(--surface-1);
+  border: 1px solid var(--border-strong);
+  border-left: 3px solid var(--accent-alt);
+}
+.play-diag-error {
+  border-left-color: var(--accent);
+}
+.play-diag h2 {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  margin: 0 0 6px;
+}
+.play-diag p {
+  margin: 0 0 6px;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+.play-diag code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--surface-3);
+  font-size: 0.78rem;
+}
+.play-diag-fix {
+  color: var(--text-dim) !important;
+}
+.play-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 9px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+.play-notice button {
+  color: var(--text-dim);
+  font-size: 0.75rem;
+}
+.play-notice button:hover {
+  color: var(--text);
+}
+
+/* Layout */
+.play-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 22px;
+  align-items: start;
+}
+
+/* Tela */
+.play-screen {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: min(68vh, 600px);
+  background: #05060a;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  transition: border-color var(--dur-fast);
+}
+.play-screen.is-dragging {
+  border-color: var(--accent-alt);
+  box-shadow: inset 0 0 0 2px var(--accent-alt);
+}
+.play-canvas-host {
+  position: absolute;
+  inset: 0;
+}
+.play-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /* Pixel art: sem suavizacao ao escalar. */
+  image-rendering: pixelated;
+  display: block;
+}
+.play-screen-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 24px;
+  text-align: center;
+  background: rgba(5, 6, 10, 0.92);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+.play-overlay-title {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: var(--text);
+  margin: 0;
+}
+.play-overlay-hint {
+  margin: 0;
+  max-width: 34ch;
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+/* Controles */
+.play-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 14px;
+}
+.play-controls > button {
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 0.8rem;
+  transition: background var(--dur-fast), border-color var(--dur-fast);
+}
+.play-controls > button:hover {
+  background: var(--surface-3);
+  border-color: var(--border-strong);
+}
+.play-slider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.play-slider input {
+  width: 84px;
+}
+.play-slider span {
+  min-width: 34px;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* Gamepad virtual */
+.play-gamepad {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-areas:
+    "l    up    r     .      .     ."
+    "left down  right select start ."
+    ".    .     .     b      a     .";
+  gap: 8px;
+  margin-top: 16px;
+  max-width: 520px;
+}
+.play-pad {
+  aspect-ratio: 1;
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 700;
+  touch-action: none;
+  user-select: none;
+  transition: background var(--dur-fast), transform var(--dur-fast);
+}
+.play-pad:active {
+  background: var(--accent);
+  transform: scale(0.94);
+}
+.play-pad-up {
+  grid-area: up;
+}
+.play-pad-down {
+  grid-area: down;
+}
+.play-pad-left {
+  grid-area: left;
+}
+.play-pad-right {
+  grid-area: right;
+}
+.play-pad-a {
+  grid-area: a;
+  background: var(--surface-3);
+}
+.play-pad-b {
+  grid-area: b;
+  background: var(--surface-3);
+}
+.play-pad-l {
+  grid-area: l;
+}
+.play-pad-r {
+  grid-area: r;
+}
+.play-pad-select,
+.play-pad-start {
+  aspect-ratio: auto;
+  border-radius: var(--radius-pill);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.play-pad-select {
+  grid-area: select;
+}
+.play-pad-start {
+  grid-area: start;
+}
+
+/* Sidebar */
+.play-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: sticky;
+  top: 76px;
+}
+.play-panel {
+  padding: 14px 16px;
+  border-radius: var(--radius-card);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+}
+.play-panel h2 {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  margin: 0 0 10px;
+}
+.play-panel-hint {
+  margin: 8px 0 0;
+  color: var(--text-dim);
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+.play-panel-hint code {
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: var(--surface-3);
+}
+.play-primary {
+  width: 100%;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+.play-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+.play-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.play-rom-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.play-rom-list button {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  text-align: left;
+  transition: border-color var(--dur-fast), background var(--dur-fast);
+}
+.play-rom-list button:hover {
+  background: var(--surface-3);
+  border-color: var(--border-strong);
+}
+.play-rom-list button.is-current {
+  border-color: var(--t-grass);
+}
+.play-rom-name {
+  font-size: 0.78rem;
+  word-break: break-all;
+}
+.play-rom-meta {
+  font-size: 0.66rem;
+  color: var(--text-dim);
+}
+
+.play-slots {
+  display: grid;
+  gap: 6px;
+}
+.play-slot {
+  display: grid;
+  grid-template-columns: 20px 1fr 1fr;
+  gap: 6px;
+  align-items: center;
+}
+.play-slot-num {
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.play-slot button {
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+.play-slot button:hover:not(:disabled) {
+  background: var(--surface-3);
+  color: var(--text);
+}
+.play-slot button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.play-save-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.play-save-actions button {
+  padding: 7px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+.play-save-actions button:hover:not(:disabled) {
+  background: var(--surface-3);
+  color: var(--text);
+}
+.play-save-actions button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.play-save-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  color: var(--text-dim);
+  font-size: 0.68rem;
+  word-break: break-all;
+}
+
+.play-keys {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.play-key-group dt {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+.play-key-group dd {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.play-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+.play-key kbd {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+  border-bottom-width: 2px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.66rem;
+}
+
+@media (max-width: 900px) {
+  .play-layout {
+    grid-template-columns: 1fr;
+  }
+  .play-sidebar {
+    position: static;
+  }
+}
+@media (max-width: 640px) {
+  .play-shell {
+    padding: 16px 12px 40px;
+  }
+  .play-gamepad {
+    max-width: none;
+  }
+  .play-slider {
+    display: none;
+  }
+}
+
+/* ========= Durabilidade dos saves ========= */
+.play-storage {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.play-storage li {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+.play-storage strong {
+  display: block;
+  font-size: 0.74rem;
+  color: var(--text);
+}
+.play-storage p {
+  margin: 2px 0 0;
+  color: var(--text-dim);
+  font-size: 0.68rem;
+  line-height: 1.5;
+}
+.play-dot {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  margin-top: 4px;
+  border-radius: 50%;
+  background: var(--text-dim);
+}
+.play-dot.is-good {
+  background: var(--t-grass);
+  box-shadow: 0 0 6px var(--t-grass);
+}
+.play-dot.is-warn {
+  background: var(--accent-alt);
+}
+.play-backup-btn {
+  width: 100%;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  font-size: 0.74rem;
+}
+.play-backup-btn:hover:not(:disabled) {
+  background: var(--surface-3);
+}
+.play-backup-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.play-disk-saves {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.play-disk-saves li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 6px;
+  align-items: center;
+  font-size: 0.68rem;
+}
+.play-disk-name {
+  color: var(--text-muted);
+  word-break: break-all;
+}
+.play-disk-meta {
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+.play-disk-saves button {
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.64rem;
+}
+.play-disk-saves button:hover {
+  background: var(--surface-3);
+  color: var(--text);
+}
+.play-empty-folder {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  font-size: 0.7rem;
+  line-height: 1.55;
+}
+.play-empty-folder code {
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: var(--surface-3);
+  color: var(--text-muted);
+}
+
+/* ========= Cabeçalho de painel com ação ========= */
+.play-panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.play-panel-head h2 {
+  margin: 0;
+}
+.play-refresh {
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 0.64rem;
+  white-space: nowrap;
+}
+.play-refresh:hover {
+  background: var(--surface-3);
+  color: var(--text);
 }

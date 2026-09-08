@@ -2,7 +2,9 @@
   "compilerOptions": {
     "composite": true,
     "target": "ES2022",
-    "lib": ["ES2023"],
+    "lib": [
+      "ES2023"
+    ],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "skipLibCheck": true,
@@ -10,7 +12,16 @@
     "strict": true,
     "emitDeclarationOnly": true,
     "declaration": true,
-    "outDir": "./.tsbuild-node"
+    "outDir": "./.tsbuild-node",
+    "types": [
+      "node"
+    ],
+    "allowJs": true,
+    "checkJs": false
   },
-  "include": ["vite.config.ts"]
+  "include": [
+    "vite.config.ts",
+    "vite-plugin-local-roms.ts",
+    "scripts/**/*.mjs"
+  ]
 }

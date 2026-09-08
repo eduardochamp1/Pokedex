@@ -27,7 +27,7 @@ const WorldMap = ({ onSelect, selectedId }: Props) => {
         preserveAspectRatio="xMidYMid meet"
         className="worldmap-svg"
         role="img"
-        aria-label="Mapa mundi do universo Pokémon"
+        aria-label="Mapa mundi do universo Pokémon: nove regiões distribuídas em três continentes"
       >
         <defs>
           {/* Ocean gradient — profundidade */}
@@ -156,15 +156,7 @@ const WorldMap = ({ onSelect, selectedId }: Props) => {
               onMouseMove={onMove}
               onMouseLeave={() => { setHoverId(undefined); setTip(undefined); }}
               onClick={() => onSelect(s.id)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  onSelect(s.id);
-                }
-              }}
-              aria-label={`Selecionar ${region.name}`}
+              aria-hidden="true"
               style={{ ["--region-color" as string]: s.color }}
             >
               {/* Halo — segunda cópia mais grossa e translúcida atrás */}
@@ -202,6 +194,33 @@ const WorldMap = ({ onSelect, selectedId }: Props) => {
           );
         })}
       </svg>
+
+      <ul className="worldmap-legend">
+        {REGION_SHAPES.map((s) => {
+          const region = regionById.get(s.id);
+          if (!region) return null;
+          return (
+            <li key={s.id}>
+              <button
+                type="button"
+                className={
+                  "worldmap-legend-btn" +
+                  (selectedId === s.id ? " is-selected" : "")
+                }
+                style={{ ["--region-color" as string]: s.color }}
+                onClick={() => onSelect(s.id)}
+                onMouseEnter={() => setHoverId(s.id)}
+                onMouseLeave={() => setHoverId(undefined)}
+                aria-pressed={selectedId === s.id}
+              >
+                <span className="worldmap-legend-dot" aria-hidden="true" />
+                {region.name}
+                <span className="worldmap-legend-gen">Gen {region.generation}</span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
 
       {hovered && tip && (
         <div

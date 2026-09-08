@@ -4,7 +4,9 @@ export interface GymLeader {
   city?: string;
 }
 
-export interface Region {
+import type { WikiSourced } from "../lib/wiki";
+
+export interface Region extends WikiSourced {
   id: string;
   name: string;
   generation: number;
@@ -21,6 +23,7 @@ export interface Region {
 export const REGIONS: Region[] = [
   {
     id: "kanto",
+    wiki: "Kanto",
     name: "Kanto",
     generation: 1,
     inspiration: "Região de Kantō, Japão",
@@ -44,6 +47,7 @@ export const REGIONS: Region[] = [
   },
   {
     id: "johto",
+    wiki: "Johto",
     name: "Johto",
     generation: 2,
     inspiration: "Regiões de Kansai e Tōkai, Japão",
@@ -67,6 +71,7 @@ export const REGIONS: Region[] = [
   },
   {
     id: "hoenn",
+    wiki: "Hoenn",
     name: "Hoenn",
     generation: 3,
     inspiration: "Kyūshū, Japão",
@@ -90,6 +95,7 @@ export const REGIONS: Region[] = [
   },
   {
     id: "sinnoh",
+    wiki: "Sinnoh",
     name: "Sinnoh",
     generation: 4,
     inspiration: "Hokkaidō, Japão",
@@ -113,6 +119,7 @@ export const REGIONS: Region[] = [
   },
   {
     id: "unova",
+    wiki: "Unova",
     name: "Unova",
     generation: 5,
     inspiration: "Nova York, EUA",
@@ -136,6 +143,7 @@ export const REGIONS: Region[] = [
   },
   {
     id: "kalos",
+    wiki: "Kalos",
     name: "Kalos",
     generation: 6,
     inspiration: "França",
@@ -159,6 +167,7 @@ export const REGIONS: Region[] = [
   },
   {
     id: "alola",
+    wiki: "Alola",
     name: "Alola",
     generation: 7,
     inspiration: "Havaí, EUA",
@@ -181,6 +190,7 @@ export const REGIONS: Region[] = [
   },
   {
     id: "galar",
+    wiki: "Galar",
     name: "Galar",
     generation: 8,
     inspiration: "Reino Unido",
@@ -204,6 +214,7 @@ export const REGIONS: Region[] = [
   },
   {
     id: "paldea",
+    wiki: "Paldea",
     name: "Paldea",
     generation: 9,
     inspiration: "Espanha e Portugal",

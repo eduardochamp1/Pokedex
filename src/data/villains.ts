@@ -1,4 +1,6 @@
-export interface VillainTeam {
+import type { WikiSourced } from "../lib/wiki";
+
+export interface VillainTeam extends WikiSourced {
   id: string;
   name: string;
   region: string;
@@ -13,6 +15,7 @@ export const VILLAIN_TEAMS: VillainTeam[] = [
   {
     id: "rocket",
     name: "Team Rocket",
+    wiki: "Team Rocket",
     region: "Kanto / Johto",
     leader: "Giovanni",
     motivation:
@@ -25,6 +28,7 @@ export const VILLAIN_TEAMS: VillainTeam[] = [
   {
     id: "magma",
     name: "Team Magma",
+    wiki: "Team Magma",
     region: "Hoenn",
     leader: "Maxie",
     motivation:
@@ -37,6 +41,7 @@ export const VILLAIN_TEAMS: VillainTeam[] = [
   {
     id: "aqua",
     name: "Team Aqua",
+    wiki: "Team Aqua",
     region: "Hoenn",
     leader: "Archie",
     motivation:
@@ -49,6 +54,7 @@ export const VILLAIN_TEAMS: VillainTeam[] = [
   {
     id: "galactic",
     name: "Team Galactic",
+    wiki: "Team Galactic",
     region: "Sinnoh",
     leader: "Cyrus",
     motivation:
@@ -61,6 +67,7 @@ export const VILLAIN_TEAMS: VillainTeam[] = [
   {
     id: "plasma",
     name: "Team Plasma",
+    wiki: "Team Plasma",
     region: "Unova",
     leader: "N / Ghetsis",
     motivation:
@@ -73,6 +80,7 @@ export const VILLAIN_TEAMS: VillainTeam[] = [
   {
     id: "flare",
     name: "Team Flare",
+    wiki: "Team Flare",
     region: "Kalos",
     leader: "Lysandre",
     motivation:
@@ -85,6 +93,7 @@ export const VILLAIN_TEAMS: VillainTeam[] = [
   {
     id: "skull",
     name: "Team Skull",
+    wiki: "Team Skull",
     region: "Alola",
     leader: "Guzma",
     motivation:
@@ -97,6 +106,7 @@ export const VILLAIN_TEAMS: VillainTeam[] = [
   {
     id: "aether",
     name: "Aether Foundation",
+    wiki: "Aether Foundation",
     region: "Alola",
     leader: "Lusamine",
     motivation:
@@ -109,6 +119,7 @@ export const VILLAIN_TEAMS: VillainTeam[] = [
   {
     id: "macro",
     name: "Macro Cosmos / Chairman Rose",
+    wiki: "Macro Cosmos",
     region: "Galar",
     leader: "Chairman Rose",
     motivation:
@@ -121,6 +132,7 @@ export const VILLAIN_TEAMS: VillainTeam[] = [
   {
     id: "star",
     name: "Team Star",
+    wiki: "Team Star",
     region: "Paldea",
     leader: "Penny (The Big Boss)",
     motivation:

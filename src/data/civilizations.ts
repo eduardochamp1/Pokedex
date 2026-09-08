@@ -1,4 +1,6 @@
-export interface AncientSite {
+import type { WikiSourced } from "../lib/wiki";
+
+export interface AncientSite extends WikiSourced {
   id: string;
   name: string;
   region: string;
@@ -12,6 +14,7 @@ export interface AncientSite {
 export const CIVILIZATIONS: AncientSite[] = [
   {
     id: "ruins-of-alph",
+    wiki: "Ruins of Alph",
     name: "Ruínas de Alph",
     region: "Johto",
     age: "Mais de 1500 anos",
@@ -23,6 +26,7 @@ export const CIVILIZATIONS: AncientSite[] = [
   },
   {
     id: "sinjoh-ruins",
+    wiki: "Sinjoh Ruins",
     name: "Ruínas de Sinjoh",
     region: "Fronteira Johto/Sinnoh",
     age: "Idade indeterminada (pré-humana)",
@@ -35,6 +39,7 @@ export const CIVILIZATIONS: AncientSite[] = [
   },
   {
     id: "sealed-chamber",
+    wiki: "Sealed Chamber",
     name: "Sealed Chamber",
     region: "Hoenn (Route 134)",
     age: "3000 anos ou mais",
@@ -47,6 +52,7 @@ export const CIVILIZATIONS: AncientSite[] = [
   },
   {
     id: "snowpoint-temple",
+    wiki: "Snowpoint Temple",
     name: "Templo de Snowpoint",
     region: "Sinnoh (extremo norte)",
     age: "Milênios (data desconhecida)",
@@ -59,6 +65,7 @@ export const CIVILIZATIONS: AncientSite[] = [
   },
   {
     id: "sky-pillar",
+    wiki: "Sky Pillar",
     name: "Sky Pillar",
     region: "Hoenn (Route 131)",
     age: "Antiguidade profunda",
@@ -70,6 +77,7 @@ export const CIVILIZATIONS: AncientSite[] = [
   },
   {
     id: "hall-of-origin",
+    wiki: "Hall of Origin",
     name: "Hall of Origin",
     region: "Sinnoh (Mount Coronet apex)",
     age: "Anterior à própria criação",
@@ -81,6 +89,7 @@ export const CIVILIZATIONS: AncientSite[] = [
   },
   {
     id: "relic-castle",
+    wiki: "Relic Castle",
     name: "Relic Castle",
     region: "Unova (Desert Resort)",
     age: "Mais de 2500 anos",
@@ -92,6 +101,7 @@ export const CIVILIZATIONS: AncientSite[] = [
   },
   {
     id: "abyssal-ruins",
+    wiki: "Abyssal Ruins",
     name: "Ruínas Abissais",
     region: "Unova (Undella Bay)",
     age: "Idade desconhecida",
@@ -103,6 +113,7 @@ export const CIVILIZATIONS: AncientSite[] = [
   },
   {
     id: "az-ruins",
+    wiki: "Ultimate weapon",
     name: "Ruínas de AZ",
     region: "Kalos (Geosenge Town)",
     age: "Exatamente 3000 anos",
@@ -114,6 +125,7 @@ export const CIVILIZATIONS: AncientSite[] = [
   },
   {
     id: "poni-altars",
+    wiki: "Altar of the Sunne",
     name: "Altares de Poni",
     region: "Alola (Ilha de Poni)",
     age: "Anteriores à colonização humana de Alola",
@@ -125,6 +137,7 @@ export const CIVILIZATIONS: AncientSite[] = [
   },
   {
     id: "turffield-runes",
+    wiki: "Turffield",
     name: "Turffield Runes",
     region: "Galar (Turffield)",
     age: "3000 anos",
@@ -136,6 +149,7 @@ export const CIVILIZATIONS: AncientSite[] = [
   },
   {
     id: "area-zero",
+    wiki: "Zero Lab",
     name: "Área Zero — Zero Lab",
     region: "Paldea (Grande Cratera do Sul)",
     age: "Cratera formada há eras; laboratório construído há décadas",

@@ -9,20 +9,34 @@ interface Props {
   page: number;
   setPage: (page: number) => void;
   totalPages: number;
+  /** Total de resultados da selecao atual, quando ha filtro/busca ativos. */
+  total?: number;
 }
 
-const Pokedex = ({ pokemons, loading, page, setPage, totalPages }: Props) => {
+const Pokedex = ({
+  pokemons,
+  loading,
+  page,
+  setPage,
+  totalPages,
+  total,
+}: Props) => {
   const onLeftClickHandler = () => {
     if (page > 0) setPage(page - 1);
   };
   const onRightClickHandler = () => {
-    if (page + 1 !== totalPages) setPage(page + 1);
+    if (page + 1 < totalPages) setPage(page + 1);
   };
 
   return (
     <div>
       <div className="pokedex-header">
         <h1>Pokédex</h1>
+        {total !== undefined && (
+          <span className="pokedex-count">
+            {total} {total === 1 ? "resultado" : "resultados"}
+          </span>
+        )}
         <Pagination
           page={page + 1}
           totalPages={totalPages}

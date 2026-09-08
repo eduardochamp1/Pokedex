@@ -51,7 +51,15 @@ const CardHero = ({ pokemon, spriteUrl }: Props) => {
       </div>
       <div className="card-artwork card-artwork-hero">
         {artwork ? (
-          <img src={artwork} alt={pokemon.name} key={artwork} />
+          <img
+            src={artwork}
+            crossOrigin="anonymous"
+            alt={pokemon.name}
+            key={artwork}
+            decoding="async"
+            width={320}
+            height={320}
+          />
         ) : (
           <span>?</span>
         )}

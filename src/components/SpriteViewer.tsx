@@ -48,7 +48,15 @@ const SpriteViewer = ({ pokemon, onSelect }: Props) => {
             onClick={() => pick(m)}
             aria-pressed={m === mode}
           >
-            <img src={sources[m]} alt={MODE_LABELS[m]} />
+            <img
+              src={sources[m]}
+              crossOrigin="anonymous"
+              alt={MODE_LABELS[m]}
+              loading="lazy"
+              decoding="async"
+              width={64}
+              height={64}
+            />
             <span>{MODE_LABELS[m]}</span>
           </button>
         </li>

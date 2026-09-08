@@ -1,5 +1,4 @@
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useCallback, useMemo, useState } from "react";
 import { LORE_EVENTS, ERAS } from "../data/lore";
 import { REGIONS } from "../data/regions";
 import { HUMAN_LEGENDS } from "../data/humans";
@@ -12,8 +11,16 @@ import { MYTHS } from "../data/myths";
 import { CIVILIZATIONS } from "../data/civilizations";
 import { BREEDING } from "../data/breeding";
 import { ITEMS } from "../data/items";
-import { usePokemonsByNames } from "../hooks/usePokemon";
+import {
+  LANDMARKS,
+  LANDMARK_KIND_LABELS,
+  type LandmarkKind,
+} from "../data/landmarks";
+import { usePokemonIndex } from "../hooks/usePokemon";
 import GenealogyTree from "../components/GenealogyTree";
+import PokemonChip from "../components/PokemonChip";
+import WikiSource from "../components/WikiSource";
+import ItemSprite from "../components/ItemSprite";
 import {
   DimensionPortal,
   HumanBadge,
@@ -21,7 +28,7 @@ import {
   VillainEmblem,
 } from "../components/LoreArt";
 import { REGION_SHAPES } from "../data/regionMap";
-import type { Pokemon } from "../types/pokemon";
+import { pixelSpriteUrl } from "../lib/sprites";
 
 // Cor temática por humano (derivada de sua saga / pokemon principal)
 const HUMAN_COLORS: Record<string, string> = {
@@ -77,7 +84,8 @@ type Tab =
   | "myths"
   | "civilizations"
   | "breeding"
-  | "items";
+  | "items"
+  | "landmarks";
 
 const TAB_LABELS: Record<Tab, string> = {
   timeline: "Cronologia",
@@ -92,6 +100,7 @@ const TAB_LABELS: Record<Tab, string> = {
   civilizations: "Civilizações",
   breeding: "Ovos",
   items: "Itens",
+  landmarks: "Locais",
 };
 
 function collectGenealogyNames(node: GenealogyNode, acc: string[] = []): string[] {
@@ -114,6 +123,7 @@ const allPokemonNames = Array.from(
     ...CIVILIZATIONS.flatMap((c) => c.pokemons),
     ...BREEDING.flatMap((b) => b.pokemons),
     ...ITEMS.flatMap((i) => i.pokemons),
+    ...LANDMARKS.flatMap((l) => l.pokemons),
   ])
 );
 
@@ -122,20 +132,19 @@ const LorePage = () => {
   const [eraFilter, setEraFilter] = useState<string | undefined>(undefined);
   const [pokemonFilter, setPokemonFilter] = useState<string | undefined>(undefined);
 
-  const { pokemons } = usePokemonsByNames(allPokemonNames);
-  const byName = useMemo(() => {
-    const m = new Map<string, Pokemon>();
-    for (const p of pokemons) m.set(p.name, p);
-    return m;
-  }, [pokemons]);
+  // Um unico request (nome -> id) alimenta os sprites de todos os chips.
+  const { idOf } = usePokemonIndex();
 
   // Case-insensitive substring match: "arc" cai em "arceus", "-mega" cai em qualquer mega
-  const matchesPokemonFilter = (list: string[]) => {
-    if (!pokemonFilter) return true;
-    const q = pokemonFilter.toLowerCase().trim();
-    if (!q) return true;
-    return list.some((n) => n.toLowerCase().includes(q));
-  };
+  const matchesPokemonFilter = useCallback(
+    (list: string[]) => {
+      if (!pokemonFilter) return true;
+      const q = pokemonFilter.toLowerCase().trim();
+      if (!q) return true;
+      return list.some((n) => n.toLowerCase().includes(q));
+    },
+    [pokemonFilter]
+  );
 
   const visibleEvents = useMemo(() => {
     return LORE_EVENTS.filter((e) => {
@@ -143,58 +152,51 @@ const LorePage = () => {
       if (!matchesPokemonFilter(e.pokemons)) return false;
       return true;
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [eraFilter, pokemonFilter]);
+  }, [eraFilter, matchesPokemonFilter]);
 
   const visibleRegions = useMemo(
     () => REGIONS.filter((r) => matchesPokemonFilter(r.signature)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [pokemonFilter]
+    [matchesPokemonFilter]
   );
   const visibleHumans = useMemo(
     () => HUMAN_LEGENDS.filter((h) => matchesPokemonFilter(h.pokemons)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [pokemonFilter]
+    [matchesPokemonFilter]
   );
   const visibleVillains = useMemo(
     () => VILLAIN_TEAMS.filter((v) => matchesPokemonFilter(v.signature)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [pokemonFilter]
+    [matchesPokemonFilter]
   );
   const visibleDimensions = useMemo(
     () => DIMENSIONS.filter((d) => matchesPokemonFilter(d.inhabitants)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [pokemonFilter]
+    [matchesPokemonFilter]
   );
   const visibleGenerations = useMemo(
     () => GAME_GENERATIONS.filter((g) => matchesPokemonFilter(g.signature)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [pokemonFilter]
+    [matchesPokemonFilter]
   );
   const visibleBattles = useMemo(
     () => BATTLES.filter((b) => matchesPokemonFilter(b.pokemons)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [pokemonFilter]
+    [matchesPokemonFilter]
   );
   const visibleMyths = useMemo(
     () => MYTHS.filter((m) => matchesPokemonFilter(m.pokemons)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [pokemonFilter]
+    [matchesPokemonFilter]
   );
   const visibleCivilizations = useMemo(
     () => CIVILIZATIONS.filter((c) => matchesPokemonFilter(c.pokemons)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [pokemonFilter]
+    [matchesPokemonFilter]
   );
   const visibleBreeding = useMemo(
     () => BREEDING.filter((b) => matchesPokemonFilter(b.pokemons)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [pokemonFilter]
+    [matchesPokemonFilter]
   );
   const visibleItems = useMemo(
     () => ITEMS.filter((i) => matchesPokemonFilter(i.pokemons)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [pokemonFilter]
+    [matchesPokemonFilter]
+  );
+  const visibleLandmarks = useMemo(
+    () => LANDMARKS.filter((l) => matchesPokemonFilter(l.pokemons)),
+    [matchesPokemonFilter]
   );
 
   const clearFilters = () => {
@@ -287,7 +289,7 @@ const LorePage = () => {
                               <PokemonChip
                                 key={name}
                                 name={name}
-                                pokemon={byName.get(name)}
+                                id={idOf(name)}
                                 onFilter={() => setPokemonFilter(name)}
                               />
                             ))}
@@ -316,7 +318,7 @@ const LorePage = () => {
               A árvore de criação — quem gerou ou moldou quem, segundo a mitologia
               do universo pokémon.
             </p>
-            <GenealogyTree node={GENEALOGY_TREE} byName={byName} />
+            <GenealogyTree node={GENEALOGY_TREE} idOf={idOf} />
           </div>
         )}
 
@@ -340,6 +342,7 @@ const LorePage = () => {
                     ))}
                   </div>
                   <p className="gen-slide-fact">{g.gimmick}</p>
+                  <WikiSource wiki={g.wiki} />
                   <div className="gen-slide-meta">
                     <strong>{g.newPokemons}</strong> novos · total {g.totalAfter}
                   </div>
@@ -348,7 +351,7 @@ const LorePage = () => {
                       <PokemonChip
                         key={name}
                         name={name}
-                        pokemon={byName.get(name)}
+                        id={idOf(name)}
                         onFilter={() => focusPokemon(name)}
                       />
                     ))}
@@ -386,6 +389,7 @@ const LorePage = () => {
                     Gen {region.generation} · {region.inspiration}
                   </p>
                   <p>{region.summary}</p>
+                  <WikiSource wiki={region.wiki} />
 
                   <dl className="region-meta">
                     {region.professor && (
@@ -438,7 +442,7 @@ const LorePage = () => {
                       <PokemonChip
                         key={name}
                         name={name}
-                        pokemon={byName.get(name)}
+                        id={idOf(name)}
                         onFilter={() => focusPokemon(name)}
                       />
                     ))}
@@ -453,11 +457,8 @@ const LorePage = () => {
           <div className="editorial-grid">
             {visibleHumans.map((h) => {
               const color = HUMAN_COLORS[h.name] ?? "#c48d3a";
-              const sig = h.pokemons[0] ? byName.get(h.pokemons[0]) : undefined;
-              const sigArt =
-                sig?.sprites.other?.["official-artwork"]?.front_default ??
-                sig?.sprites.front_default ??
-                "";
+              const sigName = h.pokemons[0];
+              const sigArt = pixelSpriteUrl(sigName ? idOf(sigName) : undefined);
               return (
                 <article
                   key={h.name}
@@ -468,8 +469,10 @@ const LorePage = () => {
                     {sigArt && (
                       <img
                         src={sigArt}
-                        alt={sig?.name ?? ""}
+                        alt={sigName ?? ""}
                         className="portrait-sprite"
+                        loading="lazy"
+                        decoding="async"
                       />
                     )}
                     <div className="portrait-badge">
@@ -481,12 +484,13 @@ const LorePage = () => {
                     {h.role} · {h.region}
                   </p>
                   <p>{h.summary}</p>
+                  <WikiSource wiki={h.wiki} />
                   <div className="lore-chips">
                     {h.pokemons.map((name) => (
                       <PokemonChip
                         key={name}
                         name={name}
-                        pokemon={byName.get(name)}
+                        id={idOf(name)}
                         onFilter={() => focusPokemon(name)}
                       />
                     ))}
@@ -500,11 +504,8 @@ const LorePage = () => {
         {tab === "villains" && (
           <div className="editorial-grid">
             {visibleVillains.map((v) => {
-              const sig = v.signature[0] ? byName.get(v.signature[0]) : undefined;
-              const sigArt =
-                sig?.sprites.other?.["official-artwork"]?.front_default ??
-                sig?.sprites.front_default ??
-                "";
+              const sigName = v.signature[0];
+              const sigArt = pixelSpriteUrl(sigName ? idOf(sigName) : undefined);
               return (
               <article
                 key={v.id}
@@ -515,8 +516,10 @@ const LorePage = () => {
                   {sigArt && (
                     <img
                       src={sigArt}
-                      alt={sig?.name ?? ""}
+                      alt={sigName ?? ""}
                       className="portrait-sprite"
+                      loading="lazy"
+                      decoding="async"
                     />
                   )}
                   <div className="portrait-badge">
@@ -533,12 +536,13 @@ const LorePage = () => {
                 <p>
                   <strong>Desfecho:</strong> {v.fate}
                 </p>
+                <WikiSource wiki={v.wiki} />
                 <div className="lore-chips">
                   {v.signature.map((name) => (
                     <PokemonChip
                       key={name}
                       name={name}
-                      pokemon={byName.get(name)}
+                      id={idOf(name)}
                       onFilter={() => focusPokemon(name)}
                     />
                   ))}
@@ -574,12 +578,13 @@ const LorePage = () => {
                 <p className="battle-outcome">
                   <strong>Resultado:</strong> {b.outcome}
                 </p>
+                <WikiSource wiki={b.wiki} />
                 <div className="lore-chips">
                   {b.pokemons.map((name) => (
                     <PokemonChip
                       key={name}
                       name={name}
-                      pokemon={byName.get(name)}
+                      id={idOf(name)}
                       onFilter={() => focusPokemon(name)}
                     />
                   ))}
@@ -614,18 +619,29 @@ const LorePage = () => {
                   <div className="items-cards">
                     {items.map((it) => (
                       <article key={it.id} className={"item-card item-card-" + it.category}>
-                        <div className="item-emblem" aria-hidden="true">
-                          {itemEmblem(it.category)}
-                        </div>
+                        <ItemSprite
+                          apiSlug={it.apiSlug}
+                          name={it.name}
+                          fallback={itemEmblem(it.category)}
+                        />
                         <div className="item-body">
                           <h2>{it.name}</h2>
+                          {(it.officialName || it.debut) && (
+                            <p className="item-meta">
+                              {it.officialName && (
+                                <span className="item-official">{it.officialName}</span>
+                              )}
+                              {it.debut && <span className="item-debut">{it.debut}</span>}
+                            </p>
+                          )}
                           <p>{it.summary}</p>
+                          <WikiSource wiki={it.wiki} />
                           <div className="lore-chips">
                             {it.pokemons.map((name) => (
                               <PokemonChip
                                 key={name}
                                 name={name}
-                                pokemon={byName.get(name)}
+                                id={idOf(name)}
                                 onFilter={() => focusPokemon(name)}
                               />
                             ))}
@@ -673,7 +689,7 @@ const LorePage = () => {
                               <PokemonChip
                                 key={name}
                                 name={name}
-                                pokemon={byName.get(name)}
+                                id={idOf(name)}
                                 onFilter={() => focusPokemon(name)}
                               />
                             ))}
@@ -717,12 +733,13 @@ const LorePage = () => {
                   <dt>Propósito</dt>
                   <dd>{c.purpose}</dd>
                 </dl>
+                <WikiSource wiki={c.wiki} />
                 <div className="lore-chips">
                   {c.pokemons.map((name) => (
                     <PokemonChip
                       key={name}
                       name={name}
-                      pokemon={byName.get(name)}
+                      id={idOf(name)}
                       onFilter={() => focusPokemon(name)}
                     />
                   ))}
@@ -743,11 +760,8 @@ const LorePage = () => {
         {tab === "myths" && (
           <div className="myth-grid">
             {visibleMyths.map((m) => {
-              const sig = m.pokemons[0] ? byName.get(m.pokemons[0]) : undefined;
-              const sigArt =
-                sig?.sprites.other?.["official-artwork"]?.front_default ??
-                sig?.sprites.front_default ??
-                "";
+              const sigName = m.pokemons[0];
+              const sigArt = pixelSpriteUrl(sigName ? idOf(sigName) : undefined);
               return (
                 <article
                   key={m.id}
@@ -755,18 +769,26 @@ const LorePage = () => {
                   style={{ ["--card-accent" as string]: m.color ?? "#c48d3a" }}
                 >
                   <div className="myth-thumb">
-                    {sigArt && <img src={sigArt} alt={sig?.name ?? ""} />}
+                    {sigArt && (
+                      <img
+                        src={sigArt}
+                        alt={sigName ?? ""}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    )}
                   </div>
                   <div className="myth-body">
                     <div className="myth-region">{m.region}</div>
                     <h2 className="myth-title">{m.title}</h2>
                     <p className="myth-summary">{m.summary}</p>
+                    <WikiSource wiki={m.wiki} />
                     <div className="lore-chips">
                       {m.pokemons.map((name) => (
                         <PokemonChip
                           key={name}
                           name={name}
-                          pokemon={byName.get(name)}
+                          id={idOf(name)}
                           onFilter={() => focusPokemon(name)}
                         />
                       ))}
@@ -778,6 +800,69 @@ const LorePage = () => {
             {visibleMyths.length === 0 && (
               <div className="lore-empty">
                 Nenhum mito com <b>{pokemonFilter}</b>.
+                <button onClick={clearFilters} className="lore-clear-btn">
+                  limpar busca
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {tab === "landmarks" && (
+          <div className="landmark-grid">
+            {REGIONS.filter((r) =>
+              visibleLandmarks.some((l) => l.regionId === r.id)
+            ).map((region) => {
+              const shape = REGION_SHAPES.find((sh) => sh.id === region.id);
+              const color = shape?.color ?? "var(--accent)";
+              const marks = visibleLandmarks.filter((l) => l.regionId === region.id);
+              return (
+                <section
+                  key={region.id}
+                  className="landmark-section"
+                  style={{ ["--card-accent" as string]: color }}
+                >
+                  <header className="landmark-region-head">
+                    <RegionMapIcon regionId={region.id} color={color} />
+                    <div>
+                      <h3 className="landmark-region-name">{region.name}</h3>
+                      <p className="landmark-region-count">
+                        {marks.length} {marks.length === 1 ? "local" : "locais"}
+                      </p>
+                    </div>
+                  </header>
+                  <div className="landmark-cards">
+                    {marks.map((l) => (
+                      <article key={l.id} className="landmark-card">
+                        <div className="landmark-card-head">
+                          <span
+                            className={"landmark-kind landmark-kind-" + l.kind}
+                          >
+                            {LANDMARK_KIND_LABELS[l.kind as LandmarkKind]}
+                          </span>
+                          <h2 className="landmark-name">{l.name}</h2>
+                        </div>
+                        <p className="landmark-summary">{l.summary}</p>
+                        <WikiSource wiki={l.wiki} />
+                        <div className="lore-chips">
+                          {l.pokemons.map((name) => (
+                            <PokemonChip
+                              key={name}
+                              name={name}
+                              id={idOf(name)}
+                              onFilter={() => focusPokemon(name)}
+                            />
+                          ))}
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
+            {visibleLandmarks.length === 0 && (
+              <div className="lore-empty">
+                Nenhum local com <b>{pokemonFilter}</b>.
                 <button onClick={clearFilters} className="lore-clear-btn">
                   limpar busca
                 </button>
@@ -803,12 +888,13 @@ const LorePage = () => {
                   <strong>Acesso:</strong> {d.access}
                 </p>
                 <p>{d.description}</p>
+                <WikiSource wiki={d.wiki} />
                 <div className="lore-chips">
                   {d.inhabitants.map((name) => (
                     <PokemonChip
                       key={name}
                       name={name}
-                      pokemon={byName.get(name)}
+                      id={idOf(name)}
                       onFilter={() => focusPokemon(name)}
                     />
                   ))}
@@ -832,41 +918,5 @@ function itemEmblem(cat: "pokebola" | "sagrado" | "chave" | "cristal" | "livro")
   };
   return map[cat];
 }
-
-interface ChipProps {
-  name: string;
-  pokemon: Pokemon | undefined;
-  onFilter?: () => void;
-}
-
-const PokemonChip = ({ name, pokemon, onFilter }: ChipProps) => {
-  const sprite =
-    pokemon?.sprites.other?.["official-artwork"]?.front_default ??
-    pokemon?.sprites.front_default ??
-    "";
-  return (
-    <span className="lore-chip-wrap">
-      <Link to={`/pokemon/${name}`} className="lore-chip" title={name}>
-        {sprite ? (
-          <img src={sprite} alt={name} />
-        ) : (
-          <span className="lore-chip-placeholder">?</span>
-        )}
-        <span>{name}</span>
-      </Link>
-      {onFilter && (
-        <button
-          type="button"
-          className="lore-chip-filter"
-          onClick={onFilter}
-          title={`Ver todos os eventos com ${name}`}
-          aria-label={`Filtrar por ${name}`}
-        >
-          ⚲
-        </button>
-      )}
-    </span>
-  );
-};
 
 export default LorePage;

@@ -1,4 +1,6 @@
-export interface Battle {
+import type { WikiSourced } from "../lib/wiki";
+
+export interface Battle extends WikiSourced {
   id: string;
   title: string;
   location: string;
@@ -13,6 +15,7 @@ export interface Battle {
 export const BATTLES: Battle[] = [
   {
     id: "red-vs-blue",
+    wiki: "Indigo Plateau",
     title: "Red vs Blue — Champion's Hall",
     location: "Indigo Plateau · Kanto",
     era: "Era moderna",
@@ -25,6 +28,7 @@ export const BATTLES: Battle[] = [
   },
   {
     id: "gold-vs-red",
+    wiki: "Mt. Silver",
     title: "Gold vs Red — no topo do Mount Silver",
     location: "Mount Silver · Fronteira Kanto/Johto",
     era: "Era moderna",
@@ -37,6 +41,7 @@ export const BATTLES: Battle[] = [
   },
   {
     id: "silver-vs-champion",
+    wiki: "Lance",
     title: "Silver vs Lance — a redenção",
     location: "Indigo Plateau · Kanto",
     era: "Era moderna",
@@ -49,6 +54,7 @@ export const BATTLES: Battle[] = [
   },
   {
     id: "steven-vs-wallace",
+    wiki: "Wallace",
     title: "Steven Stone vs Wallace — sucessão de Hoenn",
     location: "Sootopolis City · Hoenn",
     era: "Era moderna",
@@ -61,6 +67,7 @@ export const BATTLES: Battle[] = [
   },
   {
     id: "cynthia-vs-cyrus",
+    wiki: "Spear Pillar",
     title: "Cynthia vs Cyrus — Spear Pillar",
     location: "Mount Coronet · Sinnoh",
     era: "Era moderna",
@@ -73,6 +80,7 @@ export const BATTLES: Battle[] = [
   },
   {
     id: "n-vs-alder",
+    wiki: "Alder",
     title: "N vs Alder — o discurso dos dragões",
     location: "Rota 10 · Unova",
     era: "Era moderna",
@@ -85,6 +93,7 @@ export const BATTLES: Battle[] = [
   },
   {
     id: "champion-vs-n",
+    wiki: "N's Castle",
     title: "Champion vs N — o Castelo de Vidro",
     location: "N's Castle · Unova",
     era: "Era moderna",
@@ -97,6 +106,7 @@ export const BATTLES: Battle[] = [
   },
   {
     id: "ghetsis-vs-champion",
+    wiki: "Giant Chasm",
     title: "Ghetsis e Kyurem Absoluto",
     location: "Giant Chasm · Unova",
     era: "Era moderna",
@@ -109,6 +119,7 @@ export const BATTLES: Battle[] = [
   },
   {
     id: "az-vs-world",
+    wiki: "Ultimate weapon",
     title: "AZ vs o mundo — a Máquina Definitiva",
     location: "Geosenge Town · Kalos",
     era: "Reinos humanos (3000 anos atrás)",
@@ -121,6 +132,7 @@ export const BATTLES: Battle[] = [
   },
   {
     id: "lysandre-final",
+    wiki: "Team Flare",
     title: "Lysandre e a reativação da Arma",
     location: "Team Flare HQ · Kalos",
     era: "Era moderna",
@@ -133,6 +145,7 @@ export const BATTLES: Battle[] = [
   },
   {
     id: "lusamine-final",
+    wiki: "Ultra Space",
     title: "Lusamine fundida com Nihilego",
     location: "Ultra Space · Alola",
     era: "Era moderna",
@@ -145,6 +158,7 @@ export const BATTLES: Battle[] = [
   },
   {
     id: "eternatus-galar",
+    wiki: "Darkest Day",
     title: "Eternatus e o Darkest Day",
     location: "Hammerlocke Stadium · Galar",
     era: "Era moderna",
@@ -157,6 +171,7 @@ export const BATTLES: Battle[] = [
   },
   {
     id: "leon-champion-cup",
+    wiki: "Wyndon",
     title: "Leon vs Protagonista — Champion Cup",
     location: "Wyndon Stadium · Galar",
     era: "Era moderna",
@@ -169,6 +184,7 @@ export const BATTLES: Battle[] = [
   },
   {
     id: "volo-vs-arceus",
+    wiki: "Volo",
     title: "Volo confronta Arceus",
     location: "Spear Pillar (Hisui) · Sinnoh ancestral",
     era: "Hisui (Sinnoh ancestral)",
@@ -181,6 +197,7 @@ export const BATTLES: Battle[] = [
   },
   {
     id: "nemona-final",
+    wiki: "Nemona",
     title: "Nemona vs Protagonista — Grand Finale",
     location: "Naranja/Uva Academy · Paldea",
     era: "Era moderna",
@@ -193,6 +210,7 @@ export const BATTLES: Battle[] = [
   },
   {
     id: "ia-sada-turo",
+    wiki: "Area Zero",
     title: "IA de Sada/Turo — Área Zero",
     location: "Área Zero · Paldea",
     era: "Era moderna",

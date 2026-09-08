@@ -1,5 +1,5 @@
-import { useContext, useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   useEvolutionChain,
   usePokemonDetail,
@@ -25,6 +25,7 @@ const STAT_LABELS: Record<string, string> = {
 const DetailPage = () => {
   const { nameOrId } = useParams<{ nameOrId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { data: pokemon, isLoading, isError } = usePokemonDetail(nameOrId);
   const { favoritePokemons, updateFavoritePokemons } = useContext(FavoriteContext);
   const species = usePokemonSpecies(pokemon?.species.url);
@@ -33,20 +34,35 @@ const DetailPage = () => {
 
   useEffect(() => setSpriteOverride(undefined), [pokemon?.id]);
 
+  // Em deep link / F5 nao existe entrada anterior no historico: voltar com
+  // navigate(-1) sairia do app, entao caimos na Home.
+  const goBack = useCallback(() => {
+    if (location.key === "default") navigate("/");
+    else navigate(-1);
+  }, [location.key, navigate]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") navigate(-1);
+      if (e.key === "Escape") goBack();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [navigate]);
+  }, [goBack]);
 
   if (isLoading) return <DetailSkeleton />;
-  if (isError || !pokemon) {
+  if (isError) {
+    return (
+      <div className="detail-shell">
+        <p>Não foi possível carregar este pokémon. Tente de novo.</p>
+        <Link to="/">← Voltar para a Pokédex</Link>
+      </div>
+    );
+  }
+  if (!pokemon) {
     return (
       <div className="detail-shell">
         <p>Pokémon não encontrado.</p>
-        <Link to="/">← Voltar</Link>
+        <Link to="/">← Voltar para a Pokédex</Link>
       </div>
     );
   }
@@ -59,7 +75,7 @@ const DetailPage = () => {
       <button
         type="button"
         className="detail-close"
-        onClick={() => navigate(-1)}
+        onClick={goBack}
         aria-label="Fechar"
       >
         ✕

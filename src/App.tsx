@@ -1,14 +1,21 @@
+import { Suspense, lazy } from "react";
 import { Route, Routes } from "react-router-dom";
 import "./App.css";
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
-import DetailPage from "./pages/DetailPage";
-import FavoritesPage from "./pages/FavoritesPage";
-import ComparePage from "./pages/ComparePage";
-import LorePage from "./pages/LorePage";
-import MapPage from "./pages/MapPage";
+import { RouteFallback } from "./components/Skeleton";
 import { FavoriteProvider } from "./contexts/favoritesContext";
 import { useFavorites } from "./hooks/useFavorites";
+
+// A Home entra no bundle inicial; o resto e carregado sob demanda — a Lore
+// sozinha carrega ~2.000 linhas de dados curados.
+const DetailPage = lazy(() => import("./pages/DetailPage"));
+const FavoritesPage = lazy(() => import("./pages/FavoritesPage"));
+const ComparePage = lazy(() => import("./pages/ComparePage"));
+const LorePage = lazy(() => import("./pages/LorePage"));
+const MapPage = lazy(() => import("./pages/MapPage"));
+const PlayPage = lazy(() => import("./pages/PlayPage"));
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 
 function App() {
   const { favorites, toggle } = useFavorites();
@@ -21,14 +28,18 @@ function App() {
       }}
     >
       <Navbar />
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/favoritos" element={<FavoritesPage />} />
-        <Route path="/comparar" element={<ComparePage />} />
-        <Route path="/lore" element={<LorePage />} />
-        <Route path="/mapa" element={<MapPage />} />
-        <Route path="/pokemon/:nameOrId" element={<DetailPage />} />
-      </Routes>
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/favoritos" element={<FavoritesPage />} />
+          <Route path="/comparar" element={<ComparePage />} />
+          <Route path="/lore" element={<LorePage />} />
+          <Route path="/mapa" element={<MapPage />} />
+          <Route path="/jogar" element={<PlayPage />} />
+          <Route path="/pokemon/:nameOrId" element={<DetailPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Suspense>
     </FavoriteProvider>
   );
 }
