@@ -563,24 +563,26 @@ nav {
   z-index: 1;
   display: grid;
   grid-template-columns: 240px 1fr 260px;
-  grid-template-rows: auto auto auto auto auto;
+  grid-template-rows: auto auto auto auto auto auto;
   grid-template-areas:
     "sprites hero forms"
     "evo     hero lore"
     "evo     hero meta"
     "evo     hero defense"
+    "evo     hero abilities"
     "evo     hero stats";
   gap: 20px;
   max-width: 1200px;
   margin: 0 auto;
 }
-.detail-panel-sprites { grid-area: sprites; }
-.detail-panel-forms   { grid-area: forms; }
-.detail-panel-evo     { grid-area: evo; }
-.detail-panel-lore    { grid-area: lore; }
-.detail-panel-meta    { grid-area: meta; }
-.detail-panel-defense { grid-area: defense; }
-.detail-panel-stats   { grid-area: stats; }
+.detail-panel-sprites   { grid-area: sprites; }
+.detail-panel-forms     { grid-area: forms; }
+.detail-panel-evo       { grid-area: evo; }
+.detail-panel-lore      { grid-area: lore; }
+.detail-panel-meta      { grid-area: meta; }
+.detail-panel-defense   { grid-area: defense; }
+.detail-panel-abilities { grid-area: abilities; }
+.detail-panel-stats     { grid-area: stats; }
 .detail-hero-slot {
   grid-area: hero;
   display: flex;
@@ -785,18 +787,19 @@ nav {
   .detail-layout {
     grid-template-columns: 1fr 1fr;
     grid-template-areas:
-      "hero    hero"
-      "sprites forms"
-      "evo     evo"
-      "lore    lore"
-      "meta    defense"
-      "stats   stats";
+      "hero      hero"
+      "sprites   forms"
+      "evo       evo"
+      "lore      lore"
+      "meta      defense"
+      "abilities abilities"
+      "stats     stats";
   }
 }
 @media (max-width: 640px) {
   .detail-layout {
     grid-template-columns: 1fr;
-    grid-template-areas: "hero" "sprites" "forms" "evo" "lore" "meta" "defense" "stats";
+    grid-template-areas: "hero" "sprites" "forms" "evo" "lore" "meta" "defense" "abilities" "stats";
   }
 }
 
@@ -3329,4 +3332,38 @@ nav {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+}
+
+/* ========= Habilidades ========= */
+.ability-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ability-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ability-head strong {
+  font-size: 0.85rem;
+}
+.ability-hidden {
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  color: var(--accent-alt);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.ability-effect {
+  margin: 3px 0 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
 }

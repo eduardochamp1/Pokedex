@@ -84,6 +84,20 @@ export interface PokemonSpecies {
   egg_groups: { name: string; url: string }[];
 }
 
+export interface AbilityDetail {
+  name: string;
+  names: { name: string; language: { name: string } }[];
+  effect_entries: {
+    effect: string;
+    short_effect: string;
+    language: { name: string };
+  }[];
+  flavor_text_entries: {
+    flavor_text: string;
+    language: { name: string };
+  }[];
+}
+
 export interface EvolutionNode {
   species: { name: string; url: string };
   evolves_to: EvolutionNode[];
