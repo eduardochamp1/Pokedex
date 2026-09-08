@@ -98,9 +98,27 @@ export interface AbilityDetail {
   }[];
 }
 
+export interface EvolutionDetail {
+  trigger: { name: string; url: string };
+  min_level: number | null;
+  item: { name: string; url: string } | null;
+  held_item: { name: string; url: string } | null;
+  known_move: { name: string; url: string } | null;
+  location: { name: string; url: string } | null;
+  min_happiness: number | null;
+  min_affection: number | null;
+  min_beauty: number | null;
+  needs_overworld_rain: boolean;
+  time_of_day: string;
+  turn_upside_down: boolean;
+  gender: number | null;
+  trade_species: { name: string; url: string } | null;
+}
+
 export interface EvolutionNode {
   species: { name: string; url: string };
   evolves_to: EvolutionNode[];
+  evolution_details: EvolutionDetail[];
 }
 
 export interface EvolutionChain {
