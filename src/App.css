@@ -563,10 +563,11 @@ nav {
   z-index: 1;
   display: grid;
   grid-template-columns: 240px 1fr 260px;
-  grid-template-rows: auto auto auto;
+  grid-template-rows: auto auto auto auto;
   grid-template-areas:
     "sprites hero forms"
     "evo     hero lore"
+    "evo     hero meta"
     "evo     hero stats";
   gap: 20px;
   max-width: 1200px;
@@ -576,6 +577,7 @@ nav {
 .detail-panel-forms   { grid-area: forms; }
 .detail-panel-evo     { grid-area: evo; }
 .detail-panel-lore    { grid-area: lore; }
+.detail-panel-meta    { grid-area: meta; }
 .detail-panel-stats   { grid-area: stats; }
 .detail-hero-slot {
   grid-area: hero;
@@ -785,13 +787,13 @@ nav {
       "sprites forms"
       "evo     evo"
       "lore    lore"
-      "stats   stats";
+      "meta    stats";
   }
 }
 @media (max-width: 640px) {
   .detail-layout {
     grid-template-columns: 1fr;
-    grid-template-areas: "hero" "sprites" "forms" "evo" "lore" "stats";
+    grid-template-areas: "hero" "sprites" "forms" "evo" "lore" "meta" "stats";
   }
 }
 
@@ -3257,4 +3259,28 @@ nav {
 .play-refresh:hover {
   background: var(--surface-3);
   color: var(--text);
+}
+
+/* ========= Ficha do pokémon ========= */
+.detail-meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 14px;
+  margin: 0;
+  font-size: 0.8rem;
+}
+.detail-meta dt {
+  color: var(--text-dim);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  align-self: center;
+}
+.detail-meta dd {
+  margin: 0;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.detail-meta-hint {
+  color: var(--text-dim);
 }

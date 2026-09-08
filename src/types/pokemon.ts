@@ -75,6 +75,13 @@ export interface PokemonSpecies {
   is_baby: boolean;
   habitat: { name: string; url: string } | null;
   color: { name: string; url: string };
+  capture_rate: number;
+  base_happiness: number | null;
+  hatch_counter: number | null;
+  /** -1 = sem gênero; 0..8 = oitavos de chance de ser fêmea. */
+  gender_rate: number;
+  growth_rate: { name: string; url: string } | null;
+  egg_groups: { name: string; url: string }[];
 }
 
 export interface EvolutionNode {
@@ -104,4 +111,6 @@ export interface Pokemon {
   height: number;
   weight: number;
   species: { name: string; url: string };
+  base_experience: number | null;
+  cries?: { latest: string | null; legacy: string | null };
 }
