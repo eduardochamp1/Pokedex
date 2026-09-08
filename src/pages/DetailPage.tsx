@@ -12,6 +12,7 @@ import SpriteViewer from "../components/SpriteViewer";
 import VarietySwitcher from "../components/VarietySwitcher";
 import PokemonLore from "../components/PokemonLore";
 import PokemonMeta from "../components/PokemonMeta";
+import TypeDefense from "../components/TypeDefense";
 import { DetailSkeleton } from "../components/Skeleton";
 
 const STAT_LABELS: Record<string, string> = {
@@ -131,6 +132,11 @@ const DetailPage = () => {
         <aside className="detail-panel detail-panel-meta">
           <h3>Ficha</h3>
           <PokemonMeta pokemon={pokemon} species={species.data} />
+        </aside>
+
+        <aside className="detail-panel detail-panel-defense">
+          <h3>Defesas</h3>
+          <TypeDefense types={pokemon.types.map((t) => t.type.name)} />
         </aside>
 
         <aside className="detail-panel detail-panel-stats">
