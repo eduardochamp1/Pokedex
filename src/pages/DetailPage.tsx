@@ -14,6 +14,7 @@ import PokemonLore from "../components/PokemonLore";
 import PokemonMeta from "../components/PokemonMeta";
 import TypeDefense from "../components/TypeDefense";
 import AbilityList from "../components/AbilityList";
+import CryButton from "../components/CryButton";
 import { DetailSkeleton } from "../components/Skeleton";
 
 const STAT_LABELS: Record<string, string> = {
@@ -92,13 +93,16 @@ const DetailPage = () => {
 
         <div className="detail-hero-slot">
           <CardHero pokemon={pokemon} spriteUrl={spriteOverride} />
-          <button
-            type="button"
-            className="detail-fav-btn"
-            onClick={() => updateFavoritePokemons(pokemon.name)}
-          >
-            {isFav ? "❤️ Nos favoritos" : "🖤 Favoritar"}
-          </button>
+          <div className="detail-hero-actions">
+            <button
+              type="button"
+              className="detail-fav-btn"
+              onClick={() => updateFavoritePokemons(pokemon.name)}
+            >
+              {isFav ? "❤️ Nos favoritos" : "🖤 Favoritar"}
+            </button>
+            <CryButton src={pokemon.cries?.latest} name={pokemon.name} />
+          </div>
         </div>
 
         {species.data && species.data.varieties.length > 1 && (
