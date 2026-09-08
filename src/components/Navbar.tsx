@@ -58,7 +58,13 @@ const Navbar = () => {
             "nav-link" + (isActive ? " nav-link-active" : "")
           }
         >
-          Favoritos ({favoritePokemons.length})
+          <span className="nav-link-full">Favoritos</span>
+          <span className="nav-link-short" aria-hidden="true">
+            ♥
+          </span>
+          {favoritePokemons.length > 0 && (
+            <span className="nav-count">{favoritePokemons.length}</span>
+          )}
         </NavLink>
       </div>
     </nav>
