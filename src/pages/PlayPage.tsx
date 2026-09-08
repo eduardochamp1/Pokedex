@@ -230,16 +230,26 @@ const PlayPage = () => {
           <section className="play-panel">
             <div className="play-panel-head">
               <h2>Pasta roms/</h2>
-              <button
-                type="button"
-                className="play-refresh"
-                onClick={() => void emu.refreshLocalRoms()}
-                title="Reler a pasta roms/"
-              >
-                ↻ atualizar
-              </button>
+              {/* Reler não faz sentido onde a pasta não existe (produção). */}
+              {emu.localRoms !== null && (
+                <button
+                  type="button"
+                  className="play-refresh"
+                  onClick={() => void emu.refreshLocalRoms()}
+                  title="Reler a pasta roms/"
+                >
+                  ↻ atualizar
+                </button>
+              )}
             </div>
-            {emu.localRoms.length > 0 ? (
+            {emu.localRoms === null ? (
+              <p className="play-empty-folder">
+                Disponível só rodando o projeto localmente. Aqui, use{" "}
+                <strong>Escolher arquivo…</strong> — a ROM fica guardada neste
+                navegador e reaparece em “Na sua biblioteca” nas próximas
+                visitas.
+              </p>
+            ) : emu.localRoms.length > 0 ? (
               <ul className="play-rom-list">
                 {emu.localRoms.map((rom) => (
                   <li key={rom.fileName}>
