@@ -4,6 +4,7 @@ import "./App.css";
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
 import { RouteFallback } from "./components/Skeleton";
+import ErrorBoundary from "./components/ErrorBoundary";
 import { FavoriteProvider } from "./contexts/favoritesContext";
 import { useFavorites } from "./hooks/useFavorites";
 
@@ -28,18 +29,20 @@ function App() {
       }}
     >
       <Navbar />
-      <Suspense fallback={<RouteFallback />}>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/favoritos" element={<FavoritesPage />} />
-          <Route path="/comparar" element={<ComparePage />} />
-          <Route path="/lore" element={<LorePage />} />
-          <Route path="/mapa" element={<MapPage />} />
-          <Route path="/jogar" element={<PlayPage />} />
-          <Route path="/pokemon/:nameOrId" element={<DetailPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </Suspense>
+      <ErrorBoundary>
+        <Suspense fallback={<RouteFallback />}>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/favoritos" element={<FavoritesPage />} />
+            <Route path="/comparar" element={<ComparePage />} />
+            <Route path="/lore" element={<LorePage />} />
+            <Route path="/mapa" element={<MapPage />} />
+            <Route path="/jogar" element={<PlayPage />} />
+            <Route path="/pokemon/:nameOrId" element={<DetailPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </Suspense>
+      </ErrorBoundary>
     </FavoriteProvider>
   );
 }
