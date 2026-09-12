@@ -50,11 +50,20 @@ via [mGBA](https://mgba.io) compilado para WebAssembly.
 - **Saves persistentes** — o core monta IDBFS, então save de bateria, save
   states e as próprias ROMs enviadas ficam no IndexedDB do navegador e
   sobrevivem a recarregar a página
-- **6 slots de save state**, mais um estado automático a cada 30 s
+- **6 slots de save state** que mostram o que têm — ocupado, vazio e há quanto
+  tempo foi gravado, lidos do diretório de estados do core. Os estados são por
+  ROM: os slots de um jogo não aparecem em outro
+- **"Continuar de onde parou"** — o core já capturava um estado automático a
+  cada 30 s; agora ele tem um botão em vez de ser descartado
 - **Backup automático em `saves/`** no disco, mais exportar/importar `.sav`
-- **Gamepad virtual** para toque, e teclas configuradas explicitamente
-  (setas, Z/X, A/S, Enter, Backspace) — a legenda na tela lê do mesmo mapa que
-  o `bindKey`, então não mente
+- **Tela cheia e escala inteira** — cada pixel do console vira exatamente N
+  pixels na tela. Esticar com `object-fit` dava escala fracionária, e o
+  arredondamento deixava uns pixels com 3 px de lado e outros com 4
+- **Gamepad virtual** para toque, **gamepad físico** pela Gamepad API (layout
+  standard) e **teclas remapeáveis** — clique numa tecla da legenda e pressione
+  a nova. A legenda lê do mesmo mapa que o `bindKey`, então não mente
+- **Rebobinar** — segure e o jogo anda para trás, até ~10 s
+- **Captura de tela** em PNG, com download
 - **Volume e velocidade** (até 5×)
 - **Diagnóstico** quando falta isolamento: a página diz exatamente qual header
   está ausente em vez de falhar em silêncio
@@ -94,6 +103,24 @@ máquina, e um deploy acidental não os leva.
   React. O core é amarrado ao canvas na criação, então um canvas novo (StrictMode
   remonta em dev; navegar para fora e voltar remonta sempre) deixaria o core
   preso no antigo. A página só adota o canvas no container dela.
+- **Remapear precisa desvincular, e a API pública não tem isso.** O core guarda
+  tecla → ação, então só reescrever o mapa deixaria a tecla antiga disparando em
+  paralelo com a nova. Sem função de desvincular exposta, o caminho é o `cwrap`
+  cru: `bindKey(tecla, -1)`, um índice que não casa com nenhuma ação. Conferido
+  no browser com o jogo rodando — depois de mover Start para outra tecla, Enter
+  parou de avançar a tela de título. O acesso ao `cwrap` fica isolado numa
+  função só, porque a tipagem publicada do core não o declara.
+- **Teclas vêm de `KeyboardEvent.code`, com `key` como recuo.** `code` é a tecla
+  física e não muda com o layout — é o que corresponde ao que a pessoa memoriza,
+  a posição. Mas nem sempre vem: teclado virtual de sistema, alguns IMEs e
+  ferramentas de automação entregam `code` vazio. Nesses casos `key` resolve, e
+  se nenhum dos dois servir a tela diz isso em vez de ignorar a tecla.
+- **A escala é inteira por padrão.** O canvas era esticado com `object-fit:
+  contain`, o que dá fator fracionário; com `image-rendering: pixelated` o
+  arredondamento deixa uns pixels do jogo com 3 px de lado e outros com 4, e o
+  resultado treme nas bordas e nas fontes. Escala inteira sobra borda preta e é
+  o preço certo. Os fatores fixos (1×–4×) são tetos, não pisos: escolher 4× numa
+  janela que só comporta 2× aplica 2× e a tela informa o que está valendo.
 - **Save states usam `saveStateSlot`/`loadStateSlot`**, que a tipagem marca como
   *deprecated* — porque na mGBA-wasm 2.5.1 as recomendadas (`saveState`/`loadState`)
   retornam falso e não escrevem nada. Verificado no browser.
@@ -259,7 +286,13 @@ src/
 │   ├── core.ts                 Carrega /emulator/mgba.js e checa o isolamento
 │   ├── useEmulator.ts          Hook que dirige o core (ROM, saves, estados)
 │   ├── storage.ts              Persistência: pasta saves/ + status do navegador
-│   ├── keyBindings.ts          Mapa de teclas + gamepad virtual
+│   ├── saveStates.ts           Estado real dos 6 slots, lido do FS do core
+│   ├── display.ts              Escala inteira; useDisplay.ts aplica e faz tela cheia
+│   ├── capture.ts              Nome das capturas + ajustes do buffer de rebobinar
+│   ├── keyBindings.ts          Mapa de teclas (remapeável) + gamepad virtual
+│   ├── keyNames.ts             KeyboardEvent → nome SDL que o bindKey aceita
+│   ├── useGamepad.ts           Gamepad físico (layout standard) por polling
+│   ├── prefs.ts                Preferências no localStorage, com validação
 │   └── types.ts                Extensões, slots, status
 │
 ├── contexts/
