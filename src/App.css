@@ -131,6 +131,7 @@ nav {
   align-items: center;
   gap: 6px;
   margin-bottom: 4px;
+  padding-right: 36px; /* espaco pro botao ❤ absoluto no top-right */
 }
 .card-name {
   font-family: var(--font-display);
@@ -3726,26 +3727,33 @@ nav {
   text-decoration: none;
 }
 
-/* Botão 📏 no card */
+/* Botão 📏 no card — canto inferior-direito, aparece só no hover pra não brigar com nome/tipos */
 .card-compare {
   position: absolute;
-  top: 8px;
-  left: 8px;
-  width: 32px;
-  height: 32px;
+  bottom: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   border: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.55);
   color: #fff;
   cursor: pointer;
   z-index: 3;
   opacity: 0;
-  transition: opacity 200ms ease;
-  font-size: 14px;
+  transform: translateY(4px);
+  transition: opacity 180ms ease, transform 180ms ease;
+  font-size: 13px;
+  line-height: 1;
   display: grid;
   place-items: center;
 }
-.card:hover .card-compare { opacity: 1; }
-@media (hover: none) {
-  .card-compare { opacity: 1; }
+.card:hover .card-compare {
+  opacity: 1;
+  transform: translateY(0);
 }
+.card-compare:hover { background: var(--accent); color: var(--bg); }
+@media (hover: none) {
+  .card-compare { opacity: 1; transform: none; }
+}
+.card-mini .card-compare { display: none; }
