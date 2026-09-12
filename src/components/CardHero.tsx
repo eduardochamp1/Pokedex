@@ -59,6 +59,7 @@ const CardHero = ({ pokemon, spriteUrl }: Props) => {
             decoding="async"
             width={320}
             height={320}
+            style={{ viewTransitionName: `sprite-${pokemon.id}` }}
           />
         ) : (
           <span>?</span>
