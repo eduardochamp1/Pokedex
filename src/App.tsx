@@ -18,6 +18,7 @@ const ComparePage = lazy(() => import("./pages/ComparePage"));
 const LorePage = lazy(() => import("./pages/LorePage"));
 const MapPage = lazy(() => import("./pages/MapPage"));
 const PlayPage = lazy(() => import("./pages/PlayPage"));
+const SizesPage = lazy(() => import("./pages/SizesPage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 
 /**
@@ -57,6 +58,7 @@ function App() {
             <Route path="/lore" element={<LorePage />} />
             <Route path="/mapa" element={<MapPage />} />
             <Route path="/jogar" element={<PlayPage />} />
+            <Route path="/tamanhos" element={<SizesPage />} />
             <Route path="/pokemon/:nameOrId" element={<DetailPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
