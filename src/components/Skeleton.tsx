@@ -3,7 +3,7 @@ interface Props {
 }
 
 export const CardSkeleton = ({ count = 12 }: Props) => (
-  <div className="card-grid">
+  <div className="pokedex-grid">
     {Array.from({ length: count }).map((_, i) => (
       <div key={i} className="card-skeleton" aria-hidden="true">
         <div className="skeleton skeleton-line skeleton-line-lg" />
