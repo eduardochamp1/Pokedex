@@ -431,8 +431,10 @@ nav {
   display: none;
 }
 
-/* ========= Card grid ========= */
-.card-grid {
+/* ========= Grid do Pokedex (container) =========
+   Renomeado de .card-grid pra evitar colisao com <div class="card card-grid">
+   do variant do Card, que quebrava a caixa de cada card. */
+.pokedex-grid {
   display: grid;
   gap: 20px;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));

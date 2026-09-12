@@ -47,7 +47,7 @@ const Pokedex = ({
       {loading ? (
         <CardSkeleton count={10} />
       ) : (
-        <div className="card-grid">
+        <div className="pokedex-grid">
           {pokemons.map((pokemon) => (
             <Card
               key={pokemon.id}
