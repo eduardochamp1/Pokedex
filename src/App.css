@@ -229,12 +229,12 @@ nav {
 }
 .card-stats li {
   display: grid;
-  grid-template-columns: 30px 1fr 26px;
+  grid-template-columns: 32px 1fr 30px;
   align-items: center;
   gap: 6px;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.03em;
 }
 .card-stat-value {
   text-align: right;
