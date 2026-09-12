@@ -3846,13 +3846,23 @@ nav {
 }
 
 /* ===== SizeCanvas ===== */
-.size-canvas {
-  width: 100%;
-  height: auto;
+/* A altura manda e a largura segue. Com `width: 100%` o viewBox largo de uma
+   comparacao com varios pokemons grandes encolhia tudo — a regua ficava
+   ilegivel. Aqui a altura e fixa e o excesso rola na horizontal. */
+.size-canvas-scroll {
+  overflow-x: auto;
   background: var(--surface-1);
   border-radius: 12px;
   padding: 12px;
   box-sizing: border-box;
+}
+.size-canvas {
+  display: block;
+  height: min(62vh, 480px);
+  width: auto;
+  /* Poucos itens nao esticam alem do proprio tamanho; muitos rolam. */
+  max-width: none;
+  margin: 0 auto;
 }
 
 /* ===== SizesPage ===== */

@@ -6,25 +6,60 @@ interface Props {
   height?: number;
 }
 
+/** Respiro acima da regua. */
+const TOP_PAD = 20;
+/**
+ * Faixa abaixo do chao: nome, altura e a nota de escala, cada um na sua linha.
+ * Antes eram 20 px para tres linhas — a altura caia fora do viewBox e a nota
+ * passava por cima da ultima coluna.
+ */
+const LABEL_BAND = 44;
+/** Largura minima de uma coluna, para o nome caber sem encostar no vizinho. */
+const MIN_CELL = 110;
+const CELL_GAP = 16;
+
 const SizeCanvas = ({ items, height = 420 }: Props) => {
   const scale = computeScale(
     items.map((i) => ({ name: i.name, height: i.height })),
-    { canvasHeight: height - 40 }
+    { canvasHeight: height - TOP_PAD - LABEL_BAND }
   );
-  const cellW = 120;
   const humanW = 60;
   const rulerX = 40;
-  const width = rulerX + humanW + items.length * cellW + 40;
-  const baseline = height - 20;
+  const baseline = height - LABEL_BAND;
   const meters = Math.ceil(scale.maxHeightDm / 10);
 
+  /**
+   * Cada coluna tem a largura do proprio sprite.
+   *
+   * A arte oficial e quadrada, entao um sprite com a altura certa e igualmente
+   * largo — com coluna fixa, a caixa da imagem ficava mais estreita do que alta
+   * e o `preserveAspectRatio` encolhia pela largura: Wailord, de 14,5 m, era
+   * desenhado na altura de uns 3,8 m. A altura e o dado que esta pagina existe
+   * para mostrar, entao e ela que manda.
+   */
+  const cells = scale.sizes.map((s) => Math.max(MIN_CELL, s.px));
+  const cellsWidth = cells.reduce((sum, w) => sum + w + CELL_GAP, 0);
+  const width = rulerX + humanW + cellsWidth + 20;
+  /** Centro horizontal de cada coluna. */
+  const centers = cells.map((w, idx) => {
+    const before = cells
+      .slice(0, idx)
+      .reduce((sum, prev) => sum + prev + CELL_GAP, 0);
+    return rulerX + humanW + before + w / 2;
+  });
+
   return (
-    <svg
-      className="size-canvas"
-      viewBox={`0 0 ${width} ${height}`}
-      role="img"
-      aria-label="Comparação de tamanho"
-    >
+    /* Comparar varios pokemons grandes e inerentemente largo: com a arte
+       quadrada, um sprite alto e igualmente largo. Espremer tudo na largura da
+       pagina deixaria a regua ilegivel, entao a altura fica fixa e o excesso
+       rola na horizontal. */
+    <div className="size-canvas-scroll">
+      <svg
+        className="size-canvas"
+        viewBox={`0 0 ${width} ${height}`}
+        role="img"
+        aria-label="Comparação de tamanho"
+      >
       {/* Régua vertical */}
       <line
         x1={rulerX}
@@ -70,12 +105,17 @@ const SizeCanvas = ({ items, height = 420 }: Props) => {
 
       {/* Humano 1.70m */}
       <g transform={`translate(${rulerX + 20}, ${baseline - scale.humanPx})`}>
+        {/* O humano e a referencia da comparacao: com o preenchimento escuro
+            sobre fundo escuro ele praticamente sumia. O contorno o separa do
+            fundo sem competir com os sprites. */}
         <rect
           x={0}
           y={0}
           width={humanW * 0.4}
           height={scale.humanPx}
-          fill="var(--surface-2, #333)"
+          fill="var(--surface-3, #333)"
+          stroke="var(--border-strong)"
+          strokeWidth={1}
           rx={4}
         />
         <text
@@ -91,23 +131,24 @@ const SizeCanvas = ({ items, height = 420 }: Props) => {
 
       {/* Pokémons */}
       {scale.sizes.map((s, idx) => {
-        const cx = rulerX + humanW + idx * cellW + cellW / 2;
+        const cx = centers[idx];
         const item = items[idx];
-        const spriteSize = Math.min(cellW - 20, s.px);
         return (
           <g key={s.name}>
+            {/* Caixa quadrada do tamanho da altura: e a altura que define a
+                escala, e a arte oficial e quadrada. */}
             <image
               href={item.sprite}
-              x={cx - spriteSize / 2}
+              x={cx - s.px / 2}
               y={baseline - s.px}
-              width={spriteSize}
+              width={s.px}
               height={s.px}
               preserveAspectRatio="xMidYMax meet"
               crossOrigin="anonymous"
             />
             <text
               x={cx}
-              y={baseline + 14}
+              y={baseline + 15}
               fill="var(--text, #eee)"
               fontSize={11}
               textAnchor="middle"
@@ -116,7 +157,7 @@ const SizeCanvas = ({ items, height = 420 }: Props) => {
             </text>
             <text
               x={cx}
-              y={baseline + 26}
+              y={baseline + 28}
               fill="var(--text-dim)"
               fontSize={9}
               textAnchor="middle"
@@ -127,18 +168,21 @@ const SizeCanvas = ({ items, height = 420 }: Props) => {
         );
       })}
 
+      {/* Linha propria, abaixo dos rotulos das colunas, e alinhada a esquerda:
+          no canto direito o botao flutuante do comparador cobria a nota. */}
       {scale.maxHeightDm > HUMAN_HEIGHT_DM * 3 && (
         <text
-          x={width - 10}
+          x={rulerX}
           y={height - 4}
           fill="var(--text-dim)"
           fontSize={9}
-          textAnchor="end"
+          textAnchor="start"
         >
           escala não linear abaixo de 30cm
         </text>
       )}
-    </svg>
+      </svg>
+    </div>
   );
 };
 
