@@ -40,7 +40,12 @@ import {
   slotsForRom,
   type SlotInfo,
 } from "./saveStates";
-import { REWIND_SETTINGS, screenshotFileName } from "./capture";
+import {
+  REWIND_SETTINGS,
+  readStateThumbnail,
+  screenshotFileName,
+  stateThumbnailName,
+} from "./capture";
 import {
   forgetLastRom,
   getFastForward,
@@ -165,7 +170,16 @@ export function useEmulator() {
     // Os slots saem do diretório de estados, e a ROM corrente vem do módulo e
     // não do state: refreshLibrary é chamado de dentro de callbacks que foram
     // criados antes do setStatus, então o status aqui estaria atrasado.
-    setSlots(slotsForRom(readStateEntries(core), getLoadedRom() ?? undefined));
+    // A miniatura entra aqui e não em slotsForRom porque ler o FS é efeito —
+    // slotsForRom continua sendo só o cruzamento, testável sem core.
+    const rom = getLoadedRom() ?? undefined;
+    setSlots(
+      slotsForRom(readStateEntries(core), rom).map((slot) =>
+        slot.exists && rom
+          ? { ...slot, thumbnail: readStateThumbnail(core, rom, slot.slot) }
+          : slot
+      )
+    );
     try {
       const auto = core.getAutoSaveState();
       setAutoState(
@@ -657,6 +671,10 @@ export function useEmulator() {
       const core = coreRef.current;
       if (!core) return;
       const ok = core.saveStateSlot(slot);
+      // Miniatura junto com o estado: a data diz quando, a imagem diz onde —
+      // e é a imagem que faz reconhecer o slot certo de relance.
+      const rom = getLoadedRom();
+      if (ok && rom) core.screenshot(stateThumbnailName(rom, slot));
       await core.FSSync();
       refreshLibrary();
       setNotice(
@@ -682,7 +700,18 @@ export function useEmulator() {
       const rom = getLoadedRom();
       if (!core || !rom) return;
       const removed = deleteStateFile(core, rom, slot);
-      if (removed) await core.FSSync();
+      if (removed) {
+        // A miniatura vai junto: imagem órfã apontaria para um estado que já
+        // não existe.
+        try {
+          core.FS.unlink(
+            `${core.filePaths().screenshotsPath}/${stateThumbnailName(rom, slot)}`
+          );
+        } catch {
+          // estado antigo, gravado antes de haver miniatura
+        }
+        await core.FSSync();
+      }
       refreshLibrary();
       setNotice(
         removed ? `Slot ${slot} apagado.` : `Slot ${slot} já estava vazio.`

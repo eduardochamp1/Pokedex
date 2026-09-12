@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { REWIND_SETTINGS, rewindSeconds, screenshotFileName } from "./capture";
+import {
+  REWIND_SETTINGS,
+  rewindSeconds,
+  screenshotFileName,
+  stateThumbnailName,
+  toDataUrl,
+} from "./capture";
 
 describe("screenshotFileName", () => {
   const when = new Date(2026, 8, 11, 22, 7, 3);
@@ -54,5 +60,43 @@ describe("rewindSeconds", () => {
         REWIND_SETTINGS.rewindBufferInterval
       )
     ).toBe(rewindSeconds());
+  });
+});
+
+describe("stateThumbnailName", () => {
+  it("e o nome do estado com .png", () => {
+    expect(stateThumbnailName("Pokemon - Emerald.gba", 3)).toBe(
+      "Pokemon - Emerald.ss3.png"
+    );
+  });
+
+  it("acompanha o slot, para nao sobrar miniatura orfa", () => {
+    const nomes = [1, 2, 3].map((s) => stateThumbnailName("j.gba", s));
+    expect(new Set(nomes).size).toBe(3);
+  });
+});
+
+describe("toDataUrl", () => {
+  it("monta uma data URL de PNG", () => {
+    // bytes magicos de PNG
+    const png = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
+    expect(toDataUrl(png)).toBe("data:image/png;base64,iVBORw0KGgo=");
+  });
+
+  it("aceita o mime informado", () => {
+    expect(toDataUrl(new Uint8Array([65]), "image/webp")).toBe(
+      "data:image/webp;base64,QQ=="
+    );
+  });
+
+  it("nao estoura a pilha com imagem de dezenas de kB", () => {
+    // O caso que motivou os blocos: fromCharCode(...bytes) de uma vez quebra.
+    const grande = new Uint8Array(200_000).fill(200);
+    expect(() => toDataUrl(grande)).not.toThrow();
+    expect(toDataUrl(grande).startsWith("data:image/png;base64,")).toBe(true);
+  });
+
+  it("bytes vazios ainda dao uma URL valida", () => {
+    expect(toDataUrl(new Uint8Array(0))).toBe("data:image/png;base64,");
   });
 });

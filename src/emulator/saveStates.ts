@@ -24,6 +24,11 @@ export interface SlotInfo {
   exists: boolean;
   size?: number;
   modified?: number;
+  /**
+   * `data:` URL da imagem do momento gravado, quando existe. Estados gravados
+   * antes de haver miniatura simplesmente nao tem — a data continua valendo.
+   */
+  thumbnail?: string;
 }
 
 /** Base de um nome de ROM: sem diretorio e sem extensao. */
@@ -80,13 +85,13 @@ export function slotsForRom(
   });
 }
 
-/** "agora", "há 3 min", "há 2 h", "12/03 14:07" — para a etiqueta do slot. */
+/** "agora", "3 min", "2 h", "12/03 14:07" — cabe na etiqueta estreita do slot. */
 export function describeAge(modified: number | undefined, now: number): string {
   if (modified === undefined) return "gravado";
   const diff = now - modified;
   if (diff < 60_000) return "agora";
-  if (diff < 3_600_000) return `há ${Math.floor(diff / 60_000)} min`;
-  if (diff < 86_400_000) return `há ${Math.floor(diff / 3_600_000)} h`;
+  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)} min`;
+  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)} h`;
   const d = new Date(modified);
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${pad(d.getDate())}/${pad(d.getMonth() + 1)} ${pad(d.getHours())}:${pad(

@@ -490,6 +490,15 @@ const PlayPage = () => {
                   className={"play-slot" + (info.exists ? " is-filled" : "")}
                 >
                   <span className="play-slot-num">{info.slot}</span>
+                  {info.thumbnail ? (
+                    <img
+                      className="play-slot-thumb"
+                      src={info.thumbnail}
+                      alt={`Tela gravada no slot ${info.slot}`}
+                    />
+                  ) : (
+                    <span className="play-slot-thumb is-empty" aria-hidden="true" />
+                  )}
                   <span className="play-slot-state">
                     {info.exists ? describeAge(info.modified, now) : "vazio"}
                   </span>

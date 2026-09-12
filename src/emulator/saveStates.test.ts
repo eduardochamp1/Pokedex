@@ -104,8 +104,8 @@ describe("describeAge", () => {
 
   it("minutos e horas recentes", () => {
     expect(describeAge(now - 10_000, now)).toBe("agora");
-    expect(describeAge(now - 5 * 60_000, now)).toBe("há 5 min");
-    expect(describeAge(now - 3 * 3_600_000, now)).toBe("há 3 h");
+    expect(describeAge(now - 5 * 60_000, now)).toBe("5 min");
+    expect(describeAge(now - 3 * 3_600_000, now)).toBe("3 h");
   });
 
   it("cai para data quando passa de um dia", () => {

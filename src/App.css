@@ -2897,9 +2897,15 @@ nav {
   flex: 1;
   min-width: 0;
 }
+/* `width` explicito porque `.play-rom-list button` ja da `width: 100%` a todo
+   botao da lista: com flex-basis auto, o ✕ herdava isso e engolia a linha,
+   espremendo o botao de jogar para 22 px. */
 .play-rom-remove {
-  flex: 0 0 auto;
-  padding: 0 8px;
+  flex: 0 0 28px;
+  width: 28px;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
   border-radius: var(--radius-sm);
   background: none;
   border: 1px solid transparent;
@@ -2916,6 +2922,9 @@ nav {
   align-items: center;
 }
 .play-rom-confirm button {
+  /* Mesmo motivo do ✕: sem isto o `width: 100%` da lista vale aqui também. */
+  width: auto;
+  flex: 0 0 auto;
   padding: 4px 8px;
   border-radius: var(--radius-sm);
   background: var(--surface-2);
@@ -3169,10 +3178,25 @@ nav {
 }
 .play-slot {
   display: grid;
-  /* num | estado | gravar | carregar | apagar */
-  grid-template-columns: 18px minmax(0, 1fr) auto auto 22px;
+  /* num | miniatura | estado | gravar | carregar | apagar */
+  grid-template-columns: 18px 44px minmax(0, 1fr) auto auto 22px;
   gap: 6px;
   align-items: center;
+}
+/* A miniatura reserva o espaco mesmo vazia: sem isso as linhas dancam
+   conforme os slots vao sendo gravados. */
+.play-slot-thumb {
+  width: 44px;
+  height: 30px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  object-fit: cover;
+  image-rendering: pixelated;
+  display: block;
+}
+.play-slot-thumb.is-empty {
+  background: var(--surface-1);
+  border-style: dashed;
 }
 /* Slot ocupado se distingue do vazio antes de qualquer clique. */
 .play-slot.is-filled .play-slot-num {
