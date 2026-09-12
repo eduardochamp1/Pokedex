@@ -3547,3 +3547,49 @@ nav {
   @keyframes vt-fade-out { to { opacity: 0; } }
   @keyframes vt-fade-in { from { opacity: 0; } }
 }
+
+/* ===== SpriteScrubber ===== */
+.sprite-scrubber {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  padding: 16px;
+  background: var(--surface-1);
+  border-radius: 12px;
+}
+.sprite-scrubber-stage {
+  width: 180px;
+  height: 180px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+}
+.sprite-scrubber-stage img {
+  max-width: 100%;
+  max-height: 100%;
+  image-rendering: pixelated;
+  transition: opacity 200ms ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sprite-scrubber-stage img { transition: none; }
+}
+.sprite-scrubber-range { width: 100%; }
+.sprite-scrubber-label {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+.sprite-scrubber-toggles {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: 0.85rem;
+}
+.sprite-scrubber-empty {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 0 16px;
+}
