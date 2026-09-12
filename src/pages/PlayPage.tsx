@@ -6,8 +6,9 @@ import {
   type KeyBinding,
 } from "../emulator/keyBindings";
 import { sdlKeyFromEvent } from "../emulator/keyNames";
+import { SHORTCUT_HELP, isTypingTarget, shortcutFor } from "../emulator/shortcuts";
 import { useGamepad } from "../emulator/useGamepad";
-import { SUPPORTED_LABEL, consoleOf } from "../emulator/types";
+import { SUPPORTED_LABEL, consoleOf, type SaveStateSlot } from "../emulator/types";
 import { describeAge } from "../emulator/saveStates";
 import { SCALE_MODES } from "../emulator/display";
 import { rewindSeconds } from "../emulator/capture";
@@ -45,6 +46,9 @@ const PlayPage = () => {
   /** ROM com a remoção pendente de confirmação, ou null. */
   const [removing, setRemoving] = useState<string | null>(null);
   const gamepadName = useGamepad(emu.gamepadApi, playing);
+  // Avulsas para o efeito dos atalhos: cada uma é estável por si, ao contrário
+  // do objeto `emu`, que é novo a cada render.
+  const { bindings, setTurbo, saveState, loadState } = emu;
 
   // Enquanto captura, o core não pode receber o teclado: a tecla que está
   // sendo escolhida iria para o jogo junto. `toggleInput(false)` desliga a
@@ -81,6 +85,47 @@ const PlayPage = () => {
       emu.setInputEnabled(true);
     };
   }, [capturing, emu]);
+
+  /**
+   * Atalhos de teclado. Só com jogo carregado, e nunca enquanto a tela espera
+   * uma tecla nova — ali a próxima tecla é a escolha, não um comando.
+   */
+  useEffect(() => {
+    if (!playing || capturing) return;
+    const boundKeys = new Set(bindings.map((b) => b.sdlKey));
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (isTypingTarget(e.target)) return;
+      const shortcut = shortcutFor(e, boundKeys);
+      if (!shortcut) return;
+      e.preventDefault();
+      if (shortcut.kind === "turbo") {
+        // Direto no core: o turbo é momentâneo e não pode mexer na barra de
+        // velocidade, que é a preferência de quem joga.
+        if (!e.repeat) setTurbo(true);
+        return;
+      }
+      const slot = shortcut.slot as SaveStateSlot;
+      if (shortcut.kind === "save") void saveState(slot);
+      else loadState(slot);
+    };
+
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (shortcutFor(e, boundKeys)?.kind === "turbo") setTurbo(false);
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+      // Soltar a tecla fora da janela deixaria o turbo preso para sempre.
+      setTurbo(false);
+    };
+    // Dependências avulsas, e não o objeto `emu`: ele é recriado a cada render,
+    // e com ele na lista a limpeza rodava toda renderização — o turbo ligava e
+    // era desligado no mesmo instante pelo próprio efeito.
+  }, [playing, capturing, bindings, setTurbo, saveState, loadState]);
 
   const onDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -284,7 +329,9 @@ const PlayPage = () => {
                     value={emu.fastForward}
                     onChange={(e) => emu.setFastForward(Number(e.target.value))}
                   />
-                  <span>{emu.fastForward}×</span>
+                  <span>
+                    {emu.turboActive ? `${emu.fastForward}× → turbo` : `${emu.fastForward}×`}
+                  </span>
                 </label>
               </div>
 
@@ -727,6 +774,22 @@ const PlayPage = () => {
                 ? `🎮 ${gamepadName}`
                 : "Nenhum controle detectado — conecte um e aperte um botão."}
             </p>
+
+            {/* Atalhos ficam fora da lista remapeável: não são ações do
+                console, e remapeá-los é outra conversa. */}
+            <dl className="play-keys play-shortcuts">
+              <div className="play-key-group">
+                <dt>Atalhos</dt>
+                <dd>
+                  {SHORTCUT_HELP.map((s) => (
+                    <span key={s.keys} className="play-shortcut">
+                      <kbd>{s.keys}</kbd>
+                      {s.what}
+                    </span>
+                  ))}
+                </dd>
+              </div>
+            </dl>
           </section>
         </aside>
       </div>

@@ -50,11 +50,18 @@ via [mGBA](https://mgba.io) compilado para WebAssembly.
 - **Saves persistentes** — o core monta IDBFS, então save de bateria, save
   states e as próprias ROMs enviadas ficam no IndexedDB do navegador e
   sobrevivem a recarregar a página
-- **6 slots de save state** que mostram o que têm — ocupado, vazio e há quanto
-  tempo foi gravado, lidos do diretório de estados do core. Os estados são por
-  ROM: os slots de um jogo não aparecem em outro
+- **Continuidade** — sair para outra página e voltar mantém o jogo rodando, no
+  mesmo ponto. Recarregar a página recarrega a última ROM sozinho; "Fechar jogo"
+  é como dizer que não a quer de volta
+- **6 slots de save state** que mostram o que têm — a **imagem** do momento
+  gravado, há quanto tempo, e um botão para apagar. Os estados são por ROM: os
+  slots de um jogo não aparecem em outro
 - **"Continuar de onde parou"** — o core já capturava um estado automático a
   cada 30 s; agora ele tem um botão em vez de ser descartado
+- **Atalhos** — F1–F6 carregam um estado, Shift+F1–F6 gravam, e segurar Espaço
+  dá turbo 5× enquanto durar
+- **Biblioteca gerenciável** — cada ROM mostra quanto ocupa e pode ser removida;
+  o save de bateria fica, então o progresso volta se a ROM voltar
 - **Backup automático em `saves/`** no disco, mais exportar/importar `.sav`
 - **Tela cheia e escala inteira** — cada pixel do console vira exatamente N
   pixels na tela. Esticar com `object-fit` dava escala fracionária, e o
@@ -103,6 +110,18 @@ máquina, e um deploy acidental não os leva.
   React. O core é amarrado ao canvas na criação, então um canvas novo (StrictMode
   remonta em dev; navegar para fora e voltar remonta sempre) deixaria o core
   preso no antigo. A página só adota o canvas no container dela.
+- **O ponto automático não é aplicado sozinho ao recarregar a página.**
+  `loadAutoSaveState` recusa logo depois de um `loadGame` — medido no browser:
+  pelo botão da tela, com o jogo já rodando, funciona; na mesma volta do
+  carregamento devolve `false`, e continua devolvendo mesmo repetindo por
+  segundos. Mesma família do problema de `saveState`/`loadState` abaixo. Então a
+  ROM volta sozinha e quem decide retomar é quem joga, no botão — que o aviso
+  aponta.
+- **Um efeito que dependa do objeto do hook se auto-cancela.** O retorno de
+  `useEmulator` é um objeto novo a cada render; com ele na lista de dependências,
+  a limpeza do efeito roda a cada renderização. No turbo isso significava ligar e
+  desligar no mesmo instante — a tecla nunca pegava. As dependências são as
+  funções avulsas, cada uma estável por si.
 - **Remapear precisa desvincular, e a API pública não tem isso.** O core guarda
   tecla → ação, então só reescrever o mapa deixaria a tecla antiga disparando em
   paralelo com a nova. Sem função de desvincular exposta, o caminho é o `cwrap`
@@ -287,6 +306,8 @@ src/
 │   ├── useEmulator.ts          Hook que dirige o core (ROM, saves, estados)
 │   ├── storage.ts              Persistência: pasta saves/ + status do navegador
 │   ├── saveStates.ts           Estado real dos 6 slots, lido do FS do core
+│   ├── session.ts              Última ROM, volume e velocidade entre visitas
+│   ├── shortcuts.ts            F1–F6, Shift+F1–F6 e turbo no Espaço
 │   ├── display.ts              Escala inteira; useDisplay.ts aplica e faz tela cheia
 │   ├── capture.ts              Nome das capturas + ajustes do buffer de rebobinar
 │   ├── keyBindings.ts          Mapa de teclas (remapeável) + gamepad virtual

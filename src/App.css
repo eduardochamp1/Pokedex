@@ -4007,3 +4007,30 @@ nav {
   .card-compare { opacity: 1; transform: none; }
 }
 .card-mini .card-compare { display: none; }
+
+/* Legenda dos atalhos: fora da lista remapeavel, porque nao sao acoes do
+   console — sao comandos da tela. */
+.play-shortcuts {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.play-shortcut {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  font-size: 0.66rem;
+  color: var(--text-dim);
+}
+.play-shortcut kbd {
+  flex: 0 0 auto;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+  border-bottom-width: 2px;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 0.64rem;
+}

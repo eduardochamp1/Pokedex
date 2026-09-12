@@ -46,6 +46,7 @@ import {
   screenshotFileName,
   stateThumbnailName,
 } from "./capture";
+import { TURBO_MULTIPLIER } from "./shortcuts";
 import {
   forgetLastRom,
   getFastForward,
@@ -124,6 +125,8 @@ export function useEmulator() {
   bindingsRef.current = bindings;
   /** Rebobinando neste instante — a tela precisa mostrar que está. */
   const [rewinding, setRewinding_] = useState(false);
+  /** Turbo segurado neste instante — a barra de velocidade mostra isso. */
+  const [turboActive, setTurboActive] = useState(false);
   const lastBackupRef = useRef(0);
   /**
    * O callback do core e registrado uma vez na inicializacao; a ref evita
@@ -822,6 +825,23 @@ export function useEmulator() {
     coreRef.current?.setFastForwardMultiplier(multiplier);
   }, []);
 
+  /**
+   * Turbo momentâneo, enquanto a tecla estiver segurada.
+   *
+   * Fala direto com o core e não passa por `setFastForward`: a barra de
+   * velocidade é a preferência de quem joga e é gravada — o turbo é um impulso
+   * e não pode sobrescrevê-la. Ao soltar, volta para o que a barra diz.
+   */
+  const setTurbo = useCallback(
+    (active: boolean) => {
+      coreRef.current?.setFastForwardMultiplier(
+        active ? TURBO_MULTIPLIER : fastForward
+      );
+      setTurboActive(active);
+    },
+    [fastForward]
+  );
+
   /** Pressiona/solta um botão pelo gamepad virtual (toque). */
   const pressButton = useCallback((button: string) => {
     coreRef.current?.buttonPress(button);
@@ -962,6 +982,8 @@ export function useEmulator() {
     /** Estável: o loop do gamepad não pode ser recriado a cada render. */
     gamepadApi,
     rewinding,
+    turboActive,
+    setTurbo,
     setRewinding,
     takeScreenshot,
     storage,
