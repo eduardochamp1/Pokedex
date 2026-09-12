@@ -3648,3 +3648,104 @@ nav {
   color: var(--text);
   cursor: pointer;
 }
+
+/* ===== ComparatorButton (FAB + modal) ===== */
+.comparator-fab {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  min-width: 56px;
+  min-height: 56px;
+  padding: 0 16px;
+  border-radius: 28px;
+  background: var(--accent);
+  color: var(--bg);
+  border: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.comparator-fab-count {
+  background: var(--bg);
+  color: var(--accent);
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 0.85rem;
+}
+.comparator-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: grid;
+  place-items: center;
+  z-index: 70;
+}
+.comparator-modal-body {
+  background: var(--surface-1);
+  border-radius: 12px;
+  padding: 20px;
+  min-width: 320px;
+  max-width: 90vw;
+}
+.comparator-modal-body h3 { margin: 0 0 12px; }
+.comparator-modal-body ul { list-style: none; padding: 0; margin: 0 0 12px; }
+.comparator-modal-body li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+.comparator-modal-body li:last-child { border-bottom: 0; }
+.comparator-modal-body li span { flex: 1; }
+.comparator-modal-body li button {
+  background: transparent;
+  border: 0;
+  color: var(--text-dim);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+.comparator-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+.comparator-modal-actions button,
+.comparator-modal-actions a {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+/* Botão 📏 no card */
+.card-compare {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  cursor: pointer;
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 200ms ease;
+  font-size: 14px;
+  display: grid;
+  place-items: center;
+}
+.card:hover .card-compare { opacity: 1; }
+@media (hover: none) {
+  .card-compare { opacity: 1; }
+}

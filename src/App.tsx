@@ -6,6 +6,7 @@ import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
 import { RouteFallback } from "./components/Skeleton";
 import ErrorBoundary from "./components/ErrorBoundary";
+import ComparatorButton from "./components/ComparatorButton";
 import { FavoriteProvider } from "./contexts/favoritesContext";
 import { useFavorites } from "./hooks/useFavorites";
 import { startTransition as startViewTransitionWrapper } from "./lib/motion";
@@ -64,6 +65,7 @@ function App() {
           </Routes>
         </Suspense>
       </ErrorBoundary>
+      <ComparatorButton />
     </FavoriteProvider>
   );
 }

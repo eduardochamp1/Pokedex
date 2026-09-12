@@ -2,6 +2,7 @@ import { useContext, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import FavoriteContext from "../contexts/favoritesContext";
 import { useTiltEffect } from "../hooks/useTiltEffect";
+import { add as addToComparator } from "../lib/comparatorStore";
 import { LEGENDARY, MYTHICAL } from "../data/rarity";
 import { tType } from "../data/i18n";
 import type { Pokemon } from "../types/pokemon";
@@ -99,6 +100,25 @@ const Card = ({
           </ul>
         )}
       </div>
+      {showActions && (
+        <button
+          type="button"
+          className="card-compare"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            addToComparator({
+              name: pokemon.name,
+              height: pokemon.height,
+              sprite: artwork,
+            });
+          }}
+          aria-label={`Adicionar ${pokemon.name} ao comparador`}
+          title="Adicionar ao comparador"
+        >
+          📏
+        </button>
+      )}
       {showActions && (
         <button
           type="button"
