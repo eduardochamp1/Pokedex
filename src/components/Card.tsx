@@ -49,15 +49,35 @@ const Card = ({
     <>
       <div className="card-header">
         <div className="card-name">{pokemon.name}</div>
-        <div className="card-types">
-          {pokemon.types.map((t) => (
-            <span
-              key={t.type.name}
-              className="card-type-dot"
-              data-type={t.type.name}
-              title={tType(t.type.name)}
-            />
-          ))}
+        <div className="card-header-right">
+          <div className="card-types">
+            {pokemon.types.map((t) => (
+              <span
+                key={t.type.name}
+                className="card-type-dot"
+                data-type={t.type.name}
+                title={tType(t.type.name)}
+              />
+            ))}
+          </div>
+          {showActions && (
+            <button
+              type="button"
+              className="card-fav"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                updateFavoritePokemons(pokemon.name);
+              }}
+              aria-label={
+                isFavorite
+                  ? `Remover ${pokemon.name} dos favoritos`
+                  : `Favoritar ${pokemon.name}`
+              }
+            >
+              {isFavorite ? "❤️" : "🖤"}
+            </button>
+          )}
         </div>
       </div>
       <div className="card-artwork">
@@ -116,24 +136,6 @@ const Card = ({
           title="Adicionar ao comparador"
         >
           📏
-        </button>
-      )}
-      {showActions && (
-        <button
-          type="button"
-          className="card-fav"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            updateFavoritePokemons(pokemon.name);
-          }}
-          aria-label={
-            isFavorite
-              ? `Remover ${pokemon.name} dos favoritos`
-              : `Favoritar ${pokemon.name}`
-          }
-        >
-          {isFavorite ? "❤️" : "🖤"}
         </button>
       )}
       {isLegendary && !isMythical && <span className="card-badge">👑</span>}

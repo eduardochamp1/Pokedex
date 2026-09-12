@@ -131,7 +131,12 @@ nav {
   align-items: center;
   gap: 6px;
   margin-bottom: 4px;
-  padding-right: 36px; /* espaco pro botao ❤ absoluto no top-right */
+}
+.card-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 .card-name {
   font-family: var(--font-display);
@@ -229,17 +234,21 @@ nav {
 }
 .card-stats li {
   display: grid;
-  grid-template-columns: 32px 1fr 30px;
+  grid-template-columns: 30px minmax(0, 1fr) 30px;
   align-items: center;
   gap: 6px;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
+  min-width: 0;
 }
+.card-stat-label { min-width: 0; }
 .card-stat-value {
   text-align: right;
   color: var(--text);
   font-variant-numeric: tabular-nums;
+  min-width: 0;
+  white-space: nowrap;
 }
 .card-stat-bar {
   height: 4px;
@@ -256,19 +265,21 @@ nav {
 }
 
 .card-fav {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 2;
-  width: 28px;
-  height: 28px;
+  position: relative;
+  z-index: 4;
+  width: 24px;
+  height: 24px;
+  border: 0;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.5);
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  color: #fff;
+  font-size: 0.75rem;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
   transition: transform var(--dur-fast) var(--ease-out);
+  flex-shrink: 0;
 }
 .card-fav:hover { transform: scale(1.15); }
 
