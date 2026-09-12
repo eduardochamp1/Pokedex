@@ -206,6 +206,12 @@ export function getCore(): Promise<mGBAEmulator> {
       .then(async (factory) => {
         const core = await factory({ canvas: getCanvas() });
         await core.FSInit();
+        // Só em dev: o core vive fora da árvore do React e não há como
+        // alcançá-lo pelo console para inspecionar o FS virtual ou testar uma
+        // chamada. O build de produção não leva isto.
+        if (import.meta.env.DEV) {
+          (window as unknown as Record<string, unknown>).__mgbaCore__ = core;
+        }
         return core;
       })
       .catch((error: unknown) => {
