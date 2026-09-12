@@ -1,5 +1,6 @@
-import { Suspense, lazy } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Suspense, lazy, useEffect, useState } from "react";
+import { flushSync } from "react-dom";
+import { Route, Routes, useLocation, type Location } from "react-router-dom";
 import "./App.css";
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
@@ -7,6 +8,7 @@ import { RouteFallback } from "./components/Skeleton";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { FavoriteProvider } from "./contexts/favoritesContext";
 import { useFavorites } from "./hooks/useFavorites";
+import { startTransition as startViewTransitionWrapper } from "./lib/motion";
 
 // A Home entra no bundle inicial; o resto e carregado sob demanda — a Lore
 // sozinha carrega ~2.000 linhas de dados curados.
@@ -18,8 +20,25 @@ const MapPage = lazy(() => import("./pages/MapPage"));
 const PlayPage = lazy(() => import("./pages/PlayPage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 
+/**
+ * Segura a renderizacao da nova localizacao ate o browser ter feito o snapshot
+ * do estado antigo — a receita para o View Transitions API animar de A pra B.
+ */
+function useAnimatedLocation(): Location {
+  const location = useLocation();
+  const [displayed, setDisplayed] = useState(location);
+  useEffect(() => {
+    if (location === displayed) return;
+    startViewTransitionWrapper(() => {
+      flushSync(() => setDisplayed(location));
+    });
+  }, [location, displayed]);
+  return displayed;
+}
+
 function App() {
   const { favorites, toggle } = useFavorites();
+  const displayedLocation = useAnimatedLocation();
 
   return (
     <FavoriteProvider
@@ -31,7 +50,7 @@ function App() {
       <Navbar />
       <ErrorBoundary>
         <Suspense fallback={<RouteFallback />}>
-          <Routes>
+          <Routes location={displayedLocation}>
             <Route path="/" element={<HomePage />} />
             <Route path="/favoritos" element={<FavoritesPage />} />
             <Route path="/comparar" element={<ComparePage />} />
