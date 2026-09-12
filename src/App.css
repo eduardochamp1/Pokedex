@@ -3717,10 +3717,10 @@ nav {
   text-decoration: none;
 }
 
-/* Botão 📏 no card — canto inferior-direito, aparece só no hover pra não brigar com nome/tipos */
+/* Botão 📏 empilhado abaixo do ❤, no top-right — sem cobrir stats nem nome */
 .card-compare {
   position: absolute;
-  bottom: 8px;
+  top: 42px;
   right: 8px;
   width: 28px;
   height: 28px;
@@ -3731,7 +3731,7 @@ nav {
   cursor: pointer;
   z-index: 3;
   opacity: 0;
-  transform: translateY(4px);
+  transform: translateX(4px);
   transition: opacity 180ms ease, transform 180ms ease;
   font-size: 13px;
   line-height: 1;
@@ -3740,7 +3740,7 @@ nav {
 }
 .card:hover .card-compare {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateX(0);
 }
 .card-compare:hover { background: var(--accent); color: var(--bg); }
 @media (hover: none) {
