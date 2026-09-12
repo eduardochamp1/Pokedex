@@ -3603,3 +3603,48 @@ nav {
   padding: 12px;
   box-sizing: border-box;
 }
+
+/* ===== SizesPage ===== */
+.sizes-page {
+  max-width: 1100px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+.sizes-page h2 { margin-bottom: 16px; }
+.sizes-empty {
+  padding: 24px;
+  background: var(--surface-1);
+  border-radius: 12px;
+  text-align: center;
+}
+.sizes-presets {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+.sizes-presets button {
+  padding: 10px 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+}
+.sizes-presets button:hover { background: var(--accent); color: var(--bg); }
+.sizes-hint { color: var(--text-dim); font-size: 0.85rem; }
+.sizes-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+.sizes-actions button {
+  padding: 8px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  cursor: pointer;
+}
