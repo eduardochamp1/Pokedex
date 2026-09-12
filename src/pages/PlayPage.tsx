@@ -1,17 +1,17 @@
-import { useRef, useState, type DragEvent } from "react";
+import { useEffect, useRef, useState, type DragEvent } from "react";
 import { useEmulator } from "../emulator/useEmulator";
 import {
   GROUP_LABELS,
-  KEY_BINDINGS,
   TOUCH_BUTTONS,
   type KeyBinding,
 } from "../emulator/keyBindings";
-import {
-  SAVE_STATE_SLOTS,
-  SUPPORTED_LABEL,
-  consoleOf,
-  type SaveStateSlot,
-} from "../emulator/types";
+import { sdlKeyFromEvent } from "../emulator/keyNames";
+import { useGamepad } from "../emulator/useGamepad";
+import { SUPPORTED_LABEL, consoleOf } from "../emulator/types";
+import { describeAge } from "../emulator/saveStates";
+import { SCALE_MODES } from "../emulator/display";
+import { rewindSeconds } from "../emulator/capture";
+import { useDisplay } from "../emulator/useDisplay";
 import { formatBytes } from "../emulator/storage";
 
 const GROUPS: KeyBinding["group"][] = [
@@ -21,22 +21,64 @@ const GROUPS: KeyBinding["group"][] = [
   "sistema",
 ];
 
-function formatSize(bytes: number): string {
-  if (bytes >= 1024 * 1024) return `${(bytes / 1048576).toFixed(1)} MB`;
-  return `${Math.round(bytes / 1024)} kB`;
-}
-
 const PlayPage = () => {
   const emu = useEmulator();
   const romInputRef = useRef<HTMLInputElement>(null);
   const saveInputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
+  // A tela cheia e a escala medem a moldura, não o host do canvas: é a moldura
+  // que vira o elemento de tela cheia e que define o espaço disponível.
+  const screenRef = useRef<HTMLDivElement>(null);
+  const display = useDisplay(screenRef, emu.canvas, emu.notify);
+  // A idade dos slots é relativa a este instante. Sem timer próprio: o painel
+  // já re-renderiza a cada captura automática (30 s) e a cada ação de estado.
+  const now = Date.now();
 
   const currentRom =
     emu.status.kind === "running" || emu.status.kind === "paused"
       ? emu.status.rom
       : undefined;
   const playing = currentRom !== undefined;
+
+  /** Ação esperando uma tecla nova, ou null. */
+  const [capturing, setCapturing] = useState<string | null>(null);
+  const gamepadName = useGamepad(emu.gamepadApi, playing);
+
+  // Enquanto captura, o core não pode receber o teclado: a tecla que está
+  // sendo escolhida iria para o jogo junto. `toggleInput(false)` desliga a
+  // entrada no core, e o listener em fase de captura impede que o evento
+  // chegue aos handlers que o SDL registrou.
+  useEffect(() => {
+    if (!capturing) return;
+    emu.setInputEnabled(false);
+
+    const onKey = (e: KeyboardEvent) => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      if (e.key === "Escape") {
+        setCapturing(null);
+        return;
+      }
+      const sdlKey = sdlKeyFromEvent(e);
+      if (!sdlKey) {
+        const shown = e.key || e.code;
+        emu.notify(
+          shown
+            ? `"${shown}" não serve como tecla de jogo. Escolha outra.`
+            : "Não deu para identificar essa tecla. Escolha outra."
+        );
+        return;
+      }
+      emu.rebindKey(capturing, sdlKey);
+      setCapturing(null);
+    };
+
+    window.addEventListener("keydown", onKey, { capture: true });
+    return () => {
+      window.removeEventListener("keydown", onKey, { capture: true });
+      emu.setInputEnabled(true);
+    };
+  }, [capturing, emu]);
 
   const onDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -96,7 +138,12 @@ const PlayPage = () => {
       <div className="play-layout">
         <main className="play-stage">
           <div
-            className={"play-screen" + (dragging ? " is-dragging" : "")}
+            ref={screenRef}
+            className={
+              "play-screen" +
+              (dragging ? " is-dragging" : "") +
+              (display.isFullscreen ? " is-fullscreen" : "")
+            }
             onDragOver={(e) => {
               e.preventDefault();
               setDragging(true);
@@ -125,6 +172,12 @@ const PlayPage = () => {
                 ) : null}
               </div>
             )}
+
+            {/* Em tela cheia os controles da página somem junto com ela: a
+                saída precisa estar dita aqui dentro. */}
+            {display.isFullscreen && (
+              <p className="play-fs-hint">Esc para sair da tela cheia</p>
+            )}
           </div>
 
           {playing && (
@@ -139,6 +192,30 @@ const PlayPage = () => {
                     ▶ Continuar
                   </button>
                 )}
+                {/* Segurar, não alternar: rebobinar é correção de curso —
+                    você volta olhando a tela e solta no ponto certo. */}
+                <button
+                  type="button"
+                  className={
+                    "play-rewind" + (emu.rewinding ? " is-rewinding" : "")
+                  }
+                  title={`Segure para voltar no tempo (até ${rewindSeconds()} s)`}
+                  onPointerDown={(e) => {
+                    e.preventDefault();
+                    emu.setRewinding(true);
+                  }}
+                  onPointerUp={() => emu.setRewinding(false)}
+                  onPointerLeave={() => emu.setRewinding(false)}
+                  onPointerCancel={() => emu.setRewinding(false)}
+                >
+                  ⏪ Rebobinar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => currentRom && void emu.takeScreenshot(currentRom)}
+                >
+                  📷 Capturar
+                </button>
                 <button type="button" onClick={emu.reset}>
                   ↺ Reiniciar
                 </button>
@@ -148,6 +225,40 @@ const PlayPage = () => {
                 <button type="button" onClick={() => void emu.sync()}>
                   💾 Sincronizar
                 </button>
+                {display.fullscreenSupported && (
+                  <button
+                    type="button"
+                    onClick={() => void display.toggleFullscreen()}
+                  >
+                    {display.isFullscreen ? "⤡ Sair da tela cheia" : "⛶ Tela cheia"}
+                  </button>
+                )}
+
+                <div
+                  className="play-scale"
+                  role="group"
+                  aria-label="Escala da tela"
+                >
+                  <span className="play-scale-label">Escala</span>
+                  {SCALE_MODES.map((mode) => (
+                    <button
+                      key={String(mode.id)}
+                      type="button"
+                      className={
+                        "play-scale-btn" +
+                        (display.scaleMode === mode.id ? " is-active" : "")
+                      }
+                      aria-pressed={display.scaleMode === mode.id}
+                      title={mode.title}
+                      onClick={() => display.setScaleMode(mode.id)}
+                    >
+                      {mode.label}
+                    </button>
+                  ))}
+                  {display.scaleLabel && (
+                    <span className="play-scale-now">{display.scaleLabel}</span>
+                  )}
+                </div>
 
                 <label className="play-slider">
                   Volume
@@ -260,7 +371,7 @@ const PlayPage = () => {
                     >
                       <span className="play-rom-name">{rom.fileName}</span>
                       <span className="play-rom-meta">
-                        {consoleOf(rom.fileName)} · {formatSize(rom.size)}
+                        {consoleOf(rom.fileName)} · {formatBytes(rom.size)}
                       </span>
                     </button>
                   </li>
@@ -302,31 +413,89 @@ const PlayPage = () => {
 
           <section className="play-panel">
             <h2>Save states</h2>
+
+            {/* O core vinha capturando um estado a cada 30 s e nunca o
+                oferecia. Aqui ele vira o caminho de volta ao jogo. */}
+            <div className="play-auto-state">
+              <button
+                type="button"
+                className="play-primary play-resume"
+                disabled={!playing || !emu.autoState}
+                onClick={emu.loadAutoState}
+              >
+                ⏱ Continuar de onde parou
+              </button>
+              <p className="play-panel-hint">
+                {!playing
+                  ? "Carregue um jogo para ver o ponto automático."
+                  : emu.autoState
+                    ? `Ponto automático de ${formatBytes(emu.autoState.size)}, atualizado a cada 30 s.`
+                    : "Nenhum ponto automático ainda — o primeiro sai em até 30 s."}
+                {playing && (
+                  <>
+                    {" "}
+                    <button
+                      type="button"
+                      className="play-linkish"
+                      onClick={() => void emu.captureAutoState()}
+                    >
+                      capturar agora
+                    </button>
+                  </>
+                )}
+              </p>
+            </div>
+
             <div className="play-slots">
-              {SAVE_STATE_SLOTS.map((slot) => (
-                <div key={slot} className="play-slot">
-                  <span className="play-slot-num">{slot}</span>
+              {emu.slots.map((info) => (
+                <div
+                  key={info.slot}
+                  className={"play-slot" + (info.exists ? " is-filled" : "")}
+                >
+                  <span className="play-slot-num">{info.slot}</span>
+                  <span className="play-slot-state">
+                    {info.exists ? describeAge(info.modified, now) : "vazio"}
+                  </span>
                   <button
                     type="button"
                     disabled={!playing}
-                    onClick={() => void emu.saveState(slot as SaveStateSlot)}
-                    title={`Gravar no slot ${slot}`}
+                    onClick={() => void emu.saveState(info.slot)}
+                    title={
+                      info.exists
+                        ? `Sobrescrever o slot ${info.slot}`
+                        : `Gravar no slot ${info.slot}`
+                    }
                   >
-                    gravar
+                    {info.exists ? "regravar" : "gravar"}
                   </button>
                   <button
                     type="button"
-                    disabled={!playing}
-                    onClick={() => emu.loadState(slot as SaveStateSlot)}
-                    title={`Carregar do slot ${slot}`}
+                    disabled={!playing || !info.exists}
+                    onClick={() => emu.loadState(info.slot)}
+                    title={
+                      info.exists
+                        ? `Carregar do slot ${info.slot}`
+                        : `Slot ${info.slot} está vazio`
+                    }
                   >
                     carregar
+                  </button>
+                  <button
+                    type="button"
+                    className="play-slot-clear"
+                    disabled={!playing || !info.exists}
+                    onClick={() => void emu.clearState(info.slot)}
+                    title={`Apagar o slot ${info.slot}`}
+                    aria-label={`Apagar o slot ${info.slot}`}
+                  >
+                    ✕
                   </button>
                 </div>
               ))}
             </div>
             <p className="play-panel-hint">
-              O core também tira um estado automático a cada 30 s.
+              Os estados são por jogo: os seis slots acima são
+              {playing ? ` de ${currentRom}` : " do jogo que estiver carregado"}.
             </p>
           </section>
 
@@ -461,22 +630,57 @@ const PlayPage = () => {
           </section>
 
           <section className="play-panel">
-            <h2>Teclas</h2>
+            <div className="play-panel-head">
+              <h2>Teclas</h2>
+              <button
+                type="button"
+                className="play-refresh"
+                onClick={emu.resetKeyBindings}
+                title="Voltar ao mapa padrão"
+              >
+                ↺ padrão
+              </button>
+            </div>
             <dl className="play-keys">
               {GROUPS.map((group) => (
                 <div key={group} className="play-key-group">
                   <dt>{GROUP_LABELS[group]}</dt>
                   <dd>
-                    {KEY_BINDINGS.filter((b) => b.group === group).map((b) => (
-                      <span key={b.sdlKey} className="play-key">
-                        <kbd>{b.label}</kbd>
-                        {b.button}
-                      </span>
-                    ))}
+                    {emu.bindings
+                      .filter((b) => b.group === group)
+                      .map((b) => (
+                        <button
+                          key={b.button}
+                          type="button"
+                          className={
+                            "play-key" +
+                            (capturing === b.button ? " is-capturing" : "")
+                          }
+                          onClick={() =>
+                            setCapturing(
+                              capturing === b.button ? null : b.button
+                            )
+                          }
+                          title={`Clique e pressione a tecla nova para ${b.button}`}
+                        >
+                          <kbd>{capturing === b.button ? "…" : b.label}</kbd>
+                          {b.button}
+                        </button>
+                      ))}
                   </dd>
                 </div>
               ))}
             </dl>
+            <p className="play-panel-hint">
+              {capturing
+                ? `Pressione a tecla para ${capturing} — Esc cancela.`
+                : "Clique numa tecla para trocá-la. Se a nova já pertencer a outra ação, as duas trocam."}
+            </p>
+            <p className="play-panel-hint">
+              {gamepadName
+                ? `🎮 ${gamepadName}`
+                : "Nenhum controle detectado — conecte um e aperte um botão."}
+            </p>
           </section>
         </aside>
       </div>

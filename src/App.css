@@ -2785,16 +2785,56 @@ nav {
 .play-canvas-host {
   position: absolute;
   inset: 0;
+  display: grid;
+  place-items: center;
 }
 .play-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
   /* Pixel art: sem suavizacao ao escalar. */
   image-rendering: pixelated;
   display: block;
+  /* A largura e a altura vem do JS (useDisplay): escala inteira calculada
+     para o container. Esticar com object-fit dava escala fracionaria, e o
+     arredondamento deixava uns pixels com 3 px de lado e outros com 4. */
+}
+
+/* Tela cheia: a moldura vira a tela toda e a pagina some atras. */
+.play-screen:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  max-height: none;
+  border: none;
+  border-radius: 0;
+  background: #000;
+}
+.play-fs-hint {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  background: rgba(5, 6, 10, 0.75);
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  pointer-events: none;
+  /* Aparece na entrada e sai de cena: e um lembrete, nao um elemento de HUD. */
+  animation: play-fs-fade 4s var(--ease-out) forwards;
+}
+@keyframes play-fs-fade {
+  0%,
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .play-fs-hint {
+    animation: none;
+    opacity: 1;
+  }
 }
 .play-screen-overlay {
   position: absolute;
@@ -2846,6 +2886,59 @@ nav {
   background: var(--surface-3);
   border-color: var(--border-strong);
 }
+/* Rebobinar: enquanto segura, o botao precisa parecer ativo — e o unico
+   sinal de que o jogo esta andando para tras de proposito. */
+.play-rewind.is-rewinding {
+  background: var(--accent-alt) !important;
+  border-color: var(--accent-alt) !important;
+  color: #12131a !important;
+}
+
+/* Escala: botoes em vez de select, porque trocar de escala e comparativo —
+   voce troca, olha a tela, troca de novo. */
+.play-scale {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+}
+.play-scale-label {
+  color: var(--text-dim);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-right: 2px;
+}
+.play-scale-btn {
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background: none;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  transition: color var(--dur-fast), background var(--dur-fast);
+}
+.play-scale-btn:hover {
+  color: var(--text);
+  background: var(--surface-3);
+}
+.play-scale-btn.is-active {
+  color: var(--accent-alt);
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+}
+.play-scale-now {
+  color: var(--text-dim);
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+  margin-left: 4px;
+  padding-left: 8px;
+  border-left: 1px solid var(--border);
+}
+
 .play-slider {
   display: flex;
   align-items: center;
@@ -3033,9 +3126,62 @@ nav {
 }
 .play-slot {
   display: grid;
-  grid-template-columns: 20px 1fr 1fr;
+  /* num | estado | gravar | carregar | apagar */
+  grid-template-columns: 18px minmax(0, 1fr) auto auto 22px;
   gap: 6px;
   align-items: center;
+}
+/* Slot ocupado se distingue do vazio antes de qualquer clique. */
+.play-slot.is-filled .play-slot-num {
+  color: var(--accent-alt);
+  font-weight: 700;
+}
+.play-slot-state {
+  color: var(--text-dim);
+  font-size: 0.66rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.play-slot.is-filled .play-slot-state {
+  color: var(--text-muted);
+}
+.play-slot-clear {
+  padding: 5px 0 !important;
+  text-align: center;
+}
+.play-slot-clear:hover:not(:disabled) {
+  color: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+/* Retomar do ponto automatico e o caminho de volta ao jogo: fica acima dos
+   seis slots, com peso de acao principal. */
+.play-auto-state {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.play-resume {
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+}
+.play-resume:hover:not(:disabled) {
+  border-color: var(--accent-alt);
+  color: var(--accent-alt);
+}
+.play-linkish {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--text-muted);
+  font-size: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.play-linkish:hover {
+  color: var(--accent-alt);
 }
 .play-slot-num {
   color: var(--text-dim);
@@ -3112,12 +3258,23 @@ nav {
   flex-wrap: wrap;
   gap: 6px;
 }
+/* Cada tecla e um botao: clicar abre a captura da tecla nova. */
 .play-key {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  padding: 2px 6px 2px 2px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  background: none;
   font-size: 0.68rem;
   color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color var(--dur-fast), color var(--dur-fast);
+}
+.play-key:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
 }
 .play-key kbd {
   padding: 2px 6px;
@@ -3128,6 +3285,29 @@ nav {
   color: var(--text);
   font-family: var(--font-body);
   font-size: 0.66rem;
+  min-width: 1.6em;
+  text-align: center;
+}
+/* Esperando a tecla: o alvo precisa estar obvio, porque a proxima tecla
+   pressionada vai para ele e nao para o jogo. */
+.play-key.is-capturing {
+  border-color: var(--accent-alt);
+  color: var(--accent-alt);
+}
+.play-key.is-capturing kbd {
+  border-color: var(--accent-alt);
+  color: var(--accent-alt);
+  animation: play-key-pulse 1s ease-in-out infinite;
+}
+@keyframes play-key-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .play-key.is-capturing kbd {
+    animation: none;
+  }
 }
 
 @media (max-width: 900px) {

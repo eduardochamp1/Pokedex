@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   checkIsolation,
   coreVersion,
@@ -7,11 +7,19 @@ import {
   getLoadedRom,
   setLoadedRom,
 } from "./core";
-import { applyKeyBindings } from "./keyBindings";
+import {
+  applyKeyBindings,
+  loadBindings,
+  rebind,
+  resetBindings,
+  saveBindings,
+  type KeyBinding,
+} from "./keyBindings";
 import {
   listLocalSaves,
   readLocalSave,
   requestPersistence,
+  formatBytes,
   saveNameFor,
   writeLocalSave,
   type LocalSave,
@@ -24,6 +32,13 @@ import {
   type SaveStateSlot,
   type mGBAEmulator,
 } from "./types";
+import {
+  deleteStateFile,
+  readStateEntries,
+  slotsForRom,
+  type SlotInfo,
+} from "./saveStates";
+import { REWIND_SETTINGS, screenshotFileName } from "./capture";
 
 interface LocalRom {
   fileName: string;
@@ -72,6 +87,27 @@ export function useEmulator() {
   const [storage, setStorage] = useState<StorageStatus | null>(null);
   /** null = pasta saves/ indisponível (produção). */
   const [localSaves, setLocalSaves] = useState<LocalSave[] | null>(null);
+  /** Os seis slots com o estado real lido do FS do core. */
+  const [slots, setSlots] = useState<SlotInfo[]>(() => slotsForRom([], undefined));
+  /**
+   * Estado automático do jogo atual, se o core já capturou um. O core tira um a
+   * cada 30 s mas nunca o oferecia: ficava gravado e era descartado na próxima
+   * sessão.
+   */
+  const [autoState, setAutoState] = useState<{ name: string; size: number } | null>(
+    null
+  );
+  /** Mapa de teclas em vigor — o padrão com o que estiver remapeado por cima. */
+  const [bindings, setBindings] = useState<KeyBinding[]>(loadBindings);
+  /**
+   * O core precisa saber quais teclas SAÍRAM do mapa para soltá-las; sem o
+   * anterior, a tecla antiga continuaria disparando junto com a nova.
+   */
+  const appliedBindingsRef = useRef<KeyBinding[] | null>(null);
+  const bindingsRef = useRef(bindings);
+  bindingsRef.current = bindings;
+  /** Rebobinando neste instante — a tela precisa mostrar que está. */
+  const [rewinding, setRewinding_] = useState(false);
   const lastBackupRef = useRef(0);
   /**
    * O callback do core e registrado uma vez na inicializacao; a ref evita
@@ -96,6 +132,18 @@ export function useEmulator() {
       setSaves(core.listSaves().filter((name) => name !== "." && name !== ".."));
     } catch {
       // FS ainda nao pronto — a proxima chamada resolve
+    }
+    // Os slots saem do diretório de estados, e a ROM corrente vem do módulo e
+    // não do state: refreshLibrary é chamado de dentro de callbacks que foram
+    // criados antes do setStatus, então o status aqui estaria atrasado.
+    setSlots(slotsForRom(readStateEntries(core), getLoadedRom() ?? undefined));
+    try {
+      const auto = core.getAutoSaveState();
+      setAutoState(
+        auto ? { name: auto.autoSaveStateName, size: auto.data.length } : null
+      );
+    } catch {
+      setAutoState(null);
     }
   }, []);
 
@@ -194,13 +242,22 @@ export function useEmulator() {
               message: "O core travou. Recarregue a página para tentar de novo.",
             });
           },
+          // A cada captura automática (30 s) o painel de estados se atualiza —
+          // senão "Continuar de onde parou" só apareceria ao trocar de jogo.
+          autoSaveStateCapturedCallback: () => refreshLibrary(),
         });
         // Bindings explicitos: a legenda da UI le do mesmo mapa.
-        applyKeyBindings(core);
+        // bindingsRef e não `bindings`: este efeito roda uma vez, e o que vale
+        // na inicialização é o que foi carregado do localStorage.
+        const initial = bindingsRef.current;
+        applyKeyBindings(core, initial);
+        appliedBindingsRef.current = initial;
         core.setCoreSettings({
           autoSaveStateEnable: true,
           autoSaveStateTimerIntervalSeconds: 30,
           restoreAutoSaveStateOnLoad: false,
+          // O buffer de rebobinar já existia no core e nunca era ligado.
+          ...REWIND_SETTINGS,
         });
         // O core pode ja estar com jogo carregado de uma montagem anterior
         // (navegar para fora e voltar). A limpeza pausou, entao voltamos
@@ -468,6 +525,47 @@ export function useEmulator() {
     );
   }, []);
 
+  /** Apaga o estado de um slot e devolve o painel ao real. */
+  const clearState = useCallback(
+    async (slot: SaveStateSlot) => {
+      const core = coreRef.current;
+      const rom = getLoadedRom();
+      if (!core || !rom) return;
+      const removed = deleteStateFile(core, rom, slot);
+      if (removed) await core.FSSync();
+      refreshLibrary();
+      setNotice(
+        removed ? `Slot ${slot} apagado.` : `Slot ${slot} já estava vazio.`
+      );
+    },
+    [refreshLibrary]
+  );
+
+  /**
+   * Retoma do estado automático — o que o core vinha gravando a cada 30 s e
+   * que até agora era descartado sem nunca ser oferecido.
+   */
+  const loadAutoState = useCallback(() => {
+    const core = coreRef.current;
+    if (!core) return;
+    const ok = core.loadAutoSaveState();
+    setNotice(
+      ok
+        ? "Retomado do estado automático."
+        : "Não havia estado automático para este jogo."
+    );
+  }, []);
+
+  /** Força uma captura automática agora, sem gastar um dos seis slots. */
+  const captureAutoState = useCallback(async () => {
+    const core = coreRef.current;
+    if (!core) return;
+    const ok = core.forceAutoSaveState();
+    await core.FSSync();
+    refreshLibrary();
+    setNotice(ok ? "Ponto automático capturado." : "Não deu para capturar.");
+  }, [refreshLibrary]);
+
   /** Baixa o save de bateria (.sav) do jogo em execução. */
   const exportSave = useCallback((romName: string) => {
     const core = coreRef.current;
@@ -505,6 +603,34 @@ export function useEmulator() {
     [refreshLibrary]
   );
 
+  // Reaplica o mapa sempre que ele muda. Roda depois da inicialização porque
+  // depende de coreRef, que só existe quando o core termina de subir.
+  useEffect(() => {
+    const core = coreRef.current;
+    if (!core || appliedBindingsRef.current === null) return;
+    if (appliedBindingsRef.current === bindings) return;
+    applyKeyBindings(core, bindings, appliedBindingsRef.current);
+    appliedBindingsRef.current = bindings;
+  }, [bindings]);
+
+  /**
+   * Troca a tecla de uma ação. Se a tecla já era de outra, as duas trocam —
+   * ver `rebind`.
+   */
+  const rebindKey = useCallback((button: string, sdlKey: string) => {
+    setBindings((current) => {
+      const next = rebind(current, button, sdlKey);
+      if (next === current) return current;
+      saveBindings(next);
+      return next;
+    });
+  }, []);
+
+  const resetKeyBindings = useCallback(() => {
+    setBindings(resetBindings());
+    setNotice("Teclas de volta ao padrão.");
+  }, []);
+
   const setVolume = useCallback((percent: number) => {
     setVolumeState(percent);
     coreRef.current?.setVolume(percent / 100);
@@ -521,6 +647,75 @@ export function useEmulator() {
   }, []);
   const releaseButton = useCallback((button: string) => {
     coreRef.current?.buttonUnpress(button);
+  }, []);
+
+  // O gamepad físico usa o mesmo caminho do gamepad de toque. O objeto precisa
+  // ser estável: o loop de leitura roda por frame e não pode ser remontado a
+  // cada render, ou perde o estado do frame anterior.
+  const gamepadApi = useMemo(
+    () => ({ press: pressButton, release: releaseButton }),
+    [pressButton, releaseButton]
+  );
+
+  /**
+   * Rebobina enquanto estiver segurado.
+   *
+   * É segurar e soltar, não ligar e desligar: rebobinar é uma correção de
+   * curso — você volta olhando a tela e larga no ponto certo. Um botão de
+   * liga/desliga faria o jogo andar para trás sozinho até alguém lembrar.
+   */
+  const setRewinding = useCallback((active: boolean) => {
+    coreRef.current?.toggleRewind(active);
+    setRewinding_(active);
+  }, []);
+
+  /**
+   * Tira um PNG da tela e entrega como download.
+   *
+   * O core escreve no FS virtual; daqui lemos de volta e entregamos. Ficar só
+   * no FS seria guardar uma captura que ninguém consegue alcançar.
+   */
+  const takeScreenshot = useCallback(
+    async (romName: string) => {
+      const core = coreRef.current;
+      if (!core) return;
+      const fileName = screenshotFileName(romName, new Date());
+      if (!core.screenshot(fileName)) {
+        setNotice("O core não conseguiu capturar a tela.");
+        return;
+      }
+      await core.FSSync();
+      try {
+        const path = `${core.filePaths().screenshotsPath}/${fileName}`;
+        const data = core.FS.readFile(path) as Uint8Array;
+        // Mesmo motivo do exportSave: o buffer pode ser SharedArrayBuffer, que
+        // o Blob não aceita.
+        const copy = new Uint8Array(data.length);
+        copy.set(data);
+        const url = URL.createObjectURL(new Blob([copy], { type: "image/png" }));
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = fileName;
+        link.click();
+        URL.revokeObjectURL(url);
+        setNotice(`${fileName} salvo (${formatBytes(copy.length)}).`);
+      } catch (error) {
+        setNotice(
+          `A captura foi feita mas não deu para ler de volta: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    },
+    []
+  );
+
+  /**
+   * Liga/desliga a entrada no core. Usado enquanto a tela espera uma tecla
+   * nova: sem isso, a tecla escolhida também iria para o jogo.
+   */
+  const setInputEnabled = useCallback((enabled: boolean) => {
+    coreRef.current?.toggleInput(enabled);
   }, []);
 
   /** Grava o save pendente — útil antes de fechar a aba. */
@@ -544,6 +739,8 @@ export function useEmulator() {
 
   return {
     stageRef,
+    /** O canvas singleton, para quem precisa medi-lo (escala, tela cheia). */
+    canvas: getCanvas(),
     status,
     version,
     roms,
@@ -553,6 +750,8 @@ export function useEmulator() {
     fastForward,
     notice,
     dismissNotice: () => setNotice(null),
+    /** Para quem dirige partes da tela de fora daqui (escala, tela cheia). */
+    notify: setNotice,
     playFile,
     playStored,
     playLocal,
@@ -562,6 +761,11 @@ export function useEmulator() {
     stop,
     saveState,
     loadState,
+    clearState,
+    slots,
+    autoState,
+    loadAutoState,
+    captureAutoState,
     exportSave,
     importSave,
     setVolume,
@@ -569,6 +773,15 @@ export function useEmulator() {
     sync,
     pressButton,
     releaseButton,
+    bindings,
+    rebindKey,
+    resetKeyBindings,
+    setInputEnabled,
+    /** Estável: o loop do gamepad não pode ser recriado a cada render. */
+    gamepadApi,
+    rewinding,
+    setRewinding,
+    takeScreenshot,
     storage,
     localSaves,
     refreshLocalRoms,

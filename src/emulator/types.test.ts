@@ -5,7 +5,7 @@ import {
   consoleOf,
   isSupportedRom,
 } from "./types";
-import { KEY_BINDINGS, TOUCH_BUTTONS } from "./keyBindings";
+import { DEFAULT_BINDINGS, TOUCH_BUTTONS } from "./keyBindings";
 
 describe("isSupportedRom", () => {
   it.each([".gb", ".gbc", ".gba"])("aceita %s", (ext) => {
@@ -48,17 +48,17 @@ describe("consoleOf", () => {
 
 describe("mapa de teclas", () => {
   it("não tem tecla física repetida", () => {
-    const keys = KEY_BINDINGS.map((b) => b.sdlKey);
+    const keys = DEFAULT_BINDINGS.map((b) => b.sdlKey);
     expect(keys.filter((k, i) => keys.indexOf(k) !== i)).toEqual([]);
   });
 
   it("não tem botão do console repetido", () => {
-    const buttons = KEY_BINDINGS.map((b) => b.button);
+    const buttons = DEFAULT_BINDINGS.map((b) => b.button);
     expect(buttons.filter((b, i) => buttons.indexOf(b) !== i)).toEqual([]);
   });
 
   it("cobre os dez botões do GBA", () => {
-    expect(new Set(KEY_BINDINGS.map((b) => b.button))).toEqual(
+    expect(new Set(DEFAULT_BINDINGS.map((b) => b.button))).toEqual(
       new Set(["Up", "Down", "Left", "Right", "A", "B", "L", "R", "Start", "Select"])
     );
   });
@@ -67,7 +67,7 @@ describe("mapa de teclas", () => {
   // se divergirem, a tela mente sobre o que a tecla faz.
   it("o gamepad virtual cobre exatamente os mesmos botões", () => {
     expect(new Set(TOUCH_BUTTONS.map((b) => b.button))).toEqual(
-      new Set(KEY_BINDINGS.map((b) => b.button))
+      new Set(DEFAULT_BINDINGS.map((b) => b.button))
     );
   });
 
