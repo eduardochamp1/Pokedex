@@ -3593,3 +3593,13 @@ nav {
   text-align: center;
   padding: 0 16px;
 }
+
+/* ===== SizeCanvas ===== */
+.size-canvas {
+  width: 100%;
+  height: auto;
+  background: var(--surface-1);
+  border-radius: 12px;
+  padding: 12px;
+  box-sizing: border-box;
+}
