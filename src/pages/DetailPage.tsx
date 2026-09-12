@@ -9,6 +9,7 @@ import FavoriteContext from "../contexts/favoritesContext";
 import CardHero from "../components/CardHero";
 import EvolutionChain from "../components/EvolutionChain";
 import SpriteViewer from "../components/SpriteViewer";
+import SpriteScrubber from "../components/SpriteScrubber";
 import VarietySwitcher from "../components/VarietySwitcher";
 import PokemonLore from "../components/PokemonLore";
 import PokemonMeta from "../components/PokemonMeta";
@@ -147,6 +148,11 @@ const DetailPage = () => {
         <aside className="detail-panel detail-panel-abilities">
           <h3>Habilidades</h3>
           <AbilityList abilities={pokemon.abilities} />
+        </aside>
+
+        <aside className="detail-panel detail-panel-scrubber">
+          <h3>Sprite através das gerações</h3>
+          <SpriteScrubber pokemon={pokemon} />
         </aside>
 
         <aside className="detail-panel detail-panel-stats">
