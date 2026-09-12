@@ -2886,6 +2886,49 @@ nav {
   background: var(--surface-3);
   border-color: var(--border-strong);
 }
+/* Biblioteca: a ROM ocupa a linha e o remover fica na borda, para o alvo do
+   clique de jogar continuar sendo praticamente a linha inteira. */
+.play-rom-row {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+}
+.play-rom-row > button:first-child {
+  flex: 1;
+  min-width: 0;
+}
+.play-rom-remove {
+  flex: 0 0 auto;
+  padding: 0 8px;
+  border-radius: var(--radius-sm);
+  background: none;
+  border: 1px solid transparent;
+  color: var(--text-dim);
+  font-size: 0.7rem;
+}
+.play-rom-remove:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.play-rom-confirm {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.play-rom-confirm button {
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.66rem;
+  white-space: nowrap;
+}
+.play-rom-confirm-yes {
+  color: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
 /* Rebobinar: enquanto segura, o botao precisa parecer ativo — e o unico
    sinal de que o jogo esta andando para tras de proposito. */
 .play-rewind.is-rewinding {

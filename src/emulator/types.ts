@@ -17,6 +17,11 @@ export interface RomEntry {
   fileName: string;
   /** De onde veio: escolhido pelo usuario ou lido da pasta local roms/. */
   origin: "upload" | "local";
+  /**
+   * Bytes que ocupa no IndexedDB. A biblioteca so crescia e nao havia como
+   * saber o custo — sao 16 a 32 MB por jogo de GBA.
+   */
+  size?: number;
 }
 
 export type EmulatorStatus =

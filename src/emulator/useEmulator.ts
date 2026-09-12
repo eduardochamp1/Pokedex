@@ -141,11 +141,21 @@ export function useEmulator() {
     const core = coreRef.current;
     if (!core) return;
     try {
+      const gamePath = core.filePaths().gamePath;
       setRoms(
         core
           .listRoms()
           .filter(isSupportedRom)
-          .map((fileName) => ({ fileName, origin: "upload" as const }))
+          .map((fileName) => {
+            let size: number | undefined;
+            try {
+              size = (core.FS.stat(`${gamePath}/${fileName}`) as { size?: number })
+                .size;
+            } catch {
+              // sem stat: a lista continua valendo, só sem o tamanho
+            }
+            return { fileName, origin: "upload" as const, size };
+          })
       );
       // listSaves devolve o diretório cru, com as entradas "." e ".." do FS.
       setSaves(core.listSaves().filter((name) => name !== "." && name !== ".."));
@@ -538,6 +548,43 @@ export function useEmulator() {
     resumeLastRomRef.current = resumeLastRom;
   }, [resumeLastRom]);
 
+  /**
+   * Remove uma ROM da biblioteca do navegador.
+   *
+   * A biblioteca so crescia: cada ROM enviada ficava no IndexedDB para sempre,
+   * a 16-32 MB por jogo de GBA, sem nenhuma forma de limpar pela tela.
+   *
+   * O save de bateria e os save states NAO sao apagados junto — sao o
+   * progresso, e quem tira a ROM da lista quase nunca quer perder o jogo
+   * salvo. Se a mesma ROM voltar, o progresso volta com ela.
+   */
+  const deleteRom = useCallback(
+    async (fileName: string) => {
+      const core = coreRef.current;
+      if (!core) return;
+      if (fileName === getLoadedRom()) {
+        setNotice(`Feche ${fileName} antes de removê-lo da biblioteca.`);
+        return;
+      }
+      try {
+        core.FS.unlink(`${core.filePaths().gamePath}/${fileName}`);
+        await core.FSSync();
+      } catch (error) {
+        setNotice(
+          `Não deu para remover ${fileName}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        return;
+      }
+      // Sem isso a próxima visita tentaria recarregar uma ROM que não existe.
+      if (getLastRom() === fileName) forgetLastRom();
+      refreshLibrary();
+      setNotice(`${fileName} removido da biblioteca. O save foi mantido.`);
+    },
+    [refreshLibrary]
+  );
+
   /** Puxa uma ROM da pasta local roms/ e joga. */
   const playLocal = useCallback(
     async (fileName: string) => {
@@ -859,6 +906,7 @@ export function useEmulator() {
     notify: setNotice,
     playFile,
     playStored,
+    deleteRom,
     playLocal,
     pause,
     resume,

@@ -42,6 +42,8 @@ const PlayPage = () => {
 
   /** Ação esperando uma tecla nova, ou null. */
   const [capturing, setCapturing] = useState<string | null>(null);
+  /** ROM com a remoção pendente de confirmação, ou null. */
+  const [removing, setRemoving] = useState<string | null>(null);
   const gamepadName = useGamepad(emu.gamepadApi, playing);
 
   // Enquanto captura, o core não pode receber o teclado: a tecla que está
@@ -394,7 +396,7 @@ const PlayPage = () => {
               <h2>Na sua biblioteca</h2>
               <ul className="play-rom-list">
                 {emu.roms.map((rom) => (
-                  <li key={rom.fileName}>
+                  <li key={rom.fileName} className="play-rom-row">
                     <button
                       type="button"
                       className={rom.fileName === currentRom ? "is-current" : ""}
@@ -403,11 +405,46 @@ const PlayPage = () => {
                       <span className="play-rom-name">{rom.fileName}</span>
                       <span className="play-rom-meta">
                         {consoleOf(rom.fileName)}
+                        {rom.size !== undefined && ` · ${formatBytes(rom.size)}`}
                       </span>
                     </button>
+                    {/* Dois passos em vez de um confirm() do navegador: são
+                        dezenas de MB que não voltam, e um diálogo modal para
+                        isso é pesado demais. */}
+                    {removing === rom.fileName ? (
+                      <span className="play-rom-confirm">
+                        <button
+                          type="button"
+                          className="play-rom-confirm-yes"
+                          onClick={() => {
+                            void emu.deleteRom(rom.fileName);
+                            setRemoving(null);
+                          }}
+                        >
+                          remover
+                        </button>
+                        <button type="button" onClick={() => setRemoving(null)}>
+                          cancelar
+                        </button>
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        className="play-rom-remove"
+                        title={`Remover ${rom.fileName} da biblioteca`}
+                        aria-label={`Remover ${rom.fileName} da biblioteca`}
+                        onClick={() => setRemoving(rom.fileName)}
+                      >
+                        ✕
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>
+              <p className="play-panel-hint">
+                Remover libera espaço no navegador e <strong>mantém o save</strong>
+                : se a mesma ROM voltar, o progresso volta com ela.
+              </p>
             </section>
           )}
 
