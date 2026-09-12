@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from "react";
+import { useContext, useRef } from "react";
 import { Link } from "react-router-dom";
 import FavoriteContext from "../contexts/favoritesContext";
 import { useTiltEffect } from "../hooks/useTiltEffect";
@@ -25,7 +25,6 @@ const Card = ({
   const { favoritePokemons, updateFavoritePokemons } = useContext(FavoriteContext);
   const cardRef = useRef<HTMLDivElement>(null);
   useTiltEffect(cardRef, { maxDeg: variant === "mini" ? 4 : 8 });
-  const [isNavigating, setIsNavigating] = useState(false);
 
   const isFavorite = favoritePokemons.includes(pokemon.name);
   const isLegendary = LEGENDARY.includes(pokemon.name);
@@ -66,11 +65,6 @@ const Card = ({
             decoding="async"
             width={220}
             height={220}
-            style={
-              isNavigating
-                ? ({ viewTransitionName: `sprite-${pokemon.id}` } as React.CSSProperties)
-                : undefined
-            }
           />
         ) : (
           <span>?</span>
@@ -160,11 +154,7 @@ const Card = ({
       <div className="card-spectral" aria-hidden="true" />
       <div className="card-glitter" aria-hidden="true" />
       {linkTo ? (
-        <Link
-          to={linkTo}
-          className="card-link"
-          onClick={() => setIsNavigating(true)}
-        >
+        <Link to={linkTo} className="card-link">
           {inner}
         </Link>
       ) : (
