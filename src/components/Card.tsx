@@ -15,6 +15,11 @@ interface Props {
 }
 
 const STAT_ORDER = ["hp", "attack", "defense"] as const;
+const STAT_LABEL: Record<(typeof STAT_ORDER)[number], string> = {
+  hp: "HP",
+  attack: "ATK",
+  defense: "DEF",
+};
 
 const Card = ({
   pokemon,
@@ -81,7 +86,7 @@ const Card = ({
           <ul className="card-stats">
             {stats.slice(1).map((s) => (
               <li key={s.slug}>
-                <span className="card-stat-label">{s.slug}</span>
+                <span className="card-stat-label">{STAT_LABEL[s.slug]}</span>
                 <span className="card-stat-bar">
                   <span
                     className="card-stat-fill"
