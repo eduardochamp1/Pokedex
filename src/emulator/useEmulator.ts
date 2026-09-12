@@ -6,6 +6,8 @@ import {
   getCore,
   getLoadedRom,
   setLoadedRom,
+  getWasRunning,
+  setWasRunning,
 } from "./core";
 import {
   applyKeyBindings,
@@ -39,6 +41,15 @@ import {
   type SlotInfo,
 } from "./saveStates";
 import { REWIND_SETTINGS, screenshotFileName } from "./capture";
+import {
+  forgetLastRom,
+  getFastForward,
+  getLastRom,
+  getVolume,
+  rememberFastForward,
+  rememberLastRom,
+  rememberVolume,
+} from "./session";
 
 interface LocalRom {
   fileName: string;
@@ -81,8 +92,8 @@ export function useEmulator() {
   /** null = pasta roms/ indisponível (produção); [] = pasta vazia. */
   const [localRoms, setLocalRoms] = useState<LocalRom[] | null>(null);
   const [saves, setSaves] = useState<string[]>([]);
-  const [volume, setVolumeState] = useState(100);
-  const [fastForward, setFastForwardState] = useState(1);
+  const [volume, setVolumeState] = useState(getVolume);
+  const [fastForward, setFastForwardState] = useState(getFastForward);
   const [notice, setNotice] = useState<string | null>(null);
   const [storage, setStorage] = useState<StorageStatus | null>(null);
   /** null = pasta saves/ indisponível (produção). */
@@ -116,6 +127,14 @@ export function useEmulator() {
   const backupToDiskRef = useRef<
     ((rom: string, opts?: { force?: boolean }) => Promise<boolean>) | null
   >(null);
+  /** Mesma razão: a inicialização roda uma vez e precisa da versão atual. */
+  const resumeLastRomRef = useRef<((rom: string) => void) | null>(null);
+  /**
+   * O status corrente para a limpeza ler. O efeito de inicialização tem deps
+   * vazias, então o `status` que ele fecharia é o da primeira renderização.
+   */
+  const statusRef = useRef(status);
+  statusRef.current = status;
 
   /** Relê do sistema de arquivos do core o que existe guardado. */
   const refreshLibrary = useCallback(() => {
@@ -260,10 +279,32 @@ export function useEmulator() {
           ...REWIND_SETTINGS,
         });
         // O core pode ja estar com jogo carregado de uma montagem anterior
-        // (navegar para fora e voltar). A limpeza pausou, entao voltamos
-        // pausados em vez de mentir "nenhum jogo carregado".
+        // (navegar para fora e voltar). A limpeza pausou; se estava rodando,
+        // voltamos a rodar — ter que clicar "Continuar" ao voltar de uma busca
+        // e atrito puro.
         const previous = getLoadedRom();
-        setStatus(previous ? { kind: "paused", rom: previous } : { kind: "ready" });
+        if (previous) {
+          if (getWasRunning()) {
+            core.resumeGame();
+            core.resumeAudio();
+            setStatus({ kind: "running", rom: previous });
+          } else {
+            setStatus({ kind: "paused", rom: previous });
+          }
+          refreshLibrary();
+          return;
+        }
+
+        // Sem jogo no core: ou e a primeira visita, ou a pagina foi recarregada
+        // e o core morreu junto. A ROM continua no IndexedDB — recarregamos a
+        // ultima, para nao obrigar a passear pela biblioteca de novo.
+        const last = getLastRom();
+        const inLibrary = last !== undefined && core.listRoms().includes(last);
+        if (inLibrary) {
+          void resumeLastRomRef.current?.(last);
+          return;
+        }
+        setStatus({ kind: "ready" });
         refreshLibrary();
       },
       (error: unknown) => {
@@ -282,6 +323,9 @@ export function useEmulator() {
       const core = coreRef.current;
       if (core) {
         try {
+          // Guarda se estava rodando ANTES de pausar — é o que a próxima
+          // montagem usa para decidir se volta rodando.
+          setWasRunning(statusRef.current.kind === "running");
           core.pauseGame();
           core.pauseAudio();
           void core.FSSync();
@@ -412,12 +456,15 @@ export function useEmulator() {
         setStatus({ kind: "error", message: `Não deu para carregar ${flatName}.` });
         return;
       }
+      // Volume E velocidade: a barra guardava 5x e o jogo novo entrava em 1x.
       core.setVolume(volume / 100);
+      core.setFastForwardMultiplier(fastForward);
+      rememberLastRom(flatName);
       setLoadedRom(flatName);
       setStatus({ kind: "running", rom: flatName });
       refreshLibrary();
     },
-    [refreshLibrary, volume]
+    [refreshLibrary, volume, fastForward]
   );
 
   /** Roda uma ROM que já está guardada no FS do core. */
@@ -431,13 +478,65 @@ export function useEmulator() {
         setStatus({ kind: "error", message: `Não deu para carregar ${fileName}.` });
         return;
       }
+      // Volume E velocidade: a barra guardava 5x e o jogo novo entrava em 1x.
       core.setVolume(volume / 100);
+      core.setFastForwardMultiplier(fastForward);
+      rememberLastRom(fileName);
       setLoadedRom(fileName);
       setStatus({ kind: "running", rom: fileName });
       refreshLibrary();
     },
-    [refreshLibrary, volume]
+    [refreshLibrary, volume, fastForward]
   );
+
+  /**
+   * Recarrega a última ROM depois de a página ter sido recarregada, já no
+   * ponto automático quando existe um.
+   *
+   * Só entra quando o core está sem jogo E a ROM ainda está na biblioteca — e
+   * "Fechar jogo" esquece a ROM, então quem fechou de propósito não é trazido
+   * de volta. Nunca é silencioso: o aviso diz o que foi retomado, senão o jogo
+   * apareceria adiantado sem explicação.
+   */
+  const resumeLastRom = useCallback(
+    async (fileName: string) => {
+      const core = coreRef.current;
+      if (!core) return;
+      const ok = core.loadGame(`${core.filePaths().gamePath}/${fileName}`);
+      if (!ok) {
+        // A ROM sumiu ou está corrompida: esquecer evita repetir a falha em
+        // toda visita.
+        forgetLastRom();
+        setStatus({ kind: "ready" });
+        refreshLibrary();
+        return;
+      }
+      core.setVolume(volume / 100);
+      core.setFastForwardMultiplier(fastForward);
+      setLoadedRom(fileName);
+
+      await core.FSSync();
+      setStatus({ kind: "running", rom: fileName });
+
+      // O ponto automático NÃO é aplicado aqui de propósito. `loadAutoSaveState`
+      // recusa logo depois de um `loadGame` — medido no browser: pelo botão da
+      // tela, com o jogo já rodando, funciona; na mesma volta do carregamento,
+      // devolve false mesmo tentando de novo por segundos. Então o jogo volta do
+      // começo e quem decide retomar é quem está jogando, no botão que já existe.
+      const hasAuto = core.getAutoSaveState() !== null;
+      setNotice(
+        hasAuto
+          ? `${fileName} recarregado. Use "Continuar de onde parou" para voltar ao ponto automático.`
+          : `${fileName} recarregado. Use "Fechar jogo" se não quiser que ele volte sozinho.`
+      );
+      refreshLibrary();
+    },
+    [refreshLibrary, volume, fastForward]
+  );
+
+  useEffect(() => {
+    resumeLastRomRef.current = resumeLastRom;
+  }, [resumeLastRom]);
 
   /** Puxa uma ROM da pasta local roms/ e joga. */
   const playLocal = useCallback(
@@ -486,6 +585,10 @@ export function useEmulator() {
     core.quitGame();
     core.FSSync().catch(() => undefined);
     setLoadedRom(null);
+    // Fechar é dizer que não quer este jogo de volta na próxima visita — sem
+    // isso, retomar automático seria uma decisão impossível de desfazer.
+    setWasRunning(false);
+    forgetLastRom();
     setStatus({ kind: "ready" });
     refreshLibrary();
   }, [refreshLibrary]);
@@ -633,11 +736,13 @@ export function useEmulator() {
 
   const setVolume = useCallback((percent: number) => {
     setVolumeState(percent);
+    rememberVolume(percent);
     coreRef.current?.setVolume(percent / 100);
   }, []);
 
   const setFastForward = useCallback((multiplier: number) => {
     setFastForwardState(multiplier);
+    rememberFastForward(multiplier);
     coreRef.current?.setFastForwardMultiplier(multiplier);
   }, []);
 

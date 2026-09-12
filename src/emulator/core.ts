@@ -240,6 +240,24 @@ export function setLoadedRom(name: string | null): void {
   loadedRom = name;
 }
 
+/**
+ * O jogo estava rodando quando a pagina foi desmontada?
+ *
+ * Sair de /jogar pausa — nao vale queimar CPU e tocar audio numa aba que
+ * ninguem esta vendo. Mas voltar e ter que clicar em "Continuar" e atrito: se
+ * estava rodando ao sair, tem que voltar rodando. Vive aqui pelo mesmo motivo
+ * que `loadedRom`: o estado do React morre na desmontagem, o core nao.
+ */
+let wasRunning = false;
+
+export function getWasRunning(): boolean {
+  return wasRunning;
+}
+
+export function setWasRunning(running: boolean): void {
+  wasRunning = running;
+}
+
 /** Versao do core, para exibir na UI. */
 export function coreVersion(core: mGBAEmulator): string {
   const { projectName, projectVersion } = core.version;
