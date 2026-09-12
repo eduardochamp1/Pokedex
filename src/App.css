@@ -743,11 +743,16 @@ nav {
 .card-mini .card-type-dot { width: 8px; height: 8px; }
 
 /* Evolution chain */
+/* A cadeia quebra linha em vez de rolar na horizontal.
+   O painel de evolucoes e estreito — no mobile por causa da tela, e no desktop
+   porque ocupa a coluna lateral do grid — entao rolar escondia os estagios
+   seguintes justamente onde sobrava espaco para baixo. */
 .evo-chain {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  overflow-x: auto;
   padding: 4px;
 }
 .evo-step { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
