@@ -1,0 +1,69 @@
+/* ===== Holo layers (importado por App.css) =====
+   Empilha sobre .card { position: relative; overflow: hidden; }
+   Cada camada usa --holo-intensity (0..1) e --foil-x/y do useTiltEffect. */
+
+.card { --holo-intensity: 0.4; }
+.card.is-legendary { --holo-intensity: 0.9; }
+.card.is-mythical { --holo-intensity: 1; }
+.card-hero { --holo-intensity: 0.7; }
+.card-hero.is-legendary { --holo-intensity: 0.95; }
+.card-hero.is-mythical { --holo-intensity: 1; }
+
+.card-spectral,
+.card-glitter {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms ease;
+  border-radius: inherit;
+  z-index: 2;
+}
+
+.card:hover .card-spectral,
+.card-hero:hover .card-spectral {
+  opacity: calc(var(--holo-intensity) * 0.55);
+}
+.card:hover .card-glitter,
+.card-hero:hover .card-glitter {
+  opacity: calc(var(--holo-intensity) * 0.7);
+}
+
+@supports (mix-blend-mode: color-dodge) {
+  .card-spectral {
+    background: linear-gradient(
+      115deg,
+      transparent 20%,
+      rgba(255, 0, 128, 0.35) 40%,
+      rgba(0, 200, 255, 0.35) 55%,
+      rgba(255, 255, 0, 0.35) 70%,
+      transparent 85%
+    );
+    background-position: var(--foil-x, 50%) var(--foil-y, 50%);
+    background-size: 200% 200%;
+    mix-blend-mode: color-dodge;
+  }
+  .card-glitter {
+    background:
+      radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.6) 0, transparent 8%),
+      radial-gradient(circle at 70% 40%, rgba(255, 255, 255, 0.5) 0, transparent 6%),
+      radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.6) 0, transparent 7%),
+      radial-gradient(circle at 85% 75%, rgba(255, 255, 255, 0.5) 0, transparent 5%);
+    mix-blend-mode: overlay;
+  }
+}
+
+.card:not(.is-legendary):not(.is-mythical) .card-glitter,
+.card-hero:not(.is-legendary):not(.is-mythical) .card-glitter {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-spectral,
+  .card-glitter { display: none; }
+}
+
+@media (hover: none) {
+  .card-spectral { opacity: calc(var(--holo-intensity) * 0.25); }
+  .card-glitter { opacity: calc(var(--holo-intensity) * 0.3); }
+}

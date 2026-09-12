@@ -34,6 +34,8 @@ const CardHero = ({ pokemon, spriteUrl }: Props) => {
       style={{ ["--type-color" as string]: `var(--t-${primaryType})` }}
     >
       <div className="card-foil" aria-hidden="true" />
+      <div className="card-spectral" aria-hidden="true" />
+      <div className="card-glitter" aria-hidden="true" />
       <div className="card-header">
         <div className="card-name">{pokemon.name}</div>
         <div className="card-types">
