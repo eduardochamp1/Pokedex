@@ -10,21 +10,8 @@ import {
   setWasRunning,
 } from "./core";
 import {
-  applyKeyBindings,
-  loadBindings,
-  rebind,
-  resetBindings,
-  saveBindings,
-  type KeyBinding,
-} from "./keyBindings";
-import {
-  listLocalSaves,
-  readLocalSave,
   requestPersistence,
   formatBytes,
-  saveNameFor,
-  writeLocalSave,
-  type LocalSave,
   type StorageStatus,
 } from "./storage";
 import {
@@ -47,14 +34,9 @@ import {
   stateThumbnailName,
 } from "./capture";
 import { TURBO_MULTIPLIER } from "./shortcuts";
-import {
-  DEFAULT_AV,
-  appendLog,
-  isAvSettings,
-  type AvSettings,
-  type LogLine,
-} from "./diagnostics";
-import { loadPref, savePref } from "./prefs";
+import { useDiagnostics } from "./useDiagnostics";
+import { useDiskBackup } from "./useDiskBackup";
+import { useKeyBindings } from "./useKeyBindings";
 
 import {
   forgetLastRom,
@@ -65,9 +47,6 @@ import {
   rememberLastRom,
   rememberVolume,
 } from "./session";
-
-/** Chave das preferencias de audio/video. */
-const AV_PREF = "av-settings";
 
 interface LocalRom {
   fileName: string;
@@ -114,8 +93,6 @@ export function useEmulator() {
   const [fastForward, setFastForwardState] = useState(getFastForward);
   const [notice, setNotice] = useState<string | null>(null);
   const [storage, setStorage] = useState<StorageStatus | null>(null);
-  /** null = pasta saves/ indisponível (produção). */
-  const [localSaves, setLocalSaves] = useState<LocalSave[] | null>(null);
   /** Os seis slots com o estado real lido do FS do core. */
   const [slots, setSlots] = useState<SlotInfo[]>(() => slotsForRom([], undefined));
   /**
@@ -127,28 +104,15 @@ export function useEmulator() {
     null
   );
   /** Mapa de teclas em vigor — o padrão com o que estiver remapeado por cima. */
-  const [bindings, setBindings] = useState<KeyBinding[]>(loadBindings);
-  /**
-   * O core precisa saber quais teclas SAÍRAM do mapa para soltá-las; sem o
-   * anterior, a tecla antiga continuaria disparando junto com a nova.
-   */
-  const appliedBindingsRef = useRef<KeyBinding[] | null>(null);
-  const bindingsRef = useRef(bindings);
-  bindingsRef.current = bindings;
+  const { bindings, rebindKey, resetKeyBindings, attach: attachBindings } =
+    useKeyBindings(coreRef, setNotice);
   /** Rebobinando neste instante — a tela precisa mostrar que está. */
   const [rewinding, setRewinding_] = useState(false);
   /** Turbo segurado neste instante — a barra de velocidade mostra isso. */
   const [turboActive, setTurboActive] = useState(false);
-  /** Sincronia de áudio/vídeo e contador de FPS. */
-  const [av, setAvState] = useState<AvSettings>(
-    () => loadPref(AV_PREF, isAvSettings) ?? DEFAULT_AV
-  );
-  /** Log do core. Fica sempre ligado: quando algo falha, já está gravado. */
-  const [log, setLog] = useState<LogLine[]>([]);
-  /** A inicializacao roda uma vez: precisa do valor atual, nao do primeiro. */
-  const avRef = useRef(av);
-  avRef.current = av;
-  const lastBackupRef = useRef(0);
+  /** Sincronia de áudio/vídeo, contador de FPS e o log do core. */
+  const diagnostics = useDiagnostics(coreRef);
+  const attachDiagnostics = diagnostics.attach;
   /**
    * O callback do core e registrado uma vez na inicializacao; a ref evita
    * recriar aquele efeito so porque o backup mudou de identidade.
@@ -226,14 +190,15 @@ export function useEmulator() {
     };
   }, []);
 
-  const refreshLocalSaves = useCallback(async () => {
-    const list = await listLocalSaves();
-    setLocalSaves(list);
-  }, []);
+  /** Espelho dos saves na pasta `saves/` do projeto (só em dev e preview). */
+  const { localSaves, refreshLocalSaves, backupToDisk, restoreFromDisk } =
+    useDiskBackup(coreRef, setNotice, refreshLibrary);
 
+  // O callback do core é registrado uma vez; a ref é o que deixa o backup
+  // atual chegar até lá sem recriar aquele efeito.
   useEffect(() => {
-    void refreshLocalSaves();
-  }, [refreshLocalSaves]);
+    backupToDiskRef.current = backupToDisk;
+  }, [backupToDisk]);
 
   /**
    * Rele a pasta roms/. Exposto porque o manifesto e lido no carregamento —
@@ -313,24 +278,17 @@ export function useEmulator() {
           // senão "Continuar de onde parou" só apareceria ao trocar de jogo.
           autoSaveStateCapturedCallback: () => refreshLibrary(),
         });
-        // Bindings explicitos: a legenda da UI le do mesmo mapa.
-        // bindingsRef e não `bindings`: este efeito roda uma vez, e o que vale
-        // na inicialização é o que foi carregado do localStorage.
-        const initial = bindingsRef.current;
-        applyKeyBindings(core, initial);
-        appliedBindingsRef.current = initial;
+        // Bindings explícitos: a legenda da UI lê do mesmo mapa.
+        attachBindings(core);
         core.setCoreSettings({
           autoSaveStateEnable: true,
           autoSaveStateTimerIntervalSeconds: 30,
           restoreAutoSaveStateOnLoad: false,
           // O buffer de rebobinar já existia no core e nunca era ligado.
           ...REWIND_SETTINGS,
-          ...avRef.current,
         });
-
-        // O log do core ia para lugar nenhum. Ligado desde o início, para que
-        // quando algo falhar o que veio antes já esteja gravado.
-        core.setLogger((entry) => setLog((lines) => appendLog(lines, entry)));
+        // Sincronia de áudio/vídeo gravada, e o log do core.
+        attachDiagnostics(core);
         // O core pode ja estar com jogo carregado de uma montagem anterior
         // (navegar para fora e voltar). A limpeza pausou; se estava rodando,
         // voltamos a rodar — ter que clicar "Continuar" ao voltar de uma busca
@@ -387,89 +345,9 @@ export function useEmulator() {
         }
       }
     };
-  }, [refreshLibrary]);
-
-  /**
-   * Espelha o save de bateria na pasta `saves/` do projeto.
-   *
-   * Essa e a garantia forte de durabilidade: o IndexedDB sobrevive a recarregar
-   * mas pode ser descartado pelo navegador; arquivo em disco, nao. Silencioso
-   * em producao, onde a rota nao existe.
-   */
-  const backupToDisk = useCallback(
-    async (romName: string, opts: { force?: boolean } = {}) => {
-      const core = coreRef.current;
-      if (!core || localSaves === null) return false;
-
-      // Throttle: o core dispara saveDataUpdated com frequencia.
-      const now = Date.now();
-      if (!opts.force && now - lastBackupRef.current < 5000) return false;
-      lastBackupRef.current = now;
-
-      const data = core.getSave();
-      if (!data || data.length === 0) {
-        // Clique manual sem dado nao pode ser silencioso: alguns jogos (e ROMs
-        // de teste) simplesmente nao tem SRAM de bateria.
-        if (opts.force) {
-          setNotice(
-            "Este jogo ainda não gravou nada — não há save de bateria para copiar."
-          );
-        }
-        return false;
-      }
-
-      const fileName = saveNameFor(romName);
-      try {
-        await writeLocalSave(fileName, data);
-        await refreshLocalSaves();
-        if (opts.force) {
-          setNotice(`${fileName} copiado para saves/ (${data.length} bytes).`);
-        }
-        return true;
-      } catch (error) {
-        if (opts.force) {
-          setNotice(
-            `Não deu para gravar em saves/: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
-        }
-        return false;
-      }
-    },
-    [localSaves, refreshLocalSaves]
-  );
-
-  useEffect(() => {
-    backupToDiskRef.current = backupToDisk;
-  }, [backupToDisk]);
-
-  /** Traz um save da pasta `saves/` para dentro do core. */
-  const restoreFromDisk = useCallback(
-    async (fileName: string) => {
-      const core = coreRef.current;
-      if (!core) return;
-      try {
-        const bytes = await readLocalSave(fileName);
-        const file = new File([bytes], fileName);
-        await new Promise<void>((done) =>
-          core.uploadSaveOrSaveState(file, done)
-        );
-        await core.FSSync();
-        refreshLibrary();
-        setNotice(
-          `"${fileName}" restaurado da pasta saves/. Recarregue o jogo para valer.`
-        );
-      } catch (error) {
-        setNotice(
-          `Não deu para restaurar ${fileName}: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-      }
-    },
-    [refreshLibrary]
-  );
+    // Ambas são estáveis (useCallback sem dependências), então este efeito
+    // continua rodando uma única vez, como a vida do core exige.
+  }, [refreshLibrary, attachDiagnostics, attachBindings]);
 
   /** Sobe uma ROM para o FS do core e inicia o jogo. */
   const playFile = useCallback(
@@ -811,34 +689,6 @@ export function useEmulator() {
     [refreshLibrary]
   );
 
-  // Reaplica o mapa sempre que ele muda. Roda depois da inicialização porque
-  // depende de coreRef, que só existe quando o core termina de subir.
-  useEffect(() => {
-    const core = coreRef.current;
-    if (!core || appliedBindingsRef.current === null) return;
-    if (appliedBindingsRef.current === bindings) return;
-    applyKeyBindings(core, bindings, appliedBindingsRef.current);
-    appliedBindingsRef.current = bindings;
-  }, [bindings]);
-
-  /**
-   * Troca a tecla de uma ação. Se a tecla já era de outra, as duas trocam —
-   * ver `rebind`.
-   */
-  const rebindKey = useCallback((button: string, sdlKey: string) => {
-    setBindings((current) => {
-      const next = rebind(current, button, sdlKey);
-      if (next === current) return current;
-      saveBindings(next);
-      return next;
-    });
-  }, []);
-
-  const resetKeyBindings = useCallback(() => {
-    setBindings(resetBindings());
-    setNotice("Teclas de volta ao padrão.");
-  }, []);
-
   const setVolume = useCallback((percent: number) => {
     setVolumeState(percent);
     rememberVolume(percent);
@@ -945,24 +795,6 @@ export function useEmulator() {
     coreRef.current?.toggleInput(enabled);
   }, []);
 
-  /**
-   * Liga/desliga uma sincronia ou o contador de FPS.
-   *
-   * `setCoreSettings` aceita um objeto parcial, mas mandamos o conjunto todo:
-   * assim o que esta em vigor no core e sempre o que a tela mostra, sem
-   * depender de o core lembrar o que foi enviado antes.
-   */
-  const setAv = useCallback((patch: Partial<AvSettings>) => {
-    setAvState((current) => {
-      const next = { ...current, ...patch };
-      savePref(AV_PREF, next);
-      coreRef.current?.setCoreSettings(next);
-      return next;
-    });
-  }, []);
-
-  const clearLog = useCallback(() => setLog([]), []);
-
   /** Grava o save pendente — útil antes de fechar a aba. */
   const sync = useCallback(async () => {
     await coreRef.current?.FSSync();
@@ -1027,10 +859,10 @@ export function useEmulator() {
     gamepadApi,
     rewinding,
     turboActive,
-    av,
-    setAv,
-    log,
-    clearLog,
+    av: diagnostics.av,
+    setAv: diagnostics.setAv,
+    log: diagnostics.log,
+    clearLog: diagnostics.clearLog,
     setTurbo,
     setRewinding,
     takeScreenshot,
