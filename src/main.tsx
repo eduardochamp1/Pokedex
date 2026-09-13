@@ -16,6 +16,21 @@ const queryClient = new QueryClient({
   },
 });
 
+/**
+ * Service worker só em produção.
+ *
+ * Em dev ele brigaria com o HMR do Vite — o worker serviria do cache um módulo
+ * que o servidor acabou de reescrever, e a página passaria a mostrar código
+ * velho sem nenhum aviso.
+ */
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {
+      // Sem service worker o site funciona igual, só não abre sem rede.
+    });
+  });
+}
+
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
