@@ -795,6 +795,21 @@ export function useEmulator() {
     coreRef.current?.toggleInput(enabled);
   }, []);
 
+  /**
+   * Avisos somem sozinhos.
+   *
+   * Eram confirmações de ação — "estado gravado", "save copiado" — que ficavam
+   * na tela até alguém clicar no ✕, e iam se acumulando na memória de quem
+   * joga como se algo estivesse pendente. O ✕ continua, para quem quiser tirar
+   * antes. Falhas de verdade não passam por aqui: `status.kind === "error"` tem
+   * painel próprio, que não expira.
+   */
+  useEffect(() => {
+    if (!notice) return;
+    const timer = window.setTimeout(() => setNotice(null), 6000);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
+
   /** Grava o save pendente — útil antes de fechar a aba. */
   const sync = useCallback(async () => {
     await coreRef.current?.FSSync();

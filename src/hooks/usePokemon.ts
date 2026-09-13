@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   fetchJsonPublic,
   getGeneration,
@@ -86,6 +86,7 @@ export function usePokemonIndex() {
 }
 
 export function usePokemonList(page: number) {
+  const queryClient = useQueryClient();
   return useQuery<PagedResult>({
     queryKey: ["pokemon-list", page],
     queryFn: async ({ signal }) => {
@@ -93,8 +94,17 @@ export function usePokemonList(page: number) {
       const results = await Promise.all(
         data.results.map((p) => getPokemonData(p.url, signal))
       );
+      const pokemons = results.filter((r): r is Pokemon => r !== null);
+      // Estes 25 pokémons acabaram de ser buscados, mas ficavam presos nesta
+      // queryKey: abrir um card da home sem filtro pedia o MESMO objeto de
+      // novo, porque o detalhe procura por `["pokemon-detail", nome]`.
+      // Semeando aquela chave, a navegação para o detalhe passa a ser
+      // instantânea e sem request.
+      for (const pokemon of pokemons) {
+        queryClient.setQueryData(["pokemon-detail", pokemon.name], pokemon);
+      }
       return {
-        pokemons: results.filter((r): r is Pokemon => r !== null),
+        pokemons,
         totalPages: totalPagesOf(data.count, ITEMS_PER_PAGE),
       };
     },
@@ -297,15 +307,24 @@ function flattenEvolutionChain(
 }
 
 export function useEvolutionChain(speciesUrl: string | undefined) {
+  const queryClient = useQueryClient();
   return useQuery<EvolutionStep[]>({
     queryKey: ["evolution-chain", speciesUrl],
-    queryFn: async ({ signal }) => {
+    queryFn: async () => {
       if (!speciesUrl) return [];
-      const species = await fetchJsonPublic<PokemonSpecies>(speciesUrl, signal);
+      // Mesma queryKey de `usePokemonSpecies`. A página de detalhe monta os
+      // dois hooks com a mesma URL: buscando por fora, a species era pedida
+      // duas vezes por pokémon aberto. `fetchQuery` reaproveita o cache — e
+      // quem chegar primeiro serve o outro.
+      const species = await queryClient.fetchQuery({
+        queryKey: ["pokemon-species", speciesUrl],
+        queryFn: ({ signal }) =>
+          fetchJsonPublic<PokemonSpecies>(speciesUrl, signal),
+        staleTime: HOUR,
+      });
       if (!species) return [];
       const chain = await fetchJsonPublic<EvolutionChain>(
-        species.evolution_chain.url,
-        signal
+        species.evolution_chain.url
       );
       if (!chain) return [];
       return flattenEvolutionChain(chain.chain);
