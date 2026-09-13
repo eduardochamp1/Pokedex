@@ -4060,3 +4060,55 @@ nav {
   font-family: var(--font-body);
   font-size: 0.64rem;
 }
+
+/* Audio e video: caixas de marcar com a dica junto, porque "sincronizar
+   audio" nao diz sozinho quando se deve ligar. */
+.play-av {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.play-av-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+}
+.play-av-row input {
+  margin-top: 2px;
+  flex: 0 0 auto;
+  accent-color: var(--accent-alt);
+}
+.play-av-row strong {
+  display: block;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.play-av-row em {
+  display: block;
+  font-style: normal;
+  font-size: 0.66rem;
+  line-height: 1.4;
+  color: var(--text-dim);
+}
+
+/* Log do core: monoespacado e rolavel, com as falhas em destaque. */
+.play-log {
+  list-style: none;
+  margin: 0;
+  padding: 8px;
+  max-height: 180px;
+  overflow-y: auto;
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.62rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+  overflow-wrap: anywhere;
+}
+.play-log li.is-problem {
+  color: var(--accent);
+}

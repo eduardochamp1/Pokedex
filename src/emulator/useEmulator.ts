@@ -48,6 +48,15 @@ import {
 } from "./capture";
 import { TURBO_MULTIPLIER } from "./shortcuts";
 import {
+  DEFAULT_AV,
+  appendLog,
+  isAvSettings,
+  type AvSettings,
+  type LogLine,
+} from "./diagnostics";
+import { loadPref, savePref } from "./prefs";
+
+import {
   forgetLastRom,
   getFastForward,
   getLastRom,
@@ -56,6 +65,9 @@ import {
   rememberLastRom,
   rememberVolume,
 } from "./session";
+
+/** Chave das preferencias de audio/video. */
+const AV_PREF = "av-settings";
 
 interface LocalRom {
   fileName: string;
@@ -127,6 +139,15 @@ export function useEmulator() {
   const [rewinding, setRewinding_] = useState(false);
   /** Turbo segurado neste instante — a barra de velocidade mostra isso. */
   const [turboActive, setTurboActive] = useState(false);
+  /** Sincronia de áudio/vídeo e contador de FPS. */
+  const [av, setAvState] = useState<AvSettings>(
+    () => loadPref(AV_PREF, isAvSettings) ?? DEFAULT_AV
+  );
+  /** Log do core. Fica sempre ligado: quando algo falha, já está gravado. */
+  const [log, setLog] = useState<LogLine[]>([]);
+  /** A inicializacao roda uma vez: precisa do valor atual, nao do primeiro. */
+  const avRef = useRef(av);
+  avRef.current = av;
   const lastBackupRef = useRef(0);
   /**
    * O callback do core e registrado uma vez na inicializacao; a ref evita
@@ -304,7 +325,12 @@ export function useEmulator() {
           restoreAutoSaveStateOnLoad: false,
           // O buffer de rebobinar já existia no core e nunca era ligado.
           ...REWIND_SETTINGS,
+          ...avRef.current,
         });
+
+        // O log do core ia para lugar nenhum. Ligado desde o início, para que
+        // quando algo falhar o que veio antes já esteja gravado.
+        core.setLogger((entry) => setLog((lines) => appendLog(lines, entry)));
         // O core pode ja estar com jogo carregado de uma montagem anterior
         // (navegar para fora e voltar). A limpeza pausou; se estava rodando,
         // voltamos a rodar — ter que clicar "Continuar" ao voltar de uma busca
@@ -919,6 +945,24 @@ export function useEmulator() {
     coreRef.current?.toggleInput(enabled);
   }, []);
 
+  /**
+   * Liga/desliga uma sincronia ou o contador de FPS.
+   *
+   * `setCoreSettings` aceita um objeto parcial, mas mandamos o conjunto todo:
+   * assim o que esta em vigor no core e sempre o que a tela mostra, sem
+   * depender de o core lembrar o que foi enviado antes.
+   */
+  const setAv = useCallback((patch: Partial<AvSettings>) => {
+    setAvState((current) => {
+      const next = { ...current, ...patch };
+      savePref(AV_PREF, next);
+      coreRef.current?.setCoreSettings(next);
+      return next;
+    });
+  }, []);
+
+  const clearLog = useCallback(() => setLog([]), []);
+
   /** Grava o save pendente — útil antes de fechar a aba. */
   const sync = useCallback(async () => {
     await coreRef.current?.FSSync();
@@ -983,6 +1027,10 @@ export function useEmulator() {
     gamepadApi,
     rewinding,
     turboActive,
+    av,
+    setAv,
+    log,
+    clearLog,
     setTurbo,
     setRewinding,
     takeScreenshot,

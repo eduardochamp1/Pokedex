@@ -7,6 +7,11 @@ import {
 } from "../emulator/keyBindings";
 import { sdlKeyFromEvent } from "../emulator/keyNames";
 import { SHORTCUT_HELP, isTypingTarget, shortcutFor } from "../emulator/shortcuts";
+import {
+  AV_TOGGLES,
+  formatLogLine,
+  isProblem,
+} from "../emulator/diagnostics";
 import { useGamepad } from "../emulator/useGamepad";
 import { SUPPORTED_LABEL, consoleOf, type SaveStateSlot } from "../emulator/types";
 import { describeAge } from "../emulator/saveStates";
@@ -719,6 +724,59 @@ const PlayPage = () => {
                   </ul>
                 )}
               </>
+            )}
+          </section>
+
+          <section className="play-panel">
+            <h2>Áudio e vídeo</h2>
+            <div className="play-av">
+              {AV_TOGGLES.map((t) => (
+                <label key={t.id} className="play-av-row" title={t.hint}>
+                  <input
+                    type="checkbox"
+                    checked={emu.av[t.id]}
+                    onChange={(e) => emu.setAv({ [t.id]: e.target.checked })}
+                  />
+                  <span>
+                    <strong>{t.label}</strong>
+                    <em>{t.hint}</em>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </section>
+
+          <section className="play-panel">
+            <div className="play-panel-head">
+              <h2>Log do core</h2>
+              {emu.log.length > 0 && (
+                <button
+                  type="button"
+                  className="play-refresh"
+                  onClick={emu.clearLog}
+                  title="Limpar o log"
+                >
+                  limpar
+                </button>
+              )}
+            </div>
+            {emu.log.length === 0 ? (
+              <p className="play-panel-hint">
+                Nada registrado ainda. O core escreve aqui quando encontra algo
+                fora do comum — é o primeiro lugar a olhar se um jogo se
+                comportar mal.
+              </p>
+            ) : (
+              <ol className="play-log">
+                {emu.log.map((line, i) => (
+                  <li
+                    key={`${i}-${line.message}`}
+                    className={isProblem(line.level) ? "is-problem" : ""}
+                  >
+                    {formatLogLine(line)}
+                  </li>
+                ))}
+              </ol>
             )}
           </section>
 
