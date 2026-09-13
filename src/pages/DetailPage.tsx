@@ -15,6 +15,7 @@ import PokemonLore from "../components/PokemonLore";
 import PokemonMeta from "../components/PokemonMeta";
 import TypeDefense from "../components/TypeDefense";
 import AbilityList from "../components/AbilityList";
+import MoveList from "../components/MoveList";
 import CryButton from "../components/CryButton";
 import { DetailSkeleton } from "../components/Skeleton";
 
@@ -148,6 +149,11 @@ const DetailPage = () => {
         <aside className="detail-panel detail-panel-abilities">
           <h3>Habilidades</h3>
           <AbilityList abilities={pokemon.abilities} />
+        </aside>
+
+        <aside className="detail-panel detail-panel-moves">
+          <h3>Golpes</h3>
+          <MoveList moves={pokemon.moves ?? []} />
         </aside>
 
         <aside className="detail-panel detail-panel-scrubber">

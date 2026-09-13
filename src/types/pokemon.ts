@@ -133,6 +133,20 @@ export interface GenerationResponse {
   pokemon_species: { name: string; url: string }[];
 }
 
+/** Como e em que jogo o pokemon aprende um golpe. */
+export interface PokemonMoveVersion {
+  /** 0 quando o metodo nao e por nivel. */
+  level_learned_at: number;
+  version_group: { name: string; url: string };
+  move_learn_method: { name: string; url: string };
+}
+
+export interface PokemonMove {
+  move: { name: string; url: string };
+  /** Uma entrada por jogo em que o golpe e aprendido. */
+  version_group_details: PokemonMoveVersion[];
+}
+
 export interface Pokemon {
   id: number;
   name: string;
@@ -145,4 +159,26 @@ export interface Pokemon {
   species: { name: string; url: string };
   base_experience: number | null;
   cries?: { latest: string | null; legacy: string | null };
+  /**
+   * Ja vinha na resposta que buscamos e era ignorado — sao 109 golpes so no
+   * Pikachu, sem custo de request nenhum.
+   */
+  moves: PokemonMove[];
+}
+
+/** Detalhe de um golpe, buscado sob demanda em /move/{nome}. */
+export interface MoveDetail {
+  id: number;
+  name: string;
+  accuracy: number | null;
+  power: number | null;
+  pp: number | null;
+  priority: number;
+  type: { name: string; url: string };
+  damage_class: { name: string; url: string };
+  flavor_text_entries: {
+    flavor_text: string;
+    language: { name: string };
+  }[];
+  names: { name: string; language: { name: string } }[];
 }

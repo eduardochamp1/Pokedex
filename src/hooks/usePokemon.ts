@@ -23,6 +23,7 @@ import { evolutionConditionText } from "../lib/evolution";
 import type {
   EvolutionChain,
   EvolutionNode,
+  MoveDetail,
   Pokemon,
   PokemonSpecies,
 } from "../types/pokemon";
@@ -249,6 +250,26 @@ export function usePokemonSpecies(speciesUrl: string | undefined) {
     queryFn: ({ signal }) =>
       fetchJsonPublic<PokemonSpecies>(speciesUrl!, signal),
     enabled: Boolean(speciesUrl),
+    staleTime: HOUR,
+  });
+}
+
+/**
+ * Detalhe de um golpe, buscado só quando alguém abre aquele golpe.
+ *
+ * A lista em si não custa request nenhum — já vem no objeto do pokémon. Buscar
+ * os 109 golpes do Pikachu de uma vez, para mostrar poder e precisão que quase
+ * ninguém vai ler todos, seria pagar caro por nada.
+ */
+export function useMoveDetail(moveName: string | undefined) {
+  return useQuery<MoveDetail | null>({
+    queryKey: ["move-detail", moveName],
+    queryFn: ({ signal }) =>
+      fetchJsonPublic<MoveDetail>(
+        `https://pokeapi.co/api/v2/move/${moveName}`,
+        signal
+      ),
+    enabled: Boolean(moveName),
     staleTime: HOUR,
   });
 }

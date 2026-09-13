@@ -169,24 +169,24 @@ nav {
   height: auto;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
-.card-type-dot[data-type="normal"], .card-type-dot-lg[data-type="normal"]     { --type-fill: var(--t-normal); }
-.card-type-dot[data-type="fire"], .card-type-dot-lg[data-type="fire"]         { --type-fill: var(--t-fire); }
-.card-type-dot[data-type="water"], .card-type-dot-lg[data-type="water"]       { --type-fill: var(--t-water); }
-.card-type-dot[data-type="electric"], .card-type-dot-lg[data-type="electric"] { --type-fill: var(--t-electric); }
-.card-type-dot[data-type="grass"], .card-type-dot-lg[data-type="grass"]       { --type-fill: var(--t-grass); }
-.card-type-dot[data-type="ice"], .card-type-dot-lg[data-type="ice"]           { --type-fill: var(--t-ice); }
-.card-type-dot[data-type="fighting"], .card-type-dot-lg[data-type="fighting"] { --type-fill: var(--t-fighting); }
-.card-type-dot[data-type="poison"], .card-type-dot-lg[data-type="poison"]     { --type-fill: var(--t-poison); }
-.card-type-dot[data-type="ground"], .card-type-dot-lg[data-type="ground"]     { --type-fill: var(--t-ground); }
-.card-type-dot[data-type="flying"], .card-type-dot-lg[data-type="flying"]     { --type-fill: var(--t-flying); }
-.card-type-dot[data-type="psychic"], .card-type-dot-lg[data-type="psychic"]   { --type-fill: var(--t-psychic); }
-.card-type-dot[data-type="bug"], .card-type-dot-lg[data-type="bug"]           { --type-fill: var(--t-bug); }
-.card-type-dot[data-type="rock"], .card-type-dot-lg[data-type="rock"]         { --type-fill: var(--t-rock); }
-.card-type-dot[data-type="ghost"], .card-type-dot-lg[data-type="ghost"]       { --type-fill: var(--t-ghost); }
-.card-type-dot[data-type="dragon"], .card-type-dot-lg[data-type="dragon"]     { --type-fill: var(--t-dragon); }
-.card-type-dot[data-type="dark"], .card-type-dot-lg[data-type="dark"]         { --type-fill: var(--t-dark); }
-.card-type-dot[data-type="steel"], .card-type-dot-lg[data-type="steel"]       { --type-fill: var(--t-steel); }
-.card-type-dot[data-type="fairy"], .card-type-dot-lg[data-type="fairy"]       { --type-fill: var(--t-fairy); }
+.card-type-dot[data-type="normal"], .card-type-dot-lg[data-type="normal"], .move-chip[data-type="normal"] { --type-fill: var(--t-normal); }
+.card-type-dot[data-type="fire"], .card-type-dot-lg[data-type="fire"], .move-chip[data-type="fire"] { --type-fill: var(--t-fire); }
+.card-type-dot[data-type="water"], .card-type-dot-lg[data-type="water"], .move-chip[data-type="water"] { --type-fill: var(--t-water); }
+.card-type-dot[data-type="electric"], .card-type-dot-lg[data-type="electric"], .move-chip[data-type="electric"] { --type-fill: var(--t-electric); }
+.card-type-dot[data-type="grass"], .card-type-dot-lg[data-type="grass"], .move-chip[data-type="grass"] { --type-fill: var(--t-grass); }
+.card-type-dot[data-type="ice"], .card-type-dot-lg[data-type="ice"], .move-chip[data-type="ice"] { --type-fill: var(--t-ice); }
+.card-type-dot[data-type="fighting"], .card-type-dot-lg[data-type="fighting"], .move-chip[data-type="fighting"] { --type-fill: var(--t-fighting); }
+.card-type-dot[data-type="poison"], .card-type-dot-lg[data-type="poison"], .move-chip[data-type="poison"] { --type-fill: var(--t-poison); }
+.card-type-dot[data-type="ground"], .card-type-dot-lg[data-type="ground"], .move-chip[data-type="ground"] { --type-fill: var(--t-ground); }
+.card-type-dot[data-type="flying"], .card-type-dot-lg[data-type="flying"], .move-chip[data-type="flying"] { --type-fill: var(--t-flying); }
+.card-type-dot[data-type="psychic"], .card-type-dot-lg[data-type="psychic"], .move-chip[data-type="psychic"] { --type-fill: var(--t-psychic); }
+.card-type-dot[data-type="bug"], .card-type-dot-lg[data-type="bug"], .move-chip[data-type="bug"] { --type-fill: var(--t-bug); }
+.card-type-dot[data-type="rock"], .card-type-dot-lg[data-type="rock"], .move-chip[data-type="rock"] { --type-fill: var(--t-rock); }
+.card-type-dot[data-type="ghost"], .card-type-dot-lg[data-type="ghost"], .move-chip[data-type="ghost"] { --type-fill: var(--t-ghost); }
+.card-type-dot[data-type="dragon"], .card-type-dot-lg[data-type="dragon"], .move-chip[data-type="dragon"] { --type-fill: var(--t-dragon); }
+.card-type-dot[data-type="dark"], .card-type-dot-lg[data-type="dark"], .move-chip[data-type="dark"] { --type-fill: var(--t-dark); }
+.card-type-dot[data-type="steel"], .card-type-dot-lg[data-type="steel"], .move-chip[data-type="steel"] { --type-fill: var(--t-steel); }
+.card-type-dot[data-type="fairy"], .card-type-dot-lg[data-type="fairy"], .move-chip[data-type="fairy"] { --type-fill: var(--t-fairy); }
 
 .card-artwork {
   flex: 1;
@@ -578,14 +578,17 @@ nav {
   z-index: 1;
   display: grid;
   grid-template-columns: 240px 1fr 260px;
-  grid-template-rows: auto auto auto auto auto auto;
   grid-template-areas:
     "sprites hero forms"
     "evo     hero lore"
     "evo     hero meta"
     "evo     hero defense"
     "evo     hero abilities"
-    "evo     hero stats";
+    "evo     hero stats"
+    /* Golpes e sprites por geração ocupam a largura toda: são listas longas,
+       e espremê-las numa coluna de 240 px não ajudaria ninguém. */
+    "scrubber scrubber scrubber"
+    "moves    moves    moves";
   gap: 20px;
   max-width: 1200px;
   margin: 0 auto;
@@ -598,6 +601,8 @@ nav {
 .detail-panel-defense   { grid-area: defense; }
 .detail-panel-abilities { grid-area: abilities; }
 .detail-panel-stats     { grid-area: stats; }
+.detail-panel-scrubber  { grid-area: scrubber; }
+.detail-panel-moves     { grid-area: moves; }
 .detail-hero-slot {
   grid-area: hero;
   display: flex;
@@ -813,13 +818,15 @@ nav {
       "lore      lore"
       "meta      defense"
       "abilities abilities"
-      "stats     stats";
+      "stats     stats"
+      "scrubber  scrubber"
+      "moves     moves";
   }
 }
 @media (max-width: 640px) {
   .detail-layout {
     grid-template-columns: 1fr;
-    grid-template-areas: "hero" "sprites" "forms" "evo" "lore" "meta" "defense" "abilities" "stats";
+    grid-template-areas: "hero" "sprites" "forms" "evo" "lore" "meta" "defense" "abilities" "stats" "scrubber" "moves";
   }
 }
 
@@ -4111,4 +4118,146 @@ nav {
 }
 .play-log li.is-problem {
   color: var(--accent);
+}
+
+/* ========= Golpes ========= */
+.move-block {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.move-version {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+.move-version select {
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 0.74rem;
+}
+.move-group h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+.move-count {
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: 0.62rem;
+  font-variant-numeric: tabular-nums;
+}
+/* Varias colunas: sao listas longas e a faixa ocupa a largura toda. */
+.move-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 6px;
+  align-items: start;
+}
+.move-row {
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.move-row.is-open {
+  border-color: var(--border-strong);
+}
+.move-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 0.74rem;
+  text-align: left;
+  cursor: pointer;
+}
+.move-head:hover {
+  background: var(--surface-2);
+}
+/* Largura fixa para os numeros alinharem entre as linhas. */
+.move-level {
+  flex: 0 0 auto;
+  min-width: 2.2em;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--surface-3);
+  color: var(--text-muted);
+  font-size: 0.64rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.move-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.move-chip {
+  flex: 0 0 auto;
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #11131a;
+  background: var(--type-fill, var(--surface-3));
+}
+.move-toggle {
+  flex: 0 0 auto;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  line-height: 1;
+}
+.move-detail {
+  padding: 0 10px 10px;
+  border-top: 1px solid var(--border);
+}
+.move-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 10px 0 0;
+}
+.move-stats div {
+  text-align: center;
+}
+.move-stats dt {
+  font-size: 0.56rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+.move-stats dd {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+.move-flavor {
+  margin: 10px 0 0;
+  font-size: 0.68rem;
+  line-height: 1.5;
+  color: var(--text-muted);
 }
