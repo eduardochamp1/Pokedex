@@ -1,0 +1,284 @@
+/*
+ * Estilos exclusivos de ".lore-*", separados de App.css por
+ * scripts/split-route-css.mjs.
+ *
+ * Ficam aqui para serem carregados junto com a rota que os usa, em vez de
+ * entrarem no CSS que toda visita baixa. A ordem entre eles e a mesma que
+ * tinham no arquivo original — e o que preserva a cascata.
+ */
+/* Pokemon lore block */
+.lore-block { display: flex; flex-direction: column; gap: 12px; }
+.lore-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.lore-tag {
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: var(--surface-3);
+  color: var(--text-muted);
+}
+.lore-tag.lore-genus { color: var(--accent-alt); }
+.lore-tag.lore-rarity {
+  background: linear-gradient(90deg, var(--accent-alt), #ff9d00);
+  color: #333;
+}
+.lore-tag.lore-region {
+  color: var(--text);
+  background: var(--surface-2);
+}
+.lore-tag.lore-region:hover { color: var(--accent-alt); }
+.lore-quote {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text);
+  padding: 12px 14px;
+  border-left: 3px solid var(--accent-alt);
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+}
+
+/* ========= Lore shell ========= */
+.lore-shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  min-height: calc(100vh - 56px);
+}
+.lore-sidebar {
+  position: sticky;
+  top: 80px;
+  align-self: start;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 20px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.lore-sidebar-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  padding: 0 12px;
+  margin-bottom: 12px;
+}
+.lore-search {
+  padding: 0 4px 12px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+.lore-search input {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+}
+.lore-search input:focus {
+  outline: none;
+  border-color: var(--accent-alt);
+  box-shadow: 0 0 0 3px rgba(255, 203, 5, 0.15);
+}
+.lore-search input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  height: 12px;
+  width: 12px;
+  background: var(--text-muted);
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path d='M6 6l8 8M14 6l-8 8' stroke='black' stroke-width='2' fill='none' stroke-linecap='round'/></svg>") center/contain no-repeat;
+  cursor: pointer;
+}
+.lore-sidebar-btn {
+  padding: 10px 12px;
+  text-align: left;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+.lore-sidebar-btn:hover { background: var(--surface-2); color: var(--text); }
+.lore-sidebar-btn.active {
+  background: var(--surface-3);
+  color: var(--accent-alt);
+}
+.lore-main { min-width: 0; }
+
+/* Lore filters (chips of era) */
+.lore-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.lore-era-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.lore-era-chip {
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: transform var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast);
+}
+.lore-era-chip:hover {
+  border-color: var(--accent-alt);
+  transform: translateY(-1px);
+  color: var(--text);
+}
+.lore-era-chip.active {
+  background: var(--accent-alt);
+  color: #333;
+  border-color: var(--accent-alt);
+}
+.lore-active-filter {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 12px;
+  background: var(--surface-1);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  font-size: 0.8rem;
+  align-self: flex-start;
+  text-transform: capitalize;
+  color: var(--text);
+}
+.lore-clear-btn {
+  color: var(--accent-alt);
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+.lore-clear-btn:hover { background: rgba(255, 203, 5, 0.15); }
+.lore-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+}
+
+/* Lore chips (pokémon chips inside events) */
+.lore-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+.lore-chip-wrap { display: inline-flex; align-items: stretch; }
+.lore-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 4px;
+  border-radius: var(--radius-pill) 0 0 var(--radius-pill);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  transition: transform var(--dur-fast), border-color var(--dur-fast);
+}
+.lore-chip:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-alt);
+}
+.lore-chip img { width: 26px; height: 26px; object-fit: contain; }
+.lore-chip-placeholder {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--surface-3);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-dim);
+}
+.lore-chip-filter {
+  padding: 0 8px;
+  margin-left: -1px;
+  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+.lore-chip-filter:hover {
+  background: var(--accent-alt);
+  color: #333;
+  border-color: var(--accent-alt);
+}
+
+/* Timeline editorial */
+.lore-era-section { margin-bottom: 8px; }
+.lore-timeline-editorial { list-style: none; display: grid; gap: 16px; }
+.lore-event-editorial {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 20px;
+}
+.lore-event-era-mark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.7rem;
+  color: var(--accent-alt);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding-top: 20px;
+  text-align: right;
+  border-right: 2px solid var(--border);
+  padding-right: 12px;
+}
+.lore-event-editorial .lore-event-body {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 20px 24px;
+}
+.lore-event-editorial .lore-event-title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.15rem;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+.lore-event-editorial .lore-event-text {
+  line-height: 1.7;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.lore-art-emblem { max-width: 140px; padding: 20px; }
+.lore-art-region { width: 100%; height: 140px; }
+.lore-art-portal { width: 100%; height: 120px; }
+.lore-art-human { max-width: 100px; padding: 16px; }@media (max-width: 900px) {
+  .lore-shell { grid-template-columns: 1fr; }
+  .lore-sidebar {
+    position: static;
+    flex-direction: row;
+    overflow-x: auto;
+  }
+  .lore-event-editorial { grid-template-columns: 1fr; }
+  .lore-event-era-mark {
+    text-align: left;
+    border-right: none;
+    border-bottom: 2px solid var(--border);
+    padding-right: 0;
+    padding-bottom: 6px;
+    padding-top: 0;
+  }
+}

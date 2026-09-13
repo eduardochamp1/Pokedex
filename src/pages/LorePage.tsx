@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
+import "../styles/lore.css";
 import { LORE_EVENTS, ERAS } from "../data/lore";
 import { REGIONS } from "../data/regions";
 import { HUMAN_LEGENDS } from "../data/humans";

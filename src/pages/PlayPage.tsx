@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type DragEvent } from "react";
+import "../styles/play.css";
 import { useEmulator } from "../emulator/useEmulator";
 import {
   GROUP_LABELS,
