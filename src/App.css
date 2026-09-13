@@ -3400,6 +3400,17 @@ nav {
   .play-slider {
     display: none;
   }
+  /* No celular a moldura ocupava 68vh e empurrava o gamepad para fora da
+     dobra: dava para ver o jogo ou tocar nos botoes, nunca as duas coisas.
+     Com a tela mais baixa, jogo e controle cabem juntos. */
+  .play-screen {
+    height: min(40vh, 300px);
+  }
+  /* A escala tambem some: no espaco que sobra ela nao tem onde caber, e o
+     modo Auto ja resolve sozinho o que era a razao de mexer nela. */
+  .play-scale {
+    display: none;
+  }
 }
 
 /* ========= Durabilidade dos saves ========= */

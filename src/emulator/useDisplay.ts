@@ -12,6 +12,7 @@ const SCALE_PREF = "scale-mode";
 
 function isScaleMode(value: unknown): value is ScaleMode {
   return (
+    value === "auto" ||
     value === "integer" ||
     value === "fit" ||
     value === 1 ||
@@ -37,7 +38,7 @@ export function useDisplay(
   onNotice?: (message: string) => void
 ) {
   const [scaleMode, setScaleModeState] = useState<ScaleMode>(
-    () => loadPref(SCALE_PREF, isScaleMode) ?? "integer"
+    () => loadPref(SCALE_PREF, isScaleMode) ?? "auto"
   );
   const [applied, setApplied] = useState<{ size: Size; native: Size } | null>(
     null

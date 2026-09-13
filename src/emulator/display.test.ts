@@ -86,3 +86,48 @@ describe("describeScale", () => {
     );
   });
 });
+
+describe("modo auto", () => {
+  it("usa escala inteira quando cabe 2x ou mais", () => {
+    // 800x600 comporta 3x: inteiro compensa
+    expect(scaleFactor("auto", { width: 800, height: 600 }, GBA)).toBe(3);
+    expect(scaleFactor("auto", { width: 560, height: 400 }, GBA)).toBe(2);
+  });
+
+  it("preenche quando o inteiro cairia para 1x", () => {
+    // O caso medido no celular: container de 392x552 com um GBA.
+    // min(392/240, 552/160) = 1,63 -> floor 1. "Inteiro" daria 240x160 e
+    // desperdicaria 38% da largura sem ganhar nitidez, porque 1x nao escala.
+    const fator = scaleFactor("auto", { width: 392, height: 552 }, GBA);
+    expect(fator).toBeCloseTo(1.633, 2);
+    expect(fator).not.toBe(1);
+  });
+
+  it("no limite de 2x ainda prefere o inteiro", () => {
+    // exatamente 2x cabendo
+    expect(scaleFactor("auto", { width: 480, height: 320 }, GBA)).toBe(2);
+  });
+
+  it("logo abaixo de 2x ja preenche", () => {
+    const fator = scaleFactor("auto", { width: 470, height: 320 }, GBA);
+    expect(fator).toBeLessThan(2);
+    expect(fator).toBeGreaterThan(1.9);
+  });
+
+  it("container menor que o nativo encolhe, em vez de transbordar", () => {
+    // Aqui nem 1x cabe. Preencher desce abaixo de 1 — e o certo: o contrario
+    // seria o canvas vazar da moldura. "integer" e os fatores fixos e que tem
+    // piso em 1.
+    expect(scaleFactor("auto", { width: 100, height: 80 }, GBA)).toBeCloseTo(
+      0.417,
+      2
+    );
+    expect(scaleFactor("integer", { width: 100, height: 80 }, GBA)).toBe(1);
+  });
+
+  it("canvas do GB/GBC segue a mesma regra", () => {
+    expect(scaleFactor("auto", { width: 480, height: 432 }, GBC)).toBe(3);
+    // 200x200: min(1.25, 1.39) = 1.25 -> floor 1 -> preenche
+    expect(scaleFactor("auto", { width: 200, height: 200 }, GBC)).toBeCloseTo(1.25, 2);
+  });
+});

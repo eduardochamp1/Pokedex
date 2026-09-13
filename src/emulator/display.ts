@@ -12,10 +12,30 @@
  * tela. Sobra borda preta, e e o preco certo a pagar.
  */
 
-/** "integer" = maior fator inteiro que cabe; "fit" = preenche, aceitando fracao. */
-export type ScaleMode = "integer" | "fit" | 1 | 2 | 3 | 4;
+/**
+ * "auto" = inteiro quando compensa, senao preenche; "integer" = sempre inteiro;
+ * "fit" = preenche, aceitando fracao.
+ */
+export type ScaleMode = "auto" | "integer" | "fit" | 1 | 2 | 3 | 4;
+
+/**
+ * Abaixo deste fator a escala inteira nao compensa.
+ *
+ * O ganho da escala inteira e nao ter pixel de tamanho irregular. Mas quando o
+ * espaco so comporta 1x, "inteiro" e literalmente a resolucao nativa — 240x160
+ * perdidos num container de 392x552 num celular, com 38% da area desperdicada e
+ * nenhuma nitidez ganha, porque 1x nao escala nada. A partir de 2x o troco
+ * passa a valer.
+ */
+const INTEGER_WORTH_IT = 2;
 
 export const SCALE_MODES: { id: ScaleMode; label: string; title: string }[] = [
+  {
+    id: "auto",
+    label: "Auto",
+    title:
+      "Escala inteira quando cabe 2× ou mais; abaixo disso preenche, para não desperdiçar a tela",
+  },
   {
     id: "integer",
     label: "Nítido",
@@ -57,6 +77,9 @@ export function scaleFactor(
   if (mode === "fit") return fit;
   const maxInteger = Math.max(1, Math.floor(fit));
   if (mode === "integer") return maxInteger;
+  if (mode === "auto") {
+    return maxInteger >= INTEGER_WORTH_IT ? maxInteger : fit;
+  }
   return Math.min(mode, maxInteger);
 }
 
