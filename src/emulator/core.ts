@@ -186,6 +186,10 @@ export function getCanvas(): HTMLCanvasElement {
     persistentCanvas.className = "play-canvas";
     persistentCanvas.width = 240;
     persistentCanvas.height = 160;
+    // O canvas e criado fora do React, entao o rotulo tem que vir daqui: sem
+    // ele um leitor de tela anuncia so "canvas", sem dizer o que e aquilo.
+    persistentCanvas.setAttribute("role", "img");
+    persistentCanvas.setAttribute("aria-label", "Tela do emulador");
   }
   return persistentCanvas;
 }

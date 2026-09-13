@@ -30,7 +30,15 @@ function App() {
         updateFavoritePokemons: toggle,
       }}
     >
+      {/* Primeiro foco tabulável da página: sem ele, quem navega por teclado
+          passa pelos 7 links do menu em toda troca de rota. */}
+      <a className="skip-link" href="#conteudo">
+        Pular para o conteúdo
+      </a>
       <Navbar />
+      {/* tabIndex -1 para o link acima conseguir mover o foco para cá; o
+          leitor de tela anuncia a região ao chegar. */}
+      <div id="conteudo" tabIndex={-1}>
       <ErrorBoundary>
         <Suspense fallback={<RouteFallback />}>
           <Routes>
@@ -46,6 +54,7 @@ function App() {
           </Routes>
         </Suspense>
       </ErrorBoundary>
+      </div>
       <ComparatorButton />
     </FavoriteProvider>
   );

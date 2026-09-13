@@ -4261,3 +4261,42 @@ nav {
   line-height: 1.5;
   color: var(--text-muted);
 }
+
+/* ========= Acessibilidade ========= */
+/* Fica fora da tela ate receber foco pelo Tab. Sem ele, quem navega por
+   teclado atravessa os sete links do menu a cada troca de rota. */
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -100px;
+  z-index: 100;
+  padding: 10px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-alt);
+  color: #12131a;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: top var(--dur-fast) var(--ease-out);
+}
+.skip-link:focus {
+  top: 12px;
+}
+/* O container do conteudo recebe foco por programa; o anel ali nao ajuda
+   ninguem e so pisca a tela inteira. */
+#conteudo:focus {
+  outline: none;
+}
+
+/* Anel de foco visivel e consistente em tudo que e operavel por teclado.
+   Só no :focus-visible, para nao aparecer em clique de mouse. */
+a:focus-visible,
+button:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+  outline: 2px solid var(--accent-alt);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
