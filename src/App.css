@@ -1451,6 +1451,7 @@ nav {
   list-style: none;
   display: grid;
   gap: 16px;
+  align-items: start;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 .gen-slide {
@@ -1717,6 +1718,7 @@ nav {
   display: grid;
   gap: 20px;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  align-items: start;
 }
 .civ-card {
   background: var(--surface-1);
@@ -1745,17 +1747,27 @@ nav {
   align-items: center;
 }
 .civ-stamp {
-  width: 46px;
-  height: 46px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  background: var(--card-accent);
-  color: var(--surface-2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.6rem;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--card-accent) 42%, transparent),
+    transparent 72%
+  );
+  border: 2px solid var(--card-ink);
+  color: var(--card-ink);
+  display: grid;
+  place-items: center;
+  font-size: 1.4rem;
   font-weight: 700;
   flex-shrink: 0;
+}
+.civ-stamp img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  image-rendering: pixelated;
 }
 .civ-name {
   font-family: var(--font-display);
@@ -1799,6 +1811,7 @@ nav {
   display: grid;
   gap: 16px;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  align-items: start;
 }
 .myth-card {
   display: grid;

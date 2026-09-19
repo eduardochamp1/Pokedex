@@ -107,7 +107,7 @@ export const CIVILIZATIONS: AncientSite[] = [
     age: "Idade desconhecida",
     discovery: "Só revelada quando o mar da baía recua em determinadas correntes.",
     purpose:
-      "Complexo submarino com inscrições em Braille indicando localizações de tesouros lendários. Alguns creem que foi um posto avançado da civilização de Sinjoh; outros, um culto ao mar. Placas de plates de Arceus foram encontradas nas ruínas.",
+      "Complexo submarino com inscrições em Braille indicando localizações de tesouros lendários. Alguns creem que foi um posto avançado da civilização de Sinjoh; outros, um culto ao mar. Plates de Arceus foram encontradas nas ruínas.",
     pokemons: ["arceus"],
     color: "#6390f0",
   },

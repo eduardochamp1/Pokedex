@@ -711,14 +711,23 @@ const LorePage = () => {
 
         {tab === "civilizations" && (
           <div className="civ-grid">
-            {visibleCivilizations.map((c) => (
+            {visibleCivilizations.map((c) => {
+              // Quem assina o sítio é o primeiro pokémon da lista curada.
+              const sigCiv = pixelSpriteUrl(idOf(c.pokemons[0]));
+              return (
               <article
                 key={c.id}
                 className="civ-card"
                 style={{ ["--card-accent" as string]: c.color ?? "#c48d3a" }}
               >
                 <header className="civ-header">
-                  <span className="civ-stamp" aria-hidden="true">▲</span>
+                  <span className="civ-stamp" aria-hidden="true">
+                    {sigCiv ? (
+                      <img src={sigCiv} alt="" loading="lazy" decoding="async" />
+                    ) : (
+                      "▲"
+                    )}
+                  </span>
                   <div>
                     <h3 className="civ-name">{c.name}</h3>
                     <p className="civ-loc">{c.region} · {c.age}</p>
@@ -742,7 +751,8 @@ const LorePage = () => {
                   ))}
                 </div>
               </article>
-            ))}
+              );
+            })}
             {visibleCivilizations.length === 0 && (
               <div className="lore-empty">
                 Nenhuma civilização com <b>{pokemonFilter}</b>.
