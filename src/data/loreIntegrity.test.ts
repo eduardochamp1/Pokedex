@@ -10,6 +10,12 @@ import { BATTLES } from "./battles";
 import { CIVILIZATIONS } from "./civilizations";
 import { DIMENSIONS } from "./dimensions";
 import { GAME_GENERATIONS } from "./generations";
+import {
+  GENEALOGY_BRANCHES,
+  GENEALOGY_ROOT,
+  genealogyNames,
+  type GenealogyNode,
+} from "./genealogy";
 
 /**
  * Testes de integridade do conteudo curado. Nao verificam se a lore esta
@@ -36,6 +42,56 @@ describe("ids", () => {
 
   it("humanos não têm nome duplicado", () => {
     expect(dupes(HUMAN_LEGENDS.map((h) => h.name))).toEqual([]);
+  });
+});
+
+describe("genealogia", () => {
+  const flat = (n: GenealogyNode): GenealogyNode[] => [
+    n,
+    ...(n.children ?? []).flatMap(flat),
+  ];
+  const nodes = GENEALOGY_BRANCHES.flatMap((b) => b.members.flatMap(flat));
+
+  it("nenhum cla tem id duplicado", () => {
+    expect(dupes(GENEALOGY_BRANCHES.map((b) => b.id))).toEqual([]);
+  });
+
+  it("todo cla tem titulo, nota e ao menos um membro", () => {
+    for (const b of GENEALOGY_BRANCHES) {
+      expect(b.title.trim(), b.id).not.toBe("");
+      expect(b.note.trim(), b.id).not.toBe("");
+      expect(b.members.length, b.id).toBeGreaterThan(0);
+    }
+  });
+
+  // O nome vira rota (/pokemon/<name>) e caminho de sprite: um maiusculo
+  // ou um espaco a mais quebra os dois sem erro visivel.
+  it("todo nome tem forma de slug", () => {
+    for (const n of [GENEALOGY_ROOT, ...nodes]) {
+      expect(n.name, n.name).toMatch(/^[a-z0-9-]+$/);
+    }
+  });
+
+  it("todo no tem papel descrito", () => {
+    for (const n of [GENEALOGY_ROOT, ...nodes]) {
+      expect(n.role.trim(), n.name).not.toBe("");
+    }
+  });
+
+  it("nenhum pokemon aparece em dois clas", () => {
+    expect(dupes(nodes.map((n) => n.name))).toEqual([]);
+  });
+
+  it("a raiz nao se repete como membro de um cla", () => {
+    expect(nodes.map((n) => n.name)).not.toContain(GENEALOGY_ROOT.name);
+  });
+
+  // genealogyNames alimenta o indice de sprites da Lore inteira: se ela
+  // deixar um nome de fora, o chip daquele pokemon abre sem imagem.
+  it("genealogyNames cobre a raiz e toda a descendencia, sem repetir", () => {
+    const esperado = [GENEALOGY_ROOT.name, ...nodes.map((n) => n.name)];
+    expect(genealogyNames().sort()).toEqual(esperado.sort());
+    expect(dupes(genealogyNames())).toEqual([]);
   });
 });
 

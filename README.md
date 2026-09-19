@@ -262,7 +262,8 @@ src/
 │   ├── LorePage.tsx            13 abas de lore
 │   ├── MapPage.tsx             Mapa-múndi + dossiê por região
 │   ├── PlayPage.tsx            Emulador GB/GBC/GBA + saves
-│   └── NotFoundPage.tsx        404
+│   ├── NotFoundPage.tsx        404 na carcaça do aparelho
+│   └── routeModules.ts         Ficha em lazy + preload (a virada de carta precisa do módulo antes de navegar)
 │
 ├── components/
 │   ├── Navbar.tsx              Logo Pokéball + nav links
@@ -281,10 +282,10 @@ src/
 │   ├── ItemSprite.tsx          Sprite oficial de item, com fallback em emblema
 │   ├── WikiSource.tsx          Chip "fonte: Bulbapedia" dos verbetes
 │   ├── TypeMatchup.tsx         Efetividade de tipos
-│   ├── GenealogyTree.tsx       Componente recursivo da árvore
-│   ├── WorldMap.tsx            SVG das regiões + legenda acessível
-│   ├── LoreArt.tsx             Arte SVG (regiões, humanos, vilões, portais)
-│   └── ParticleField.tsx       Partículas do oceano
+│   ├── GenealogyTree.tsx       Árvore de criação: Arceus + painéis de clã
+│   ├── WorldMap.tsx            Mapa em papel (folha 1000x640) + legenda acessível
+│   ├── ScanlineToggle.tsx      Liga/desliga a scanline, guardada no localStorage
+│   └── LoreArt.tsx             Arte SVG (regiões, humanos, vilões, portais)
 │
 ├── hooks/
 │   ├── usePokemon.ts           React Query wrappers (índice, seleção, página, species, evolution)
@@ -292,6 +293,7 @@ src/
 │   ├── useFeaturedPokemon.ts   Lendário em destaque na Home
 │   ├── useDebounce.ts          Debounce genérico
 │   ├── useTiltEffect.ts        Tilt 3D seguindo o mouse
+│   ├── useTypewriter.ts        Verbete da dex se escrevendo, uma vez por visita
 │   └── useReducedMotion.ts     prefers-reduced-motion
 │
 ├── lib/                        Lógica pura, com testes
@@ -299,6 +301,8 @@ src/
 │   ├── regionForPokemon.ts     Pokémon/geração → id de região
 │   ├── localize.ts             Fallback pt-BR → pt → en
 │   ├── sprites.ts              Caminho dos sprites locais (id / slug)
+│   ├── roughenPath.ts          Ruído de costa determinístico nos paths do mapa
+│   ├── scanline.ts             Preferência da scanline, aplicada antes do render
 │   └── wiki.ts                 Monta as URLs de fonte
 │
 ├── emulator/                   Integração do core mGBA
@@ -327,7 +331,7 @@ src/
 │   ├── regions.ts              9 regiões documentadas
 │   ├── regionMap.ts            Paths SVG das regiões
 │   ├── humans.ts               33 personagens humanos
-│   ├── genealogy.ts            Árvore de criação
+│   ├── genealogy.ts            Árvore de criação, agrupada em seis clãs
 │   ├── generations.ts          9 gerações de jogos
 │   ├── villains.ts             10 organizações antagonistas
 │   ├── dimensions.ts           7 planos dimensionais
@@ -365,13 +369,18 @@ vite-plugin-local-roms.ts       Serve roms/ só em dev e preview
 
 Tudo em `src/design/tokens.css`, importado pelo `App.css`:
 
-- Superfícies: `--bg`, `--surface-1..3`, `--border`, `--border-strong`
+- Superfícies: `--bg`, `--surface-1..3`, `--border`, `--border-strong` — tons frios, para a sombra sólida e a borda de janela lerem como menu de jogo
 - Texto: `--text`, `--text-muted`, `--text-dim`
-- Acentos: `--accent` (vermelho Pokéball), `--accent-alt` (amarelo Pikachu), `--accent-hover`
-- **Paleta de tipos**: `--t-fire`, `--t-water`, `--t-grass` etc. (18 tipos)
-- Sombras (`--shadow-card`, `--shadow-hero`), raios (`--radius-card`, `--radius-pill`) e motion (`--dur-*`, `--ease-*`)
+- Acentos: `--accent` (fósforo do Game Boy, **o único acento de sistema**: foco, seleção, progresso, cursor), `--accent-hover`, `--accent-ink` (tinta escura legível sobre o fósforo)
+- `--accent-alt` é o dourado: destaque secundário e **moldura de raridade**. `--fav` é o vermelho, reservado ao coração de favorito, e `--pokeball-red` guarda o vermelho da marca no ícone
+- Papel da carta e do mapa: `--paper`, `--paper-ink`, `--paper-ink-soft`, `--paper-ps`, `--paper-edge`, `--paper-line`
+- **Paleta de tipos**: `--t-fire`, `--t-water`, `--t-grass` etc. (18 tipos) — a única cor saturada da tela, e a que desenha a moldura da carta
+- Sombras sólidas (`--shadow-card`, `--shadow-hero`, sobre `--shadow-hard`) no lugar de blur, raios (`--radius-card`, `--radius-sm`, `--radius-pill`) e motion (`--dur-*`, `--ease-*`)
+- Fontes: `--font-display`, `--font-body` e `--font-pixel` — a bitmap fica em número, rótulo e estado; nunca em texto corrido
 
-O tema é dark-only por decisão de design — não há variante clara.
+O cromo é dark-only por decisão de design. As duas exceções são superfícies de
+artefato, não temas: a **carta** e o **mapa** são papel creme, com a moldura da
+carta na cor do tipo e o dourado reservado a raridade.
 
 ---
 
@@ -389,6 +398,12 @@ O tema é dark-only por decisão de design — não há variante clara.
 - **Aliases**: nomes canônicos que a API não aceita direto (`giratina` → `giratina-altered`) passam por `resolveName`, usado tanto no fetch quanto na normalização dos filtros.
 - **Lore data**: os arquivos em `src/data/*.ts` são curados manualmente. As listas de lendários/míticos podem defasar a cada nova geração; para produção, considere buscar `is_legendary`/`is_mythical` via species endpoint.
 - **Emulador**: o core é carregado em runtime de `/emulator/mgba.js`, não pelo bundler — o runtime de threads do Emscripten sobe o worker de pthread a partir da URL do próprio script e resolve o `.wasm` relativo a ela. Por isso os dois arquivos são servidos lado a lado de `public/` (copiados de `node_modules` no `predev`/`prebuild`, e fora do git).
+- **Virada de carta**: a transição da grade para a ficha usa a View Transitions API direto, não o `viewTransition` do react-router — o app monta o `BrowserRouter` clássico, e aquele hook exige data router. Como a ficha é lazy, a carta pré-carrega o módulo antes de começar a transição; sem isso o retrato novo pegaria o esqueleto do Suspense no lugar do hero.
+- **Costa do mapa**: os nove paths do `regionMap` são curvas suaves, legíveis no arquivo; o recorte de costa é calculado em runtime por `roughenPath`, com semente fixa — determinístico, então não muda entre renders nem entre visitas.
+- **Scanline**: ligada por padrão e desligável pela navbar. O estado mora num atributo do `<html>` aplicado antes do primeiro render, para a página não aparecer lisa e só depois ganhar a textura.
+- **Virada de carta**: a transição da grade para a ficha usa a View Transitions API direto, não o `viewTransition` do react-router — o app monta o `BrowserRouter` clássico, e aquele hook exige data router. Como a ficha é lazy, a carta pré-carrega o módulo antes de começar a transição; sem isso o retrato novo pegaria o esqueleto do Suspense no lugar do hero.
+- **Costa do mapa**: os nove paths do `regionMap` são curvas suaves, legíveis no arquivo; o recorte de costa é calculado em runtime por `roughenPath`, com semente fixa — determinístico, então não muda entre renders nem entre visitas.
+- **Scanline**: ligada por padrão e desligável pela navbar. O estado mora num atributo do `<html>` aplicado antes do primeiro render, para a página não aparecer lisa e só depois ganhar a textura.
 - **Testes**: `src/lib/*.test.ts` e `src/data/typeMatchups.test.ts` cobrem a lógica pura (interseção de filtros, busca, resolução de região, matriz de tipos). Os componentes não têm testes de render.
 
 ---
