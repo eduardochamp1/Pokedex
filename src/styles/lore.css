@@ -244,35 +244,73 @@
 }
 
 /* Timeline editorial */
-.lore-era-section { margin-bottom: 8px; }
-.lore-timeline-editorial { list-style: none; display: grid; gap: 16px; }
-.lore-event-editorial {
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  gap: 20px;
-}
-.lore-event-era-mark {
+.lore-era-section { margin-bottom: 34px; }
+.lore-era-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 0.7rem;
-  color: var(--accent-alt);
+  font-size: 0.82rem;
+  color: var(--accent);
   text-transform: uppercase;
-  letter-spacing: 0.15em;
-  padding-top: 20px;
-  text-align: right;
-  border-right: 2px solid var(--border);
-  padding-right: 12px;
+  letter-spacing: 0.18em;
+  margin: 0 0 16px;
+  padding-bottom: 9px;
+  border-bottom: 2px solid color-mix(in srgb, var(--accent) 28%, transparent);
+}
+.lore-era-head::before { content: "\25B8"; }
+.lore-era-count {
+  margin-left: auto;
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+}
+
+/* O fio corre pela lista e cada evento e um no nele. A coluna de 120px que
+   existia aqui so repetia o nome da era, que agora fica no cabecalho. */
+.lore-timeline-editorial {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 30px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.lore-timeline-editorial::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 10px;
+  bottom: 10px;
+  width: 2px;
+  background: color-mix(in srgb, var(--accent) 38%, transparent);
+}
+.lore-event-editorial { position: relative; }
+.lore-event-editorial::before {
+  content: "";
+  position: absolute;
+  left: -29px;
+  top: 22px;
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  transform: rotate(45deg);
 }
 .lore-event-editorial .lore-event-body {
   background: var(--surface-1);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border-strong);
   border-radius: var(--radius-card);
-  padding: 20px 24px;
+  box-shadow: inset 0 0 0 2px var(--surface-2), var(--shadow-card);
+  padding: 18px 22px;
 }
 .lore-event-editorial .lore-event-title {
   font-family: var(--font-display);
-  font-weight: 500;
-  font-size: 1.15rem;
+  font-weight: 700;
+  font-size: 1.1rem;
   margin-bottom: 10px;
   color: var(--text);
 }
@@ -291,13 +329,6 @@
     flex-direction: row;
     overflow-x: auto;
   }
-  .lore-event-editorial { grid-template-columns: 1fr; }
-  .lore-event-era-mark {
-    text-align: left;
-    border-right: none;
-    border-bottom: 2px solid var(--border);
-    padding-right: 0;
-    padding-bottom: 6px;
-    padding-top: 0;
-  }
+  .lore-timeline-editorial { padding-left: 22px; }
+  .lore-event-editorial::before { left: -21px; }
 }

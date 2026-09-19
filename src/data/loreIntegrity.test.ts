@@ -10,6 +10,7 @@ import { BATTLES } from "./battles";
 import { CIVILIZATIONS } from "./civilizations";
 import { DIMENSIONS } from "./dimensions";
 import { GAME_GENERATIONS } from "./generations";
+import { LORE_EVENTS } from "./lore";
 import {
   GENEALOGY_BRANCHES,
   GENEALOGY_ROOT,
@@ -196,6 +197,11 @@ describe("fontes citadas", () => {
     expect(bad).toEqual([]);
   });
 
+  // A cronologia repete titulo? O render usa event.title como key da lista.
+  it("nenhum evento da cronologia repete titulo", () => {
+    expect(dupes(LORE_EVENTS.map((e) => e.title))).toEqual([]);
+  });
+
   it("a cobertura de fontes é total nas coleções principais", () => {
     for (const [label, list] of [
       ["landmarks", LANDMARKS],
@@ -204,6 +210,7 @@ describe("fontes citadas", () => {
       ["myths", MYTHS],
       ["battles", BATTLES],
       ["regions", REGIONS],
+      ["lore", LORE_EVENTS],
     ] as const) {
       const missing = list.filter((e) => !e.wiki);
       expect(missing, `${label} sem fonte`).toEqual([]);

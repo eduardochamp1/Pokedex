@@ -270,17 +270,26 @@ const LorePage = () => {
               )}
             </div>
 
-            {ERAS.filter((era) => visibleEvents.some((e) => e.era === era)).map((era) => (
+            {ERAS.filter((era) => visibleEvents.some((e) => e.era === era)).map((era) => {
+              const daEra = visibleEvents.filter((e) => e.era === era);
+              return (
               <section key={era} className="lore-era-section">
+                {/* O nome da era era repetido ao lado de cada evento. Uma vez
+                    por seção basta, e sobra espaço para o fio do tempo. */}
+                <h3 className="lore-era-head">
+                  {era}
+                  <span className="lore-era-count">
+                    {daEra.length} {daEra.length === 1 ? "evento" : "eventos"}
+                  </span>
+                </h3>
                 <ol className="lore-timeline-editorial">
-                  {visibleEvents
-                    .filter((e) => e.era === era)
+                  {daEra
                     .map((event) => (
                       <li key={event.title} className="lore-event-editorial">
-                        <div className="lore-event-era-mark">{era}</div>
                         <div className="lore-event-body">
-                          <h3 className="lore-event-title">{event.title}</h3>
+                          <h4 className="lore-event-title">{event.title}</h4>
                           <p className="lore-event-text">{event.body}</p>
+                          <WikiSource wiki={event.wiki} />
                           <div className="lore-chips">
                             {event.pokemons.map((name) => (
                               <PokemonChip
@@ -296,7 +305,8 @@ const LorePage = () => {
                     ))}
                 </ol>
               </section>
-            ))}
+              );
+            })}
 
             {visibleEvents.length === 0 && (
               <div className="lore-empty">

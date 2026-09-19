@@ -1,7 +1,9 @@
+import type { WikiSourced } from "../lib/wiki";
+
 // Cronologia da mitologia Pokémon — compilada a partir de folclore in-game
 // (Sinnoh Myths, Alolan Myths, Diaries de vilas, Kalos legends, etc.).
 
-export interface LoreEvent {
+export interface LoreEvent extends WikiSourced {
   era: string;
   title: string;
   body: string;
@@ -12,6 +14,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   // ================= ANTES DO TEMPO =================
   {
     era: "Antes do tempo",
+    wiki: "Arceus (Pokémon)",
     title: "O Ovo Original e o vazio",
     body:
       "Do vórtice do caos surge Arceus, o pokémon original, dentro de um Ovo cósmico. Ao emergir, dá origem a si mesmo e à noção de existência. Suas 1000 mãos são a origem de todas as leis do universo.",
@@ -19,6 +22,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Antes do tempo",
+    wiki: "Plate",
     title: "As Placas da criação",
     body:
       "Arceus deixa espalhadas pelo mundo dezessete Placas — uma para cada elemento — capazes de transformá-lo em qualquer tipo. Quem reunir todas pode invocar sua presença no topo do Monte Coronet.",
@@ -28,6 +32,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   // ================= CRIAÇÃO DO UNIVERSO =================
   {
     era: "Criação do universo",
+    wiki: "Pokémon of myth",
     title: "Nascem tempo, espaço e antimatéria",
     body:
       "Arceus cria a trindade da criação: Dialga passa a controlar o tempo, Palkia o espaço e Giratina — pela sua violência — é banido ao Mundo Distorcido, existindo em um plano paralelo espelhado.",
@@ -35,6 +40,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Criação do universo",
+    wiki: "Lake guardians",
     title: "Os guardiões do coração humano",
     body:
       "Arceus cria três seres para dar vida ao Ser Humano: Uxie concede o conhecimento, Mesprit as emoções e Azelf a força de vontade. Cada um repousa no fundo de um dos lagos de Sinnoh.",
@@ -42,6 +48,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Criação do universo",
+    wiki: "Ultra Space",
     title: "A criação do Ultra Espaço",
     body:
       "Um rasgo entre os mundos: os Ultra Buracos ligam o universo conhecido ao Ultra Espaço. Necrozma habitava lá antes, alimentando-se de luz. Cosmog vem desse vazio, semente de Solgaleo e Lunala.",
@@ -51,6 +58,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   // ================= FORMAÇÃO DO MUNDO =================
   {
     era: "Formação do mundo",
+    wiki: "Regigigas (Pokémon)",
     title: "Regigigas e os continentes",
     body:
       "Regigigas, o pokémon colossal, ergueu os continentes puxando placas tectônicas com cordas. Ao terminar, moldou seus três servos — Regirock, Regice e Registeel — a partir dos elementos primordiais.",
@@ -58,6 +66,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Formação do mundo",
+    wiki: "Super-ancient Pokémon",
     title: "O confronto pela terra e pelo mar",
     body:
       "Groudon emerge do magma expandindo os continentes; Kyogre surge das profundezas para preencher os oceanos. A guerra entre os dois moldou o clima e devastou paisagens até que Rayquaza desceu dos céus para acalmá-los, restaurando o equilíbrio.",
@@ -65,6 +74,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Formação do mundo",
+    wiki: "Meloetta (Pokémon)",
     title: "Meloetta e a canção do mundo",
     body:
       "Diz-se que Meloetta cantava para a natureza recém-formada, e as espécies aprenderam suas próprias vozes ouvindo-a. Sua canção esquecida ainda ecoa em ruínas antigas de Unova.",
@@ -74,6 +84,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   // ================= ERA ANTIGA =================
   {
     era: "Era antiga",
+    wiki: "Mew (Pokémon)",
     title: "Mew, o ancestral de todos os pokémon",
     body:
       "Diz a lenda que todos os pokémon descendem de Mew, encontrado nas profundezas das selvas de Guyana. Seus genes contêm o material genético de todas as espécies conhecidas — e um dia, cientistas usariam essa amostra para criar Mewtwo.",
@@ -81,6 +92,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Era antiga",
+    wiki: "Manaphy (Pokémon)",
     title: "Manaphy e o berço do mar",
     body:
       "Nas profundezas do Templo do Mar, um Ovo lendário se preserva há milênios. Dele nasce Manaphy, cuja habilidade Heart Swap conecta os corações de todas as criaturas marinhas. Phione é o descendente natural de Manaphy.",
@@ -88,6 +100,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Era antiga",
+    wiki: "Burned Tower",
     title: "A Torre dos Sinos e o incêndio",
     body:
       "Séculos atrás, três pokémon anônimos morreram em um incêndio na Brass Tower, em Ecruteak City. Ho-Oh, ao voar sobre as ruínas, os ressuscitou como Suicune (a chuva purificadora), Raikou (o relâmpago) e Entei (o vulcão).",
@@ -95,6 +108,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Era antiga",
+    wiki: "Lugia (Pokémon)",
     title: "Lugia, guardião dos mares",
     body:
       "Lugia habita as profundezas mais escuras do oceano, evitando os humanos. Comanda os três pássaros lendários de Kanto — Articuno, Zapdos e Moltres — quando sua rivalidade ameaça o equilíbrio climático mundial.",
@@ -102,6 +116,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Era antiga",
+    wiki: "Fossil",
     title: "Fósseis do mar pré-histórico",
     body:
       "Antes das eras humanas, os oceanos eram dominados por criaturas hoje conhecidas apenas por seus fósseis: Omanyte, Kabuto, Aerodactyl. Cientistas os ressuscitam a partir de âmbar e concha antiga.",
@@ -109,6 +124,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Era antiga",
+    wiki: "Absol (Pokémon)",
     title: "Absol, o arauto dos desastres",
     body:
       "Absol vive isolado nas montanhas, mas quando desce até as vilas humanas, é presságio de calamidade. Injustamente temido: ele não causa, ele avisa.",
@@ -118,6 +134,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   // ================= REINOS HUMANOS =================
   {
     era: "Reinos humanos",
+    wiki: "AZ",
     title: "AZ e a Guerra de Kalos",
     body:
       "Há três mil anos, o rei AZ perdeu seu Floette na guerra e, em luto, construiu a Máquina Definitiva — que devastou Kalos. Xerneas concede vida eterna; Yveltal a rouba. Zygarde vigia o equilíbrio entre ambos. AZ vagou pelos séculos até reencontrar seu Floette.",
@@ -125,6 +142,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Diancie (Pokémon)",
     title: "Diancie, a princesa de diamante",
     body:
       "Nas cavernas de Kalos, um Carbink raro sofre uma mutação e transforma-se em Diancie, capaz de criar diamantes com as mãos. É reverenciada como princesa pelos Carbink que a rodeiam.",
@@ -132,6 +150,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Tao trio",
     title: "Reshiram e Zekrom — a verdade e o ideal",
     body:
       "Dois irmãos de Unova fundaram um reino unido, mas se dividiram sobre verdade e ideais. O Dragão Original se dividiu em Reshiram (verdade) e Zekrom (ideais), deixando Kyurem como a carcaça vazia — o dragão do vazio.",
@@ -139,6 +158,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Eon duo",
     title: "Latios e Latias em Alto Mare",
     body:
       "Na cidade insular de Alto Mare, uma dupla de irmãos Latios e Latias protege os canais com a Alma Devocional — uma pedra sagrada que apenas eles podem despertar.",
@@ -146,6 +166,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Sinjoh Ruins",
     title: "As Ruínas de Sinjoh e o ritual do Ovo",
     body:
       "Nas fronteiras entre Sinnoh e Johto, cientistas descobrem que ao trazer Arceus às Ruínas de Sinjoh, um novo Ovo é gerado — contendo Dialga, Palkia ou Giratina, dependendo do momento e do lugar do ritual.",
@@ -153,6 +174,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Sir Aaron",
     title: "A Espada de Rota e o povo de Aaron",
     body:
       "Séculos atrás, o herói Sir Aaron salvou o reino de Rota sacrificando-se junto com Lucario, sua sombra e conselheiro. Sua consciência permaneceu selada no bastão real por gerações.",
@@ -160,6 +182,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Cyrus",
     title: "Cyrus e a rasgadura do céu",
     body:
       "Cyrus, líder do Team Galactic, buscou capturar Dialga e Palkia para destruir o universo e reconstruí-lo sem emoções. Ao invocar a Chain Rouge no Mount Coronet, quase rasgou a realidade — mas Giratina o arrastou ao Mundo Distorcido.",
@@ -167,6 +190,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "N",
     title: "N e o Dragão Original",
     body:
       "Criado pela Team Plasma para libertar todos os pokémon, o rapaz N despertou o dragão adormecido — Zekrom (Black) ou Reshiram (White) — para desafiar o Champion. Sua ideologia dividiu Unova.",
@@ -174,6 +198,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Guardian deities",
     title: "Os Tapus, guardiões de Alola",
     body:
       "Cada uma das quatro ilhas de Alola tem seu guardião: Tapu Koko (Melemele), Tapu Lele (Akala), Tapu Bulu (Ula'ula) e Tapu Fini (Poni). Servem à família real de Cosmog, criada nas fendas do Ultra Espaço.",
@@ -181,6 +206,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Necrozma (Pokémon)",
     title: "Necrozma e o roubo da luz",
     body:
       "Necrozma, faminto por luz depois de banido de seu mundo original, se funde a Solgaleo ou Lunala para roubar a luz de Alola. Só a Z-Move de Zeraora restaura o equilíbrio quando o Sol se apaga.",
@@ -188,6 +214,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Ultra Beast",
     title: "Ultra Beasts vazam do Ultra Espaço",
     body:
       "A pesquisa da Aether Foundation abre buracos entre dimensões. Criaturas de outros mundos — Nihilego, Buzzwole, Pheromosa, Xurkitree, Celesteela, Kartana, Guzzlord — invadem Alola. Guzma e Lusamine ficam obcecados por elas.",
@@ -195,6 +222,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Darkest Day",
     title: "Os heróis de Galar e o Darkest Day",
     body:
       "Há três mil anos, o Darkest Day ameaçou Galar quando Eternatus surgiu do espaço. Dois irmãos — hoje conhecidos apenas como os heróis — o selaram com as espadas e escudos de Zacian e Zamazenta.",
@@ -202,6 +230,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Tower of Darkness",
     title: "Kubfu e as torres gêmeas",
     body:
       "Kubfu, quando treinado nas Torres do Punho da Água ou do Punho Sombrio da Ilha da Armadura, evolui para Urshifu — um estilo de luta rápido (Single-Strike) ou fluido (Rapid-Strike), conforme a torre.",
@@ -209,6 +238,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Calyrex (Pokémon)",
     title: "Calyrex, o rei-corcel esquecido",
     body:
       "Séculos atrás, Calyrex governou a Coroa da Tundra com seus dois corcéis — Glastrier no inverno e Spectrier no crepúsculo. Esquecido pelos humanos, retorna para reclamar seu trono.",
@@ -219,6 +249,7 @@ export const LORE_EVENTS: LoreEvent[] = [
 
   {
     era: "Era antiga",
+    wiki: "Rainbow Feather",
     title: "As Penas Arco-íris de Ho-Oh",
     body:
       "Diz a lenda que Ho-Oh deixa cair sete penas de cores diferentes ao voar. Quem encontrar as sete e as levar até a Tin Tower pode invocar o pokémon lendário. Ash Ketchum viu Ho-Oh em seu primeiríssimo dia de treinador.",
@@ -226,6 +257,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Era antiga",
+    wiki: "Zoroark (Pokémon)",
     title: "A ilusão do castelo de Zoroark",
     body:
       "Zoroark tem o poder de projetar ilusões elaboradas. Séculos atrás, um Zoroark protegeu sua cria construindo com sua mente um castelo inteiro invisível — a Crown City original, hoje conhecida apenas em relatos.",
@@ -233,6 +265,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Professor Oak",
     title: "Prof. Oak e o nascimento da Pokédex",
     body:
       "Séculos após a domesticação dos pokémon, o Prof. Samuel Oak de Pallet Town cria o primeiro dispositivo capaz de escanear e catalogar espécies automaticamente — a Pokédex. Distribui três protótipos a jovens treinadores: Red, Blue e Green.",
@@ -240,6 +273,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Mt. Silver",
     title: "Red desaparece no Mount Silver",
     body:
       "Após tornar-se o Champion mais jovem da história aos 11 anos, Red simplesmente sumiu. Foi encontrado três anos depois no topo do Mount Silver, em silêncio absoluto, treinando com seu Pikachu e outros parceiros contra pokémon selvagens de nível brutal.",
@@ -247,6 +281,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Team Rocket",
     title: "A queda da Team Rocket original",
     body:
       "Giovanni, líder da Team Rocket, foi derrotado em seu Ginásio de Viridian por Red. Envergonhado, se refugiou no exílio, deixando o próprio filho Silver para trás. A organização se dissolveu — só ressurge três anos depois em Johto, sem seu líder.",
@@ -254,6 +289,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Delta Episode",
     title: "Delta Episode — o meteoro sobre Hoenn",
     body:
       "Após os eventos de Kyogre e Groudon, cientistas de Hoenn descobrem que um meteoro colossal está em rota de colisão com o planeta. Deoxys aparece do espaço. Rayquaza absorve a Mega Pedra para atingir sua forma Mega e destruir o meteoro em pleno voo.",
@@ -261,6 +297,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Distortion World",
     title: "Cyrus vaga eternamente no Mundo Distorcido",
     body:
       "Após ser derrotado no Spear Pillar, Cyrus é arrastado por Giratina ao Mundo Distorcido. Décadas se passam para nós; ele ainda anda por lá, sozinho, procurando alguma forma de escapar. Alguns testemunhos dizem tê-lo visto refletido em espelhos.",
@@ -268,6 +305,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "N's Castle",
     title: "N e o Castelo de Vidro",
     body:
       "A Team Plasma ergueu um castelo colossal ao redor da Pokémon League de Unova durante os eventos de Black/White. N esperava seu Champion no topo — se ele vencesse, todos os pokémon seriam libertados; se perdesse, sua filosofia estava errada. A batalha final decidiu a era.",
@@ -275,6 +313,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Team Rainbow Rocket",
     title: "Rainbow Rocket — os vilões de todas as regiões",
     body:
       "Em Alola, Giovanni reuniu líderes derrotados de todas as regiões (Maxie, Archie, Cyrus, Ghetsis, Lysandre) em uma dimensão paralela onde eles venceram. A Rainbow Rocket foi derrotada apenas quando o protagonista provou que a vitória do herói é a única constante.",
@@ -282,6 +321,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Wally",
     title: "Wally e a captura sob orientação",
     body:
       "Wally, um garoto doente de Petalburg, quer aprender a capturar seu primeiro pokémon. Sob a supervisão do protagonista, captura Ralts — que depois se torna Gallade Mega e o transforma em um dos treinadores mais fortes de Hoenn.",
@@ -289,6 +329,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Ultra Megalopolis",
     title: "Necrozma rouba a luz de Alola",
     body:
       "Necrozma se funde com Solgaleo (ou Lunala) para tornar-se Ultra Necrozma. Rouba toda a luz de Alola até o sol se apagar. Só é derrotado quando o protagonista atravessa Ultra Wormholes e o encontra em Ultra Megalopolis, sua terra natal.",
@@ -296,6 +337,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Leon",
     title: "Leon perde pela primeira vez",
     body:
       "Após anos como Champion invicto de Galar, Leon é derrotado pelo protagonista em uma partida transmitida para toda a região. O Charizard Gigantamax é vencido pela primeira vez, marcando o fim de uma era e o começo de outra.",
@@ -303,6 +345,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Passado e futuro",
+    wiki: "Area Zero",
     title: "A Grande Cratera do Sul e a Área Zero",
     body:
       "No centro de Paldea abre-se uma cratera colossal formada por meteoritos cristalinos. Pesquisadores identificaram criaturas ali que não existem em nenhum outro lugar do mundo: variações antigas e futurísticas dos pokémon conhecidos, chamadas Paradox Pokémon.",
@@ -310,6 +353,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Passado e futuro",
+    wiki: "Professor Sada",
     title: "IA de Sada e Turo",
     body:
       "Prof. Sada (passado) e Prof. Turo (futuro) morreram na Área Zero durante suas pesquisas. Criaram IAs de si mesmos para continuar o trabalho — mas essas IAs continuaram os planos além do razoável, obrigando seus filhos Arven a destruí-las junto do jogador.",
@@ -317,6 +361,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Passado e futuro",
+    wiki: "Terapagos (Pokémon)",
     title: "Terapagos e a Ilha das Escamas",
     body:
       "Dentro do Terarium DLC — a bioesfera artificial de Blueberry Academy — Terapagos revela-se o pokémon original que gerou toda energia Terastal. Estava selado em uma pequena forma inofensiva por séculos, até ser reencontrado.",
@@ -327,6 +372,7 @@ export const LORE_EVENTS: LoreEvent[] = [
 
   {
     era: "Era antiga",
+    wiki: "Whirl Islands",
     title: "Whirl Islands — o refúgio de Lugia",
     body:
       "No sudoeste de Johto, um arquipélago de quatro ilhas rochosas com correntes marítimas violentas esconde uma câmara submarina onde Lugia repousa. Só treinadores que dominam Surf, Whirlpool e Waterfall podem alcançá-lo.",
@@ -334,6 +380,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Era antiga",
+    wiki: "Bell Tower",
     title: "Bell Tower e as chamas sagradas",
     body:
       "Em Ecruteak City, a Bell Tower é o único local sagrado onde Ho-Oh permite ser visto. Sua companheira era a Brass Tower — hoje ruína queimada. Diz-se que o incêndio foi acidental; outros dizem que foi obra dos deuses.",
@@ -341,6 +388,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Era antiga",
+    wiki: "Ilex Forest",
     title: "Ilex Forest e Celebi",
     body:
       "Nas profundezas de Ilex Forest, junto ao santuário, Celebi vive fora do tempo. Só aparece a quem tem coração puro. Já foi visto com um jovem membro da Team Rocket, o que gerou paradoxos temporais.",
@@ -348,6 +396,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Era antiga",
+    wiki: "Ruins of Alph",
     title: "As Ruínas de Alph",
     body:
       "Ruínas escavadas em Johto revelam paredes cobertas por 26 hieróglifos idênticos aos Unown modernos. Cada Unown corresponde a uma letra. Ninguém sabe se os Unown ensinaram o alfabeto aos humanos ou vice-versa.",
@@ -355,6 +404,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Pokémon Mansion",
     title: "Cinnabar Mansion — o nascimento de Mewtwo",
     body:
       "Na mansão abandonada de Cinnabar Island, diários encontrados por Red revelam a criação de Mewtwo. O dr. Fuji, cientista chefe, tentava clonar sua filha morta usando DNA de Mew. Mewtwo destruiu o laboratório antes de fugir.",
@@ -362,6 +412,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Silph Co.",
     title: "Silph Co. e a Master Ball",
     body:
       "A gigante corporativa de Saffron City desenvolveu a Master Ball — pokébola perfeita capaz de capturar qualquer pokémon. A Team Rocket invadiu a sede para roubar o protótipo. Só existe uma no mundo — o resto é lenda.",
@@ -369,6 +420,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Goldenrod Radio Tower",
     title: "Radio Tower Takeover — Johto",
     body:
       "Três anos após o colapso original, remanescentes da Team Rocket invadem a Radio Tower de Goldenrod City com um plano: enviar uma frequência que forçaria Giovanni a voltar. O plano falhou — o transmissor foi silenciado por um treinador anônimo.",
@@ -376,6 +428,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Sealed Chamber",
     title: "Wailord + Relicanth = os Regis despertam",
     body:
       "Uma câmara secreta em Sealed Chamber só se abre quando um Wailord e um Relicanth são posicionados nas extremidades da sala. O ritual, decifrado da parede em Braille, libera Regirock, Regice e Registeel de seus tumbas.",
@@ -383,6 +436,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Battle Frontier",
     title: "Battle Frontier — o desafio pós-Champion",
     body:
       "Além da Elite Four, o Battle Frontier oferecia sete Frontier Brains e regras cada vez mais brutais. Brandon (Regirock/Regice/Registeel), Anabel (Alakazam/Snorlax/Entei), Palmer (Rhyperior/Milotic/Dragonite) — os brains eram semi-lendários entre treinadores.",
@@ -390,6 +444,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Shadow Lugia",
     title: "Shadow Lugia (XD001) — Orre",
     body:
       "Em Orre, a organização Cipher desenvolveu técnica para fechar o coração dos pokémon, criando Shadow Pokémon capazes de atacar humanos. O experimento mais brutal foi XD001: Shadow Lugia. Só foi purificado por um treinador solitário.",
@@ -397,6 +452,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Old Chateau",
     title: "Old Chateau — o menino do quadro",
     body:
       "Em Eterna Forest de Sinnoh, uma mansão vitoriana abandonada abriga fantasmas. À noite, um quadro pintado ganha vida: um menino de vermelho passa por corredores. Alguns dizem ver Rotom possuindo eletrodomésticos ao redor.",
@@ -404,6 +460,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Hoopa (Pokémon)",
     title: "Hoopa e os anéis dimensionais",
     body:
       "Hoopa Confined é uma versão contida do verdadeiro Hoopa Unbound. Seus anéis abrem portais para qualquer lugar do mundo. Um vilarejo de Kalos foi devastado por Hoopa Unbound séculos atrás — o anel de contenção foi criado após.",
@@ -411,6 +468,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Volcanion (Pokémon)",
     title: "Volcanion escapa da pesquisa",
     body:
       "Volcanion, único pokémon do tipo Fire/Water, foi capturado em um laboratório de Azoth. Após anos de estudo, escapou. Formou aliança improvável com Magearna, o pokémon-boneca criado 500 anos antes da era da Máquina Definitiva.",
@@ -418,6 +476,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
+    wiki: "Blueberry Academy",
     title: "Blueberry Academy e o Terarium",
     body:
       "Academia parceira de Naranja/Uva em Paldea. Fica em uma cúpula submarina no oceano ao leste. Dentro dela, o Terarium — bioesfera artificial com 4 biomas — abriga Terapagos e outras espécies raras aclimatadas.",
@@ -425,6 +484,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Passado e futuro",
+    wiki: "Loyal Three",
     title: "The Loyal Three — Kitakami",
     body:
       "Na região montanhosa de Kitakami, três pokémon — Okidogi, Munkidori e Fezandipiti — eram reverenciados como heróis que expulsaram um demônio (Ogerpon). A verdade histórica é o oposto: eles eram os vilões; Ogerpon foi a heroína injustamente exilada.",
@@ -434,6 +494,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   // ================= PASSADO E FUTURO =================
   {
     era: "Passado e futuro",
+    wiki: "Paradox Pokémon",
     title: "Koraidon e Miraidon — vindos de outra era",
     body:
       "As expedições ao Área Zero de Paldea revelaram criaturas que atravessaram o tempo: Koraidon vem de uma era pré-histórica, Miraidon do futuro distante. Ambos servem como montaria dos exploradores modernos.",
@@ -441,6 +502,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Passado e futuro",
+    wiki: "Treasures of ruin",
     title: "Os Quatro Tesouros da Ruína",
     body:
       "Há muito tempo, no continente que hoje é Paldea, quatro objetos amaldiçoados foram selados por seus crimes — a espada Chien-Pao, o jade Ting-Lu, a vela Chi-Yu e as fitas Wo-Chien. Cada um encarna a ruína de um antigo reino.",
@@ -448,10 +510,151 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Passado e futuro",
+    wiki: "Ogerpon (Pokémon)",
     title: "Ogerpon e a máscara emprestada",
     body:
       "Em Kitakami, Ogerpon foi injustamente acusada e teve sua máscara roubada. Suas quatro máscaras (Teal, Wellspring, Hearthflame, Cornerstone) alteram seu tipo. Terapagos, escondido nas profundezas, guarda o poder Terastal.",
     pokemons: ["ogerpon", "terapagos"],
+  },
+
+  // ================= VERBETES ACRESCENTADOS NA REVISAO =================
+  // As eras de criacao e formacao tinham dois e tres eventos, contra trinta e
+  // quatro em "Reinos humanos": filtrar por elas devolvia quase nada.
+  {
+    era: "Antes do tempo",
+    wiki: "Hall of Origin",
+    title: "O Salão da Origem",
+    body:
+      "Acima do topo do Monte Coronet existe um lugar que não aparece em mapa nenhum e só se abre a quem carrega a Flauta Azure. É onde Arceus repousa entre uma criação e outra, e o único ponto do mundo em que um humano pode encontrá-lo.",
+    pokemons: ["arceus"],
+  },
+  {
+    era: "Criação do universo",
+    wiki: "Xerneas (Pokémon)",
+    title: "Xerneas e Yveltal — dar e tirar a vida",
+    body:
+      "Em Kalos a criação se divide em dois. Xerneas compartilha vida eterna e depois adormece na forma de uma árvore por mil anos; Yveltal absorve a vida de tudo em volta e se fecha num casulo. Nenhum dos dois existe sem o outro.",
+    pokemons: ["xerneas", "yveltal"],
+  },
+  {
+    era: "Criação do universo",
+    wiki: "Zygarde (Pokémon)",
+    title: "Zygarde vigia o equilíbrio",
+    body:
+      "Espalhado pelo mundo em células e núcleos, Zygarde observa o ecossistema sem interferir. Só quando a ordem é ameaçada as partes se juntam — e quanto pior a ameaça, maior a forma que ele assume.",
+    pokemons: ["zygarde"],
+  },
+  {
+    era: "Formação do mundo",
+    wiki: "Mount Coronet",
+    title: "O Monte Coronet, espinha de Sinnoh",
+    body:
+      "A cordilheira que corta Sinnoh ao meio é tratada pelos antigos como o lugar onde o mundo começou. No alto dela fica a Coluna da Lança, o ponto em que o tempo e o espaço podem ser rasgados por quem souber como.",
+    pokemons: ["dialga", "palkia"],
+  },
+  {
+    era: "Formação do mundo",
+    wiki: "Heatran (Pokémon)",
+    title: "Heatran e o coração vulcânico",
+    body:
+      "Nascido na lava fervente, Heatran escava as paredes das cavernas com garras em forma de cruz e vive dentro dos vulcões. É o calor que mantém o subsolo em movimento — e o motivo de certas montanhas nunca esfriarem.",
+    pokemons: ["heatran"],
+  },
+  {
+    era: "Formação do mundo",
+    wiki: "Giant Chasm",
+    title: "A cratera gigante de Unova",
+    body:
+      "Um meteorito abre uma cratera no leste de Unova. No fundo dela, num abrigo de gelo, dorme Kyurem — o que sobrou do Dragão Original depois que ele se partiu em Reshiram e Zekrom, e que desde então busca o que lhe falta.",
+    pokemons: ["kyurem"],
+  },
+  {
+    era: "Formação do mundo",
+    wiki: "Eternatus (Pokémon)",
+    title: "Eternatus cai sobre Galar",
+    body:
+      "Uma criatura que se alimenta de energia chega do espaço dentro de um meteorito. A queda espalha por Galar a energia que muito depois permitiria o Dynamax, e deixa adormecido o que voltaria a acordar no Darkest Day.",
+    pokemons: ["eternatus"],
+  },
+  {
+    era: "Era antiga",
+    wiki: "Celestic Town",
+    title: "Celestic Town e os que adoravam a criação",
+    body:
+      "A vila mais antiga de Sinnoh guarda um santuário com pinturas de Dialga e Palkia na parede. Foi ali que os primeiros humanos registraram o que acreditavam ser o começo de tudo — e a região ainda se organiza em torno desse registro.",
+    pokemons: ["dialga", "palkia"],
+  },
+  {
+    era: "Era antiga",
+    wiki: "Old Amber",
+    title: "O âmbar e o céu pré-histórico",
+    body:
+      "Um inseto preso em resina guarda sangue de um pokémon que voava antes de existir história escrita. Do material se reconstrói Aerodactyl, e com ele a prova de que o céu antigo já tinha dono.",
+    pokemons: ["aerodactyl"],
+  },
+  {
+    era: "Era antiga",
+    wiki: "Noble Pokémon",
+    title: "As nobres de Hisui e o frenesi",
+    body:
+      "Em Hisui certos pokémon recebem bênçãos e são reverenciados como nobres pelos clãs. Quando a energia que os atravessa descontrola, entram em frenesi — e só o bálsamo preparado pelos guardiões consegue acalmá-los.",
+    pokemons: ["kleavor"],
+  },
+  {
+    era: "Era antiga",
+    wiki: "Jubilife Village",
+    title: "Jubilife e a fenda no céu",
+    body:
+      "Uma fenda espaço-temporal se abre sobre Hisui e despeja gente e pokémon de outras épocas. A vila de Jubilife se organiza em torno do problema, e dali sai a primeira equipe dedicada a estudar pokémon em vez de temê-los.",
+    pokemons: ["dialga", "palkia"],
+  },
+  {
+    era: "Era antiga",
+    wiki: "Volo",
+    title: "Volo e a obsessão pelo Original",
+    body:
+      "Um mercador ambulante de Hisui reúne as Placas com um objetivo só: forçar Arceus a desfazer o mundo e recriá-lo do jeito dele. Perde, e some — deixando claro que a criação já tinha sido contestada muito antes.",
+    pokemons: ["arceus", "giratina"],
+  },
+  {
+    era: "Reinos humanos",
+    wiki: "Aether Foundation",
+    title: "A Fundação Aether e os buracos de minhoca",
+    body:
+      "Uma fundação que diz existir para cuidar de pokémon feridos passa a abrir Ultra Buracos por conta própria. Lusamine atravessa um deles atrás de Nihilego, e o que volta do outro lado já não é só ela.",
+    pokemons: ["nihilego"],
+  },
+  {
+    era: "Reinos humanos",
+    wiki: "Colress",
+    title: "Colress e a máquina de potencial",
+    body:
+      "Um cientista sem lado definido constrói um aparelho para extrair o máximo de força de um pokémon. Trabalha para a Team Plasma enquanto o laboratório serve à pesquisa, e vai embora no dia em que deixa de servir.",
+    pokemons: ["genesect"],
+  },
+  {
+    era: "Passado e futuro",
+    wiki: "Pokémon Legends: Arceus",
+    title: "As formas Origin de Hisui",
+    body:
+      "Em Hisui, Dialga e Palkia aparecem em formas que os jogos posteriores não mostram, e Giratina volta do Mundo Distorcido junto com elas. É a trindade da criação vista antes de assentar no formato que o mundo moderno conhece.",
+    pokemons: ["dialga", "palkia", "giratina"],
+  },
+  {
+    era: "Passado e futuro",
+    wiki: "Celebi (Pokémon)",
+    title: "Celebi e os saltos no tempo",
+    body:
+      "A Voz da Floresta atravessa o tempo sem esforço aparente, e onde ela pousa a vegetação volta a crescer. Quem a encontra costuma encontrar junto uma versão diferente do próprio mundo.",
+    pokemons: ["celebi"],
+  },
+  {
+    era: "Passado e futuro",
+    wiki: "Terastal phenomenon",
+    title: "A Terastalização e o cristal de Paldea",
+    body:
+      "A energia que vaza da Área Zero cobre os pokémon de Paldea com uma coroa cristalina e troca o tipo deles enquanto dura. Ninguém sabe dizer se o fenômeno é natural ou resíduo do que foi aberto lá embaixo.",
+    pokemons: ["terapagos"],
   },
 ];
 

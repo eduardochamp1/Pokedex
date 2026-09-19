@@ -167,7 +167,7 @@ Página com **13 abas** cobrindo a mitologia oficial:
 
 | Aba | Conteúdo |
 |---|---|
-| **Cronologia** | 61 eventos em 6 eras — do Ovo Original de Arceus a Koraidon/Miraidon; filtrável por era ou por pokémon |
+| **Cronologia** | 78 eventos em 6 eras — do Ovo Original de Arceus a Koraidon/Miraidon; filtrável por era ou por pokémon, cada um com fonte citada |
 | **Genealogia** | Árvore hierárquica de criação, com conectores desenhados — quem gerou ou moldou quem |
 | **Gerações** | Os 9 jogos, de 1996 (Kanto) a 2022 (Paldea) |
 | **Regiões** | 9 regiões com cidades, professor, champion, Elite Four e líderes de ginásio |
@@ -328,7 +328,7 @@ src/
 │   ├── rarity.ts               Lendários / míticos / bebês / iniciais
 │   ├── typeMatchups.ts         Matriz canônica 18×18 de efetividade
 │   ├── i18n.ts                 Traduções PT-BR de tipos, habitats e genus
-│   ├── lore.ts                 61 eventos cronológicos em 6 eras
+│   ├── lore.ts                 78 eventos cronológicos em 6 eras, com fonte citada
 │   ├── regions.ts              9 regiões documentadas
 │   ├── regionMap.ts            Paths SVG das regiões
 │   ├── humans.ts               33 personagens humanos
