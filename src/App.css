@@ -1174,73 +1174,191 @@ nav {
 .genealogy-intro {
   color: var(--text-muted);
   text-align: center;
-  margin-bottom: 24px;
+  max-width: 560px;
+  margin: 0 auto 28px;
   font-family: var(--font-display);
   font-style: italic;
 }
 
-/* ========= Genealogia: registro de linhagem =========
-   O trilho desce pela esquerda e cada clã se pendura nele. As ligações são
-   pseudo-elementos, não SVG medido no DOM: a hierarquia continua legível em
-   qualquer largura e nada precisa ser recalculado no resize. */
+/* ========= Genealogia =========
+   Uma coluna: Arceus no alto e, abaixo, painéis de clã de largura cheia
+   ligados por um fio central. O fio vive no vão entre painéis, então nunca
+   passa por cima de texto — e as ligações são pseudo-elementos, sem medição
+   de DOM nem SVG sobreposto. */
 .genealogy {
-  --rail: 34px;
-  --rail-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  --wire: color-mix(in srgb, var(--accent) 50%, transparent);
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
-.genealogy-card {
+/* ---- Arceus ---- */
+.genealogy-root {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
   display: flex;
-  gap: 12px;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+  padding: 26px 28px 24px;
+  background:
+    radial-gradient(
+      circle at 50% 30%,
+      color-mix(in srgb, var(--accent-alt) 16%, transparent),
+      transparent 62%
+    ),
+    var(--surface-1);
+  border: 2px solid var(--accent-alt);
+  border-radius: var(--radius-card);
+  box-shadow: inset 0 0 0 2px var(--surface-2), var(--shadow-hero);
+}
+.genealogy-root-portrait {
+  width: 104px;
+  height: 104px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  margin-bottom: 8px;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--accent-alt) 22%, transparent),
+    transparent 70%
+  );
+}
+.genealogy-root-portrait img { width: 88px; height: 88px; object-fit: contain; }
+.genealogy-root-name {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: capitalize;
+  color: var(--text);
+  line-height: 1.1;
+}
+.genealogy-root-name:hover { color: var(--accent-alt); }
+.genealogy-root-role {
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--accent-alt);
+}
+.genealogy-root-note {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  max-width: 320px;
+}
+
+/* ---- Pilha de clãs ---- */
+.genealogy-branches {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  /* O vão é dono do fio: 44px é o comprimento visível dele. */
+  gap: 44px;
+  margin-top: 44px;
+}
+.genealogy-branch {
+  position: relative;
   background: var(--surface-1);
   border: 2px solid var(--border-strong);
   border-radius: var(--radius-card);
   box-shadow: inset 0 0 0 2px var(--surface-2), var(--shadow-card);
-  padding: 12px 14px;
-  position: relative;
-  z-index: 1;
+  padding: 16px 18px 18px;
 }
-/* Arceus usa a moldura dourada, a mesma marca de raridade da carta: é o
-   único nó da página que a recebe. */
-.genealogy-card.is-root {
-  border-color: var(--accent-alt);
-  box-shadow: inset 0 0 0 2px var(--surface-2), var(--shadow-hero);
-  padding: 18px 20px;
-  gap: 18px;
-  align-items: center;
-  margin-left: var(--rail);
+/* Fio que sobe do painel até o painel anterior (ou até Arceus). */
+.genealogy-branch::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -44px;
+  width: 2px;
+  height: 44px;
+  background: var(--wire);
 }
-.genealogy-card.is-root .genealogy-name { font-size: 1.5rem; }
-.genealogy-card.is-root .genealogy-role { color: var(--accent-alt); }
-.genealogy-card.is-root .genealogy-note { font-size: 0.9rem; }
+/* Nó onde o fio encontra o painel. */
+.genealogy-branch::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -5px;
+  width: 9px;
+  height: 9px;
+  margin-left: -5.5px;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  transform: rotate(45deg);
+}
 
-.genealogy-portrait {
-  flex-shrink: 0;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--surface-2);
-  border: 2px solid var(--border);
-  padding: 4px;
+.genealogy-branch-head {
+  border-bottom: 2px solid color-mix(in srgb, var(--accent) 28%, transparent);
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+}
+.genealogy-branch-title {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 7px;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  margin: 0;
 }
-.genealogy-card.is-root .genealogy-portrait {
-  width: 76px;
-  height: 76px;
-  border-color: var(--accent-alt);
+.genealogy-branch-title::before { content: "\25B8"; }
+.genealogy-branch-note {
+  margin: 5px 0 0;
+  font-size: 0.82rem;
+  color: var(--text-dim);
 }
-.genealogy-portrait img { width: 100%; height: 100%; object-fit: contain; }
-.genealogy-info {
+
+/* ---- Membros ---- */
+.genealogy-row {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+/* Sem moldura: caixa dentro de caixa dentro de caixa era metade da sensação
+   de inacabado. O membro se separa do painel pelo fundo, não pela borda. */
+.genealogy-member {
+  min-width: 0;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 2px;
-  min-width: 0;
-  flex: 1;
 }
+.genealogy-portrait {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 4px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--accent) 12%, transparent),
+    transparent 70%
+  );
+}
+.genealogy-portrait img { width: 48px; height: 48px; object-fit: contain; }
 .genealogy-name {
   font-family: var(--font-display);
   font-size: 1rem;
@@ -1251,138 +1369,79 @@ nav {
 .genealogy-name:hover { color: var(--accent); }
 .genealogy-role {
   font-family: var(--font-display);
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   color: var(--accent);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
 }
 .genealogy-note {
   font-size: 0.78rem;
   color: var(--text-muted);
   line-height: 1.45;
-  margin: 2px 0 0;
+  margin: 6px 0 0;
 }
 
-/* O trilho: uma linha só, do pé de Arceus até o último clã. */
-.genealogy-branches {
+/* ---- Descendência: ficha, não carta ---- */
+.genealogy-heirs {
   list-style: none;
-  margin: 0;
-  padding: 0 0 0 var(--rail);
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-}
-.genealogy-branches::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: -18px;
-  bottom: 22px;
-  width: 2px;
-  background: var(--rail-color);
-}
-
-.genealogy-branch { position: relative; }
-/* Braço horizontal até o título do clã. */
-.genealogy-branch::before {
-  content: "";
-  position: absolute;
-  left: calc(var(--rail) * -1);
-  top: 11px;
-  width: calc(var(--rail) - 12px);
-  height: 2px;
-  background: var(--rail-color);
-}
-/* Nó no encontro do braço com o trilho. */
-.genealogy-branch::after {
-  content: "";
-  position: absolute;
-  left: calc(var(--rail) * -1 - 3px);
-  top: 6px;
-  width: 8px;
-  height: 8px;
-  background: var(--accent);
-  transform: rotate(45deg);
-}
-.genealogy-branch-title {
-  font-family: var(--font-display);
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  margin: 0;
-}
-.genealogy-branch-note {
-  font-size: 0.8rem;
-  color: var(--text-dim);
-  margin: 3px 0 12px;
-}
-
-.genealogy-row {
-  list-style: none;
-  margin: 0;
+  margin: 12px 0 0;
   padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+}
+.genealogy-heir { min-width: 0; }
+.genealogy-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  transition: border-color var(--dur-fast), background var(--dur-fast);
+}
+.genealogy-chip:hover {
+  background: var(--surface-1);
+  border-color: var(--accent);
+}
+.genealogy-chip-portrait {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
   display: grid;
-  /* As colunas sao elasticas para o trio caber sempre numa fileira so; quem
-     segura a largura e a carta, nao a coluna. Com o teto na coluna, tres
-     cartas de 300 estouravam o container e o trio quebrava em duas linhas —
-     e sem teto nenhum, um cla de um membro so esticava pela largura inteira. */
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  justify-content: start;
-  gap: 14px;
-  /* Stretch para os tres membros de um trio terminarem na mesma linha, mesmo
-     quando um deles tem a nota mais longa. */
-  align-items: stretch;
+  place-items: center;
 }
-.genealogy-member {
-  min-width: 0;
-  max-width: 300px;
-  display: flex;
-  flex-direction: column;
+.genealogy-chip-portrait img { width: 28px; height: 28px; object-fit: contain; }
+.genealogy-chip-text { display: flex; flex-direction: column; min-width: 0; }
+.genealogy-chip-name {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  color: var(--text);
+  line-height: 1.2;
 }
-.genealogy-member > .genealogy-card { flex-grow: 1; }
-
-/* Descendência de um membro: desce dele, não do trilho principal. */
-.genealogy-descent {
-  list-style: none;
-  margin: 10px 0 0;
-  padding: 0 0 0 22px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.genealogy-chip-role {
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
-.genealogy-descent::before {
-  content: "";
-  position: absolute;
-  left: 23px;
-  top: -10px;
-  bottom: 18px;
-  width: 2px;
-  background: var(--rail-color);
+/* Terceiro nível (Cosmog -> Solgaleo/Lunala): quebra a linha e recua. */
+.genealogy-heir > .genealogy-heirs {
+  flex-basis: 100%;
+  margin-top: 8px;
+  margin-left: 15px;
+  padding-left: 12px;
+  border-left: 2px solid var(--wire);
 }
-.genealogy-descent > .genealogy-member { position: relative; }
-.genealogy-descent > .genealogy-member::before {
-  content: "";
-  position: absolute;
-  left: -22px;
-  top: 30px;
-  width: 21px;
-  height: 2px;
-  background: var(--rail-color);
-}
-.genealogy-descent .genealogy-card {
-  box-shadow: 3px 3px 0 var(--shadow-hard);
-  background: var(--surface-2);
-}
-.genealogy-descent .genealogy-portrait { width: 38px; height: 38px; }
-.genealogy-descent .genealogy-name { font-size: 0.9rem; }
 
 @media (max-width: 640px) {
-  .genealogy { --rail: 20px; }
+  .genealogy-branches { gap: 32px; margin-top: 32px; }
+  .genealogy-branch::before { top: -32px; height: 32px; }
   .genealogy-row { grid-template-columns: 1fr; }
 }
 
