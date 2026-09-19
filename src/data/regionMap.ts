@@ -1,4 +1,13 @@
-// Coordenadas SVG do mapa mundi Pokémon — 1000x600 viewbox.
+// Coordenadas SVG do mapa mundi Pokémon.
+//
+// Os paths vivem no sistema original de 1000x600; quem desenha (WorldMap)
+// aplica uma transformação única para encaixá-los na folha, que hoje é
+// 1000x640 com faixas reservadas em cima e embaixo para o cartucho, a rosa
+// dos ventos e a escala. Mexer numa coordenada daqui não exige recalcular
+// a moldura, e mexer na moldura não exige recalcular estes paths.
+//
+// As cores são lavadas de propósito: a folha é papel creme, e os tons
+// saturados que existiam antes estouravam sobre ela.
 // Paths desenhados para lembrar as geografias reais que cada região representa:
 //   Continente Japão: Sinnoh (Hokkaido), Johto+Kanto (Honshu), Hoenn (Kyushu)
 //   Pacífico: Alola (Hawaii, 4 ilhas)
@@ -21,7 +30,7 @@ export const REGION_SHAPES: RegionShape[] = [
   // Sinnoh — Hokkaido: massa arredondada ao norte
   {
     id: "sinnoh",
-    color: "#3a6cb0",
+    color: "#9db4cd",
     path:
       "M 205,105 C 235,95 275,100 305,115 C 330,130 340,155 335,180 " +
       "C 325,200 300,210 275,208 C 250,205 220,195 205,175 C 195,155 195,125 205,105 Z",
@@ -32,7 +41,7 @@ export const REGION_SHAPES: RegionShape[] = [
   // Johto — Kansai: península oeste conectada ao Kanto
   {
     id: "johto",
-    color: "#c48d3a",
+    color: "#d9bd8b",
     path:
       "M 190,255 C 210,235 240,232 265,240 " +
       "C 275,245 280,258 275,270 " +
@@ -46,7 +55,7 @@ export const REGION_SHAPES: RegionShape[] = [
   // Kanto — Honshu leste (encostado no Johto)
   {
     id: "kanto",
-    color: "#dc0a2d",
+    color: "#d98b80",
     path:
       "M 270,240 C 300,232 330,240 355,255 " +
       "C 380,270 395,290 400,315 " +
@@ -60,7 +69,7 @@ export const REGION_SHAPES: RegionShape[] = [
   // Hoenn — Kyushu: ilha sul com formato irregular
   {
     id: "hoenn",
-    color: "#a83a2c",
+    color: "#c9907e",
     path:
       "M 190,395 C 215,385 245,388 270,400 " +
       "C 290,410 300,430 295,450 " +
@@ -75,7 +84,7 @@ export const REGION_SHAPES: RegionShape[] = [
   // ==== PACÍFICO — Alola (Hawaii, 4 ilhas) ====
   {
     id: "alola",
-    color: "#f7b32b",
+    color: "#e6c98d",
     path:
       // Melemele (NW)
       "M 460,430 C 475,425 490,432 493,445 C 490,455 478,458 465,455 C 456,450 455,438 460,430 Z " +
@@ -85,14 +94,14 @@ export const REGION_SHAPES: RegionShape[] = [
       "M 545,485 C 570,478 595,488 602,505 C 605,522 588,532 565,530 C 545,527 535,512 540,498 C 541,492 542,488 545,485 Z " +
       // Poni (SE)
       "M 510,530 C 528,527 542,538 540,552 C 535,563 518,565 508,558 C 502,550 502,538 510,530 Z",
-    labelX: 530, labelY: 585,
+    labelX: 530, labelY: 412,
     centerX: 530, centerY: 495,
   },
 
   // ==== AMÉRICAS — Unova (NYC) ====
   {
     id: "unova",
-    color: "#3a3a4a",
+    color: "#a8a5ae",
     path:
       // Manhattan-esque: forma vertical longa com peninsulas
       "M 640,155 C 660,148 675,155 682,170 " +
@@ -112,7 +121,7 @@ export const REGION_SHAPES: RegionShape[] = [
   // Galar — Great Britain (comprimento norte-sul, com "Scotland" apontando NW)
   {
     id: "galar",
-    color: "#3d5a80",
+    color: "#9fb2c6",
     path:
       "M 758,120 C 770,110 785,113 795,125 " +
       "C 800,140 800,155 795,170 " +
@@ -128,7 +137,7 @@ export const REGION_SHAPES: RegionShape[] = [
   // Kalos — França: hexágono clássico
   {
     id: "kalos",
-    color: "#c8ab74",
+    color: "#dbc79c",
     path:
       "M 810,290 L 852,275 L 892,300 L 895,345 L 855,368 L 812,352 Z",
     labelX: 852, labelY: 325,
@@ -138,7 +147,7 @@ export const REGION_SHAPES: RegionShape[] = [
   // Paldea — Península Ibérica: retângulo com contorno costeiro
   {
     id: "paldea",
-    color: "#e63946",
+    color: "#dd9089",
     path:
       "M 760,400 C 785,392 815,395 845,398 " +
       "C 875,402 895,415 900,435 " +

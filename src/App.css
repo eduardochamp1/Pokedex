@@ -1909,99 +1909,119 @@ nav {
   margin: 0 auto;
   line-height: 1.5;
 }
+/* ========= Mapa: a folha de papel ========= */
 .worldmap-wrap {
   position: relative;
-  background: linear-gradient(180deg, #0d1f38, #0b1729);
+  background: #ede2c2;
   border-radius: var(--radius-card);
   overflow: hidden;
   box-shadow: var(--shadow-hero);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border-strong);
 }
 .worldmap-svg {
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 1000 / 600;
+  aspect-ratio: 1000 / 640;
 }
 .worldmap-region { cursor: pointer; outline: none; }
+/* Sem escala no hover: terra que cresce ao passar o mouse desmente o mapa.
+   O estado se diz escurecendo o tom e engrossando a linha de tinta. */
 .worldmap-region path {
   fill: var(--region-color);
-  stroke: rgba(255, 255, 255, 0.4);
-  stroke-width: 2;
-  transition: transform var(--dur-base) var(--ease-out), filter var(--dur-base) var(--ease-out), stroke-width var(--dur-base) var(--ease-out);
-  transform-origin: center;
-  transform-box: fill-box;
-  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--region-color) 40%, transparent));
+  stroke: #6b4e2e;
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+  transition: fill var(--dur-base) var(--ease-out), stroke-width var(--dur-fast);
 }
 .worldmap-region:hover path,
 .worldmap-region.is-hover path {
-  transform: scale(1.06);
-  stroke: white;
-  stroke-width: 3;
-  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--region-color) 70%, transparent)) brightness(1.15);
+  fill: color-mix(in srgb, var(--region-color) 82%, #6b4e2e);
+  stroke-width: 2.6;
 }
 .worldmap-region.is-selected path {
-  stroke: var(--accent-alt);
-  stroke-width: 4;
-  filter: drop-shadow(0 0 12px rgba(255, 203, 5, 0.6));
+  fill: color-mix(in srgb, var(--region-color) 72%, #6b4e2e);
+  stroke: #b8892b;
+  stroke-width: 3.5;
 }
+/* paint-order: stroke poe um contorno de papel atras da letra, entao o nome
+   continua legivel sobre qualquer tom de regiao. */
 .worldmap-label {
-  fill: white;
+  fill: #3f3018;
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  letter-spacing: 0.02em;
   pointer-events: none;
   text-transform: capitalize;
+  paint-order: stroke;
+  stroke: #f2e7c9;
+  stroke-width: 3px;
+  stroke-linejoin: round;
 }
-.worldmap-sub {
-  fill: rgba(255, 255, 255, 0.7);
+.worldmap-sea-label { pointer-events: none; }
+.worldmap-cartouche-title {
   font-family: var(--font-display);
-  font-size: 10px;
-  font-weight: 600;
-  pointer-events: none;
+  font-size: 19px;
+  font-weight: 700;
+  fill: #3f3018;
+  letter-spacing: 0.04em;
 }
-.particle {
-  opacity: 0;
-  animation: particle-drift 8s ease-in-out infinite;
+.worldmap-cartouche-sub {
+  font-family: var(--font-pixel);
+  font-size: 7px;
+  fill: #6b4e2e;
 }
-@keyframes particle-drift {
-  0%, 100% { opacity: 0; transform: translateY(0); }
-  50% { opacity: 0.6; transform: translateY(-6px); }
+.worldmap-compass-n {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  fill: #3f3018;
 }
-
+.worldmap-scale-label {
+  font-family: var(--font-pixel);
+  font-size: 7px;
+  fill: #6b4e2e;
+}
 .worldmap-tooltip {
   position: absolute;
-  background: var(--surface-1);
-  color: var(--text);
-  border: 1px solid var(--border);
+  background: #f6eed6;
+  color: #2b2620;
+  border: 2px solid #6b4e2e;
   border-radius: var(--radius-sm);
   padding: 10px 14px;
-  box-shadow: var(--shadow-card-hover);
+  box-shadow: 4px 4px 0 rgba(107, 78, 46, 0.35);
   pointer-events: none;
   max-width: 240px;
   z-index: 10;
   font-size: 0.85rem;
-  animation: fadeIn 140ms ease-out;
+  /* Só opacidade: o transform é de quem vira o balão perto da borda. */
+  animation: worldmap-tip-in 140ms ease-out;
 }
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0); }
+@keyframes worldmap-tip-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
+.worldmap-tooltip.is-flip-x { transform: translateX(-100%); }
+.worldmap-tooltip.is-flip-y { transform: translateY(-100%); }
+.worldmap-tooltip.is-flip-x.is-flip-y { transform: translate(-100%, -100%); }
 .worldmap-tooltip-name {
   font-family: var(--font-display);
   font-size: 1rem;
   font-weight: 700;
-  color: var(--accent-alt);
+  color: #3f3018;
   margin-bottom: 2px;
   text-transform: capitalize;
 }
 .worldmap-tooltip-info {
-  color: var(--text);
+  color: #5a4527;
   margin-bottom: 6px;
-  font-style: italic;
 }
-.worldmap-tooltip-hint { color: var(--text-muted); font-size: 0.75rem; }
+.worldmap-tooltip-hint {
+  color: #8a6f42;
+  font-family: var(--font-pixel);
+  font-size: 7px;
+}
 
 /* Map dossier */
 .mappage-detail {
