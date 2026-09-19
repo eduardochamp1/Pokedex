@@ -56,6 +56,15 @@ function lerNomesCurados() {
   return usos;
 }
 
+/** Ids das dex regionais que o filtro oferece. */
+function lerDexRegionais() {
+  const src = readFileSync("src/hooks/usePokemon.ts", "utf8");
+  const ini = src.indexOf("export const REGIONAL_DEXES");
+  const fim = src.indexOf("];", ini);
+  if (ini < 0 || fim < 0) throw new Error("não achei REGIONAL_DEXES em usePokemon.ts");
+  return [...src.slice(ini, fim).matchAll(/id:\s*"([^"]+)"/g)].map((m) => m[1]);
+}
+
 /** Quantos pokémon cada geração declara em generations.ts. */
 function lerDeclarado() {
   const src = readFileSync("src/data/generations.ts", "utf8");
@@ -126,5 +135,32 @@ if (gensRuins.length) {
   }
 }
 
-if (semSprite.length || aliasQuebrado.length || gensRuins.length) process.exit(1);
-console.log("\nTodo nome resolve, e as nove gerações fecham com o número publicado.");
+// ---------- dex regionais ----------
+// Mesma falha silenciosa da geração: espécie que não resolve some da grade, e
+// o contador passa a mostrar menos do que a dex realmente tem.
+const dexRuins = [];
+for (const dex of lerDexRegionais()) {
+  const r = await fetch(`https://pokeapi.co/api/v2/pokedex/${dex}`);
+  if (!r.ok) {
+    dexRuins.push({ dex, erro: `HTTP ${r.status}` });
+    continue;
+  }
+  const especies = (await r.json()).pokemon_entries.map((e) => e.pokemon_species.name);
+  const somem = especies.filter((e) => !indice.has(resolver(e)));
+  if (somem.length) dexRuins.push({ dex, somem });
+}
+
+if (dexRuins.length) {
+  console.log("\nDex regionais com problema:");
+  for (const d of dexRuins) {
+    const detalhe = d.erro ?? `somem ${d.somem.length} (${d.somem.join(", ")})`;
+    console.log(`  ${d.dex}: ${detalhe}`);
+  }
+} else {
+  console.log(`\n${lerDexRegionais().length} dex regionais conferidas, nenhuma perde espécie.`);
+}
+
+if (semSprite.length || aliasQuebrado.length || gensRuins.length || dexRuins.length) {
+  process.exit(1);
+}
+console.log("\nTudo fecha: lore, gerações e dex regionais.");

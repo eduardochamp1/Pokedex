@@ -133,6 +133,20 @@ export interface GenerationResponse {
   pokemon_species: { name: string; url: string }[];
 }
 
+/**
+ * Dex regional. Nao confundir com GenerationResponse: a geracao lista o que
+ * ESTREOU nela, a dex lista o que APARECE na regiao — por isso Paldea tem 400
+ * entradas contra as 120 especies novas da geracao IX.
+ */
+export interface PokedexResponse {
+  id: number;
+  name: string;
+  pokemon_entries: {
+    entry_number: number;
+    pokemon_species: { name: string; url: string };
+  }[];
+}
+
 /** Como e em que jogo o pokemon aprende um golpe. */
 export interface PokemonMoveVersion {
   /** 0 quando o metodo nao e por nivel. */

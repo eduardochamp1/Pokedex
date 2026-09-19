@@ -232,7 +232,7 @@ A aplicação abre em [http://localhost:3000](http://localhost:3000).
 | `npm test` | Suíte Vitest |
 | `npm run test:watch` | Vitest em watch |
 | `npm run sprites` | Baixa os sprites para `public/sprites/` (idempotente; `--force` rebaixa) |
-| `npm run names:check` | Confere se todo nome usado pelo site resolve para um slug da PokéAPI — a lore e as nove gerações do filtro (precisa de rede) |
+| `npm run names:check` | Confere se todo nome usado pelo site resolve para um slug da PokéAPI — a lore, as nove gerações e as 16 dex regionais (precisa de rede) |
 | `npm run emulator:core` | Copia o core do emulador para `public/emulator/` (roda no predev/prebuild) |
 
 > **Deploy:** é uma SPA com `BrowserRouter`. O host precisa reescrever qualquer
@@ -274,7 +274,7 @@ src/
 │   ├── CardHero.tsx            Versão ampliada do card
 │   ├── Pagination.tsx          Desabilita nos limites
 │   ├── Skeleton.tsx            Placeholders + fallback de rota lazy
-│   ├── TypeFilter.tsx / GenerationFilter.tsx / RarityFilter.tsx
+│   ├── TypeFilter.tsx / DexFilter.tsx / RarityFilter.tsx
 │   ├── SpriteViewer.tsx        Toggle normal/shiny/animado
 │   ├── VarietySwitcher.tsx     Mega, Gigantamax, formas regionais
 │   ├── EvolutionChain.tsx
@@ -388,7 +388,8 @@ carta na cor do tipo e o dourado reservado a raridade.
 ## 📝 Notas técnicas
 
 - **Índice de nomes**: um único request (`/pokemon?limit=100000`, ~90 kB) monta o mapa nome → id que alimenta a busca parcial, a ordenação dos filtros e os sprites dos chips da lore. Cacheado por 1 h.
-- **Filtros**: cada critério custa no máximo um request e devolve a lista **completa** de nomes; a interseção e a paginação são locais. Só a página visível (25 itens) tem os detalhes buscados.
+- **Filtros**: cada critério custa no máximo um request e devolve a lista **completa** de nomes; a interseção e a paginação são locais. Só a página visível (48 itens) tem os detalhes buscados — uma página fria leva ~1,9 s e o esqueleto cobre a espera.
+- **Geração ≠ dex regional**: são dois filtros, e confundi-los é o erro mais fácil de cometer. A geração IX trouxe **120 espécies novas**; a dex de **Paldea tem 400 entradas**, porque lista tudo que aparece na região venha de onde vier. Os dois números estão certos — por isso o `DexFilter` separa os dois em grupos rotulados, em vez de oferecer só "Geração: IX — Paldea" e deixar o número parecer errado. Kalos e Galar não têm dex única: os jogos dividem em partes, e a lista reflete isso.
 - **Sprites locais**: os 1.342 sprites pixelados e os 36 de item ficam em `public/sprites/` (~1,4 MB), baixados uma vez por `npm run sprites` e commitados. Como o caminho é determinístico (id do pokémon / slug do item), a Lore renderiza 140+ chips com **zero** request por pokémon e sem depender de CDN de terceiros.
 - **O artwork grande não é local**: 475px × 1.351 daria ~176 MB. Ele continua saindo do objeto `Pokemon` que a PokéAPI já devolve nas telas que buscam o detalhe (card do grid, hero, sprite viewer).
 - **Imagens de personagens, regiões e organizações**: não vêm de wiki. O Bulbapedia bloqueia hotlink (`archives.bulbagarden.net` responde 403) e a arte é propriedade da Nintendo/Game Freak — então a ilustração dessas seções é SVG gerado no próprio projeto (`LoreArt.tsx`), e a wiki entra como **fonte citada**.

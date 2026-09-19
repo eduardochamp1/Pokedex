@@ -1,5 +1,6 @@
 import type {
   GenerationResponse,
+  PokedexResponse,
   Pokemon,
   PokemonListResponse,
 } from "./types/pokemon";
@@ -163,4 +164,12 @@ export const getGeneration = async (
   signal?: AbortSignal
 ): Promise<GenerationResponse | null> => {
   return fetchJson<GenerationResponse>(`${BASE_URL}/generation/${gen}`, signal);
+};
+
+/** Dex regional (kanto, paldea, hisui...): tudo que aparece na regiao. */
+export const getPokedex = async (
+  dex: string,
+  signal?: AbortSignal
+): Promise<PokedexResponse | null> => {
+  return fetchJson<PokedexResponse>(`${BASE_URL}/pokedex/${dex}`, signal);
 };

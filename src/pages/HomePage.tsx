@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import Searchbar from "../components/Searchbar";
 import Pokedex from "../components/Pokedex";
 import TypeFilter from "../components/TypeFilter";
-import GenerationFilter from "../components/GenerationFilter";
+import DexFilter from "../components/DexFilter";
 import RarityFilter from "../components/RarityFilter";
 import CardHero from "../components/CardHero";
 import { CardSkeleton } from "../components/Skeleton";
@@ -50,6 +50,7 @@ const HomePage = () => {
     search: debouncedSearch,
     type: current.type,
     generation: current.generation,
+    pokedex: current.pokedex,
     rarity: current.rarity,
   });
 
@@ -122,10 +123,14 @@ const HomePage = () => {
             value={current.type}
             onChange={(v) => update({ type: v })}
           />
-          <h3>Geração</h3>
-          <GenerationFilter
-            value={current.generation}
-            onChange={(v) => update({ generation: v })}
+          <h3>Geração ou região</h3>
+          <DexFilter
+            generation={current.generation}
+            pokedex={current.pokedex}
+            onChange={(next) =>
+              // Exclusivos: escolher um limpa o outro.
+              update({ generation: next.generation, pokedex: next.pokedex })
+            }
           />
           <h3>Raridade</h3>
           <RarityFilter

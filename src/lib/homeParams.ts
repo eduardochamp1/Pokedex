@@ -1,4 +1,4 @@
-import { POKEMON_TYPES } from "../hooks/usePokemon";
+import { POKEMON_TYPES, REGIONAL_DEXES } from "../hooks/usePokemon";
 import { RARITIES, type RarityId } from "../data/rarity";
 
 export const SORTS = [
@@ -12,6 +12,7 @@ export interface HomeParams {
   search: string;
   type: string | undefined;
   generation: number | undefined;
+  pokedex: string | undefined;
   rarity: RarityId | undefined;
   sort: SortId;
   page: number;
@@ -21,6 +22,7 @@ const DEFAULTS: HomeParams = {
   search: "",
   type: undefined,
   generation: undefined,
+  pokedex: undefined,
   rarity: undefined,
   sort: "id",
   page: 0,
@@ -41,6 +43,9 @@ export function parseHomeParams(params: URLSearchParams): HomeParams {
   const generation =
     Number.isInteger(genRaw) && genRaw >= 1 && genRaw <= 9 ? genRaw : undefined;
 
+  const dexRaw = params.get("dex") ?? undefined;
+  const pokedex = REGIONAL_DEXES.some((d) => d.id === dexRaw) ? dexRaw : undefined;
+
   const rarity = params.get("rar") ?? undefined;
   const validRarity = RARITIES.some((r) => r.id === rarity)
     ? (rarity as RarityId)
@@ -58,6 +63,7 @@ export function parseHomeParams(params: URLSearchParams): HomeParams {
     search: params.get("q") ?? "",
     type: validType,
     generation,
+    pokedex,
     rarity: validRarity,
     sort,
     page,
@@ -70,6 +76,7 @@ export function toSearchParams(p: HomeParams): URLSearchParams {
   if (p.search) out.set("q", p.search);
   if (p.type) out.set("tipo", p.type);
   if (p.generation) out.set("ger", String(p.generation));
+  if (p.pokedex) out.set("dex", p.pokedex);
   if (p.rarity) out.set("rar", p.rarity);
   if (p.sort !== DEFAULTS.sort) out.set("ord", p.sort);
   if (p.page > 0) out.set("p", String(p.page + 1));

@@ -3,6 +3,7 @@ import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   fetchJsonPublic,
   getGeneration,
+  getPokedex,
   getPokemonData,
   getPokemonIndex,
   getPokemons,
@@ -40,6 +41,39 @@ export const GENERATIONS = [
   { id: 9, label: "IX — Paldea" },
 ] as const;
 
+/**
+ * Dex regionais da PokeAPI.
+ *
+ * Geracao e dex regional sao coisas diferentes, e confundi-las e o erro mais
+ * facil de cometer aqui: a geracao IX trouxe 120 especies NOVAS, enquanto a
+ * dex de Paldea tem 400 entradas — porque inclui tudo que aparece na regiao,
+ * vindo de qualquer geracao. Quem procura "quantos pokemon tem em Paldea"
+ * acha 400, e tem razao.
+ *
+ * Kalos e Galar nao tem uma dex unica: os jogos dividem em partes, e a lista
+ * reflete isso em vez de inventar um total que nao existe.
+ */
+export const REGIONAL_DEXES = [
+  { id: "kanto", label: "Kanto" },
+  { id: "original-johto", label: "Johto" },
+  { id: "hoenn", label: "Hoenn" },
+  { id: "extended-sinnoh", label: "Sinnoh" },
+  { id: "updated-unova", label: "Unova" },
+  { id: "kalos-central", label: "Kalos · Central" },
+  { id: "kalos-coastal", label: "Kalos · Costa" },
+  { id: "kalos-mountain", label: "Kalos · Montanha" },
+  { id: "updated-alola", label: "Alola" },
+  { id: "galar", label: "Galar" },
+  { id: "isle-of-armor", label: "Galar · Ilha da Armadura" },
+  { id: "crown-tundra", label: "Galar · Tundra da Coroa" },
+  { id: "hisui", label: "Hisui" },
+  { id: "paldea", label: "Paldea" },
+  { id: "kitakami", label: "Paldea · Kitakami" },
+  { id: "blueberry", label: "Paldea · Blueberry" },
+] as const;
+
+export type RegionalDexId = (typeof REGIONAL_DEXES)[number]["id"];
+
 export const POKEMON_TYPES = [
   "normal", "fire", "water", "electric", "grass", "ice",
   "fighting", "poison", "ground", "flying", "psychic", "bug",
@@ -48,7 +82,12 @@ export const POKEMON_TYPES = [
 
 export type PokemonTypeName = (typeof POKEMON_TYPES)[number];
 
-export const ITEMS_PER_PAGE = 25;
+/**
+ * Cartas por pagina. Cada uma custa um request de detalhe, disparados em
+ * paralelo e cacheados por 30 min — 25 deixava a lista completa em 55 paginas,
+ * o que e navegar por indice em vez de olhar a dex.
+ */
+export const ITEMS_PER_PAGE = 48;
 
 const HOUR = 60 * 60 * 1000;
 
@@ -153,10 +192,27 @@ function useGenerationNames(gen: number | undefined) {
   });
 }
 
+function usePokedexNames(dex: string | undefined) {
+  return useQuery<string[]>({
+    queryKey: ["pokedex-names", dex],
+    queryFn: async ({ signal }) => {
+      const data = await getPokedex(dex!, signal);
+      if (!data) return [];
+      return data.pokemon_entries.map((e: { pokemon_species: { name: string } }) =>
+        resolveName(e.pokemon_species.name)
+      );
+    },
+    enabled: Boolean(dex),
+    staleTime: HOUR,
+  });
+}
+
 export interface SelectionCriteria {
   search?: string;
   type?: string;
   generation?: number;
+  /** Dex regional: o que aparece na regiao, nao o que estreou nela. */
+  pokedex?: string;
   rarity?: RarityId;
 }
 
@@ -172,10 +228,11 @@ export interface Selection {
  * id. Cada criterio custa no maximo um request; a interseccao e local.
  */
 export function usePokemonSelection(criteria: SelectionCriteria): Selection {
-  const { search, type, generation, rarity } = criteria;
+  const { search, type, generation, pokedex, rarity } = criteria;
   const { index, isLoading: indexLoading, isError: indexError } = usePokemonIndex();
   const typeQuery = useTypeNames(type);
   const genQuery = useGenerationNames(generation);
+  const dexQuery = usePokedexNames(pokedex);
 
   const rarityNames = useMemo(() => {
     if (!rarity) return undefined;
@@ -183,7 +240,7 @@ export function usePokemonSelection(criteria: SelectionCriteria): Selection {
   }, [rarity]);
 
   const searchQuery = search?.trim() ? search.trim() : undefined;
-  const hasCriteria = Boolean(searchQuery || type || generation || rarity);
+  const hasCriteria = Boolean(searchQuery || type || generation || pokedex || rarity);
 
   const names = useMemo(() => {
     if (!hasCriteria || !index) return null;
@@ -192,6 +249,7 @@ export function usePokemonSelection(criteria: SelectionCriteria): Selection {
     if (searchQuery) sources.push(searchNames(searchQuery, index));
     if (type) sources.push(typeQuery.data ?? []);
     if (generation) sources.push(genQuery.data ?? []);
+    if (pokedex) sources.push(dexQuery.data ?? []);
     if (rarityNames) sources.push(rarityNames);
 
     return sortNamesById(intersectNames(sources), index);
@@ -201,9 +259,11 @@ export function usePokemonSelection(criteria: SelectionCriteria): Selection {
     searchQuery,
     type,
     generation,
+    pokedex,
     rarityNames,
     typeQuery.data,
     genQuery.data,
+    dexQuery.data,
   ]);
 
   return {
@@ -212,8 +272,9 @@ export function usePokemonSelection(criteria: SelectionCriteria): Selection {
       hasCriteria &&
       (indexLoading ||
         (Boolean(type) && typeQuery.isLoading) ||
-        (Boolean(generation) && genQuery.isLoading)),
-    isError: indexError || typeQuery.isError || genQuery.isError,
+        (Boolean(generation) && genQuery.isLoading) ||
+        (Boolean(pokedex) && dexQuery.isLoading)),
+    isError: indexError || typeQuery.isError || genQuery.isError || dexQuery.isError,
   };
 }
 
