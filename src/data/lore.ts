@@ -527,17 +527,9 @@ export const LORE_EVENTS: LoreEvent[] = [
   {
     era: "Reinos humanos",
     wiki: "Necrozma (Pokémon)",
-    title: "Necrozma e o roubo da luz",
-    body:
-      "Necrozma, faminto por luz depois de banido de seu mundo original, se funde a Solgaleo ou Lunala para roubar a luz de Alola. Só a Z-Move de Zeraora restaura o equilíbrio quando o Sol se apaga.",
-    pokemons: ["necrozma", "solgaleo", "lunala"],
-  },
-  {
-    era: "Reinos humanos",
-    wiki: "Ultra Megalopolis",
     title: "Necrozma rouba a luz de Alola",
     body:
-      "Necrozma se funde com Solgaleo (ou Lunala) para tornar-se Ultra Necrozma. Rouba toda a luz de Alola até o sol se apagar. Só é derrotado quando o protagonista atravessa Ultra Wormholes e o encontra em Ultra Megalopolis, sua terra natal.",
+      "Faminto por luz desde que foi banido do próprio mundo, Necrozma se funde a Solgaleo ou a Lunala e se torna Ultra Necrozma, roubando a luz de Alola até o sol se apagar. Só é detido quando o protagonista atravessa os Ultra Buracos e o enfrenta em Ultra Megalopolis, a terra natal dele.",
     pokemons: ["necrozma", "solgaleo", "lunala"],
   },
   {
