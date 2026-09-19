@@ -1531,11 +1531,29 @@ nav {
   position: absolute; top: 0; left: 0; right: 0; height: 4px;
   background: var(--card-accent, var(--accent));
 }
+/* ========= Tinta derivada da cor curada =========
+   Cada verbete da Lore traz uma cor própria — roxo do Mundo Distorcido, preto
+   da Team Rocket. Ela foi escolhida para ser ATMOSFERA (fundo, aura, borda), e
+   estava sendo usada crua como cor de texto: das 67 cores curadas, 19
+   reprovavam em título grande e 35 em texto pequeno. Team Skull, em #1a1a1a,
+   dava 1.02:1 — título invisível.
+
+   A tinta mistura a cor com o texto claro: mantém o matiz, garante o piso.
+   Em 45% o pior caso do acervo sai em 4.80:1, então passa até em texto
+   pequeno. Fundo, borda e aura continuam usando a cor crua. */
+.editorial-card,
+.battle-card,
+.civ-card,
+.myth-card,
+.landmark-section {
+  --card-ink: color-mix(in srgb, var(--card-accent, var(--accent)) 45%, var(--text));
+}
+
 .editorial-card h2 {
   font-family: var(--font-display);
   font-size: 1.3rem;
   font-weight: 500;
-  color: var(--card-accent, var(--accent));
+  color: var(--card-ink);
   text-transform: capitalize;
 }
 .editorial-card .subtitle {
@@ -1550,7 +1568,7 @@ nav {
   font-size: 0.9rem;
   text-align: left;
 }
-.editorial-card p strong { color: var(--card-accent); font-weight: 700; }
+.editorial-card p strong { color: var(--card-ink); font-weight: 700; }
 
 .editorial-card-dim { padding-right: 22px; }
 .editorial-card-dim h2,
@@ -1736,7 +1754,7 @@ nav {
   font-family: var(--font-display);
   font-size: 1.15rem;
   font-weight: 500;
-  color: var(--card-accent);
+  color: var(--card-ink);
 }
 .civ-loc {
   font-family: var(--font-display);
@@ -1757,7 +1775,7 @@ nav {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 0.7rem;
-  color: var(--card-accent);
+  color: var(--card-ink);
   text-transform: uppercase;
   letter-spacing: 0.15em;
 }
@@ -1809,7 +1827,7 @@ nav {
 .myth-region {
   font-family: var(--font-display);
   font-size: 0.65rem;
-  color: var(--card-accent);
+  color: var(--card-ink);
   text-transform: uppercase;
   letter-spacing: 0.2em;
   font-weight: 700;
@@ -1879,7 +1897,7 @@ nav {
   font-family: var(--font-display);
   font-weight: 900;
   font-size: 1.4rem;
-  color: var(--card-accent);
+  color: var(--card-ink);
   padding: 4px 12px;
   border: 2px solid var(--card-accent);
   border-radius: 4px;
@@ -1902,7 +1920,7 @@ nav {
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
-.battle-location strong { color: var(--card-accent); font-weight: 700; }
+.battle-location strong { color: var(--card-ink); font-weight: 700; }
 .battle-summary {
   color: var(--text);
   line-height: 1.55;
@@ -1920,7 +1938,7 @@ nav {
   line-height: 1.5;
   color: var(--text);
 }
-.battle-outcome strong { color: var(--card-accent); font-weight: 700; }
+.battle-outcome strong { color: var(--card-ink); font-weight: 700; }
 .battle-card .lore-chips { padding: 12px 20px 16px; margin-top: 0; }
 
 /* Region enriched metadata */
@@ -1936,7 +1954,7 @@ nav {
 .region-meta dt {
   font-family: var(--font-display);
   font-weight: 700;
-  color: var(--card-accent, var(--accent));
+  color: var(--card-ink);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-size: 0.7rem;
@@ -2700,7 +2718,7 @@ nav {
   font-family: var(--font-display);
   font-size: 1.15rem;
   margin: 0;
-  color: var(--card-accent, var(--text));
+  color: var(--card-ink);
 }
 .landmark-region-count {
   margin: 2px 0 0;
