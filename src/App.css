@@ -1466,14 +1466,84 @@ nav {
   flex-direction: column;
   gap: 10px;
 }
-.gen-slide-year {
-  font-family: var(--font-display);
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--gen-ink);
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
+/* Arte: os tres iniciais sobre um fundo tingido pela cor da geracao. Era a
+   unica aba da Lore sem figura propria. */
+.gen-slide-art {
+  margin: -20px -20px 4px;
+  padding: 14px 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background:
+    radial-gradient(
+      circle at 50% 120%,
+      color-mix(in srgb, var(--gen-color) 38%, transparent),
+      transparent 70%
+    ),
+    var(--surface-2);
+  border-bottom: 2px solid var(--border);
 }
+.gen-slide-art img {
+  width: 62px;
+  height: 62px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.gen-slide-head { display: flex; align-items: center; gap: 12px; }
+/* O numeral vira selo: identifica sem competir com o nome da regiao. */
+.gen-slide-roman {
+  flex-shrink: 0;
+  min-width: 42px;
+  height: 42px;
+  padding: 0 8px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--gen-ink);
+  color: var(--gen-ink);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+}
+.gen-slide-title { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+/* O ano era o maior elemento do card, acima do nome da regiao. Quem pensa
+   "geracao V" pensa em Unova, nao em 2010: o ano desce para bitmap pequeno,
+   como todo numero do site. */
+.gen-slide-year {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 0.02em;
+}
+
+/* Crescimento da dex, na mesma linguagem de blocos dos stats. */
+.gen-growth { display: flex; flex-direction: column; gap: 6px; }
+.gen-growth-bar {
+  position: relative;
+  display: flex;
+  height: 9px;
+  border-radius: 2px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+.gen-growth-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0 calc(5% - 2px),
+    var(--surface-1) calc(5% - 2px) 5%
+  );
+  pointer-events: none;
+}
+.gen-growth-antes { background: var(--border-strong); }
+.gen-growth-novos { background: var(--gen-ink); }
+.gen-growth-label { font-size: 0.78rem; color: var(--text-muted); }
+.gen-growth-label strong { color: var(--gen-ink); }
 .gen-slide-roman {
   font-family: var(--font-display);
   font-size: 0.75rem;
@@ -1483,9 +1553,11 @@ nav {
 }
 .gen-slide-region {
   font-family: var(--font-display);
-  font-weight: 500;
-  font-size: 1.2rem;
+  font-weight: 700;
+  font-size: 1.3rem;
+  letter-spacing: -0.015em;
   color: var(--text);
+  margin: 0;
 }
 .gen-games { display: flex; gap: 6px; flex-wrap: wrap; }
 .gen-game-badge {
@@ -1503,14 +1575,6 @@ nav {
   font-size: 0.9rem;
   line-height: 1.5;
 }
-.gen-slide-meta {
-  font-family: var(--font-display);
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-}
-.gen-slide-meta strong { color: var(--text); font-weight: 700; }
-
 /* Editorial grid (regions/humans/villains/dimensions) */
 .editorial-grid {
   display: grid;

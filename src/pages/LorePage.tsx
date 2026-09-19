@@ -30,6 +30,7 @@ import {
 } from "../components/LoreArt";
 import { REGION_SHAPES } from "../data/regionMap";
 import { pixelSpriteUrl } from "../lib/sprites";
+import { STARTERS } from "../data/rarity";
 
 // Cor temática por humano (derivada de sua saga / pokemon principal)
 const HUMAN_COLORS: Record<string, string> = {
@@ -338,12 +339,31 @@ const LorePage = () => {
                   className="gen-slide"
                   style={{ ["--gen-color" as string]: g.color }}
                 >
-                  <div className="gen-slide-year">{g.year}</div>
-                  <div className="gen-slide-roman">Geração {g.roman}</div>
-                  <h3 className="gen-slide-region">
-                    {g.region}
-                    <span className="visually-hidden">, geração {g.roman}</span>
-                  </h3>
+                  {/* Os tres iniciais sao o que identifica uma geracao de
+                      relance — mais do que o ano ou o numeral. */}
+                  <div className="gen-slide-art" aria-hidden="true">
+                    {STARTERS.slice((g.id - 1) * 3, g.id * 3).map((nome) => (
+                      <img
+                        key={nome}
+                        src={pixelSpriteUrl(idOf(nome))}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    ))}
+                  </div>
+                  <div className="gen-slide-head">
+                    <span className="gen-slide-roman" aria-hidden="true">
+                      {g.roman}
+                    </span>
+                    <div className="gen-slide-title">
+                      <h3 className="gen-slide-region">
+                        {g.region}
+                        <span className="visually-hidden">, geração {g.roman}</span>
+                      </h3>
+                      <span className="gen-slide-year">{g.year}</span>
+                    </div>
+                  </div>
                   <div className="gen-games">
                     {g.mainGames.map((game) => (
                       <span key={game} className="gen-game-badge">
@@ -353,8 +373,24 @@ const LorePage = () => {
                   </div>
                   <p className="gen-slide-fact">{g.gimmick}</p>
                   <WikiSource wiki={g.wiki} />
-                  <div className="gen-slide-meta">
-                    <strong>{g.newPokemons}</strong> novos · total {g.totalAfter}
+                  {/* A dex saindo de 151 para 1025 e o assunto da aba, e era
+                      um texto miudo. A barra poe as nove na mesma escala: o
+                      trecho aceso e o que esta geracao acrescentou. */}
+                  <div className="gen-growth">
+                    <span className="gen-growth-bar">
+                      <span
+                        className="gen-growth-antes"
+                        style={{ width: ((g.totalAfter - g.newPokemons) / 1025) * 100 + "%" }}
+                      />
+                      <span
+                        className="gen-growth-novos"
+                        style={{ width: (g.newPokemons / 1025) * 100 + "%" }}
+                      />
+                    </span>
+                    <span className="gen-growth-label">
+                      <strong>{g.newPokemons}</strong> novos · a dex chega a{" "}
+                      {g.totalAfter}
+                    </span>
                   </div>
                   <div className="lore-chips">
                     {g.signature.map((name) => (
