@@ -3,9 +3,14 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import App from "./App";
+import { applyScanline, readScanline } from "./lib/scanline";
 
 const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("Root element #root not found");
+
+// Antes do primeiro render: a pagina nunca aparece lisa para so depois
+// ganhar a textura.
+applyScanline(readScanline());
 
 const queryClient = new QueryClient({
   defaultOptions: {

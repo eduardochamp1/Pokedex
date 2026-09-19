@@ -48,10 +48,11 @@ const Pokedex = ({
         <CardSkeleton count={10} />
       ) : (
         <div className="pokedex-grid">
-          {pokemons.map((pokemon) => (
+          {pokemons.map((pokemon, i) => (
             <Card
               key={pokemon.id}
               pokemon={pokemon}
+              index={i}
               linkTo={`/pokemon/${pokemon.name}`}
             />
           ))}

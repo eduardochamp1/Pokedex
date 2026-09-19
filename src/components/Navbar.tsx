@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { Link, NavLink } from "react-router-dom";
 import FavoriteContext from "../contexts/favoritesContext";
+import ScanlineToggle from "./ScanlineToggle";
 
 const Navbar = () => {
   const { favoritePokemons } = useContext(FavoriteContext);
@@ -78,6 +79,7 @@ const Navbar = () => {
           )}
         </NavLink>
       </div>
+      <ScanlineToggle />
     </nav>
   );
 };

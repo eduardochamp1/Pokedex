@@ -7,9 +7,15 @@ import type { Pokemon } from "../types/pokemon";
 interface Props {
   pokemon: Pokemon;
   spriteUrl?: string;
+  /**
+   * Nome da transicao de view. So a ficha passa: e la que o hero e o
+   * destino da carta clicada. Na home o hero e so destaque, e dois
+   * elementos com o mesmo nome cancelariam a transicao.
+   */
+  viewTransitionName?: string;
 }
 
-const CardHero = ({ pokemon, spriteUrl }: Props) => {
+const CardHero = ({ pokemon, spriteUrl, viewTransitionName }: Props) => {
   const heroRef = useRef<HTMLDivElement>(null);
   useTiltEffect(heroRef, { maxDeg: 12 });
 
@@ -31,7 +37,10 @@ const CardHero = ({ pokemon, spriteUrl }: Props) => {
         (isMythical ? " is-mythical" : "")
       }
       data-primary-type={primaryType}
-      style={{ ["--type-color" as string]: `var(--t-${primaryType})` }}
+      style={{
+        ["--type-color" as string]: `var(--t-${primaryType})`,
+        ...(viewTransitionName ? { viewTransitionName } : null),
+      }}
     >
       <div className="card-foil" aria-hidden="true" />
       <div className="card-spectral" aria-hidden="true" />

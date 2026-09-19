@@ -190,6 +190,17 @@ const PlayPage = () => {
 
       <div className="play-layout">
         <main className="play-stage">
+          {/* Carcaca: lente, LEDs e grelha em volta da tela. E moldura —
+              nada aqui recebe foco nem cobre o canvas. */}
+          <div className="play-deck" aria-hidden="true">
+            <span className="play-deck-lens" />
+            <span className="play-deck-leds">
+              <span />
+              <span />
+              <span />
+            </span>
+            <span className="play-deck-grille" />
+          </div>
           <div
             ref={screenRef}
             className={

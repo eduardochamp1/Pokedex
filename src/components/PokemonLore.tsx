@@ -3,6 +3,7 @@ import type { PokemonSpecies } from "../types/pokemon";
 import { tGenus, tHabitat } from "../data/i18n";
 import { pickLocalized } from "../lib/localize";
 import { regionIdForPokemon } from "../lib/regionForPokemon";
+import { useTypewriter } from "../hooks/useTypewriter";
 
 interface Props {
   species: PokemonSpecies;
@@ -12,9 +13,12 @@ const PokemonLore = ({ species }: Props) => {
   const flavor = pickLocalized(species.flavor_text_entries, (e) => e.flavor_text);
   const genus = pickLocalized(species.genera, (g) => g.genus);
   const rarity: string[] = [];
-  if (species.is_mythical) rarity.push("Mítico ✨");
-  else if (species.is_legendary) rarity.push("Lendário 👑");
-  if (species.is_baby) rarity.push("Bebê 🍼");
+  if (species.is_mythical) rarity.push("Mítico ✦");
+  else if (species.is_legendary) rarity.push("Lendário ★");
+  if (species.is_baby) rarity.push("Bebê");
+
+  // O verbete se escreve sozinho na primeira visita — depois abre pronto.
+  const typed = useTypewriter(flavor ?? "", species.name);
 
   // O mapa e indexado por id de regiao ("kanto"), nao por nome de pokemon.
   const regionId = regionIdForPokemon(species.name, species.generation?.name);
@@ -42,7 +46,19 @@ const PokemonLore = ({ species }: Props) => {
           </Link>
         )}
       </div>
-      {flavor && <blockquote className="lore-quote">"{flavor}"</blockquote>}
+      {flavor && (
+        // O clique completa na hora. Quem le por leitor de tela recebe o
+        // texto inteiro desde o primeiro quadro, na copia escondida.
+        <blockquote className="lore-quote" onClick={typed.skip}>
+          <span aria-hidden="true">"{typed.shown}"</span>
+          <span className="visually-hidden">"{flavor}"</span>
+          {!typed.done && (
+            <span className="lore-quote-caret" aria-hidden="true">
+              ▾
+            </span>
+          )}
+        </blockquote>
+      )}
     </div>
   );
 };

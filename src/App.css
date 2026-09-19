@@ -2156,17 +2156,90 @@ nav {
 .notfound-shell {
   max-width: 560px;
   margin: 0 auto;
-  padding: 80px 24px;
+  padding: 56px 24px 80px;
   text-align: center;
 }
-.notfound-code {
-  font-family: var(--font-display);
-  font-size: 5rem;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--accent);
-  opacity: 0.35;
+
+/* A carcaca do aparelho so aparece aqui e em /jogar: sao as duas telas em
+   que a moldura e o assunto. Em tudo que se consulta ela atrapalharia. */
+.notfound-device {
+  width: 264px;
+  margin: 0 auto 30px;
+  padding: 14px;
+  border-radius: 16px 16px 22px 22px;
+  background: linear-gradient(160deg, #d8453a, #9b2a22);
+  box-shadow:
+    0 16px 30px rgba(155, 42, 34, 0.3),
+    inset 0 2px 0 rgba(255, 255, 255, 0.28);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
+.notfound-deck { display: flex; align-items: center; gap: 10px; }
+.notfound-lens {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #bfe6ff, #4ea8de 55%, #1c6ea8);
+  border: 3px solid #f2f2f5;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.35);
+}
+.notfound-leds { display: flex; gap: 6px; }
+.notfound-leds span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: inset 0 -2px 3px rgba(0, 0, 0, 0.3);
+}
+.notfound-leds span:nth-child(1) { background: #e8543f; }
+.notfound-leds span:nth-child(2) { background: #f5c518; }
+.notfound-leds span:nth-child(3) { background: #7ac74c; }
+.notfound-lcd {
+  position: relative;
+  overflow: hidden;
+  border: 9px solid #2a2a2e;
+  border-radius: 10px;
+  background: #9fc55a;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.notfound-lcd::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(27, 36, 16, 0.12) 0 1px,
+    transparent 1px 3px
+  );
+}
+.notfound-code {
+  font-family: var(--font-pixel);
+  font-size: 32px;
+  line-height: 1;
+  color: #1b2410;
+}
+.notfound-lcd-line {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: #35471f;
+}
+.notfound-dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 16px);
+  grid-template-rows: repeat(3, 16px);
+  justify-content: center;
+}
+.notfound-dpad span { background: #3a3a40; }
+.notfound-dpad span:nth-child(1) { grid-area: 1 / 2; border-radius: 3px 3px 0 0; }
+.notfound-dpad span:nth-child(2) { grid-area: 2 / 1; border-radius: 3px 0 0 3px; }
+.notfound-dpad span:nth-child(3) { grid-area: 2 / 2; background: #2a2a2e; }
+.notfound-dpad span:nth-child(4) { grid-area: 2 / 3; border-radius: 0 3px 3px 0; }
+.notfound-dpad span:nth-child(5) { grid-area: 3 / 2; border-radius: 0 0 3px 3px; }
 .notfound-shell h1 {
   font-family: var(--font-display);
   font-size: 1.5rem;
@@ -2190,9 +2263,11 @@ nav {
 .notfound-links a:hover { color: var(--text); }
 .notfound-cta {
   padding: 10px 18px;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--accent);
+  box-shadow: var(--shadow-card);
   background: var(--accent);
-  color: #fff !important;
+  color: var(--accent-ink) !important;
   font-weight: 700;
   font-size: 0.9rem !important;
 }
@@ -2253,7 +2328,7 @@ nav {
 }
 @media (max-width: 640px) {
   .worldmap-legend-gen { display: none; }
-  .notfound-code { font-size: 3.5rem; }
+  .notfound-code { font-size: 26px; }
 }
 
 /* ========= Estado vazio de cada slot do comparador ========= */
@@ -2604,13 +2679,13 @@ nav {
   padding: 0 5px;
   border-radius: var(--radius-pill);
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-ink);
   font-size: 0.62rem;
   font-variant-numeric: tabular-nums;
 }
 
-@media (max-width: 700px) {
-  /* Rolar em vez de cortar: 6 links nao cabem em 375px. */
+@media (max-width: 860px) {
+  /* Rolar em vez de cortar: os links nao cabem ao lado da marca. */
   .nav-links {
     overflow-x: auto;
     scrollbar-width: none;
@@ -2710,7 +2785,7 @@ nav {
   border-radius: var(--radius-pill);
   background: var(--accent);
   border: none;
-  color: #fff;
+  color: var(--accent-ink);
   font-weight: 700;
   font-size: 0.85rem;
 }
@@ -3123,4 +3198,114 @@ textarea:focus-visible,
   outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* ========= Scanline do tubo =========
+   A unica citacao que cobre a tela inteira — e por isso a unica com botao
+   para desligar. Opacidade baixa de proposito: e textura, nao efeito. */
+html[data-scanline="on"] body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(155, 188, 15, 0.055) 0 1px,
+    transparent 1px 3px
+  );
+}
+.scanline-toggle {
+  flex-shrink: 0;
+  width: 32px;
+  height: 28px;
+  margin-left: 6px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  transition: border-color var(--dur-fast), color var(--dur-fast);
+}
+.scanline-toggle:hover { border-color: var(--border-strong); color: var(--text-muted); }
+.scanline-toggle.is-on { border-color: var(--accent); color: var(--accent); }
+.scanline-toggle-glyph {
+  width: 14px;
+  height: 12px;
+  background: repeating-linear-gradient(
+    to bottom,
+    currentColor 0 2px,
+    transparent 2px 4px
+  );
+}
+
+/* ========= Entrada da grade =========
+   Em cascata de 20 ms, como uma lista de menu sendo desenhada. O `backwards`
+   segura a carta invisivel ate a vez dela; sem ele todas piscam juntas. */
+.pokedex-grid > * {
+  animation: grid-in 280ms var(--ease-out) backwards;
+  animation-delay: calc(var(--i, 0) * 20ms);
+}
+@keyframes grid-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ========= Virada de carta da grade para a ficha =========
+   A carta clicada e o hero do detalhe dividem o mesmo view-transition-name,
+   entao o navegador liga os dois em vez de cortar a tela. Onde a View
+   Transition API nao existe, a navegacao acontece igual, so sem a virada. */
+::view-transition-group(card-flip) { animation-duration: 260ms; }
+::view-transition-image-pair(card-flip) {
+  perspective: 1200px;
+  transform-style: preserve-3d;
+}
+::view-transition-old(card-flip),
+::view-transition-new(card-flip) {
+  animation-duration: 260ms;
+  animation-timing-function: var(--ease-inout);
+  backface-visibility: hidden;
+}
+::view-transition-old(card-flip) { animation-name: card-flip-out; }
+::view-transition-new(card-flip) { animation-name: card-flip-in; }
+@keyframes card-flip-out {
+  to { transform: rotateY(90deg); opacity: 0; }
+}
+@keyframes card-flip-in {
+  from { transform: rotateY(-90deg); opacity: 0; }
+}
+
+/* ========= Verbete que se escreve =========
+   Uma vez por pokemon, por visita. O cursor pisca enquanto escreve e some
+   quando termina — e a marca de "continua" das caixas de dialogo. */
+.lore-quote-caret {
+  display: inline-block;
+  margin-left: 4px;
+  color: var(--accent);
+  animation: caret-blink 700ms steps(1, end) infinite;
+}
+@keyframes caret-blink {
+  50% { opacity: 0; }
+}
+
+/* Fora da tela, dentro do leitor de tela: o verbete inteiro fica disponivel
+   desde o primeiro quadro, enquanto a versao visivel ainda esta digitando. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pokedex-grid > * { animation: none; }
+  .lore-quote-caret { animation: none; }
+  ::view-transition-old(card-flip),
+  ::view-transition-new(card-flip) { animation: none; }
 }

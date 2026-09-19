@@ -94,7 +94,11 @@ const DetailPage = () => {
         </aside>
 
         <div className="detail-hero-slot">
-          <CardHero pokemon={pokemon} spriteUrl={spriteOverride} />
+          <CardHero
+            pokemon={pokemon}
+            spriteUrl={spriteOverride}
+            viewTransitionName="card-flip"
+          />
           <div className="detail-hero-actions">
             <button
               type="button"

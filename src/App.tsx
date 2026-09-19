@@ -8,10 +8,10 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import ComparatorButton from "./components/ComparatorButton";
 import { FavoriteProvider } from "./contexts/favoritesContext";
 import { useFavorites } from "./hooks/useFavorites";
+import { DetailPage } from "./pages/routeModules";
 
 // A Home entra no bundle inicial; o resto e carregado sob demanda — a Lore
 // sozinha carrega ~2.000 linhas de dados curados.
-const DetailPage = lazy(() => import("./pages/DetailPage"));
 const FavoritesPage = lazy(() => import("./pages/FavoritesPage"));
 const ComparePage = lazy(() => import("./pages/ComparePage"));
 const LorePage = lazy(() => import("./pages/LorePage"));
