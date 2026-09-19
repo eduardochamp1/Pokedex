@@ -1,30 +1,40 @@
 :root {
-  /* Palco */
-  --bg: #0d0e14;
-  --surface-1: #1a1c25;
-  --surface-2: #141520;
-  --surface-3: #212433;
-  --border: #2a2c37;
-  --border-strong: #3a3d4d;
+  /* Palco — tons frios: a sombra dura e a borda de janela so leem como
+     menu de jogo se o fundo for azulado, nao neutro. */
+  --bg: #0b0e13;
+  --surface-1: #151823;
+  --surface-2: #10131c;
+  --surface-3: #1e2330;
+  --border: #2b3345;
+  --border-strong: #3a445c;
 
   /* Texto */
   --text: #f2f2f5;
-  --text-muted: #a1a1a6;
-  --text-dim: #6b6b70;
+  --text-muted: #a2a9b8;
+  --text-dim: #6b7285;
 
-  /* Acentos */
-  --accent: #ee1e35;
-  --accent-alt: #ffcb05;
-  --accent-hover: #ff3550;
+  /* Acentos — fosforo do Game Boy e o unico acento de sistema (foco,
+     selecao, progresso, cursor). O vermelho fica reservado a acao e a
+     favorito, e a pokebola guarda o vermelho da marca. */
+  --accent: #9bbc0f;
+  --accent-hover: #b9dc2a;
+  --accent-ink: #0b0e13; /* texto legivel sobre o fosforo */
+  /* Dourado herda o papel de destaque secundario que o amarelo antigo ja
+     tinha (lore, mapa, comparador) e serve de moldura de raridade. */
+  --accent-alt: #e8c33c;
+  --fav: #e8543f;        /* so o coracao de favorito */
+  --pokeball-red: #ee1e35;
 
-  /* Sombras */
-  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.45);
-  --shadow-card-hover: 0 16px 40px rgba(0, 0, 0, 0.6);
-  --shadow-hero: 0 24px 60px rgba(0, 0, 0, 0.7);
+  /* Sombras — deslocamento solido no lugar do blur. A cor e mais clara
+     que o fundo de proposito: sombra preta some em tela escura. */
+  --shadow-hard: #242c3d;
+  --shadow-card: 4px 4px 0 var(--shadow-hard);
+  --shadow-card-hover: 7px 7px 0 var(--shadow-hard);
+  --shadow-hero: 8px 8px 0 var(--shadow-hard);
 
-  /* Raios */
-  --radius-card: 14px;
-  --radius-sm: 8px;
+  /* Raios — janela, nao pilula */
+  --radius-card: 10px;
+  --radius-sm: 6px;
   --radius-pill: 999px;
 
   /* Motion */
@@ -34,7 +44,8 @@
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
 
-  /* Tipos — paleta canônica (mesma do CSS antigo) */
+  /* Tipos — paleta canonica (inalterada: e a unica cor saturada da tela
+     e continua sendo o dado mais importante) */
   --t-normal:   #a8a77a;
   --t-fire:     #ee8130;
   --t-water:    #6390f0;
@@ -57,4 +68,7 @@
   /* Fontes */
   --font-display: "Space Grotesk", system-ui, sans-serif;
   --font-body: system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Bitmap: so numero, rotulo e estado. Nunca texto corrido — abaixo de
+     10px fica ilegivel e nenhum tamanho dela passa em paragrafo. */
+  --font-pixel: "Press Start 2P", "Courier New", monospace;
 }

@@ -101,7 +101,7 @@ const DetailPage = () => {
               className="detail-fav-btn"
               onClick={() => updateFavoritePokemons(pokemon.name)}
             >
-              {isFav ? "❤️ Nos favoritos" : "🖤 Favoritar"}
+              {isFav ? "♥ Nos favoritos" : "♡ Favoritar"}
             </button>
             <CryButton src={pokemon.cries?.latest} name={pokemon.name} />
           </div>

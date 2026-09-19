@@ -17,11 +17,11 @@ a { color: inherit; text-decoration: none; }
 input, select, textarea { font-family: inherit; }
 img { display: block; max-width: 100%; }
 :focus-visible {
-  outline: 2px solid var(--accent-alt);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: 4px;
 }
-::selection { background: var(--accent); color: white; }
+::selection { background: var(--accent); color: var(--accent-ink); }
 
 /* ========= Navbar ========= */
 nav {
@@ -35,7 +35,7 @@ nav {
   justify-content: space-between;
   background: color-mix(in srgb, var(--bg) 85%, transparent);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--border);
 }
 .navbar-brand {
   display: inline-flex;
@@ -49,7 +49,7 @@ nav {
 .navbar-brand:hover { transform: scale(1.03); }
 .navbar-pokeball {
   width: 24px; height: 24px; border-radius: 50%;
-  background: linear-gradient(#f5f5f7 0 50%, var(--accent) 50% 100%);
+  background: linear-gradient(#f5f5f7 0 50%, var(--pokeball-red) 50% 100%);
   border: 2px solid var(--text);
   position: relative;
   flex-shrink: 0;
@@ -62,15 +62,17 @@ nav {
   background: var(--text);
 }
 .navbar-title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.1rem;
-  letter-spacing: -0.02em;
+  font-family: var(--font-pixel);
+  font-weight: 400;
+  font-size: 16px;
+  letter-spacing: 0.02em;
+  /* A bitmap desenha o baseline alto demais para alinhar com a pokebola. */
+  padding-top: 3px;
 }
 .nav-links { display: flex; gap: 4px; }
 .nav-link {
   padding: 6px 12px;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
   color: var(--text-muted);
   font-family: var(--font-display);
   font-weight: 500;
@@ -78,7 +80,10 @@ nav {
   transition: color var(--dur-fast), background var(--dur-fast);
 }
 .nav-link:hover { color: var(--text); background: var(--surface-1); }
-.nav-link-active { color: var(--accent-alt); background: var(--surface-1); }
+/* O cursor do menu marca a rota atual: e o mesmo sinal que o jogo usa e
+   nao depende de cor para ser lido. */
+.nav-link-active { color: var(--accent-ink); background: var(--accent); }
+.nav-link-active::before { content: "\25B8"; margin-right: 6px; }
 
 /* ========= Card 2:3 ========= */
 .card {
@@ -86,7 +91,7 @@ nav {
   aspect-ratio: 2 / 3;
   background: var(--surface-1);
   border-radius: var(--radius-card);
-  border: 1px solid color-mix(in srgb, var(--type-color, var(--border)) 30%, var(--border));
+  border: 2px solid color-mix(in srgb, var(--type-color, var(--border)) 35%, var(--border));
   box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
@@ -99,7 +104,7 @@ nav {
   will-change: transform;
 }
 .card:hover {
-  transform: translateY(-8px);
+  transform: translateY(-4px);
   box-shadow: var(--shadow-card-hover);
 }
 .card-link { display: contents; }
@@ -224,6 +229,13 @@ nav {
   margin-top: 4px;
 }
 .card-hp strong { color: var(--text); font-weight: 700; font-size: 1rem; }
+/* Numero sempre em bitmap: e rotulo, nunca texto de leitura. */
+.card-id {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+}
 
 .card-stats {
   list-style: none;
@@ -251,10 +263,25 @@ nav {
   white-space: nowrap;
 }
 .card-stat-bar {
-  height: 4px;
+  position: relative;
+  height: 7px;
   background: var(--surface-3);
-  border-radius: var(--radius-pill);
+  border-radius: 2px;
   overflow: hidden;
+}
+/* Os cortes ficam por cima do preenchimento: o valor vira contagem de
+   blocos, que e como o jogo sempre desenhou stat. */
+.card-stat-bar::after,
+.detail-stat-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0 calc(10% - 2px),
+    var(--surface-1) calc(10% - 2px) 10%
+  );
+  pointer-events: none;
 }
 .card-stat-fill {
   display: block;
@@ -282,15 +309,22 @@ nav {
   flex-shrink: 0;
 }
 .card-fav:hover { transform: scale(1.15); }
+/* O coracao vazio some no fundo; cheio, e o unico vermelho da grade. */
+.card-fav { color: var(--text-muted); font-size: 0.9rem; }
+.card.is-favorite .card-fav,
+.card-hero.is-favorite .card-fav { color: var(--fav); }
 
 .card-badge {
   position: absolute;
   top: 8px;
   left: 8px;
   z-index: 2;
-  font-size: 1.1rem;
+  font-size: 0.85rem;
+  line-height: 1;
+  color: var(--accent-alt);
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
 }
+.card-badge-mythical { color: #ff8ec7; }
 
 @property --shine-angle {
   syntax: "<angle>";
@@ -323,7 +357,7 @@ nav {
   max-width: 420px;
   background: var(--surface-1);
   border-radius: var(--radius-card);
-  border: 1px solid color-mix(in srgb, var(--type-color, var(--border)) 30%, var(--border));
+  border: 2px solid color-mix(in srgb, var(--type-color, var(--border)) 35%, var(--border));
   box-shadow: var(--shadow-hero);
   display: flex;
   flex-direction: column;
@@ -355,12 +389,13 @@ nav {
   letter-spacing: -0.02em;
 }
 .home-featured-copy .home-featured-genus {
-  color: var(--accent-alt);
+  font-family: var(--font-display);
+  color: var(--accent);
   font-weight: 700;
-  font-size: 0.8rem;
-  letter-spacing: 0.15em;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 .home-featured-copy .pokemon-type {
   display: flex;
@@ -393,16 +428,18 @@ nav {
   flex-direction: column;
   gap: 14px;
   background: var(--surface-1);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
   padding: 16px;
 }
 .home-sidebar h3 {
   font-family: var(--font-display);
-  font-size: 0.7rem;
-  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 0.68rem;
+  color: var(--accent);
   text-transform: uppercase;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.16em;
   margin-bottom: -6px;
   margin-top: 4px;
 }
@@ -412,7 +449,7 @@ nav {
   width: 100%;
   padding: 8px 12px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   background: var(--surface-2);
   color: var(--text);
   font-size: 0.9rem;
@@ -421,7 +458,7 @@ nav {
 .home-sidebar input:focus,
 .home-sidebar select:focus {
   outline: none;
-  border-color: var(--accent-alt);
+  border-color: var(--accent);
 }
 .home-sidebar .searchbar-container,
 .home-sidebar .type-filter {
@@ -459,15 +496,17 @@ nav {
   display: flex;
   align-items: center;
   gap: 12px;
+  font-family: var(--font-pixel);
   font-variant-numeric: tabular-nums;
   color: var(--text-muted);
-  font-size: 0.85rem;
+  font-size: 10px;
+  letter-spacing: 0.04em;
 }
 .pagination-container button {
   width: 32px; height: 32px;
-  border-radius: 50%;
+  border-radius: var(--radius-sm);
   background: var(--surface-1);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   color: var(--text);
   display: flex;
   align-items: center;
@@ -488,7 +527,7 @@ nav {
   aspect-ratio: 2 / 3;
   padding: 12px;
   background: var(--surface-1);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   border-radius: var(--radius-card);
   display: flex;
   flex-direction: column;
@@ -612,34 +651,40 @@ nav {
   padding: 20px 0;
 }
 .detail-fav-btn {
-  padding: 8px 16px;
-  border-radius: var(--radius-pill);
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
   background: var(--surface-1);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
+  box-shadow: var(--shadow-card);
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 700;
   font-size: 0.9rem;
   color: var(--text);
-  transition: transform var(--dur-fast), background var(--dur-fast);
+  transition: transform var(--dur-fast), background var(--dur-fast), box-shadow var(--dur-fast);
 }
+/* O botao afunda no proprio deslocamento: e o pressionar de um botao
+   fisico, nao um card subindo. */
 .detail-fav-btn:hover {
   background: var(--surface-3);
-  transform: translateY(-2px);
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--shadow-hard);
 }
 
 .detail-panel {
   background: var(--surface-1);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
   padding: 16px;
   min-width: 0;
 }
 .detail-panel h3 {
   font-family: var(--font-display);
-  font-size: 0.7rem;
-  color: var(--accent-alt);
+  font-weight: 700;
+  font-size: 0.68rem;
+  color: var(--accent);
   text-transform: uppercase;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.16em;
   margin-bottom: 12px;
 }
 .detail-muted { color: var(--text-muted); font-size: 0.9rem; }
@@ -659,15 +704,16 @@ nav {
   font-size: 0.7rem;
 }
 .detail-stat-bar {
-  height: 8px;
+  position: relative;
+  height: 10px;
   background: var(--surface-3);
-  border-radius: var(--radius-pill);
+  border-radius: 2px;
   overflow: hidden;
 }
 .detail-stat-fill {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, var(--accent-alt), var(--type-fill, var(--accent)));
+  background: var(--type-fill, var(--accent));
   border-radius: inherit;
   transition: width var(--dur-slow) var(--ease-out);
 }
@@ -683,7 +729,11 @@ nav {
   margin-top: 4px;
   font-weight: 700;
 }
-.detail-stat-total span:last-child { color: var(--accent-alt); font-size: 1rem; }
+.detail-stat-total span:last-child {
+  color: var(--accent);
+  font-family: var(--font-pixel);
+  font-size: 12px;
+}
 
 /* Sprite viewer */
 .sprite-list { list-style: none; display: grid; gap: 8px; }
@@ -699,7 +749,7 @@ nav {
   transition: border-color var(--dur-fast), background var(--dur-fast);
 }
 .sprite-btn:hover { background: var(--surface-3); }
-.sprite-btn.active { border-color: var(--accent-alt); }
+.sprite-btn.active { border-color: var(--accent); }
 .sprite-btn img { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; }
 .sprite-btn span {
   font-family: var(--font-display);
@@ -722,7 +772,7 @@ nav {
   align-items: stretch;
 }
 .variety-item.active .card {
-  outline: 2px solid var(--accent-alt);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 .variety-label {
@@ -768,7 +818,7 @@ nav {
 }
 .evo-card-wrap { width: 110px; }
 .evo-card-wrap.active .card {
-  outline: 2px solid var(--accent-alt);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
   box-shadow: 0 0 20px color-mix(in srgb, var(--accent-alt) 30%, transparent);
 }
@@ -884,11 +934,24 @@ nav {
   gap: 12px;
 }
 .compare-bar {
-  height: 6px;
+  position: relative;
+  height: 9px;
   background: var(--surface-2);
-  border-radius: var(--radius-pill);
+  border-radius: 2px;
   overflow: hidden;
   display: flex;
+}
+/* Mesmos blocos da carta e da ficha: stat se conta, nao se estima. */
+.compare-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0 calc(10% - 2px),
+    var(--bg) calc(10% - 2px) 10%
+  );
+  pointer-events: none;
 }
 .compare-bar.left { justify-content: flex-end; }
 .compare-bar span {
@@ -896,12 +959,8 @@ nav {
   height: 100%;
   transition: width var(--dur-slow) var(--ease-out);
 }
-.compare-bar.left span {
-  background: linear-gradient(90deg, var(--t-water), #2f5bb0);
-}
-.compare-bar.right span {
-  background: linear-gradient(90deg, var(--t-fire), #b34e10);
-}
+.compare-bar.left span { background: var(--t-water); }
+.compare-bar.right span { background: var(--t-fire); }
 .compare-label {
   font-family: var(--font-display);
   font-size: 0.7rem;
@@ -2046,6 +2105,13 @@ nav {
   .home-sidebar { position: static; }
 }
 @media (max-width: 640px) {
+  /* Em tela estreita o deslocamento de 4px rouba espaco util: a sombra
+     dura continua lendo como sombra dura com metade do curso. */
+  :root {
+    --shadow-card: 2px 2px 0 var(--shadow-hard);
+    --shadow-card-hover: 3px 3px 0 var(--shadow-hard);
+    --shadow-hero: 3px 3px 0 var(--shadow-hard);
+  }
   nav { padding: 0 14px; height: 48px; }
   .navbar-title { display: none; }
   .nav-link { padding: 6px 8px; font-size: 0.75rem; }
@@ -3030,8 +3096,8 @@ nav {
   z-index: 100;
   padding: 10px 16px;
   border-radius: var(--radius-pill);
-  background: var(--accent-alt);
-  color: #12131a;
+  background: var(--accent);
+  color: var(--accent-ink);
   font-size: 0.8rem;
   font-weight: 700;
   text-decoration: none;
@@ -3054,7 +3120,7 @@ select:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 [tabindex]:not([tabindex="-1"]):focus-visible {
-  outline: 2px solid var(--accent-alt);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: 4px;
 }

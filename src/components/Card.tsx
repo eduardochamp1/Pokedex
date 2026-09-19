@@ -75,7 +75,7 @@ const Card = ({
                   : `Favoritar ${pokemon.name}`
               }
             >
-              {isFavorite ? "❤️" : "🖤"}
+              {isFavorite ? "♥" : "♡"}
             </button>
           )}
         </div>
@@ -97,7 +97,7 @@ const Card = ({
       </div>
       <div className="card-footer">
         <div className="card-meta-row">
-          <span className="card-id">#{String(pokemon.id).padStart(3, "0")}</span>
+          <span className="card-id">{String(pokemon.id).padStart(4, "0")}</span>
           <span className="card-hp">
             HP <strong>{stats[0].value}</strong>
           </span>
@@ -138,8 +138,21 @@ const Card = ({
           📏
         </button>
       )}
-      {isLegendary && !isMythical && <span className="card-badge">👑</span>}
-      {isMythical && <span className="card-badge">✨</span>}
+      {/* Simbolo de raridade no canto, como na carta: le-se sem depender de cor. */}
+      {isLegendary && !isMythical && (
+        <span className="card-badge" title="Lendário" aria-hidden="true">
+          ★
+        </span>
+      )}
+      {isMythical && (
+        <span
+          className="card-badge card-badge-mythical"
+          title="Mítico"
+          aria-hidden="true"
+        >
+          ✦
+        </span>
+      )}
     </>
   );
 
