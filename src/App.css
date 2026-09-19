@@ -5,7 +5,11 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body, #root { height: 100%; }
 body {
-  background: var(--bg);
+  background-color: var(--bg);
+  /* Reticula de LCD: nao e ornamento. E o que faz a pagina inteira ler como
+     tela antes de qualquer componente aparecer. */
+  background-image: radial-gradient(rgba(155, 188, 15, 0.075) 1px, transparent 1px);
+  background-size: 22px 22px;
   color: var(--text);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
@@ -91,7 +95,7 @@ nav {
   aspect-ratio: 2 / 3;
   background: var(--surface-1);
   border-radius: var(--radius-card);
-  border: 2px solid color-mix(in srgb, var(--type-color, var(--border)) 35%, var(--border));
+  border: 2px solid color-mix(in srgb, var(--type-color, var(--border)) 70%, var(--border));
   box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
@@ -106,7 +110,17 @@ nav {
 .card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-card-hover);
+  border-color: var(--type-color, var(--accent));
 }
+/* O espaco do cursor fica reservado desde sempre: aparecer no hover nao pode
+   empurrar o nome para o lado. */
+.card-grid .card-name::before {
+  content: "▸";
+  color: transparent;
+  margin-right: 4px;
+}
+.card-grid:hover .card-name::before,
+.card-grid:focus-within .card-name::before { color: var(--accent); }
 .card-link { display: contents; }
 
 .card-foil {
@@ -357,7 +371,7 @@ nav {
   max-width: 420px;
   background: var(--surface-1);
   border-radius: var(--radius-card);
-  border: 2px solid color-mix(in srgb, var(--type-color, var(--border)) 35%, var(--border));
+  border: 2px solid color-mix(in srgb, var(--type-color, var(--border)) 70%, var(--border));
   box-shadow: var(--shadow-hero);
   display: flex;
   flex-direction: column;
@@ -404,12 +418,21 @@ nav {
   margin-top: 10px;
 }
 .home-featured-copy p {
-  color: var(--text-muted);
+  color: var(--text);
   line-height: 1.6;
-  margin-top: 14px;
-  font-style: italic;
+  margin-top: 16px;
   font-family: var(--font-display);
-  max-width: 420px;
+  max-width: 440px;
+  background: var(--surface-1);
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius-card);
+  box-shadow: inset 0 0 0 2px var(--surface-2), var(--shadow-card);
+  padding: 14px 16px;
+}
+.home-featured-copy p::after {
+  content: "▾";
+  color: var(--accent);
+  margin-left: 6px;
 }
 
 .home-layout {
@@ -428,19 +451,24 @@ nav {
   flex-direction: column;
   gap: 14px;
   background: var(--surface-1);
-  border: 2px solid var(--border);
+  border: 2px solid var(--border-strong);
   border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
+  box-shadow: inset 0 0 0 2px var(--surface-2), var(--shadow-card);
   padding: 16px;
 }
 .home-sidebar h3 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 0.68rem;
   color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  margin-bottom: -6px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  margin-bottom: -4px;
   margin-top: 4px;
 }
 .home-sidebar h3:first-child { margin-top: 0; }
@@ -449,16 +477,20 @@ nav {
   width: 100%;
   padding: 8px 12px;
   border-radius: var(--radius-sm);
-  border: 2px solid var(--border);
+  border: 2px solid var(--border-strong);
   background: var(--surface-2);
+  box-shadow: inset 0 0 0 2px var(--bg);
   color: var(--text);
   font-size: 0.9rem;
-  transition: border-color var(--dur-fast);
+  transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
 }
 .home-sidebar input:focus,
 .home-sidebar select:focus {
   outline: none;
   border-color: var(--accent);
+  box-shadow:
+    inset 0 0 0 2px var(--bg),
+    0 0 0 2px color-mix(in srgb, var(--accent) 45%, transparent);
 }
 .home-sidebar .searchbar-container,
 .home-sidebar .type-filter {
@@ -513,9 +545,13 @@ nav {
   justify-content: center;
   transition: background var(--dur-fast), transform var(--dur-fast);
 }
+.pagination-container button {
+  box-shadow: 2px 2px 0 var(--shadow-hard);
+}
 .pagination-container button:hover:not(:disabled) {
   background: var(--surface-3);
-  transform: scale(1.05);
+  transform: translate(2px, 2px);
+  box-shadow: none;
 }
 .pagination-container button:disabled {
   opacity: 0.35;
@@ -672,20 +708,31 @@ nav {
 
 .detail-panel {
   background: var(--surface-1);
-  border: 2px solid var(--border);
+  border: 2px solid var(--border-strong);
   border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
+  box-shadow: inset 0 0 0 2px var(--surface-2), var(--shadow-card);
   padding: 16px;
   min-width: 0;
 }
 .detail-panel h3 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 0.68rem;
   color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.16em;
+  padding-bottom: 8px;
+  border-bottom: 2px solid color-mix(in srgb, var(--accent) 30%, transparent);
   margin-bottom: 12px;
+}
+/* O cursor marca o titulo da janela, como no menu do jogo. */
+.home-sidebar h3::before,
+.detail-panel h3::before {
+  content: "▸";
+  color: var(--accent);
 }
 .detail-muted { color: var(--text-muted); font-size: 0.9rem; }
 
@@ -3209,11 +3256,13 @@ html[data-scanline="on"] body::after {
   inset: 0;
   z-index: 300;
   pointer-events: none;
-  background: repeating-linear-gradient(
-    to bottom,
-    rgba(155, 188, 15, 0.055) 0 1px,
-    transparent 1px 3px
-  );
+  background:
+    radial-gradient(ellipse at center, transparent 52%, rgba(0, 0, 0, 0.38) 100%),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(155, 188, 15, 0.09) 0 1px,
+      transparent 1px 3px
+    );
 }
 .scanline-toggle {
   flex-shrink: 0;
