@@ -340,7 +340,10 @@ const LorePage = () => {
                 >
                   <div className="gen-slide-year">{g.year}</div>
                   <div className="gen-slide-roman">Geração {g.roman}</div>
-                  <div className="gen-slide-region">{g.region}</div>
+                  <h3 className="gen-slide-region">
+                    {g.region}
+                    <span className="visually-hidden">, geração {g.roman}</span>
+                  </h3>
                   <div className="gen-games">
                     {g.mainGames.map((game) => (
                       <span key={game} className="gen-game-badge">

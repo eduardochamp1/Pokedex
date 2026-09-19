@@ -51,8 +51,9 @@ export const GAME_GENERATIONS: GameGeneration[] = [
     wiki: "Generation V", roman: "V", year: 2010, region: "Unova",
     mainGames: ["Black", "White", "Black 2", "White 2"],
     newPokemons: 156, totalAfter: 649,
-    gimmick: "Nenhum pokémon anterior aparece antes do pós-game — reset completo.",
-    signature: ["reshiram", "zekrom", "kyurem"], color: "#1a1a1a",
+    gimmick:
+      "Em Black e White, nenhum pokémon anterior aparece antes do pós-game — reset completo. As sequências voltam atrás.",
+    signature: ["reshiram", "zekrom", "kyurem"], color: "#55556b",
   },
   {
     id: 6,
@@ -73,7 +74,7 @@ export const GAME_GENERATIONS: GameGeneration[] = [
   {
     id: 8,
     wiki: "Generation VIII", roman: "VIII", year: 2019, region: "Galar",
-    mainGames: ["Sword", "Shield", "Arceus (Hisui)", "Brilliant Diamond/Shining Pearl"],
+    mainGames: ["Sword", "Shield"],
     newPokemons: 96, totalAfter: 905,
     gimmick: "Dynamax/Gigantamax, Wild Area, Hisuian forms em Legends: Arceus.",
     signature: ["zacian", "zamazenta", "eternatus", "calyrex"], color: "#3d5a80",
@@ -83,7 +84,7 @@ export const GAME_GENERATIONS: GameGeneration[] = [
     wiki: "Generation IX", roman: "IX", year: 2022, region: "Paldea",
     mainGames: ["Scarlet", "Violet"],
     newPokemons: 120, totalAfter: 1025,
-    gimmick: "Mundo aberto, Terastalization, três histórias paralelas.",
+    gimmick: "Mundo aberto, Terastalização, três histórias paralelas.",
     signature: ["koraidon", "miraidon", "terapagos"], color: "#e63946",
   },
 ];
