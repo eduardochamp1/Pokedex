@@ -13,7 +13,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "sprites": "node scripts/fetch-sprites.mjs",
-    "lore:check": "node scripts/check-lore-names.mjs",
+    "names:check": "node scripts/check-names.mjs",
     "emulator:core": "node scripts/copy-emulator-core.mjs"
   },
   "dependencies": {

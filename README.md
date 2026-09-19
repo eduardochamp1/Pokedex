@@ -232,7 +232,7 @@ A aplicação abre em [http://localhost:3000](http://localhost:3000).
 | `npm test` | Suíte Vitest |
 | `npm run test:watch` | Vitest em watch |
 | `npm run sprites` | Baixa os sprites para `public/sprites/` (idempotente; `--force` rebaixa) |
-| `npm run lore:check` | Confere se todo pokémon citado na lore resolve para um slug da PokéAPI (precisa de rede) |
+| `npm run names:check` | Confere se todo nome usado pelo site resolve para um slug da PokéAPI — a lore e as nove gerações do filtro (precisa de rede) |
 | `npm run emulator:core` | Copia o core do emulador para `public/emulator/` (roda no predev/prebuild) |
 
 > **Deploy:** é uma SPA com `BrowserRouter`. O host precisa reescrever qualquer

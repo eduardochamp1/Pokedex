@@ -4,6 +4,7 @@ import { flushSync } from "react-dom";
 import FavoriteContext from "../contexts/favoritesContext";
 import { useTiltEffect } from "../hooks/useTiltEffect";
 import { add as addToComparator } from "../lib/comparatorStore";
+import { displayName } from "../api";
 import { LEGENDARY, MYTHICAL } from "../data/rarity";
 import { tType } from "../data/i18n";
 import { preloadDetailPage } from "../pages/routeModules";
@@ -91,7 +92,7 @@ const Card = ({
   const inner = (
     <>
       <div className="card-header">
-        <div className="card-name">{pokemon.name}</div>
+        <div className="card-name">{displayName(pokemon.name)}</div>
         <div className="card-header-right">
           <div className="card-types">
             {pokemon.types.map((t) => (

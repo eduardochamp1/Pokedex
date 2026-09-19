@@ -28,11 +28,19 @@ const POKEMON_ALIAS: Record<string, string> = {
   keldeo: "keldeo-ordinary",
   basculin: "basculin-red-striped",
   meowstic: "meowstic-male",
-  // A API so tem a forma com sufixo de genero para estes tres — o nome seco
-  // nao responde, e sem alias o chip da lore fica sem sprite.
+  // A API so serve a forma default com sufixo para estes — o nome seco nao
+  // responde. Sem alias o chip da lore fica sem sprite E a especie some do
+  // filtro por geracao: a Gen 9 mostrava 114 de 120 por causa dos seis daqui.
   frillish: "frillish-male",
   jellicent: "jellicent-male",
   pyroar: "pyroar-male",
+  basculegion: "basculegion-male",
+  oinkologne: "oinkologne-male",
+  maushold: "maushold-family-of-four",
+  squawkabilly: "squawkabilly-green-plumage",
+  palafin: "palafin-zero",
+  tatsugiri: "tatsugiri-curly",
+  dudunsparce: "dudunsparce-two-segment",
   aegislash: "aegislash-shield",
   pumpkaboo: "pumpkaboo-average",
   gourgeist: "gourgeist-average",
@@ -53,6 +61,26 @@ const POKEMON_ALIAS: Record<string, string> = {
 export function resolveName(name: string): string {
   const lower = name.toLowerCase().trim();
   return POKEMON_ALIAS[lower] ?? lower;
+}
+
+/** Caminho de volta: slug servido pela API -> nome pelo qual a especie e conhecida. */
+const NOME_DA_ESPECIE: Record<string, string> = Object.fromEntries(
+  Object.entries(POKEMON_ALIAS).map(([especie, slug]) => [slug, especie])
+);
+
+/**
+ * Nome para mostrar na tela.
+ *
+ * Trinta e sete especies so existem no endpoint /pokemon com o sufixo da
+ * forma default, e o alias acima traduz isso na ida. Na volta, sem esta
+ * funcao, a carta escrevia "giratina-altered", "deoxys-normal" e
+ * "maushold-family-of-four" — o slug do banco, nao o nome da criatura.
+ *
+ * So desfaz o que o alias fez: forma que e de fato distinta, como
+ * "charizard-mega-x", passa intacta.
+ */
+export function displayName(apiName: string): string {
+  return NOME_DA_ESPECIE[apiName.toLowerCase().trim()] ?? apiName;
 }
 
 export function isAbortError(error: unknown): boolean {
