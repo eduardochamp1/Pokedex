@@ -69,7 +69,7 @@ export const MYTHS: Myth[] = [
     title: "O Gyarados vermelho do Lake of Rage",
     region: "Johto",
     summary:
-      "A Team Rocket experimentou com evolução forçada em Magikarps do Lake of Rage. Um Gyarados nasceu vermelho de raiva pura. O primeiro Shiny documentado da história — símbolo do lago até hoje.",
+      "A Team Rocket experimentou com evolução forçada em Magikarps do Lake of Rage. Um Gyarados nasceu vermelho de raiva pura. O primeiro shiny que a série pôs no caminho do jogador como evento de história — e símbolo do lago até hoje.",
     pokemons: ["magikarp", "gyarados"],
     color: "#a83a2c",
   },
@@ -90,7 +90,7 @@ export const MYTHS: Myth[] = [
     title: "Mirage Island — a ilha que só aparece por instantes",
     region: "Hoenn",
     summary:
-      "Uma ilha selvagem no arquipélago sul só se materializa em certos dias, quando o ID de um Wynaut selvagem alinha com o do treinador. Só quem tem sorte astronômica caminha por suas selvas.",
+      "Uma ilha selvagem no arquipélago sul só se materializa em certos dias, quando um valor sorteado naquele dia coincide com o de um pokémon do grupo do treinador. Só quem tem sorte astronômica caminha por suas selvas.",
     pokemons: ["wynaut", "wobbuffet"],
     color: "#f95587",
   },
@@ -164,7 +164,7 @@ export const MYTHS: Myth[] = [
     title: "Dragonspiral Tower — o berço do Dragão",
     region: "Unova (Icirrus)",
     summary:
-      "Torre mais antiga de Unova, onde o Dragão Original repousou depois de se dividir em Reshiram, Zekrom e Kyurem. Quem escala até o topo pode invocar aquele que corresponde à sua alma — verdade ou ideais.",
+      "Torre mais antiga de Unova, onde o Dragão Original repousou depois de se partir em dois, Reshiram e Zekrom, deixando para trás a casca vazia que viria a ser Kyurem. Quem escala até o topo pode invocar aquele que corresponde à sua alma — verdade ou ideais.",
     pokemons: ["reshiram", "zekrom", "kyurem"],
     color: "#6f35fc",
   },
@@ -208,7 +208,7 @@ export const MYTHS: Myth[] = [
     title: "Altar do Sol / Altar da Lua",
     region: "Alola (Poni Canyon)",
     summary:
-      "Dois altares gêmeos no interior de Poni. Cosmog cresce e evolui neles: em Sun, vira Solgaleo (Lion do Amanhecer); em Moon, vira Lunala (Batalhador da Meia-Noite). Necrozma se funde a um dos dois.",
+      "Dois altares gêmeos no interior de Poni. Cosmog cresce e evolui neles: em Sun, vira Solgaleo, o devorador do sol; em Moon, vira Lunala, a devoradora da lua. Necrozma se funde a um dos dois.",
     pokemons: ["cosmog", "solgaleo", "lunala", "necrozma"],
     color: "#f7d02c",
   },

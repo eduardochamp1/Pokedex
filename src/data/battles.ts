@@ -14,6 +14,32 @@ export interface Battle extends WikiSourced {
 
 export const BATTLES: Battle[] = [
   {
+    id: "az-vs-world",
+    wiki: "Ultimate weapon",
+    title: "AZ vs o mundo — a Máquina Definitiva",
+    location: "Geosenge Town · Kalos",
+    era: "Reinos humanos (3000 anos atrás)",
+    contenders: ["AZ", "O mundo conhecido"],
+    outcome: "Kalos devastado. AZ amaldiçoado com imortalidade.",
+    summary:
+      "Os soldados tomaram o Floette de AZ e o gastaram como arma na Guerra de Kalos. Anos depois, recebendo o corpo de volta, o rei ergueu a Máquina Definitiva com a energia de Xerneas e conseguiu ressuscitá-lo — e então virou a mesma arma contra os exércitos. O Floette viu o que ele tinha feito e foi embora; a máquina deixou AZ imortal para carregar isso sozinho.",
+    pokemons: ["xerneas", "yveltal", "floette"],
+    color: "#7ac74c",
+  },
+  {
+    id: "volo-vs-arceus",
+    wiki: "Volo",
+    title: "Volo confronta Arceus",
+    location: "Spear Pillar (Hisui) · Sinnoh ancestral",
+    era: "Hisui (Sinnoh ancestral)",
+    contenders: ["Volo (com Giratina)", "Protagonista (com Arceus)"],
+    outcome: "Volo derrotado; sua obsessão eterniza no Mundo Distorcido.",
+    summary:
+      "Mercador da Guilda Ginkgo e adorador de Arceus, Volo diz descender do povo antigo de Sinnoh. Tenta forçar Arceus a descer e recriar o mundo destruindo-o com Giratina. O protagonista de Hisui, tendo capturado Arceus, o detém em uma batalha épica sobre o Spear Pillar de séculos atrás.",
+    pokemons: ["arceus", "giratina", "spiritomb", "togekiss"],
+    color: "#735797",
+  },
+  {
     id: "red-vs-blue",
     wiki: "Indigo Plateau",
     title: "Red vs Blue — Champion's Hall",
@@ -48,7 +74,7 @@ export const BATTLES: Battle[] = [
     contenders: ["Silver", "Lance"],
     outcome: "Silver perde — mas ganha um novo sentido para batalhar.",
     summary:
-      "Filho abandonado de Giovanni, Silver treinou apenas com ódio até enfrentar Lance. A derrota o fez perceber que sem laços com seus pokémon, jamais seria forte. Voltou para casa reformado — décadas depois, seria mentor de novos treinadores.",
+      "Filho abandonado de Giovanni, Silver treinou apenas com ódio até enfrentar Lance. A derrota o fez perceber que sem laços com seus pokémon, jamais seria forte. Voltou para casa disposto a recomeçar, e some da vista do jogador logo depois.",
     pokemons: ["feraligatr", "typhlosion", "meganium", "sneasel"],
     color: "#a1a1a6",
   },
@@ -61,7 +87,7 @@ export const BATTLES: Battle[] = [
     contenders: ["Steven Stone", "Wallace"],
     outcome: "Wallace assume; Steven retorna às pesquisas geológicas.",
     summary:
-      "Depois da Delta Episode, Steven abre mão do título para dedicar-se ao estudo das Mega Pedras. Wallace, então Líder de Ginásio, é o sucessor natural. A cerimônia envolveu Metagross vs Milotic em um duelo tranquilo e elegante.",
+      "Depois da Delta Episode, Steven abre mão do título para dedicar-se ao estudo das Mega Pedras. Wallace, então Líder de Ginásio, é o sucessor natural. Não houve cerimônia: Steven apenas deixa de defender o título, e quem encontra o desafiante no fim da Liga passa a ser Wallace.",
     pokemons: ["metagross", "milotic"],
     color: "#3a6cb0",
   },
@@ -107,7 +133,7 @@ export const BATTLES: Battle[] = [
   {
     id: "ghetsis-vs-champion",
     wiki: "Giant Chasm",
-    title: "Ghetsis e Kyurem Absoluto",
+    title: "Ghetsis e o Kyurem fundido",
     location: "Giant Chasm · Unova",
     era: "Era moderna",
     contenders: ["Ghetsis", "Protagonista (BW2)"],
@@ -116,19 +142,6 @@ export const BATTLES: Battle[] = [
       "Anos após a saída de N, Ghetsis retorna com Kyurem — capaz de fundir-se com Reshiram (Kyurem Branco) ou Zekrom (Kyurem Preto). Sua ambição era congelar Unova e governar do trono. O protagonista o derrota; Ghetsis é preso, mas nunca julgado.",
     pokemons: ["kyurem", "hydreigon"],
     color: "#3a3a4a",
-  },
-  {
-    id: "az-vs-world",
-    wiki: "Ultimate weapon",
-    title: "AZ vs o mundo — a Máquina Definitiva",
-    location: "Geosenge Town · Kalos",
-    era: "Reinos humanos (3000 anos atrás)",
-    contenders: ["AZ", "O mundo conhecido"],
-    outcome: "Kalos devastado. AZ amaldiçoado com imortalidade.",
-    summary:
-      "Após perder seu Floette na Guerra de Kalos, o rei AZ construiu a Máquina Definitiva alimentada por Xerneas capturado. A arma erradicou exércitos inteiros mas custou a vida do seu próprio Floette. Xerneas o puniu com vida eterna — para sofrer.",
-    pokemons: ["xerneas", "yveltal", "floette"],
-    color: "#7ac74c",
   },
   {
     id: "lysandre-final",
@@ -178,22 +191,9 @@ export const BATTLES: Battle[] = [
     contenders: ["Leon", "Protagonista"],
     outcome: "Leon perde pela primeira vez em cadeia nacional.",
     summary:
-      "Leon nunca perdeu. Sua imagem estava em todos os outdoors de Galar. Charizard Gigantamax era invencível — até o protagonista, um novato promovido por Sonia, quebrar a sequência. Leon se aposenta em paz, torna-se mentor da Battle Tower.",
+      "Leon nunca perdeu. Sua imagem estava em todos os outdoors de Galar. Charizard Gigantamax era invencível — até o protagonista, um novato que o próprio Leon havia indicado, quebrar a sequência. Leon se aposenta em paz, torna-se mentor da Battle Tower.",
     pokemons: ["charizard", "dragapult", "aegislash"],
     color: "#dc0a2d",
-  },
-  {
-    id: "volo-vs-arceus",
-    wiki: "Volo",
-    title: "Volo confronta Arceus",
-    location: "Spear Pillar (Hisui) · Sinnoh ancestral",
-    era: "Hisui (Sinnoh ancestral)",
-    contenders: ["Volo (com Giratina)", "Protagonista (com Arceus)"],
-    outcome: "Volo derrotado; sua obsessão eterniza no Mundo Distorcido.",
-    summary:
-      "Descendente do clã de Cyrus, Volo tenta forçar Arceus a descer e recriar o mundo destruindo-o com Giratina. O protagonista de Hisui, tendo capturado Arceus, o detém em uma batalha épica sobre o Spear Pillar de séculos atrás.",
-    pokemons: ["arceus", "giratina", "spiritomb", "togekiss"],
-    color: "#735797",
   },
   {
     id: "nemona-final",
@@ -221,4 +221,5 @@ export const BATTLES: Battle[] = [
     pokemons: ["koraidon", "miraidon"],
     color: "#e63946",
   },
+
 ];
