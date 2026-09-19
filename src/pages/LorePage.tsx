@@ -3,7 +3,7 @@ import "../styles/lore.css";
 import { LORE_EVENTS, ERAS } from "../data/lore";
 import { REGIONS } from "../data/regions";
 import { HUMAN_LEGENDS } from "../data/humans";
-import { GENEALOGY_TREE, type GenealogyNode } from "../data/genealogy";
+import { genealogyNames } from "../data/genealogy";
 import { GAME_GENERATIONS } from "../data/generations";
 import { VILLAIN_TEAMS } from "../data/villains";
 import { DIMENSIONS } from "../data/dimensions";
@@ -104,18 +104,13 @@ const TAB_LABELS: Record<Tab, string> = {
   landmarks: "Locais",
 };
 
-function collectGenealogyNames(node: GenealogyNode, acc: string[] = []): string[] {
-  acc.push(node.name);
-  node.children?.forEach((c) => collectGenealogyNames(c, acc));
-  return acc;
-}
 
 const allPokemonNames = Array.from(
   new Set([
     ...LORE_EVENTS.flatMap((e) => e.pokemons),
     ...REGIONS.flatMap((r) => r.signature),
     ...HUMAN_LEGENDS.flatMap((h) => h.pokemons),
-    ...collectGenealogyNames(GENEALOGY_TREE),
+    ...genealogyNames(),
     ...GAME_GENERATIONS.flatMap((g) => g.signature),
     ...VILLAIN_TEAMS.flatMap((v) => v.signature),
     ...DIMENSIONS.flatMap((d) => d.inhabitants),
@@ -319,7 +314,7 @@ const LorePage = () => {
               A árvore de criação — quem gerou ou moldou quem, segundo a mitologia
               do universo pokémon.
             </p>
-            <GenealogyTree node={GENEALOGY_TREE} idOf={idOf} />
+            <GenealogyTree idOf={idOf} />
           </div>
         )}
 

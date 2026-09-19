@@ -1,113 +1,86 @@
-import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import type { GenealogyNode } from "../data/genealogy";
+import {
+  GENEALOGY_BRANCHES,
+  GENEALOGY_ROOT,
+  type GenealogyNode,
+} from "../data/genealogy";
 import { pixelSpriteUrl } from "../lib/sprites";
 
 interface Props {
-  node: GenealogyNode;
   /** Resolvedor nome -> id da Pokedex (ja normaliza apelidos). */
   idOf: (name: string) => number | undefined;
-  depth?: number;
 }
 
-const GenealogyTree = ({ node, idOf, depth = 0 }: Props) => {
+interface CardProps {
+  node: GenealogyNode;
+  idOf: (name: string) => number | undefined;
+  variant?: "root" | "member";
+}
+
+const GenealogyCard = ({ node, idOf, variant = "member" }: CardProps) => {
   const sprite = pixelSpriteUrl(idOf(node.name));
-  const rootRef = useRef<HTMLDivElement>(null);
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const [connectors, setConnectors] = useState<
-    Array<{ d: string; box: { w: number; h: number; ox: number; oy: number } }>
-  >([]);
-
-  useEffect(() => {
-    if (!node.children || !rootRef.current || !wrapRef.current) return;
-    const compute = () => {
-      const rootRect = rootRef.current!.getBoundingClientRect();
-      const wrapRect = wrapRef.current!.getBoundingClientRect();
-      const parentBottom = {
-        x: rootRect.left + rootRect.width / 2 - wrapRect.left,
-        y: rootRect.bottom - wrapRect.top,
-      };
-      const childEls = wrapRef.current!.querySelectorAll<HTMLElement>(
-        ":scope > .genealogy-children > .genealogy-node > .genealogy-card"
-      );
-      const paths: typeof connectors = [];
-      childEls.forEach((el) => {
-        const r = el.getBoundingClientRect();
-        const cx = r.left + r.width / 2 - wrapRect.left;
-        const cy = r.top - wrapRect.top;
-        const midY = (parentBottom.y + cy) / 2;
-        paths.push({
-          d: `M ${parentBottom.x} ${parentBottom.y} C ${parentBottom.x} ${midY}, ${cx} ${midY}, ${cx} ${cy}`,
-          box: { w: wrapRect.width, h: wrapRect.height, ox: 0, oy: 0 },
-        });
-      });
-      setConnectors(paths);
-    };
-    compute();
-    const ro = new ResizeObserver(compute);
-    ro.observe(wrapRef.current);
-    return () => ro.disconnect();
-  }, [node.children]);
-
   return (
-    <div className={"genealogy-node depth-" + depth} ref={wrapRef}>
-      <div ref={rootRef} className="genealogy-card">
-        <Link to={`/pokemon/${node.name}`} className="genealogy-portrait">
-          {sprite ? (
-            <img
-              src={sprite}
-              alt={node.name}
-              loading="lazy"
-              decoding="async"
-            />
-          ) : (
-            <span>?</span>
-          )}
+    <div className={"genealogy-card" + (variant === "root" ? " is-root" : "")}>
+      <Link to={`/pokemon/${node.name}`} className="genealogy-portrait">
+        {sprite ? (
+          <img src={sprite} alt={node.name} loading="lazy" decoding="async" />
+        ) : (
+          <span>?</span>
+        )}
+      </Link>
+      <div className="genealogy-info">
+        <Link to={`/pokemon/${node.name}`} className="genealogy-name">
+          {node.name}
         </Link>
-        <div className="genealogy-info">
-          <Link to={`/pokemon/${node.name}`} className="genealogy-name">
-            {node.name}
-          </Link>
-          <div className="genealogy-role">{node.role}</div>
-          {node.note && <p className="genealogy-note">{node.note}</p>}
-        </div>
-        {depth === 0 && <span className="genealogy-pulse" aria-hidden="true" />}
+        <div className="genealogy-role">{node.role}</div>
+        {node.note && <p className="genealogy-note">{node.note}</p>}
       </div>
-      {node.children && (
-        <>
-          {connectors.length > 0 && (
-            <svg
-              className="genealogy-connectors"
-              width={connectors[0]?.box.w}
-              height={connectors[0]?.box.h}
-              aria-hidden="true"
-            >
-              {connectors.map((c, i) => (
-                <path
-                  key={i}
-                  d={c.d}
-                  stroke="var(--accent-alt)"
-                  strokeWidth="1.5"
-                  fill="none"
-                  opacity="0.4"
-                />
-              ))}
-            </svg>
-          )}
-          <div className="genealogy-children">
-            {node.children.map((c) => (
-              <GenealogyTree
-                key={c.name}
-                node={c}
-                idOf={idOf}
-                depth={depth + 1}
-              />
-            ))}
-          </div>
-        </>
-      )}
     </div>
   );
 };
+
+/** Um membro do clã e, se tiver, a descendência dele logo abaixo. */
+const GenealogyMember = ({ node, idOf }: CardProps) => (
+  <li className="genealogy-member">
+    <GenealogyCard node={node} idOf={idOf} />
+    {node.children && (
+      <ul className="genealogy-descent">
+        {node.children.map((c) => (
+          <GenealogyMember key={c.name} node={c} idOf={idOf} />
+        ))}
+      </ul>
+    )}
+  </li>
+);
+
+/**
+ * A árvore é desenhada como registro de linhagem, não como organograma: um
+ * trilho desce pela esquerda e cada clã se pendura nele.
+ *
+ * A versão anterior punha os doze descendentes diretos de Arceus num flex que
+ * quebrava linha, e mandava doze curvas de Bézier — medidas no DOM a cada
+ * resize — atravessarem as seis fileiras resultantes. O trilho resolve as
+ * duas coisas: a hierarquia fica legível em qualquer largura e as ligações
+ * são CSS, sem medição nenhuma.
+ */
+const GenealogyTree = ({ idOf }: Props) => (
+  <div className="genealogy">
+    <GenealogyCard node={GENEALOGY_ROOT} idOf={idOf} variant="root" />
+
+    <ol className="genealogy-branches">
+      {GENEALOGY_BRANCHES.map((branch) => (
+        <li key={branch.id} className="genealogy-branch">
+          <h3 className="genealogy-branch-title">{branch.title}</h3>
+          <p className="genealogy-branch-note">{branch.note}</p>
+          <ul className="genealogy-row">
+            {branch.members.map((m) => (
+              <GenealogyMember key={m.name} node={m} idOf={idOf} />
+            ))}
+          </ul>
+        </li>
+      ))}
+    </ol>
+  </div>
+);
 
 export default GenealogyTree;
