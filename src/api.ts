@@ -28,6 +28,11 @@ const POKEMON_ALIAS: Record<string, string> = {
   keldeo: "keldeo-ordinary",
   basculin: "basculin-red-striped",
   meowstic: "meowstic-male",
+  // A API so tem a forma com sufixo de genero para estes tres — o nome seco
+  // nao responde, e sem alias o chip da lore fica sem sprite.
+  frillish: "frillish-male",
+  jellicent: "jellicent-male",
+  pyroar: "pyroar-male",
   aegislash: "aegislash-shield",
   pumpkaboo: "pumpkaboo-average",
   gourgeist: "gourgeist-average",
@@ -40,11 +45,9 @@ const POKEMON_ALIAS: Record<string, string> = {
   eiscue: "eiscue-ice",
   indeedee: "indeedee-male",
   morpeko: "morpeko-full-belly",
-  ogerpon: "ogerpon-teal-mask",
   zygarde: "zygarde-50",
   wormadam: "wormadam-plant",
   darmanitan: "darmanitan-standard",
-  cherrim: "cherrim-overcast",
 };
 
 export function resolveName(name: string): string {

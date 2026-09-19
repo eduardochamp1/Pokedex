@@ -707,7 +707,7 @@ export const LANDMARKS: Landmark[] = [
     wiki: "Slumbering Weald",
     summary:
       "Floresta permanentemente enevoada perto de Postwick, onde o jogador e Hop encontram, no primeiro dia, duas silhuetas que ninguém acredita que existiram. São Zacian e Zamazenta — e o jogo espera vinte horas para confirmar isso.",
-    pokemons: ["zacian", "zamazenta", "galarian-weezing"],
+    pokemons: ["zacian", "zamazenta", "weezing-galar"],
   },
   {
     id: "energy-plant",

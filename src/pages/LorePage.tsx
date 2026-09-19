@@ -817,6 +817,36 @@ const LorePage = () => {
 
         {tab === "landmarks" && (
           <div className="landmark-grid">
+            {(() => {
+              const comLocais = REGIONS.filter((r) =>
+                visibleLandmarks.some((l) => l.regionId === r.id)
+              );
+              if (comLocais.length < 2) return null;
+              return (
+                <nav className="landmark-index" aria-label="Ir para uma região">
+                  {comLocais.map((r) => (
+                    <button
+                      key={r.id}
+                      type="button"
+                      className="landmark-index-btn"
+                      onClick={() =>
+                        document
+                          .getElementById("locais-" + r.id)
+                          // Salto instantaneo: a distancia entre Kanto e Paldea passa
+                          // de doze mil pixels, e rolagem suave nesse trecho leva
+                          // segundos passando por setenta cards.
+                          ?.scrollIntoView({ block: "start" })
+                      }
+                    >
+                      {r.name}
+                      <span className="landmark-index-count">
+                        {visibleLandmarks.filter((l) => l.regionId === r.id).length}
+                      </span>
+                    </button>
+                  ))}
+                </nav>
+              );
+            })()}
             {REGIONS.filter((r) =>
               visibleLandmarks.some((l) => l.regionId === r.id)
             ).map((region) => {
@@ -826,6 +856,7 @@ const LorePage = () => {
               return (
                 <section
                   key={region.id}
+                  id={"locais-" + region.id}
                   className="landmark-section"
                   style={{ ["--card-accent" as string]: color }}
                 >

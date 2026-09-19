@@ -2719,6 +2719,45 @@ nav {
   flex-direction: column;
   gap: 32px;
 }
+/* Indice de regioes: a aba tem 76 locais em nove secoes, quase treze mil
+   pixels de rolagem. Sem ele, chegar em Paldea custa a pagina inteira. */
+.landmark-index {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom: 2px solid var(--border);
+}
+.landmark-index-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  border: 2px solid var(--border);
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  transition: border-color var(--dur-fast), color var(--dur-fast),
+    background var(--dur-fast);
+}
+.landmark-index-btn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  background: var(--surface-3);
+}
+.landmark-index-count {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  color: var(--accent);
+}
+
+/* A ancora fica abaixo da navbar fixa: sem o scroll-margin o titulo da regiao
+   para atras dela. */
+.landmark-section { scroll-margin-top: 76px; }
 .landmark-section {
   border-left: 3px solid var(--card-accent, var(--accent));
   padding-left: 18px;
