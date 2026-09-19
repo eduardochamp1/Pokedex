@@ -79,7 +79,7 @@ const CardHero = ({ pokemon, spriteUrl, viewTransitionName }: Props) => {
         <div className="card-meta-row">
           <span className="card-id">{String(pokemon.id).padStart(4, "0")}</span>
           <span className="card-hp">
-            HP{" "}
+            PS{" "}
             <strong>
               {pokemon.stats.find((s) => s.stat.name === "hp")?.base_stat ?? 0}
             </strong>

@@ -93,13 +93,15 @@ nav {
 .card {
   position: relative;
   aspect-ratio: 2 / 3;
-  background: var(--surface-1);
+  background: var(--paper);
   border-radius: var(--radius-card);
-  border: 2px solid color-mix(in srgb, var(--type-color, var(--border)) 70%, var(--border));
-  box-shadow: var(--shadow-card);
+  /* A moldura grossa e a cor do tipo; o filete dourado por dentro separa a
+     moldura do miolo, como na carta impressa. */
+  border: 6px solid var(--type-color, var(--border-strong));
+  box-shadow: inset 0 0 0 1px var(--paper-edge), var(--shadow-card);
   display: flex;
   flex-direction: column;
-  padding: 12px;
+  padding: 9px;
   overflow: hidden;
   transition:
     transform var(--dur-base) var(--ease-out),
@@ -110,7 +112,7 @@ nav {
 .card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-card-hover);
-  border-color: var(--type-color, var(--accent));
+  border-color: var(--type-ink);
 }
 /* O espaco do cursor fica reservado desde sempre: aparecer no hover nao pode
    empurrar o nome para o lado. */
@@ -120,7 +122,11 @@ nav {
   margin-right: 4px;
 }
 .card-grid:hover .card-name::before,
-.card-grid:focus-within .card-name::before { color: var(--accent); }
+.card-grid:focus-within .card-name::before { color: var(--type-ink); }
+.card,
+.card-hero {
+  --type-ink: color-mix(in srgb, var(--type-color, var(--border-strong)) 76%, #4a3312);
+}
 .card-link { display: contents; }
 
 .card-foil {
@@ -159,9 +165,9 @@ nav {
 }
 .card-name {
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 700;
   font-size: 0.95rem;
-  color: var(--text);
+  color: var(--paper-ink);
   text-transform: capitalize;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -174,7 +180,7 @@ nav {
   height: 12px;
   border-radius: 50%;
   background: var(--type-fill, var(--text-muted));
-  box-shadow: 0 0 6px color-mix(in srgb, var(--type-fill, transparent) 60%, transparent);
+  border: 1px solid color-mix(in srgb, var(--type-fill, #000) 55%, #2b2620);
 }
 .card-type-dot-lg {
   width: auto;
@@ -215,11 +221,12 @@ nav {
   background:
     radial-gradient(
       circle at center,
-      color-mix(in srgb, var(--type-color) 25%, transparent) 0%,
-      transparent 70%
+      color-mix(in srgb, var(--type-color) 20%, transparent) 0%,
+      transparent 74%
     ),
-    var(--surface-2);
-  border-radius: var(--radius-sm);
+    #faf4e4;
+  border: 2px solid var(--paper-edge);
+  border-radius: 4px;
   padding: 8px;
   margin: 4px 0;
   min-height: 0;
@@ -238,16 +245,24 @@ nav {
   justify-content: space-between;
   align-items: baseline;
   font-size: 0.85rem;
-  color: var(--text-muted);
+  color: var(--paper-ink-soft);
   font-variant-numeric: tabular-nums;
   margin-top: 4px;
+  padding-top: 5px;
+  border-top: 1px solid var(--paper-line);
 }
-.card-hp strong { color: var(--text); font-weight: 700; font-size: 1rem; }
+.card-hp { font-size: 0.7rem; letter-spacing: 0.04em; }
+.card-hp strong {
+  color: var(--paper-ps);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0;
+}
 /* Numero sempre em bitmap: e rotulo, nunca texto de leitura. */
 .card-id {
   font-family: var(--font-pixel);
   font-size: 10px;
-  color: var(--accent);
+  color: var(--paper-ink-soft);
   letter-spacing: 0.02em;
 }
 
@@ -263,7 +278,8 @@ nav {
   grid-template-columns: 30px minmax(0, 1fr) 30px;
   align-items: center;
   gap: 6px;
-  color: var(--text-muted);
+  color: var(--paper-ink-soft);
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.02em;
   min-width: 0;
@@ -271,7 +287,8 @@ nav {
 .card-stat-label { min-width: 0; }
 .card-stat-value {
   text-align: right;
-  color: var(--text);
+  color: var(--paper-ink);
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   min-width: 0;
   white-space: nowrap;
@@ -279,10 +296,18 @@ nav {
 .card-stat-bar {
   position: relative;
   height: 7px;
-  background: var(--surface-3);
+  background: var(--paper-line);
   border-radius: 2px;
   overflow: hidden;
 }
+.card-stat-bar::after {
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0 calc(10% - 2px),
+    var(--paper) calc(10% - 2px) 10%
+  ) !important;
+}
+.card-stat-fill { background: var(--type-ink) !important; }
 /* Os cortes ficam por cima do preenchimento: o valor vira contagem de
    blocos, que e como o jogo sempre desenhou stat. */
 .card-stat-bar::after,
@@ -324,7 +349,11 @@ nav {
 }
 .card-fav:hover { transform: scale(1.15); }
 /* O coracao vazio some no fundo; cheio, e o unico vermelho da grade. */
-.card-fav { color: var(--text-muted); font-size: 0.9rem; }
+.card-fav {
+  background: transparent;
+  color: var(--paper-ink-soft);
+  font-size: 1rem;
+}
 .card.is-favorite .card-fav,
 .card-hero.is-favorite .card-fav { color: var(--fav); }
 
@@ -335,8 +364,8 @@ nav {
   z-index: 2;
   font-size: 0.85rem;
   line-height: 1;
-  color: var(--accent-alt);
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+  color: var(--paper-edge);
+  filter: drop-shadow(0 1px 1px rgba(242, 231, 201, 0.9));
 }
 .card-badge-mythical { color: #ff8ec7; }
 
@@ -345,22 +374,26 @@ nav {
   inherits: false;
   initial-value: 0deg;
 }
+/* So raro, lendario e mitico trocam a moldura do tipo pela dourada: e o
+   unico jeito de o dourado informar alguma coisa. */
 .card.is-legendary,
 .card-hero.is-legendary {
   background:
-    linear-gradient(var(--surface-1), var(--surface-1)) padding-box,
-    conic-gradient(from var(--shine-angle, 0deg), var(--accent-alt), #ff9d00, var(--accent-alt), transparent 60%) border-box;
-  border: 2px solid transparent;
+    linear-gradient(var(--paper), var(--paper)) padding-box,
+    conic-gradient(from var(--shine-angle, 0deg), var(--accent-alt), #ff9d00, var(--accent-alt), #c79a22) border-box;
+  border: 6px solid transparent;
   animation: legendary-shine 4s linear infinite;
 }
+.card-hero.is-legendary { border-width: 7px; }
 .card.is-mythical,
 .card-hero.is-mythical {
   background:
-    linear-gradient(var(--surface-1), var(--surface-1)) padding-box,
-    conic-gradient(from var(--shine-angle, 0deg), #ff5eb0, #7fc8ff, #ff5eb0, transparent 60%) border-box;
-  border: 2px solid transparent;
+    linear-gradient(var(--paper), var(--paper)) padding-box,
+    conic-gradient(from var(--shine-angle, 0deg), #ff5eb0, #7fc8ff, #ff5eb0, #c98ad6) border-box;
+  border: 6px solid transparent;
   animation: legendary-shine 6s linear infinite;
 }
+.card-hero.is-mythical { border-width: 7px; }
 @keyframes legendary-shine { to { --shine-angle: 360deg; } }
 
 /* ========= CardHero ========= */
@@ -369,13 +402,13 @@ nav {
   aspect-ratio: 2 / 3;
   width: 100%;
   max-width: 420px;
-  background: var(--surface-1);
+  background: var(--paper);
   border-radius: var(--radius-card);
-  border: 2px solid color-mix(in srgb, var(--type-color, var(--border)) 70%, var(--border));
-  box-shadow: var(--shadow-hero);
+  border: 7px solid var(--type-color, var(--border-strong));
+  box-shadow: inset 0 0 0 1px var(--paper-edge), var(--shadow-hero);
   display: flex;
   flex-direction: column;
-  padding: 16px;
+  padding: 12px;
   overflow: hidden;
   transition: transform var(--dur-base) var(--ease-out);
   transform-style: preserve-3d;
@@ -561,9 +594,9 @@ nav {
 /* ========= Skeleton ========= */
 .card-skeleton {
   aspect-ratio: 2 / 3;
-  padding: 12px;
-  background: var(--surface-1);
-  border: 2px solid var(--border);
+  padding: 9px;
+  background: var(--paper);
+  border: 6px solid var(--border-strong);
   border-radius: var(--radius-card);
   display: flex;
   flex-direction: column;
@@ -578,6 +611,10 @@ nav {
 @keyframes skeleton-shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+.card-skeleton .skeleton {
+  background: linear-gradient(90deg, #e2d5b2 0%, #ece0c2 50%, #e2d5b2 100%);
+  background-size: 200% 100%;
 }
 .skeleton-line { height: 12px; }
 .skeleton-line-lg { width: 70%; height: 16px; }
@@ -605,7 +642,7 @@ nav {
   position: absolute; inset: 0;
   background: radial-gradient(
     circle at 50% 30%,
-    color-mix(in srgb, var(--type-fill, transparent) 20%, transparent),
+    color-mix(in srgb, var(--type-fill, transparent) 12%, transparent),
     transparent 70%
   );
   pointer-events: none;
@@ -3044,8 +3081,8 @@ nav {
   height: 28px;
   border-radius: 50%;
   border: 0;
-  background: rgba(0, 0, 0, 0.55);
-  color: #fff;
+  background: var(--paper-ink);
+  color: var(--paper);
   cursor: pointer;
   z-index: 3;
   opacity: 0;

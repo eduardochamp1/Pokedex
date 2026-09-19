@@ -142,7 +142,7 @@ const Card = ({
         <div className="card-meta-row">
           <span className="card-id">{String(pokemon.id).padStart(4, "0")}</span>
           <span className="card-hp">
-            HP <strong>{stats[0].value}</strong>
+            PS <strong>{stats[0].value}</strong>
           </span>
         </div>
         {variant === "grid" && (

@@ -2,10 +2,12 @@
    Empilha sobre .card { position: relative; overflow: hidden; }
    Cada camada usa --holo-intensity (0..1) e --foil-x/y do useTiltEffect. */
 
-.card { --holo-intensity: 0.4; }
+/* Sobre papel claro o foil precisa de menos: color-dodge em fundo creme
+   estoura para branco muito antes do que estourava no escuro. */
+.card { --holo-intensity: 0.22; }
 .card.is-legendary { --holo-intensity: 0.9; }
 .card.is-mythical { --holo-intensity: 1; }
-.card-hero { --holo-intensity: 0.7; }
+.card-hero { --holo-intensity: 0.4; }
 .card-hero.is-legendary { --holo-intensity: 0.95; }
 .card-hero.is-mythical { --holo-intensity: 1; }
 
@@ -41,7 +43,7 @@
     );
     background-position: var(--foil-x, 50%) var(--foil-y, 50%);
     background-size: 200% 200%;
-    mix-blend-mode: color-dodge;
+    mix-blend-mode: soft-light;
   }
   .card-glitter {
     background:

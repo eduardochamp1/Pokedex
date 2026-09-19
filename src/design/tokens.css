@@ -65,6 +65,15 @@
   --t-steel:    #b7b7ce;
   --t-fairy:    #d685ad;
 
+  /* Papel da carta — a superficie que a opcao 3 traz. A moldura fica na cor
+     do tipo e o dourado passa a significar so raridade. */
+  --paper: #f2e7c9;
+  --paper-ink: #2b2620;       /* nome e numeros: 11:1 sobre o papel */
+  --paper-ink-soft: #6b4e2e;  /* rotulo e numero da dex */
+  --paper-ps: #b23a2e;        /* o PS, como na carta */
+  --paper-edge: #b8892b;      /* filete dourado entre moldura e miolo */
+  --paper-line: #d9c9a6;      /* divisoria e bloco de stat vazio */
+
   /* Fontes */
   --font-display: "Space Grotesk", system-ui, sans-serif;
   --font-body: system-ui, -apple-system, "Segoe UI", sans-serif;
