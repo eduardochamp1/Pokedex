@@ -1513,6 +1513,11 @@ nav {
   display: grid;
   gap: 20px;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  /* Sem isto a grade estica o card curto ate a altura do vizinho: o card do
+     Mundo Distorcido, que tem um habitante, ficava com 230px de vazio por
+     baixo do conteudo so porque o Ultra Espaco, ao lado, tem doze. Cada card
+     agora termina onde o conteudo dele termina. */
+  align-items: start;
 }
 .editorial-card {
   background: var(--surface-1);
@@ -1549,7 +1554,7 @@ nav {
   --card-ink: color-mix(in srgb, var(--card-accent, var(--accent)) 45%, var(--text));
 }
 
-.editorial-card h2 {
+.editorial-card h3 {
   font-family: var(--font-display);
   font-size: 1.3rem;
   font-weight: 500;
@@ -1571,7 +1576,7 @@ nav {
 .editorial-card p strong { color: var(--card-ink); font-weight: 700; }
 
 .editorial-card-dim { padding-right: 22px; }
-.editorial-card-dim h2,
+.editorial-card-dim h3,
 .editorial-card-dim p,
 .editorial-card-dim .subtitle,
 .editorial-card-dim .lore-chips { position: relative; z-index: 1; }
@@ -1579,6 +1584,7 @@ nav {
 /* Itens Lendários */
 .items-grid { display: grid; gap: 32px; }
 .items-section { display: flex; flex-direction: column; gap: 12px; }
+.items-cat-label::before { content: "\25B8"; margin-right: 7px; }
 .items-cat-label {
   font-family: var(--font-display);
   font-size: 0.85rem;
@@ -1630,7 +1636,7 @@ nav {
   box-shadow: 0 4px 12px color-mix(in srgb, var(--item-accent) 40%, transparent);
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
-.item-body h2 {
+.item-body h4 {
   font-family: var(--font-display);
   font-size: 1.05rem;
   font-weight: 500;
@@ -1648,6 +1654,7 @@ nav {
 /* Breeding / Ovos */
 .breeding-grid { display: grid; gap: 32px; }
 .breeding-section { display: flex; flex-direction: column; gap: 12px; }
+.breeding-cat-label::before { content: "\25B8"; margin-right: 7px; }
 .breeding-cat-label {
   font-family: var(--font-display);
   font-size: 0.85rem;
@@ -1690,7 +1697,7 @@ nav {
 }
 .breeding-card-regra .breeding-icon { background: color-mix(in srgb, var(--accent-alt) 20%, var(--surface-2)); }
 .breeding-card-especial .breeding-icon { background: color-mix(in srgb, #a33ea1 30%, var(--surface-2)); }
-.breeding-body h2 {
+.breeding-body h4 {
   font-family: var(--font-display);
   font-size: 1rem;
   font-weight: 500;
@@ -2714,6 +2721,7 @@ nav {
   height: 52px;
   flex: 0 0 auto;
 }
+.landmark-region-name::before { content: "\25B8"; margin-right: 7px; }
 .landmark-region-name {
   font-family: var(--font-display);
   font-size: 1.15rem;
@@ -2743,6 +2751,34 @@ nav {
   border-color: var(--card-accent, var(--border-strong));
   transform: translateY(-2px);
 }
+
+/* ========= Janela: a linguagem que o resto do site já usa =========
+   Carta, mapa, painel de filtro e painel da ficha viraram janela — borda de
+   2px, filete interno e sombra sólida. Os cards da Lore eram o último lugar
+   com borda de 1px e nenhum filete, e por isso a seção parecia de outro site.
+
+   A borda entra sem shorthand: .myth-card carrega uma barra de 4px na cor do
+   verbete à esquerda, e um border: shorthand aqui apagaria ela. */
+.editorial-card,
+.item-card,
+.breeding-card,
+.civ-card,
+.myth-card,
+.battle-card,
+.landmark-card {
+  border-width: 2px;
+  border-style: solid;
+  border-color: var(--border-strong);
+  box-shadow: inset 0 0 0 2px var(--surface-2), var(--shadow-card);
+}
+.myth-card {
+  border-left-width: 4px;
+  border-left-color: var(--card-accent);
+}
+/* O cabeçalho da batalha ocupa a largura toda e encosta na moldura: o filete
+   por dentro viraria um anel em volta dele. */
+.battle-card { box-shadow: var(--shadow-card); }
+
 .landmark-card-head {
   display: flex;
   align-items: baseline;

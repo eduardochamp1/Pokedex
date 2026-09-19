@@ -63,6 +63,25 @@
   flex-direction: column;
   gap: 4px;
 }
+/* O nome da aba, entre o titulo da pagina e o conteudo. Discreto de
+   proposito: ele existe para dar pe na navegacao por heading e para dizer
+   onde voce esta quando a barra lateral vira menu no celular. */
+.lore-tab-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+  margin: 0 0 18px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid color-mix(in srgb, var(--accent) 28%, transparent);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.lore-tab-title::before { content: "\25B8"; }
+
 .lore-sidebar-title {
   font-family: var(--font-display);
   font-weight: 700;

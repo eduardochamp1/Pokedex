@@ -207,7 +207,7 @@ const LorePage = () => {
   return (
     <div className="lore-shell">
       <aside className="lore-sidebar">
-        <h2 className="lore-sidebar-title">Universo Pokémon</h2>
+        <h1 className="lore-sidebar-title">Universo Pokémon</h1>
 
         <div className="lore-search">
           <input
@@ -237,6 +237,7 @@ const LorePage = () => {
       </aside>
 
       <main className="lore-main">
+        <h2 className="lore-tab-title">{TAB_LABELS[tab]}</h2>
         {tab === "timeline" && (
           <>
             <div className="lore-filters">
@@ -380,7 +381,7 @@ const LorePage = () => {
                   <div className="editorial-art">
                     <RegionMapIcon regionId={region.id} color={color} />
                   </div>
-                  <h2>{region.name}</h2>
+                  <h3>{region.name}</h3>
                   <p className="subtitle">
                     Gen {region.generation} · {region.inspiration}
                   </p>
@@ -475,7 +476,7 @@ const LorePage = () => {
                       <HumanBadge name={h.name} color={color} />
                     </div>
                   </div>
-                  <h2>{h.name}</h2>
+                  <h3>{h.name}</h3>
                   <p className="subtitle">
                     {h.role} · {h.region}
                   </p>
@@ -522,7 +523,7 @@ const LorePage = () => {
                     <VillainEmblem teamId={v.id} color={v.color} />
                   </div>
                 </div>
-                <h2>{v.name}</h2>
+                <h3>{v.name}</h3>
                 <p className="subtitle">
                   {v.region} · líder: {v.leader}
                 </p>
@@ -566,7 +567,7 @@ const LorePage = () => {
                     <span className="battle-side-name">{b.contenders[1]}</span>
                   </div>
                 </header>
-                <h2 className="battle-title">{b.title}</h2>
+                <h3 className="battle-title">{b.title}</h3>
                 <p className="battle-location">
                   <strong>{b.era}</strong> · {b.location}
                 </p>
@@ -621,7 +622,7 @@ const LorePage = () => {
                           fallback={itemEmblem(it.category)}
                         />
                         <div className="item-body">
-                          <h2>{it.name}</h2>
+                          <h4>{it.name}</h4>
                           {(it.officialName || it.debut) && (
                             <p className="item-meta">
                               {it.officialName && (
@@ -678,7 +679,7 @@ const LorePage = () => {
                           {b.category === "grupo" ? "🥚" : b.category === "regra" ? "📜" : "✨"}
                         </div>
                         <div className="breeding-body">
-                          <h2>{b.title}</h2>
+                          <h4>{b.title}</h4>
                           <p>{b.summary}</p>
                           <div className="lore-chips">
                             {b.pokemons.map((name) => (
@@ -719,7 +720,7 @@ const LorePage = () => {
                 <header className="civ-header">
                   <span className="civ-stamp" aria-hidden="true">▲</span>
                   <div>
-                    <h2 className="civ-name">{c.name}</h2>
+                    <h3 className="civ-name">{c.name}</h3>
                     <p className="civ-loc">{c.region} · {c.age}</p>
                   </div>
                 </header>
@@ -776,7 +777,7 @@ const LorePage = () => {
                   </div>
                   <div className="myth-body">
                     <div className="myth-region">{m.region}</div>
-                    <h2 className="myth-title">{m.title}</h2>
+                    <h3 className="myth-title">{m.title}</h3>
                     <p className="myth-summary">{m.summary}</p>
                     <WikiSource wiki={m.wiki} />
                     <div className="lore-chips">
@@ -836,7 +837,7 @@ const LorePage = () => {
                           >
                             {LANDMARK_KIND_LABELS[l.kind as LandmarkKind]}
                           </span>
-                          <h2 className="landmark-name">{l.name}</h2>
+                          <h4 className="landmark-name">{l.name}</h4>
                         </div>
                         <p className="landmark-summary">{l.summary}</p>
                         <WikiSource wiki={l.wiki} />
@@ -882,7 +883,7 @@ const LorePage = () => {
                     spriteUrl={pixelSpriteUrl(idOf(d.signature))}
                   />
                 </div>
-                <h2>{d.name}</h2>
+                <h3>{d.name}</h3>
                 <p className="subtitle">Regente: {d.ruler}</p>
                 <p>
                   <strong>Acesso:</strong> {d.access}

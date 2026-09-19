@@ -452,15 +452,26 @@ function dimensionScene(id: string, color: string): Scene {
       return {
         back: (
           <>
-            <path d="M 0 108 L 40 108 L 52 90 L 96 90 L 106 108 L 168 108 L 182 84 L 220 84 L 232 108 L 320 108 L 320 130 L 0 130 Z" fill={color} opacity="0.4" />
-            <rect y="126" width="320" height="54" fill={color} opacity="0.16" />
-            <g stroke={color} strokeWidth="0.8" opacity="0.5" fill="none">
+            {/* Mesas ao longe, em duas profundidades: a de tras mais apagada
+                da o ar rarefeito do deserto de Orre. */}
+            <path d="M 0 100 L 44 100 L 58 78 L 104 78 L 116 100 L 176 100 L 192 70 L 232 70 L 246 100 L 320 100 L 320 122 L 0 122 Z" fill={color} opacity="0.3" />
+            <path d="M 0 118 L 62 118 L 76 100 L 122 100 L 134 118 L 206 118 L 222 96 L 258 96 L 270 118 L 320 118 L 320 136 L 0 136 Z" fill={color} opacity="0.55" />
+            {/* Chao arido: areia quente sob o ceu frio, e a linha do horizonte
+                marcada, que e o que faltava para a cena ter fundo e frente. */}
+            <rect y="132" width="320" height="48" fill="#c89a62" opacity="0.14" />
+            <line x1="0" y1="132" x2="320" y2="132" stroke={color} strokeWidth="1.2" opacity="0.7" />
+            <g stroke="#c89a62" strokeWidth="1" opacity="0.5" fill="none" strokeLinecap="round">
               {[
-                "M 24 142 L 62 150 L 48 166", "M 116 136 L 150 152 L 138 172",
-                "M 206 140 L 246 148 L 238 170", "M 272 158 L 306 150",
+                "M 18 146 L 58 154 L 44 172", "M 96 140 L 138 158 L 126 176",
+                "M 196 144 L 240 152 L 232 174", "M 262 162 L 306 152",
+                "M 70 166 L 104 172",
               ].map((d, i) => <path key={i} d={d} />)}
             </g>
-            <ellipse cx="160" cy="86" rx="52" ry="44" fill="#000" opacity="0.65" filter={`url(#db-${id})`} />
+            {/* A aura que a Cipher fechava no coracao: roxa, com halo, nao uma
+                mancha preta sem forma. */}
+            <ellipse cx="160" cy="80" rx="58" ry="50" fill="#2a1038" opacity="0.85" filter={`url(#db-${id})`} />
+            <ellipse cx="160" cy="80" rx="46" ry="40" fill="none" stroke="#9a4fd0" strokeWidth="1.4" opacity="0.5" />
+            <ellipse cx="160" cy="80" rx="34" ry="29" fill="none" stroke="#9a4fd0" strokeWidth="0.8" opacity="0.3" />
           </>
         ),
       };
