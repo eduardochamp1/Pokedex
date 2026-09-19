@@ -8,11 +8,18 @@ export interface Dimension extends WikiSourced {
   description: string;
   inhabitants: string[];
   color: string;
+  /**
+   * Quem aparece na cena da dimensão. Nem sempre é o regente: o Ultra Espaço
+   * é de Necrozma, mas quem o representa em imagem é Nihilego; Hisui não tem
+   * regente, e quem a assina é a forma de Zorua que só existe lá.
+   */
+  signature: string;
 }
 
 export const DIMENSIONS: Dimension[] = [
   {
     id: "distortion",
+    signature: "giratina",
     wiki: "Distortion World",
     name: "Mundo Distorcido",
     ruler: "Giratina",
@@ -24,6 +31,7 @@ export const DIMENSIONS: Dimension[] = [
   },
   {
     id: "ultraspace",
+    signature: "nihilego",
     wiki: "Ultra Space",
     name: "Ultra Espaço",
     ruler: "Necrozma (originalmente)",
@@ -35,6 +43,7 @@ export const DIMENSIONS: Dimension[] = [
   },
   {
     id: "dreamworld",
+    signature: "musharna",
     wiki: "Pokémon Dream World",
     name: "Mundo dos Sonhos",
     ruler: "Musharna / Cresselia",
@@ -46,6 +55,7 @@ export const DIMENSIONS: Dimension[] = [
   },
   {
     id: "sinjoh",
+    signature: "arceus",
     wiki: "Sinjoh Ruins",
     name: "Ruínas de Sinjoh",
     ruler: "Arceus",
@@ -57,6 +67,7 @@ export const DIMENSIONS: Dimension[] = [
   },
   {
     id: "hisui",
+    signature: "zorua-hisui",
     wiki: "Hisui",
     name: "Hisui (Sinnoh ancestral)",
     ruler: "Nenhum — era pré-humana",
@@ -68,6 +79,7 @@ export const DIMENSIONS: Dimension[] = [
   },
   {
     id: "terastal",
+    signature: "terapagos",
     wiki: "Area Zero",
     name: "Área Zero / Realm Terastal",
     ruler: "Terapagos",
@@ -79,6 +91,7 @@ export const DIMENSIONS: Dimension[] = [
   },
   {
     id: "shadow",
+    signature: "lugia",
     wiki: "Reverse World",
     name: "Reverse World / Colosseum",
     ruler: "Cipher (grupo criminoso)",

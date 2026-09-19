@@ -876,7 +876,11 @@ const LorePage = () => {
                 style={{ ["--card-accent" as string]: d.color }}
               >
                 <div className="editorial-art editorial-art-portal">
-                  <DimensionPortal dimId={d.id} color={d.color} />
+                  <DimensionPortal
+                    dimId={d.id}
+                    color={d.color}
+                    spriteUrl={pixelSpriteUrl(idOf(d.signature))}
+                  />
                 </div>
                 <h2>{d.name}</h2>
                 <p className="subtitle">Regente: {d.ruler}</p>

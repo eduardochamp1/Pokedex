@@ -163,127 +163,310 @@ export const RegionMapIcon = ({ regionId, color }: RegionIconProps) => {
 interface DimensionProps {
   dimId: string;
   color: string;
+  /**
+   * Sprite local (public/sprites) do habitante que assina a dimensão. A arte
+   * da Lore é desenhada aqui de propósito — a arte dos jogos é da Nintendo e
+   * o Bulbapedia bloqueia hotlink, então a wiki entra como fonte citada e a
+   * ilustração é SVG próprio. O sprite que o projeto já serve é a única
+   * figura real da cena, e entra como habitante, não como ilustração.
+   */
+  spriteUrl?: string;
 }
 
-export const DimensionPortal = ({ dimId, color }: DimensionProps) => {
+/**
+ * Levanta a cor da dimensão até ela ter presença sobre o fundo quase preto
+ * da cena.
+ *
+ * A mesma armadilha da tinta dos verbetes, agora em desenho: #3a3a4a do
+ * Reverse World e #4a3663 do Mundo Distorcido rendem 1,7:1 contra #080910 —
+ * a montanha, a racha e o anel simplesmente não apareciam. Cores que já têm
+ * presença passam intactas, então só os tons escuros são tocados.
+ */
+function litFor(hex: string): string {
+  const rgb = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  if (rgb.some(Number.isNaN)) return hex;
+  const lum = (c: number[]) =>
+    c
+      .map((v) => {
+        const n = v / 255;
+        return n <= 0.03928 ? n / 12.92 : Math.pow((n + 0.055) / 1.055, 2.4);
+      })
+      .reduce((a, v, i) => a + v * [0.2126, 0.7152, 0.0722][i], 0);
+  const fundo = lum([8, 9, 16]);
+  const razao = (c: number[]) => (lum(c) + 0.05) / (fundo + 0.05);
+  let p = 0;
+  let atual = rgb;
+  while (razao(atual) < 3 && p < 0.6) {
+    p += 0.05;
+    atual = rgb.map((v) => Math.round(v * (1 - p) + 255 * p));
+  }
+  return "#" + atual.map((v) => v.toString(16).padStart(2, "0")).join("");
+}
+
+/** Onde o habitante pousa na cena, em coordenadas do viewBox 320x180. */
+const DIM_SPRITE: Record<string, { x: number; y: number; size: number }> = {
+  distortion: { x: 118, y: 40, size: 84 },
+  ultraspace: { x: 46, y: 56, size: 62 },
+  dreamworld: { x: 124, y: 48, size: 72 },
+  sinjoh: { x: 122, y: 16, size: 76 },
+  hisui: { x: 180, y: 98, size: 66 },
+  terastal: { x: 128, y: 74, size: 64 },
+  shadow: { x: 120, y: 34, size: 82 },
+};
+
+export const DimensionPortal = ({ dimId, color, spriteUrl }: DimensionProps) => {
+  const box = DIM_SPRITE[dimId] ?? { x: 124, y: 54, size: 72 };
+  const lit = litFor(color);
+  const scene = dimensionScene(dimId, lit);
   return (
-    <svg viewBox="0 0 200 120" className="lore-art-portal" aria-hidden="true">
+    <svg viewBox="0 0 320 180" className="lore-art-portal" aria-hidden="true">
       <defs>
-        <radialGradient id={`dp-${dimId}`} cx="50%" cy="50%" r="60%">
-          <stop offset="0%" stopColor={color} stopOpacity="0.9" />
-          <stop offset="50%" stopColor={color} stopOpacity="0.4" />
-          <stop offset="100%" stopColor={color} stopOpacity="0" />
+        <radialGradient id={`dp-${dimId}`} cx="50%" cy="46%" r="62%">
+          <stop offset="0%" stopColor={lit} stopOpacity="0.5" />
+          <stop offset="55%" stopColor={lit} stopOpacity="0.16" />
+          <stop offset="100%" stopColor={lit} stopOpacity="0" />
         </radialGradient>
-        <filter id={`db-${dimId}`}>
-          <feGaussianBlur stdDeviation="1.5" />
+        <radialGradient id={`dv-${dimId}`} cx="50%" cy="50%" r="72%">
+          <stop offset="55%" stopColor="#000" stopOpacity="0" />
+          <stop offset="100%" stopColor="#000" stopOpacity="0.55" />
+        </radialGradient>
+        <filter id={`db-${dimId}`} x="-25%" y="-25%" width="150%" height="150%">
+          <feGaussianBlur stdDeviation="4" />
         </filter>
       </defs>
-      <rect width="200" height="120" fill="#0b0c15" />
-      {dimensionInner(dimId, color)}
-      <ellipse
-        cx="100" cy="60" rx="70" ry="45"
-        fill={`url(#dp-${dimId})`}
-        style={{ mixBlendMode: "screen" }}
-      />
+
+      <rect width="320" height="180" fill="#080910" />
+      <rect width="320" height="180" fill={`url(#dp-${dimId})`} />
+      {scene.back}
+
+      {spriteUrl && (
+        <image
+          href={spriteUrl}
+          x={box.x}
+          y={box.y}
+          width={box.size}
+          height={box.size}
+          style={{ imageRendering: "pixelated" }}
+        />
+      )}
+
+      {scene.front}
+      <rect width="320" height="180" fill={`url(#dv-${dimId})`} />
     </svg>
   );
 };
 
-function dimensionInner(id: string, color: string) {
+interface Scene {
+  back: JSX.Element;
+  front?: JSX.Element;
+}
+
+function dimensionScene(id: string, color: string): Scene {
   switch (id) {
-    case "distortion":
-      // Fractured mirror lines
-      return (
-        <g stroke={color} strokeWidth="0.5" opacity="0.6" fill="none">
-          {[15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180].map((x) => (
-            <line key={x} x1={x} y1="10" x2={x + 15} y2="110" />
-          ))}
+    // Mundo Distorcido: lajes soltas e o mesmo mundo repetido de cabeça para
+    // baixo. A gravidade quebrada é o assunto, então o espelho é a cena.
+    case "distortion": {
+      const lajes = [
+        { x: 14, y: 68, w: 82, r: -13 },
+        { x: 206, y: 54, w: 96, r: 10 },
+        { x: 96, y: 132, w: 112, r: -4 },
+        { x: 236, y: 118, w: 62, r: -8 },
+      ];
+      const slab = (s: (typeof lajes)[number], i: number) => (
+        <g key={i} transform={`rotate(${s.r} ${s.x + s.w / 2} ${s.y})`}>
+          <rect x={s.x} y={s.y} width={s.w} height="6" fill={color} />
+          <rect x={s.x + 7} y={s.y + 6} width={s.w - 14} height="4" fill="#000" opacity="0.45" />
         </g>
       );
+      return {
+        back: (
+          <>
+            <g stroke={color} strokeWidth="0.6" opacity="0.22" fill="none">
+              {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+                <path key={i} d={`M ${i * 46} 0 C ${i * 46 + 26} 60, ${i * 46 - 26} 120, ${i * 46} 180`} />
+              ))}
+            </g>
+            <g opacity="0.16" transform="translate(0 180) scale(1 -1)">{lajes.map(slab)}</g>
+            <g opacity="0.75">{lajes.map(slab)}</g>
+          </>
+        ),
+      };
+    }
+
+    // Ultra Espaço: o buraco de minhoca visto de dentro — anéis que afunilam
+    // para um ponto de luz, com Nihilego à deriva na boca do túnel.
     case "ultraspace":
-      // Swirling stars
-      return (
-        <g fill={color}>
-          {Array.from({ length: 30 }).map((_, i) => {
-            const angle = (i / 30) * Math.PI * 4;
-            const r = 15 + (i / 30) * 40;
-            const x = 100 + Math.cos(angle) * r;
-            const y = 60 + Math.sin(angle) * r * 0.6;
-            return <circle key={i} cx={x} cy={y} r={0.5 + (i % 3) * 0.4} opacity={0.4 + (i / 30) * 0.6} />;
-          })}
-        </g>
-      );
+      return {
+        back: (
+          <>
+            <g fill="#fff">
+              {Array.from({ length: 26 }).map((_, i) => (
+                <circle
+                  key={i}
+                  cx={(i * 97) % 320}
+                  cy={(i * 53) % 180}
+                  r={0.5 + (i % 3) * 0.35}
+                  opacity={0.25 + (i % 5) * 0.12}
+                />
+              ))}
+            </g>
+            <g fill="none" stroke={color} strokeLinecap="round">
+              {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+                <ellipse
+                  key={i}
+                  cx={214 - i * 4}
+                  cy="90"
+                  rx={86 - i * 12}
+                  ry={70 - i * 10}
+                  strokeWidth={2.2 - i * 0.22}
+                  opacity={0.16 + i * 0.11}
+                  transform={`rotate(${-12 + i * 2} 214 90)`}
+                />
+              ))}
+            </g>
+            <circle cx="190" cy="90" r="11" fill="#fff" opacity="0.85" filter={`url(#db-${id})`} />
+            <circle cx="190" cy="90" r="4" fill="#fff" />
+          </>
+        ),
+      };
+
+    // Mundo dos Sonhos: a mente vaga, o corpo dorme. Névoa, lua e brilhos.
     case "dreamworld":
-      // Soft cloud with sparkles
-      return (
-        <g>
-          <ellipse cx="100" cy="70" rx="60" ry="20" fill={color} opacity="0.3" />
-          <ellipse cx="100" cy="60" rx="45" ry="15" fill={color} opacity="0.4" />
-          {[
-            { x: 40, y: 30 }, { x: 160, y: 25 }, { x: 70, y: 90 },
-            { x: 140, y: 90 }, { x: 100, y: 20 },
-          ].map((p, i) => (
-            <path
-              key={i}
-              d={`M ${p.x} ${p.y - 4} L ${p.x + 1} ${p.y - 1} L ${p.x + 4} ${p.y} L ${p.x + 1} ${p.y + 1} L ${p.x} ${p.y + 4} L ${p.x - 1} ${p.y + 1} L ${p.x - 4} ${p.y} L ${p.x - 1} ${p.y - 1} Z`}
-              fill={color}
-              opacity="0.8"
-            />
-          ))}
-        </g>
-      );
+      return {
+        back: (
+          <>
+            <g opacity="0.9">
+              <circle cx="262" cy="40" r="17" fill={color} opacity="0.55" />
+              <circle cx="255" cy="36" r="15" fill="#080910" />
+            </g>
+            <g filter={`url(#db-${id})`} opacity="0.5">
+              <ellipse cx="120" cy="128" rx="92" ry="26" fill={color} />
+              <ellipse cx="206" cy="140" rx="70" ry="20" fill={color} opacity="0.7" />
+            </g>
+          </>
+        ),
+        front: (
+          <g fill={color} opacity="0.9">
+            {[
+              { x: 56, y: 44 }, { x: 236, y: 92 }, { x: 88, y: 96 },
+              { x: 268, y: 130 }, { x: 150, y: 28 }, { x: 40, y: 122 },
+            ].map((p, i) => (
+              <path
+                key={i}
+                d={`M ${p.x} ${p.y - 6} L ${p.x + 1.6} ${p.y - 1.6} L ${p.x + 6} ${p.y} L ${p.x + 1.6} ${p.y + 1.6} L ${p.x} ${p.y + 6} L ${p.x - 1.6} ${p.y + 1.6} L ${p.x - 6} ${p.y} L ${p.x - 1.6} ${p.y - 1.6} Z`}
+              />
+            ))}
+          </g>
+        ),
+      };
+
+    // Ruínas de Sinjoh: o altar onde a criação pode ser reencenada. Pilares,
+    // círculo de runas e o Ovo no centro.
     case "sinjoh":
-      // Rune circles
-      return (
-        <g stroke={color} strokeWidth="1" fill="none" opacity="0.7">
-          <circle cx="100" cy="60" r="50" />
-          <circle cx="100" cy="60" r="38" strokeDasharray="4 4" />
-          <circle cx="100" cy="60" r="24" />
-          {[0, 60, 120, 180, 240, 300].map((deg) => (
-            <line
-              key={deg}
-              x1="100" y1="10" x2="100" y2="20"
-              transform={`rotate(${deg} 100 60)`}
-            />
-          ))}
-        </g>
-      );
+      return {
+        back: (
+          <>
+            <g stroke={color} fill="none" opacity="0.5">
+              <ellipse cx="160" cy="138" rx="104" ry="26" strokeWidth="1.2" />
+              <ellipse cx="160" cy="138" rx="78" ry="19" strokeWidth="0.8" strokeDasharray="5 5" />
+              <ellipse cx="160" cy="138" rx="48" ry="12" strokeWidth="0.8" />
+            </g>
+            {[56, 160, 264].map((x, i) => (
+              <g key={x} opacity={i === 1 ? 0.5 : 0.8}>
+                <rect x={x - 7} y={92 - i * 0} width="14" height="50" fill={color} opacity="0.35" />
+                <rect x={x - 10} y="88" width="20" height="6" fill={color} opacity="0.6" />
+              </g>
+            ))}
+          </>
+        ),
+        front: (
+          <g>
+            <ellipse cx="160" cy="132" rx="13" ry="16" fill={color} opacity="0.9" filter={`url(#db-${id})`} />
+            <ellipse cx="160" cy="132" rx="9" ry="12" fill="#fff" opacity="0.85" />
+          </g>
+        ),
+      };
+
+    // Hisui: Sinnoh antes dos humanos. Monte Coronet ao fundo, pinheiros e
+    // neve — nada de construção, que é o ponto da era.
     case "hisui":
-      // Ancient scroll
-      return (
-        <g fill={color} opacity="0.6">
-          <rect x="30" y="30" width="140" height="60" rx="4" fill={color} opacity="0.15" stroke={color} strokeWidth="1" />
-          <line x1="50" y1="45" x2="150" y2="45" stroke={color} strokeWidth="0.5" />
-          <line x1="50" y1="55" x2="140" y2="55" stroke={color} strokeWidth="0.5" />
-          <line x1="50" y1="65" x2="150" y2="65" stroke={color} strokeWidth="0.5" />
-          <line x1="50" y1="75" x2="130" y2="75" stroke={color} strokeWidth="0.5" />
-        </g>
-      );
+      return {
+        back: (
+          <>
+            <path d="M 0 120 L 62 66 L 104 108 L 150 58 L 210 118 L 264 84 L 320 124 L 320 180 L 0 180 Z" fill={color} opacity="0.32" />
+            <path d="M 0 140 L 48 106 L 96 136 L 160 98 L 226 138 L 282 114 L 320 142 L 320 180 L 0 180 Z" fill={color} opacity="0.5" />
+            <path d="M 150 58 L 168 76 L 150 72 L 136 80 Z" fill="#fff" opacity="0.55" />
+            <rect y="146" width="320" height="34" fill="#dfe6ee" opacity="0.12" />
+            <g fill={color} opacity="0.75">
+              {[22, 46, 274, 300].map((x, i) => (
+                <g key={x}>
+                  <path d={`M ${x} ${116 + i % 2 * 6} L ${x + 11} ${142 + i % 2 * 6} L ${x - 11} ${142 + i % 2 * 6} Z`} />
+                  <rect x={x - 1.5} y={142 + (i % 2) * 6} width="3" height="8" />
+                </g>
+              ))}
+            </g>
+          </>
+        ),
+      };
+
+    // Área Zero: a cratera em corte. As paredes descem para o fundo cristalino
+    // onde a energia Terastal brota do chão.
     case "terastal":
-      // Crystal facets
-      return (
-        <g stroke={color} fill={color} strokeWidth="1">
-          <polygon points="100,20 130,50 115,90 85,90 70,50" fill={color} fillOpacity="0.3" />
-          <polygon points="100,20 130,50 100,50" fill={color} fillOpacity="0.5" />
-          <polygon points="100,20 70,50 100,50" fill={color} fillOpacity="0.6" />
-          <polygon points="130,50 115,90 100,50" fill={color} fillOpacity="0.4" />
-          <polygon points="70,50 85,90 100,50" fill={color} fillOpacity="0.5" />
-        </g>
-      );
+      return {
+        back: (
+          <>
+            <path d="M 0 0 L 96 132 L 0 180 Z" fill={color} opacity="0.22" />
+            <path d="M 320 0 L 224 132 L 320 180 Z" fill={color} opacity="0.22" />
+            <path d="M 0 0 L 74 138 L 0 180 Z" fill="#080910" opacity="0.75" />
+            <path d="M 320 0 L 246 138 L 320 180 Z" fill="#080910" opacity="0.75" />
+            <ellipse cx="160" cy="150" rx="96" ry="22" fill={color} opacity="0.45" filter={`url(#db-${id})`} />
+          </>
+        ),
+        front: (
+          <g>
+            {[
+              { x: 92, h: 40, w: 11 }, { x: 116, h: 26, w: 8 },
+              { x: 208, h: 46, w: 12 }, { x: 232, h: 30, w: 9 },
+              { x: 68, h: 22, w: 7 }, { x: 252, h: 20, w: 7 },
+            ].map((c, i) => (
+              <g key={i}>
+                <polygon
+                  points={`${c.x},${152 - c.h} ${c.x + c.w},${152 - c.h * 0.55} ${c.x + c.w * 0.6},152 ${c.x - c.w * 0.4},152`}
+                  fill={color}
+                  opacity="0.75"
+                />
+                <polygon
+                  points={`${c.x},${152 - c.h} ${c.x + c.w * 0.6},152 ${c.x - c.w * 0.4},152`}
+                  fill="#fff"
+                  opacity="0.22"
+                />
+              </g>
+            ))}
+          </g>
+        ),
+      };
+
+    // Orre: a região sem grama alta. Chão rachado, mesas ao longe e a aura
+    // escura que a Cipher fechava no coração dos pokémon.
     case "shadow":
-      // Inverted grid
-      return (
-        <g stroke={color} strokeWidth="0.5" opacity="0.4" fill="none">
-          {[15, 30, 45, 60, 75, 90, 105].map((y) => (
-            <line key={y} x1="10" y1={y} x2="190" y2={y} />
-          ))}
-          {[20, 40, 60, 80, 100, 120, 140, 160, 180].map((x) => (
-            <line key={x} x1={x} y1="10" x2={x} y2="110" />
-          ))}
-        </g>
-      );
+      return {
+        back: (
+          <>
+            <path d="M 0 108 L 40 108 L 52 90 L 96 90 L 106 108 L 168 108 L 182 84 L 220 84 L 232 108 L 320 108 L 320 130 L 0 130 Z" fill={color} opacity="0.4" />
+            <rect y="126" width="320" height="54" fill={color} opacity="0.16" />
+            <g stroke={color} strokeWidth="0.8" opacity="0.5" fill="none">
+              {[
+                "M 24 142 L 62 150 L 48 166", "M 116 136 L 150 152 L 138 172",
+                "M 206 140 L 246 148 L 238 170", "M 272 158 L 306 150",
+              ].map((d, i) => <path key={i} d={d} />)}
+            </g>
+            <ellipse cx="160" cy="86" rx="52" ry="44" fill="#000" opacity="0.65" filter={`url(#db-${id})`} />
+          </>
+        ),
+      };
+
     default:
-      return null;
+      return { back: <g /> };
   }
 }
 

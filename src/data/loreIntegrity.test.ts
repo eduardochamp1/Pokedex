@@ -45,6 +45,16 @@ describe("ids", () => {
   });
 });
 
+describe("dimensoes", () => {
+  // A assinatura vira caminho de sprite na cena do card: se vier vazia ou
+  // fora do formato, a dimensao aparece sem habitante e sem erro.
+  it("toda dimensao tem assinatura em forma de slug", () => {
+    for (const d of DIMENSIONS) {
+      expect(d.signature, d.id).toMatch(/^[a-z0-9-]+$/);
+    }
+  });
+});
+
 describe("genealogia", () => {
   const flat = (n: GenealogyNode): GenealogyNode[] => [
     n,
