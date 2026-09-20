@@ -1,5 +1,6 @@
+// @vitest-environment jsdom
 import { describe, expect, it } from "vitest";
-import { shortcutFor } from "./shortcuts";
+import { isTypingTarget, shortcutFor } from "./shortcuts";
 
 const press = (key: string, shiftKey = false) => ({ key, shiftKey });
 
@@ -48,5 +49,32 @@ describe("shortcutFor", () => {
     it("gravar tambem respeita o vinculo", () => {
       expect(shortcutFor(press("F5", true), new Set(["F5"]))).toBeNull();
     });
+  });
+});
+
+/**
+ * A regressao mais cara desta tela: o Espaco do turbo nunca chegava ao atalho.
+ *
+ * Para comecar a jogar a pessoa clica num botao, o foco fica nele, e enquanto
+ * `BUTTON` estava nesta lista todo Espaco seguinte era descartado. Quem chama
+ * da `preventDefault()`, entao o botao focado nao e acionado — e Enter continua
+ * acionando botoes.
+ */
+describe("isTypingTarget", () => {
+  const elemento = (tag: string) => document.createElement(tag);
+
+  it("um botao focado nao rouba a tecla do jogo", () => {
+    expect(isTypingTarget(elemento("button"))).toBe(false);
+    expect(isTypingTarget(elemento("a"))).toBe(false);
+  });
+
+  it("campo de texto continua sendo campo de texto", () => {
+    expect(isTypingTarget(elemento("input"))).toBe(true);
+    expect(isTypingTarget(elemento("textarea"))).toBe(true);
+    expect(isTypingTarget(elemento("select"))).toBe(true);
+  });
+
+  it("nao quebra com alvo que nao e elemento", () => {
+    expect(isTypingTarget(null)).toBe(false);
   });
 });

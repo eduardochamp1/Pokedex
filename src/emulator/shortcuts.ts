@@ -19,25 +19,29 @@ export type Shortcut =
 const MAX_SLOT = 6;
 
 /**
- * Elemento onde o usuario esta digitando ou que responde a barra de espaco por
- * conta propria.
+ * Elemento onde a tecla e texto, e por isso nao pode virar atalho.
  *
- * Sem isto, o turbo roubaria a barra de espaco de um botao focado — a tecla que
- * o navegador usa para acionar botoes — e quebraria a navegacao por teclado.
+ * ### Por que `BUTTON` e `A` saiam daqui e voltaram a nao sair
  *
- * O preco disso era alto e passou despercebido: para comecar a jogar a pessoa
- * **clica num botao** ("Continuar de onde parou", uma ROM da biblioteca,
- * "Pausar"), e o foco fica nele. Com o botao focado, o Espaco caia aqui e o
- * turbo nunca ligava — e, pior, acionava de novo o ultimo botao clicado. Era
- * por isso que "no emulador normal segurar Espaco acelera e aqui nao".
+ * A primeira versao incluia os dois, para nao roubar de um botao focado a
+ * barra de espaco — que e como o navegador aciona botoes. A regra parecia
+ * certa e custava caro: **para comecar a jogar a pessoa clica num botao**
+ * ("Continuar de onde parou", uma ROM da biblioteca, "Pausar"), o foco fica
+ * nele, e o Espaco seguinte morria aqui. O turbo nunca ligava — e, pior, o
+ * Espaco reacionava aquele mesmo botao. Era essa a causa de "no emulador de
+ * PC segurar Espaco acelera e aqui nao".
  *
- * A saida nao e afrouxar esta regra, que esta certa: e tirar o foco do botao
- * quando o jogo comeca. Quem cuida disso e `focarPalco`, na PlayPage.
+ * Tentar resolver movendo o foco para o palco funciona no caso feliz, mas
+ * depende de acertar todo caminho que devolve o foco a um botao — e basta um
+ * escapar para o turbo sumir de novo. Entao os dois sairam da lista: com um
+ * jogo rodando, o Espaco e do jogo. Quem chama o atalho da `preventDefault()`,
+ * o que impede o botao focado de ser acionado, e Enter continua acionando
+ * botoes normalmente — a navegacao por teclado segue inteira.
  */
 export function isTypingTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
   if (target.isContentEditable) return true;
-  return ["INPUT", "TEXTAREA", "SELECT", "BUTTON", "A"].includes(target.tagName);
+  return ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName);
 }
 
 /**

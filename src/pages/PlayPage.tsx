@@ -143,10 +143,9 @@ const PlayPage = () => {
   /**
    * Põe o foco no palco do emulador.
    *
-   * Sem isto o teclado do jogo funciona e o turbo não: para começar a jogar a
-   * pessoa clica num botão, o foco fica nele, e `isTypingTarget` — com razão —
-   * descarta o Espaço vindo de um `<button>`. Com o palco focado o Espaço
-   * chega ao atalho, e de quebra deixa de reacionar o último botão clicado.
+   * O turbo não depende mais disto — `isTypingTarget` deixou de descartar
+   * teclas vindas de botões —, mas devolver o teclado ao jogo depois de
+   * acionar um controle continua sendo o comportamento certo.
    */
   const focarPalco = useCallback(() => {
     emu.stageRef.current?.focus({ preventScroll: true });
@@ -307,10 +306,8 @@ const PlayPage = () => {
           >
             {/* O canvas é criado fora do React e adotado aqui pelo hook: o
                 core é amarrado a ele na criação e retido pela sessão. */}
-            {/* `tabIndex={-1}` para poder receber foco sem entrar na ordem do
-                Tab: o palco não é um controle, mas precisa ser focável para
-                que o Espaço do turbo não fique preso no último botão clicado.
-                Ver `focarPalco` e a doc de `isTypingTarget`. */}
+            {/* `tabIndex={-1}`: focável por código, fora da ordem do Tab —
+                o palco não é um controle. Ver `focarPalco`. */}
             <div
               ref={emu.stageRef}
               className="play-canvas-host"
@@ -345,9 +342,7 @@ const PlayPage = () => {
 
           {playing && (
             <>
-              {/* Depois de acionar um controle o teclado volta para o jogo:
-                  senão o botão fica com o foco e o Espaço do turbo morre em
-                  `isTypingTarget` — e ainda reaciona aquele mesmo botão. */}
+              {/* Depois de acionar um controle o teclado volta para o jogo. */}
               <div className="play-controls" onClick={focarPalco}>
                 {emu.status.kind === "running" ? (
                   <button type="button" onClick={emu.pause}>
