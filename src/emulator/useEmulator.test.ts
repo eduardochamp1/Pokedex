@@ -29,9 +29,8 @@ const dublê = vi.hoisted(() => ({
   /**
    * Nomes dos métodos chamados, na ordem.
    *
-   * O que faz o turbo funcionar é **não** haver `setCoreSettings` depois do
-   * multiplicador: os dois escrevem no mesmo byte de `audioWait`, e é o
-   * `audioWait` ligado pelo multiplicador que puxa os quadros na taxa nova.
+   * O turbo desliga o passo fixo e só então aplica o multiplicador; esta lista
+   * existe para travar essa ordem, que é o que faz a aceleração valer.
    */
   chamadas: [] as string[],
   /** Volume corrente do core, para o mudo do turbo. */
@@ -259,47 +258,35 @@ describe("useEmulator — ROM nova que falha", () => {
 });
 
 /**
- * A velocidade, no modelo do mGBA de mesa.
+ * A velocidade: passo fixo desligado, e só então o multiplicador.
  *
- * Lá não existe régua: há velocidade normal e há o turbo enquanto a tecla está
- * segurada, sem teto (`fastForwardHeldRatio=-1`, `holdFastForward=Space`).
+ * Em passo fixo (`timestepSync`) o core avança 1/60 s de tempo emulado por
+ * iteração e o multiplicador não tem o que multiplicar — é por isso que ele
+ * parecia inerte. Ver a tabela de medições na doc de `aplicarVelocidade`.
  *
- * Quem controla a velocidade neste build é **só** `setMainLoopTiming`. Medido
- * no navegador com o contador de quadros do próprio mGBA: sob rAF o core fica
- * em 60,0 qps com `setFastForwardMultiplier(5)` e em 60,1 com `(-5)` — inerte
- * nos dois sentidos —, e sob `SETIMMEDIATE` vai a 835–913. A tabela inteira
- * está na doc de `aplicarVelocidade`.
- *
- * Por isso estes testes travam o laço, e não o multiplicador.
+ * O que estes testes travam é a **ordem** e o fato de `setMainLoopTiming` não
+ * ser mais chamado: ele acelera o laço de render da thread principal, não a
+ * emulação, e mexer nele produzia as arrancadas em velocidade normal.
  */
-describe("useEmulator — turbo, no modelo do mGBA de mesa", () => {
-  const RAF = 1;
-  const SETIMMEDIATE = 2;
-
-  it("segurar solta o laço, que é o que realmente acelera", async () => {
-    const emu = await montar();
-    await act(async () => {
-      emu.atual.setTurbo(true);
-    });
-    expect(dublê.timings.at(-1)).toEqual({ mode: SETIMMEDIATE, value: 0 });
-    expect(multiplicadores.at(-1)).toBe(TURBO_MULTIPLIER);
-  });
-
-  /**
-   * Reafirmar `audioSync` durante o turbo não quebra a aceleração (medido:
-   * 835 qps com a chamada no fim), mas não há razão para escrever num byte
-   * que o core acabou de assumir. Fora do turbo, sim.
-   */
-  it("não mexe nos ajustes do core enquanto acelera", async () => {
+describe("useEmulator — turbo", () => {
+  it("desliga o passo fixo ANTES de aplicar o multiplicador", async () => {
     const emu = await montar();
     dublê.chamadas.length = 0;
+    dublê.coreSettings.length = 0;
     await act(async () => {
       emu.atual.setTurbo(true);
     });
-    expect(dublê.chamadas).not.toContain("setCoreSettings");
+    expect(multiplicadores.at(-1)).toBe(TURBO_MULTIPLIER);
+    expect(dublê.coreSettings.at(-1)).toMatchObject({ timestepSync: false });
+    // Invertido não adianta nada: o multiplicador entraria em passo fixo.
+    const passo = dublê.chamadas.indexOf("setCoreSettings");
+    const mult = dublê.chamadas.indexOf("setFastForwardMultiplier");
+    expect(passo).toBeGreaterThanOrEqual(0);
+    expect(mult).toBeGreaterThan(passo);
   });
 
-  it("soltar devolve o laço ao rAF", async () => {
+  /** O laço da thread principal só desenha; a emulação roda numa worker. */
+  it("nunca dirige o laço principal", async () => {
     const emu = await montar();
     await act(async () => {
       emu.atual.setTurbo(true);
@@ -307,9 +294,18 @@ describe("useEmulator — turbo, no modelo do mGBA de mesa", () => {
     await act(async () => {
       emu.atual.setTurbo(false);
     });
-    // Sob rAF o `timestepSync` prende o core em 60 qps. Sem voltar para cá, um
-    // monitor de 120 Hz rodaria o jogo ao dobro da velocidade.
-    expect(dublê.timings.at(-1)).toEqual({ mode: RAF, value: 1 });
+    expect(dublê.timings).toEqual([]);
+  });
+
+  it("soltar devolve o passo fixo, que é o que segura os 60 qps", async () => {
+    const emu = await montar();
+    await act(async () => {
+      emu.atual.setTurbo(true);
+    });
+    await act(async () => {
+      emu.atual.setTurbo(false);
+    });
+    expect(dublê.coreSettings.at(-1)).toMatchObject({ timestepSync: true });
   });
 
   it("soltar devolve a velocidade normal", async () => {
