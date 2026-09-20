@@ -211,45 +211,53 @@ function baseDe(
 /**
  * Aplica a velocidade no core.
  *
- * ### O passo fixo é que trava o multiplicador
+ * Uma chamada, e só — `setFastForwardMultiplier`, que é o que o gbajs3 faz.
+ * O resto é o mudo, que é conforto.
  *
- * `setFastForwardMultiplier` sozinho não faz nada aqui, e durante muito tempo
- * a conclusão foi que ele era inerte. Não é: ele só não tem o que multiplicar
- * enquanto `timestepSync` está ligado. Em passo fixo o core avança 1/60 s de
- * tempo emulado por iteração, ponto — o alvo de quadros por segundo que o
- * multiplicador levanta nunca entra na conta. Desligado, o core passa a andar
- * por tempo decorrido contra esse alvo, e aí o multiplicador vale.
+ * ### Por que isso levou tanto tempo para funcionar
  *
- * Por isso a ordem importa: **passo fixo primeiro, multiplicador depois.**
+ * O multiplicador **não fazia nada** neste projeto, em nenhum dos dois
+ * sentidos, e três análises seguidas tentaram contornar isso mexendo em
+ * `timestepSync`, `baseFpsTarget` e `setMainLoopTiming`. Nenhuma funcionou,
+ * e desligar o passo fixo ainda deixava o jogo mais pesado.
  *
- * ### Como isto foi medido, e por que as medições anteriores mentiram
+ * A causa não estava no código: **a versão 2.5.1 do core quebrou o
+ * `setFastForwardMultiplier`.** O gbajs3 — mesma biblioteca, mesmo autor —
+ * acelera de verdade porque serve a **2.5.0**. Isso foi confirmado por md5: o
+ * `mgba.wasm` que o gbajs3 publica é byte a byte o da 2.5.0, e o nosso era o
+ * da 2.5.1 (mesmo tamanho, 28 163 bytes diferentes). O `mgba.js` é idêntico
+ * nas duas; só o wasm mudou.
  *
- * Duas rodadas anteriores mediram pelo contador de quadros do próprio mGBA
- * (`showFpsCounter`) e chegaram a conclusões erradas — entre elas a de que
- * `setMainLoopTiming(SETIMMEDIATE)` acelerava, porque o contador ia de 60
- * para ~900. **Aquele contador conta o laço de render, não tempo emulado.**
+ * Por isso a versão está **presa em 2.5.0** no `package.json`. Ver
+ * `mgbaDefaults.ts` antes de subir.
  *
- * O teste que vale é outro: `quickReload()` e, 4 s depois, onde a sequência
- * de abertura do jogo chegou. Mesmo ponto de partida, tempo de parede fixo,
- * e o que se compara é progresso do jogo.
+ * ### Medido, contando quadros emulados
  *
- * | configuração | onde chegou em 4 s |
- * |---|---|
- * | normal | logo da GAME FREAK |
- * | `setMainLoopTiming` em `SETIMMEDIATE` | **idêntico** |
- * | multiplicador 5, passo fixo ligado | **idêntico** |
- * | multiplicador 5, passo fixo desligado | adiantado |
- * | multiplicador 20, passo fixo desligado | logo já se dissolvendo |
+ * O instrumento é `keysReadCallback`, que o core dispara uma vez por quadro
+ * **emulado** — ao contrário do `showFpsCounter`, que conta o laço de render e
+ * levou duas análises anteriores a conclusões erradas.
  *
- * `setMainLoopTiming` saiu daqui: ele acelera o laço da thread principal, que
- * só desenha — a emulação roda numa worker e não escuta. Mexer nele era o que
- * produzia as arrancadas aleatórias em velocidade normal.
+ * | multiplicador | 2.5.0 | 2.5.1 |
+ * |---|---|---|
+ * | 1 | 66 qps | 60 qps |
+ * | −5 (lento) | **29 qps** | 60 qps |
+ * | 5 | **104 qps** | 60 qps |
  *
- * ### Por que o passo fixo volta ao soltar
+ * Na 2.5.1 o número não se move. Na 2.5.0 ele obedece nos dois sentidos.
  *
- * Ligado, ele prende o core em 60 quadros por segundo. Desligado, o jogo anda
- * no ritmo do laço — num monitor de 120 Hz isso é o dobro da velocidade. Ele
- * é a preferência "Passo fixo" da tela de A/V, e é ela que volta a valer.
+ * O teto para cima é a máquina, não o core: com 20 o número não passa de ~92,
+ * igual ao de 5. Quem tiver CPU sobrando acelera mais; quem não tiver, menos.
+ *
+ * ### O que **não** entra aqui
+ *
+ * `setMainLoopTiming` acelera o laço da thread principal, que só desenha — a
+ * emulação não escuta. Provado pelo teste do `quickReload()`: com
+ * `SETIMMEDIATE` a abertura do jogo chega exatamente no mesmo ponto em 4 s.
+ * Era ele que produzia as arrancadas aleatórias em velocidade normal.
+ *
+ * `timestepSync` fica como a pessoa deixou na tela de A/V. Desligá-lo no turbo
+ * não acelerava e fazia o core mirar 300 quadros por segundo e falhar — daí a
+ * sensação de "mais pesado e não acelera".
  */
 function aplicarVelocidade(
   core: mGBAEmulator | null | undefined,
@@ -259,21 +267,20 @@ function aplicarVelocidade(
 ): void {
   if (!core) return;
 
+  core.setFastForwardMultiplier(turbo ? TURBO_MULTIPLIER : 1);
+
   if (turbo) {
     if (volumeAntes.current === null) {
       const atual = core.getVolume();
       volumeAntes.current = typeof atual === "number" ? atual : null;
     }
-    // Antes do multiplicador, sempre: ver o primeiro bloco.
-    core.setCoreSettings({ timestepSync: false });
-    core.setFastForwardMultiplier(TURBO_MULTIPLIER);
     // Mudo enquanto acelera, como o `muteOnFastForward` do gbajs3 e como o
-    // mGBA de mesa: o resampler a 5× vira chiado, e não há o que ouvir ali.
+    // mGBA de mesa: o resampler acelerado vira chiado.
     core.setVolume(0);
     return;
   }
 
-  core.setFastForwardMultiplier(1);
+  // Fora da aceleração, a tela de A/V manda de novo.
   core.setCoreSettings({
     timestepSync: prefs.timestepSync,
     audioSync: prefs.audioSync,

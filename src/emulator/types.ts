@@ -1,6 +1,20 @@
-import type { mGBAEmulator } from "@thenick775/mgba-wasm";
+import type { mGBAEmulator as mGBABase } from "@thenick775/mgba-wasm";
 
-export type { mGBAEmulator };
+/**
+ * O core, com as duas funcoes que as typings da 2.5.0 esqueceram.
+ *
+ * `saveStateSlot` e `loadStateSlot` existem no `mgba.js` da 2.5.0 — conferido
+ * no proprio arquivo, as duas sao `cwrap` de exports do wasm. Elas so entraram
+ * no `.d.ts` na 2.5.1, e a 2.5.1 e justamente a versao que nao podemos usar:
+ * ela quebrou o `setFastForwardMultiplier`. Ver `mgbaDefaults.ts`.
+ *
+ * Declarar aqui em vez de subir de versao e o preco de ficar na 2.5.0, e ele e
+ * pequeno: duas assinaturas, contra o turbo inteiro.
+ */
+export type mGBAEmulator = mGBABase & {
+  saveStateSlot(slot: number, flags?: number): boolean;
+  loadStateSlot(slot: number, flags?: number): boolean;
+};
 
 /** Extensoes que o core aceita: Game Boy, Game Boy Color e Game Boy Advance. */
 export const SUPPORTED_EXTENSIONS = [".gb", ".gbc", ".gba"] as const;

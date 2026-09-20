@@ -15,10 +15,25 @@
  * Qt nativo com pacing próprio; o build wasm é dirigido por fora, e o que vale
  * para ele é o que o gbajs3 exercita em produção.
  *
- * `audioSync` fica desligado porque é assim no gbajs3, e não porque ele
- * atrapalhe a aceleração — o turbo liga o `audioWait` por conta própria, e é
- * justamente ele que puxa os quadros na taxa nova. Ver `aplicarVelocidade` em
- * `useEmulator.ts`.
+ * `audioSync` fica desligado porque é assim no gbajs3. Ele não tem relação com
+ * a aceleração: quem acelera é `setFastForwardMultiplier`, sozinho. Ver
+ * `aplicarVelocidade` em `useEmulator.ts`.
+ *
+ * ### A versão está presa, e não é por conservadorismo
+ *
+ * O `package.json` fixa `@thenick775/mgba-wasm` em **2.5.0**, sem `^`.
+ * **Não suba sem testar o turbo.** A 2.5.1 quebrou o
+ * `setFastForwardMultiplier`: o multiplicador passa a não fazer nada, nem para
+ * acelerar nem para desacelerar, e o jogo fica preso em 60 quadros por segundo
+ * faça o que fizer. Isso custou três investigações inteiras antes de aparecer.
+ *
+ * Como conferir numa versão nova, em um minuto: com o jogo rodando, no console,
+ * `__mgbaCore__.setFastForwardMultiplier(-5)`. O jogo tem que ficar
+ * visivelmente lento. Se não ficar, a versão não serve.
+ *
+ * O `mgba.js` é idêntico entre 2.5.0 e 2.5.1 — só o `.wasm` mudou. A 2.5.0 não
+ * declara `saveStateSlot`/`loadStateSlot` nas typings, embora as tenha em
+ * tempo de execução; `types.ts` cobre isso.
  *
  * ### Onde divergimos da referência, de propósito
  *

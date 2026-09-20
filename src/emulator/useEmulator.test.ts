@@ -29,8 +29,8 @@ const dublê = vi.hoisted(() => ({
   /**
    * Nomes dos métodos chamados, na ordem.
    *
-   * O turbo desliga o passo fixo e só então aplica o multiplicador; esta lista
-   * existe para travar essa ordem, que é o que faz a aceleração valer.
+   * O turbo aplica o multiplicador e silencia, e nada mais; esta lista existe
+   * para provar que nenhum ajuste do core é tocado durante a aceleração.
    */
   chamadas: [] as string[],
   /** Volume corrente do core, para o mudo do turbo. */
@@ -258,34 +258,45 @@ describe("useEmulator — ROM nova que falha", () => {
 });
 
 /**
- * A velocidade: passo fixo desligado, e só então o multiplicador.
+ * A velocidade: `setFastForwardMultiplier` e nada mais.
  *
- * Em passo fixo (`timestepSync`) o core avança 1/60 s de tempo emulado por
- * iteração e o multiplicador não tem o que multiplicar — é por isso que ele
- * parecia inerte. Ver a tabela de medições na doc de `aplicarVelocidade`.
+ * Isso só passou a valer com o core preso em 2.5.0 — a 2.5.1 quebrou o
+ * multiplicador, e é por isso que `package.json` fixa a versão sem `^`. Medido
+ * contando quadros emulados (`keysReadCallback`): na 2.5.0, `-5` leva o jogo de
+ * 66 para 29 qps e `5` o leva a 104; na 2.5.1 o número não sai de 60 em
+ * nenhum dos casos. A tabela completa está na doc de `aplicarVelocidade`.
  *
- * O que estes testes travam é a **ordem** e o fato de `setMainLoopTiming` não
- * ser mais chamado: ele acelera o laço de render da thread principal, não a
- * emulação, e mexer nele produzia as arrancadas em velocidade normal.
+ * O que estes testes travam é que nada mais seja tocado ao acelerar. Três
+ * tentativas anteriores mexeram em `timestepSync` e `setMainLoopTiming` para
+ * compensar o multiplicador morto; a primeira deixava o jogo mais pesado e a
+ * segunda causava arrancadas aleatórias em velocidade normal.
  */
 describe("useEmulator — turbo", () => {
-  it("desliga o passo fixo ANTES de aplicar o multiplicador", async () => {
+  it("segurar aplica o multiplicador e silencia", async () => {
     const emu = await montar();
     dublê.chamadas.length = 0;
-    dublê.coreSettings.length = 0;
     await act(async () => {
       emu.atual.setTurbo(true);
     });
     expect(multiplicadores.at(-1)).toBe(TURBO_MULTIPLIER);
-    expect(dublê.coreSettings.at(-1)).toMatchObject({ timestepSync: false });
-    // Invertido não adianta nada: o multiplicador entraria em passo fixo.
-    const passo = dublê.chamadas.indexOf("setCoreSettings");
-    const mult = dublê.chamadas.indexOf("setFastForwardMultiplier");
-    expect(passo).toBeGreaterThanOrEqual(0);
-    expect(mult).toBeGreaterThan(passo);
+    expect(dublê.volumes.at(-1)).toBe(0);
   });
 
-  /** O laço da thread principal só desenha; a emulação roda numa worker. */
+  /**
+   * O passo fixo é preferência de quem joga, não alavanca de velocidade.
+   * Desligá-lo no turbo não acelerava e fazia o core mirar 300 quadros por
+   * segundo e falhar — era a sensação de "mais pesado e não acelera".
+   */
+  it("não mexe nos ajustes do core enquanto acelera", async () => {
+    const emu = await montar();
+    dublê.chamadas.length = 0;
+    await act(async () => {
+      emu.atual.setTurbo(true);
+    });
+    expect(dublê.chamadas).not.toContain("setCoreSettings");
+  });
+
+  /** O laço da thread principal só desenha; a emulação não escuta. */
   it("nunca dirige o laço principal", async () => {
     const emu = await montar();
     await act(async () => {
@@ -295,17 +306,6 @@ describe("useEmulator — turbo", () => {
       emu.atual.setTurbo(false);
     });
     expect(dublê.timings).toEqual([]);
-  });
-
-  it("soltar devolve o passo fixo, que é o que segura os 60 qps", async () => {
-    const emu = await montar();
-    await act(async () => {
-      emu.atual.setTurbo(true);
-    });
-    await act(async () => {
-      emu.atual.setTurbo(false);
-    });
-    expect(dublê.coreSettings.at(-1)).toMatchObject({ timestepSync: true });
   });
 
   it("soltar devolve a velocidade normal", async () => {
