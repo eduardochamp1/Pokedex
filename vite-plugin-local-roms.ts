@@ -1,5 +1,4 @@
 import {
-  copyFile,
   mkdir,
   readdir,
   readFile,
@@ -248,62 +247,6 @@ export function localRoms(): Plugin {
     },
     configurePreviewServer(server: PreviewServer) {
       server.middlewares.use(middleware(server.config.root));
-    },
-  };
-}
-
-/**
- * Garante que o core do emulador esteja em `public/emulator/` antes de servir
- * ou buildar.
- *
- * Antes isso dependia dos hooks `predev`/`prebuild` do npm — e `npm start`
- * (que e o que o .claude/launch.json roda) nao tem `prestart`, entao quem
- * subisse por ali ficava sem o core. Como `public/emulator/` e gitignorado,
- * um clone limpo + `npm start` dava erro de carregamento.
- *
- * No hook do Vite o problema desaparece: vale para dev, start, build e preview,
- * e tambem para quem chama `vite` direto.
- */
-export function emulatorCore(): Plugin {
-  const FILES = ["mgba.js", "mgba.wasm"];
-
-  return {
-    name: "emulator-core",
-    async buildStart() {
-      const root = process.cwd();
-      const from = resolve(
-        root,
-        "node_modules",
-        "@thenick775",
-        "mgba-wasm",
-        "dist"
-      );
-      const to = resolve(root, "public", "emulator");
-
-      try {
-        await stat(from);
-      } catch {
-        this.warn(
-          "Core do emulador não encontrado em node_modules — rode `npm install`. A rota /jogar vai avisar."
-        );
-        return;
-      }
-
-      await mkdir(to, { recursive: true });
-
-      for (const file of FILES) {
-        const src = join(from, file);
-        const dest = join(to, file);
-        try {
-          // Copia so quando muda de tamanho: nao reescreve 1,8 MB a cada start.
-          const [a, b] = await Promise.all([stat(src), stat(dest)]);
-          if (a.size === b.size) continue;
-        } catch {
-          // destino ainda nao existe — copia
-        }
-        await copyFile(src, dest);
-        this.info?.(`emulator-core: ${file} copiado`);
-      }
     },
   };
 }

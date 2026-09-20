@@ -1,6 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { emulatorCore, localRoms } from "./vite-plugin-local-roms";
+import { localRoms } from "./vite-plugin-local-roms";
 
 /**
  * O core do emulador (mGBA compilado para wasm) usa threads, e threads exigem
@@ -21,7 +21,22 @@ const crossOriginIsolationHeaders = {
 };
 
 export default defineConfig({
-  plugins: [react(), emulatorCore(), localRoms()],
+  plugins: [react(), localRoms()],
+  /**
+   * O core do emulador fica **fora** do pre-bundle do Vite.
+   *
+   * Isto vem do gbajs3, que roda este mesmo core em producao. O `mgba.js` e
+   * glue do Emscripten: ele sobe o worker de pthread a partir da URL do
+   * proprio script e resolve o `.wasm` relativo a ela. O pre-bundle do esbuild
+   * reescreve o modulo e move o arquivo, e as duas resolucoes quebram.
+   *
+   * Com o `exclude`, o `import("@thenick775/mgba-wasm")` entrega o arquivo do
+   * pacote como ele e, e o worker e o wasm sobem. Era este ajuste que faltava
+   * para dispensar a copia manual em `public/emulator/`.
+   */
+  optimizeDeps: {
+    exclude: ["@thenick775/mgba-wasm"],
+  },
   server: {
     port: 3000,
     open: false,

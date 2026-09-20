@@ -64,7 +64,7 @@ vi.mock("./core", () => {
       dublê.volumes.push(v);
       dublê.volume = v;
     },
-    // A mensagem é a do core de verdade, conferida em public/emulator/mgba.js.
+    // A mensagem é a do core de verdade, conferida em mgba.js do pacote.
     FSSync: () =>
       dublê.syncFalha
         ? Promise.reject(
@@ -89,8 +89,8 @@ vi.mock("./core", () => {
     },
   });
   return {
-    CORE_URL: "/emulator/mgba.js",
-    READY_EVENT: "mgba-core-loaded",
+    
+    
     checkIsolation: () => ({
       ok: true,
       crossOriginIsolated: true,
@@ -153,7 +153,7 @@ beforeEach(() => {
 
 /**
  * `FSSync()` rejeita quando `FS.syncfs` devolve erro — o caso comum é a cota do
- * navegador cheia. A definição está em `public/emulator/mgba.js`:
+ * navegador cheia. A definição está em `mgba.js do pacote`:
  * `FSSync=()=>new Promise((resolve,reject)=>{FS.syncfs(err=>{if(err){reject(...)}resolve()})})`.
  *
  * Sem guarda, a rejeição virava unhandled rejection silenciosa: quem chama faz

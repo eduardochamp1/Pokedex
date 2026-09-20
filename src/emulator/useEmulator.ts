@@ -93,7 +93,7 @@ async function withTimeout(promise: Promise<void>, ms: number): Promise<boolean>
  * Grava o FS virtual no IndexedDB e devolve o motivo da falha, ou `null`.
  *
  * `FSSync()` **rejeita** quando `FS.syncfs` devolve erro — conferido no proprio
- * `public/emulator/mgba.js`. A causa comum e a cota do navegador cheia.
+ * `mgba.js do pacote`. A causa comum e a cota do navegador cheia.
  *
  * Sem guarda, essa rejeicao virava rejeicao nao tratada e sumia: quem chama faz
  * `void emu.playFile(file)`, entao a tela ficava em "Carregando..." para sempre

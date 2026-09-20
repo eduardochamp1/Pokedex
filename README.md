@@ -109,12 +109,16 @@ tem hook de build, então **não vai para `dist/`**. Os arquivos ficam na sua
 máquina, e um deploy acidental não os leva.
 
 #### Detalhes de implementação que custaram caro
-- **O core é carregado por tag `<script>`, não por `import()`.** Ele mora em
-  `public/emulator/` (precisa: o runtime de threads sobe o worker a partir da
-  URL do próprio script e resolve o `.wasm` relativo a ela). Mas arquivo em
-  `public/` não pode ser alvo de `import()` no fonte — em dev o Vite anexa
-  `?import`, tenta transformar e responde **500**. O `/* @vite-ignore */` não
-  evita. A correção é a que o próprio Vite indica: referenciar por tag.
+- **O core sai do pre-bundle do Vite** — `optimizeDeps.exclude` em
+  `vite.config.ts`. Sem essa linha nada do emulador funciona, e a falha é
+  silenciosa: o `mgba.js` é glue do Emscripten que sobe o worker de pthread a
+  partir da URL do próprio script e resolve o `.wasm` relativo a ela; o
+  pre-bundle do esbuild reescreve o módulo e o move, quebrando as duas
+  resoluções. Com o `exclude`, o `import()` normal do pacote basta — é o que
+  o **gbajs3** faz, e ele roda este mesmo core em produção.
+- **O core é carregado sob demanda** (`await import("@thenick775/mgba-wasm")`
+  dentro de `getCore`). São ~2 MB entre glue e wasm; quem abre a Pokédex para
+  ver um Pokémon não os baixa.
 - **O canvas e o core são singletons da sessão**, criados fora da árvore do
   React. O core é amarrado ao canvas na criação, então um canvas novo (StrictMode
   remonta em dev; navegar para fora e voltar remonta sempre) deixaria o core
@@ -245,7 +249,6 @@ A aplicação abre em [http://localhost:3000](http://localhost:3000).
 | `npm run gen3:species <rom.gba>` | Regera `src/emulator/saveParse/gen3Species.ts` lendo a tabela de espécies da sua ROM. A ROM não entra no repo nem no bundle |
 | `npm run gen3:save-check "<arquivo.sav>"` | Valida o leitor de save contra um `.sav` de verdade. A suíte usa um save sintético; este é para quem tem um real |
 | `npm run wiki:check` | Confere se todo campo `wiki` aponta para um artigo real da Bulbapedia — sem página inexistente, sem redirect e sem desambiguação (precisa de rede) |
-| `npm run emulator:core` | Copia o core do emulador para `public/emulator/` (roda no predev/prebuild) |
 
 > **Deploy:** é uma SPA com `BrowserRouter`. O host precisa reescrever qualquer
 > rota para `index.html`, senão `/lore` e `/pokemon/:id` dão 404 no refresh — e

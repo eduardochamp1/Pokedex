@@ -3,41 +3,31 @@ import type { mGBAEmulator } from "./types";
 /**
  * Carregamento e inicializacao do core mGBA.
  *
- * O core vive em `public/emulator/` e precisa ficar la: o runtime de threads do
- * Emscripten sobe o worker de pthread a partir da URL do proprio script e
- * resolve `mgba.wasm` relativo a ela. Se o bundler reescrever o modulo, as
- * duas coisas quebram.
+ * ### Isto segue o gbajs3, e a diferenca importa
  *
- * Mas arquivo em `public/` NAO pode ser alvo de `import()` no codigo-fonte: em
- * dev o Vite anexa `?import` a URL, tenta transformar, ve que o caminho esta
- * em publicDir e responde 500 —
+ * O core vem do pacote, por `import` normal — e o que o `use-emulator.tsx` do
+ * gbajs3 faz, e ele roda este mesmo core em producao. O que torna isso possivel
+ * e uma linha na `vite.config.ts`:
  *
- *   "This file is in /public and will be copied as-is during build without
- *    going through the plugin transforms, and therefore should not be imported
- *    from source code. It can only be referenced via HTML tags."
+ *     optimizeDeps: { exclude: ["@thenick775/mgba-wasm"] }
  *
- * (`/* @vite-ignore *\/` nao evita isso: ele dispensa a analise do especificador,
- * nao o marcador `?import` do pipeline de dev.)
+ * O `mgba.js` e glue do Emscripten: ele sobe o worker de pthread a partir da
+ * URL do proprio script e resolve o `.wasm` relativo a ela. Sem o `exclude`, o
+ * pre-bundle do esbuild reescreve o modulo e o move, e as duas resolucoes
+ * quebram.
  *
- * Entao carregamos exatamente como o Vite manda: injetando uma tag <script>.
- * O `import()` de dentro dela e executado pelo browser, nao pelo Vite, e a URL
- * chega limpa. Funciona igual em dev e em producao.
+ * ### O que havia aqui antes
+ *
+ * Uma versao anterior nao conhecia o `exclude` e contornou o problema copiando
+ * `mgba.js` e `mgba.wasm` para `public/emulator/` num plugin de build, e
+ * carregando dali por uma tag `<script>` injetada com `import()` dentro de uma
+ * string — porque arquivo em `public/` nao pode ser alvo de `import()` no
+ * fonte (o Vite anexa `?import` e responde 500).
+ *
+ * Funcionava, mas era um caminho so nosso, com uma copia de 2 MB versionada e
+ * um carregador de 80 linhas para manter. Sair dele foi o pedido: seguir o
+ * projeto que ja funciona em vez de manter um desvio proprio.
  */
-
-export const CORE_URL = "/emulator/mgba.js";
-export const READY_EVENT = "mgba-core-loaded";
-const LOAD_TIMEOUT_MS = 30_000;
-
-type CoreFactory = (options: {
-  canvas: HTMLCanvasElement;
-}) => Promise<mGBAEmulator>;
-
-declare global {
-  interface Window {
-    __mgbaCoreFactory__?: CoreFactory;
-    __mgbaCoreError__?: string;
-  }
-}
 
 export interface IsolationCheck {
   ok: boolean;
@@ -64,106 +54,6 @@ export function checkIsolation(): IsolationCheck {
     sharedArrayBuffer: sab,
     webAssembly: wasm,
   };
-}
-
-/**
- * Monta o texto do carregador injetado.
- *
- * Extraido para poder ser testado: o `import()` precisa ficar DENTRO desta
- * string, nunca como expressao no fonte — se voltar para o fonte, o Vite anexa
- * `?import` e o dev quebra com 500.
- */
-export function buildLoaderScript(
-  coreUrl: string,
-  readyEvent: string
-): string {
-  return [
-    `import(${JSON.stringify(coreUrl)})`,
-    `  .then(function (m) { window.__mgbaCoreFactory__ = m.default || m; })`,
-    `  .catch(function (e) { window.__mgbaCoreError__ = (e && e.message) || String(e); })`,
-    `  .finally(function () { window.dispatchEvent(new Event(${JSON.stringify(
-      readyEvent
-    )})); });`,
-  ].join("\n");
-}
-
-let factoryPromise: Promise<CoreFactory> | null = null;
-
-/** Importa a fabrica do core uma unica vez por sessao, via tag <script>. */
-function loadFactory(): Promise<CoreFactory> {
-  if (factoryPromise) return factoryPromise;
-
-  factoryPromise = new Promise<CoreFactory>((resolve, reject) => {
-    // Se outra montagem ja carregou (StrictMode remonta em dev), reaproveita.
-    if (window.__mgbaCoreFactory__) {
-      resolve(window.__mgbaCoreFactory__);
-      return;
-    }
-
-    let settled = false;
-    const finish = (fn: () => void) => {
-      if (settled) return;
-      settled = true;
-      window.removeEventListener(READY_EVENT, onReady);
-      window.clearTimeout(timer);
-      fn();
-    };
-
-    const onReady = () => {
-      const factory = window.__mgbaCoreFactory__;
-      if (typeof factory === "function") {
-        finish(() => resolve(factory));
-        return;
-      }
-      const detail = window.__mgbaCoreError__ ?? "motivo não informado";
-      finish(() =>
-        reject(
-          new Error(
-            `O core do emulador não carregou de ${CORE_URL}: ${detail}. ` +
-              "Se o arquivo não existe, rode `npm run emulator:core`."
-          )
-        )
-      );
-    };
-
-    const timer = window.setTimeout(() => {
-      finish(() =>
-        reject(
-          new Error(
-            `O core do emulador não respondeu em ${
-              LOAD_TIMEOUT_MS / 1000
-            }s (${CORE_URL}).`
-          )
-        )
-      );
-    }, LOAD_TIMEOUT_MS);
-
-    window.addEventListener(READY_EVENT, onReady);
-
-    // O import roda no browser; o Vite nao ve o conteudo desta string.
-    const script = document.createElement("script");
-    script.dataset.mgbaLoader = "true";
-    script.textContent = [
-      `import(${JSON.stringify(CORE_URL)})`,
-      `  .then(function (m) { window.__mgbaCoreFactory__ = m.default || m; })`,
-      `  .catch(function (e) { window.__mgbaCoreError__ = (e && e.message) || String(e); })`,
-      `  .finally(function () { window.dispatchEvent(new Event(${JSON.stringify(
-        READY_EVENT
-      )})); });`,
-    ].join("\n");
-    script.onerror = () =>
-      finish(() =>
-        reject(new Error(`Não foi possível injetar o carregador do core.`))
-      );
-
-    document.head.appendChild(script);
-  }).catch((error: unknown) => {
-    // Zera para uma proxima tentativa poder recarregar.
-    factoryPromise = null;
-    throw error instanceof Error ? error : new Error(String(error));
-  });
-
-  return factoryPromise;
 }
 
 /**
@@ -206,22 +96,26 @@ let corePromise: Promise<mGBAEmulator> | null = null;
  */
 export function getCore(): Promise<mGBAEmulator> {
   if (!corePromise) {
-    corePromise = loadFactory()
-      .then(async (factory) => {
-        const core = await factory({ canvas: getCanvas() });
-        await core.FSInit();
-        // Só em dev: o core vive fora da árvore do React e não há como
-        // alcançá-lo pelo console para inspecionar o FS virtual ou testar uma
-        // chamada. O build de produção não leva isto.
-        if (import.meta.env.DEV) {
-          (window as unknown as Record<string, unknown>).__mgbaCore__ = core;
-        }
-        return core;
-      })
-      .catch((error: unknown) => {
-        corePromise = null;
-        throw error instanceof Error ? error : new Error(String(error));
-      });
+    corePromise = (async () => {
+      // A mesma sequência do `use-emulator.tsx` do gbajs3, `import()`
+      // dinâmico incluído: o core são ~2 MB entre glue e wasm, e quem abre a
+      // Pokédex para ver um Pokémon não tem por que baixá-los. Com o import
+      // estático ele ia para o chunk principal e pesava em toda a navegação.
+      const { default: mGBA } = await import("@thenick775/mgba-wasm");
+      const core = (await mGBA({ canvas: getCanvas() })) as mGBAEmulator;
+      await core.FSInit();
+      // Só em dev: o core vive fora da árvore do React e não há como
+      // alcançá-lo pelo console para inspecionar o FS virtual ou testar uma
+      // chamada. O build de produção não leva isto.
+      if (import.meta.env.DEV) {
+        (window as unknown as Record<string, unknown>).__mgbaCore__ = core;
+      }
+      return core;
+    })().catch((error: unknown) => {
+      // Zera para uma próxima tentativa poder recarregar.
+      corePromise = null;
+      throw error instanceof Error ? error : new Error(String(error));
+    });
   }
   return corePromise;
 }
