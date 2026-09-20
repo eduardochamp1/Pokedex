@@ -83,8 +83,9 @@ export const AV_TOGGLES: {
     id: "timestepSync",
     label: "Passo fixo",
     hint:
-      "Avança em passos de 1/60 s. É o que a barra de velocidade multiplica — " +
-      "desligue só para diagnosticar.",
+      "Avança em passos de 1/60 s e segura o jogo na velocidade certa. " +
+      "Desligado, o jogo acompanha o ritmo do navegador e pode correr mais " +
+      "rápido que o normal. Deixe ligado.",
   },
   {
     id: "showFpsCounter",
