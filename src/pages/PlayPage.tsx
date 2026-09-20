@@ -184,11 +184,18 @@ const PlayPage = () => {
       if (shortcutFor(e, boundKeys)?.kind === "turbo") setTurbo(false);
     };
 
-    window.addEventListener("keydown", onKeyDown);
-    window.addEventListener("keyup", onKeyUp);
+    // Fase de **captura**, e na janela: assim estes dois rodam antes de
+    // qualquer outro ouvinte da página. O core registra os próprios handlers
+    // de teclado (é como o SDL entrega as teclas ao jogo) e, na fase de
+    // borbulhamento, bastaria um deles parar a propagação para o Espaço nunca
+    // chegar aqui — sem deixar rastro nenhum de que sumiu. Na captura isso não
+    // pode acontecer. Só o `preventDefault` atravessa, e é o que queremos: ele
+    // impede que o Espaço acione um botão focado.
+    window.addEventListener("keydown", onKeyDown, { capture: true });
+    window.addEventListener("keyup", onKeyUp, { capture: true });
     return () => {
-      window.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("keydown", onKeyDown, { capture: true });
+      window.removeEventListener("keyup", onKeyUp, { capture: true });
       // Soltar a tecla fora da janela deixaria o turbo preso para sempre.
       setTurbo(false);
     };
