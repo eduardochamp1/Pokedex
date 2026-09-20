@@ -72,6 +72,9 @@ via [mGBA](https://mgba.io) compilado para WebAssembly.
   daquela geração, à região no mapa e à geração na lore
 - **Galeria de capturas** por jogo, com miniatura, data, baixar de novo e
   apagar — antes o PNG ficava no FS para sempre e a cota crescia invisível
+- **Seu time, lido do save** — o save de bateria de Gen 3 é interpretado e o
+  time aparece com as **mesmas cartas** da Pokédex, com apelido e nível. É onde
+  o emulador deixa de ser ilha e vira fonte de dados do site
 - **Gamepad virtual** para toque, **gamepad físico** pela Gamepad API (layout
   standard) e **teclas remapeáveis** — clique numa tecla da legenda e pressione
   a nova. A legenda lê do mesmo mapa que o `bindKey`, então não mente
@@ -240,6 +243,7 @@ A aplicação abre em [http://localhost:3000](http://localhost:3000).
 | `npm run sprites` | Baixa os sprites para `public/sprites/` (idempotente; `--force` rebaixa) |
 | `npm run names:check` | Confere se todo nome usado pelo site resolve para um slug da PokéAPI — a lore, as nove gerações e as 16 dex regionais (precisa de rede) |
 | `npm run gen3:species <rom.gba>` | Regera `src/emulator/saveParse/gen3Species.ts` lendo a tabela de espécies da sua ROM. A ROM não entra no repo nem no bundle |
+| `npm run gen3:save-check "<arquivo.sav>"` | Valida o leitor de save contra um `.sav` de verdade. A suíte usa um save sintético; este é para quem tem um real |
 | `npm run wiki:check` | Confere se todo campo `wiki` aponta para um artigo real da Bulbapedia — sem página inexistente, sem redirect e sem desambiguação (precisa de rede) |
 | `npm run emulator:core` | Copia o core do emulador para `public/emulator/` (roda no predev/prebuild) |
 
@@ -429,6 +433,15 @@ carta na cor do tipo e o dourado reservado a raridade.
   `sSpeciesToNationalPokedexNum`. O localizador acha as duas tabelas pelo
   conteúdo (âncoras Bulbasaur/Celebi/Chimecho), e não por offset fixo, que não
   sobrevive a romhack: a Unbound está repontada para `0x166A98C`.
+- **O formato do save de Gen 3, medido e não lembrado.** São 32 setores de 4096
+  bytes; os 28 primeiros formam dois blocos de 14, e vence o de maior contador.
+  Três coisas só apareceram com um save real na mão: **as seções giram dentro do
+  bloco** (as posições físicas 0..13 carregavam os ids 10,11,12,13,0,…,9, então
+  indexar por posição lê a seção errada); o mGBA **acrescenta 16 bytes** de data
+  e hora depois dos 131072; e `playerPartyCount` está em `0x0234`, confirmado
+  por varredura — há exatamente um u32 entre 1 e 6 nos primeiros 0x400 bytes.
+  `SECTOR_DATA_SIZE` é **3968**, o menor tamanho que valida os 28 checksums;
+  esta fixture não o distingue de 4084, porque o espaço entre os dois é zero.
 - **`FSSync()` rejeita**, e engolir essa rejeição prendia a tela em
   "Carregando…" para sempre. Carregar é fatal e vira `status` de erro; gravar,
   apagar e importar são recuperáveis e viram aviso sem derrubar o jogo.
