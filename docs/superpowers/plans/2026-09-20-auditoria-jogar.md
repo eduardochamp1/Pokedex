@@ -18,7 +18,7 @@
 
 | Fase | O que é | Tarefas | Estado |
 |---|---|---|---|
-| 0 | Bugs confirmados no emulador | 5 | ◐ 2/5 — 0.1 e 0.2 concluídas |
+| 0 | Bugs confirmados no emulador | 5 | ◐ 3/5 — 0.1, 0.2 e 0.3 (menos a limpeza do arquivo) |
 | 1 | `romId.ts` — a pedra angular | 1 | ☐ não iniciada |
 | 2 | Furar a ilha: a barra de três links | 1 | ☐ não iniciada |
 | 3 | Pontes baratas | 4 | ☐ não iniciada |
@@ -213,16 +213,21 @@ arquivo em `saves/`. O dono fica com um arquivo que parece progresso e não é.
 **Verificação:** um save de Gen 3 válido contém a assinatura `0x08012025` no rodapé de cada setor
 de 4096 bytes (offset `0x0FF8` dentro do setor). O arquivo atual não tem nenhuma ocorrência.
 
-- [ ] **Passo 1 — teste que falha primeiro.** Em `src/emulator/useDiskBackup.test.ts` (novo, função
+- [x] **Passo 1 — teste que falha primeiro.** Em `src/emulator/useDiskBackup.test.ts` (novo, função
       pura extraída): `Uint8Array(131072)` todo zero deve ser recusado; um buffer com a assinatura
       em ao menos um setor deve ser aceito.
-- [ ] **Passo 2 — rodar e ver falhar.**
-- [ ] **Passo 3 — corrigir.** Extrair um `hasRealSaveData(bytes)` que, além de `length === 0`,
+- [x] **Passo 2 — rodar e ver falhar.**
+- [x] **Passo 3 — corrigir.** Extrair um `hasRealSaveData(bytes)` que, além de `length === 0`,
       recuse buffer inteiramente zerado. Deixar a checagem de assinatura para a Fase 4 — aqui basta
       "não é só zeros", que é genérico e não depende de formato.
 - [ ] **Passo 4 — limpar o arquivo morto.** Apagar `saves/Pokemon - Emerald.sav` (131072 bytes de
+      **Não feito de propósito.** `saves/` está no `.gitignore` (linha 54), então o arquivo
+      não é rastreado e apagá-lo não teria volta pelo git. Ele é provadamente inútil —
+      conferido byte a byte: 131072 bytes, **nenhum** diferente de zero, **nenhum** setor com
+      a assinatura `0x08012025`. Mas é arquivo no disco do dono, e o próprio passo condiciona
+      a apagá-lo à confirmação dele. O guard novo impede que outro igual apareça.
       zero, sem valor) **depois** de confirmar com o dono que não há nada a perder.
-- [ ] **Passo 5 — commit.** `fix(emulador): nao grava save zerado como se fosse progresso`
+- [x] **Passo 5 — commit.** `fix(emulador): nao grava save zerado como se fosse progresso`
 
 ## Tarefa 0.4 — Erro ao carregar ROM nova apaga os controles do jogo que continua rodando
 

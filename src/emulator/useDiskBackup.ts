@@ -9,6 +9,28 @@ import {
 import type { mGBAEmulator } from "./types";
 
 /**
+ * Ha progresso de verdade nestes bytes?
+ *
+ * O guard antigo testava so `length === 0`, e isso nao pega o caso comum. A
+ * flash de um jogo de Gen 3 e alocada com o tamanho certo — 131072 bytes — e
+ * preenchida de zero antes de o jogo gravar qualquer coisa. Esse buffer passava
+ * pela checagem, virava arquivo em `saves/` e o dono ficava com algo que parece
+ * progresso e nao e. Foi o que aconteceu com o `Pokemon - Emerald.sav` deste
+ * repositorio: 131072 bytes, nenhum diferente de zero.
+ *
+ * A checagem e proposital de gente pobre — "nao e so zeros" — e nao olha
+ * assinatura de formato. Serve para GB, GBC e GBA igual, e nao precisa saber
+ * de qual geracao e o jogo. A validacao por assinatura de setor pertence ao
+ * parsing de save, que e outro assunto.
+ */
+export function hasRealSaveData(
+  data: Uint8Array | undefined | null
+): data is Uint8Array {
+  if (!data || data.length === 0) return false;
+  return data.some((byte) => byte !== 0);
+}
+
+/**
  * Espelho dos saves na pasta `saves/` do projeto.
  *
  * Essa e a garantia forte de durabilidade: o IndexedDB sobrevive a recarregar
@@ -48,9 +70,10 @@ export function useDiskBackup(
       lastBackupRef.current = now;
 
       const data = core.getSave();
-      if (!data || data.length === 0) {
+      if (!hasRealSaveData(data)) {
         // Clique manual sem dado nao pode ser silencioso: alguns jogos (e ROMs
-        // de teste) simplesmente nao tem SRAM de bateria.
+        // de teste) simplesmente nao tem SRAM de bateria, e um jogo que ainda
+        // nao gravou tem a flash alocada e zerada — que nao e progresso.
         if (opts.force) {
           notify(
             "Este jogo ainda não gravou nada — não há save de bateria para copiar."
