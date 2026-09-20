@@ -708,15 +708,28 @@ export function useEmulator() {
    * velocidade é a preferência de quem joga e é gravada — o turbo é um impulso
    * e não pode sobrescrevê-la. Ao soltar, volta para o que a barra diz.
    */
-  const setTurbo = useCallback(
-    (active: boolean) => {
-      coreRef.current?.setFastForwardMultiplier(
-        active ? TURBO_MULTIPLIER : fastForward
-      );
-      setTurboActive(active);
-    },
-    [fastForward]
-  );
+  /**
+   * O valor da barra lido por ref, e nao pelo closure.
+   *
+   * Com `[fastForward]` nas dependencias, a identidade de `setTurbo` mudava a
+   * cada mexida na barra. A PlayPage tem esse `setTurbo` nas dependencias do
+   * efeito de atalhos E o chama na limpeza — entao o React rodava a limpeza
+   * ANTIGA, que devolvia o core ao multiplicador ANTIGO logo depois de
+   * `setFastForward` ter acertado. O rotulo dizia 5x e o jogo rodava em 1x.
+   *
+   * Estavel, o efeito nao e remontado e a limpeza le sempre o valor atual.
+   * Mesmo idioma do `avRef` em useDiagnostics e do `bindingsRef` em
+   * useKeyBindings.
+   */
+  const fastForwardRef = useRef(fastForward);
+  fastForwardRef.current = fastForward;
+
+  const setTurbo = useCallback((active: boolean) => {
+    coreRef.current?.setFastForwardMultiplier(
+      active ? TURBO_MULTIPLIER : fastForwardRef.current
+    );
+    setTurboActive(active);
+  }, []);
 
   /** Pressiona/solta um botão pelo gamepad virtual (toque). */
   const pressButton = useCallback((button: string) => {

@@ -18,7 +18,7 @@
 
 | Fase | O que é | Tarefas | Estado |
 |---|---|---|---|
-| 0 | Bugs confirmados no emulador | 5 | ☐ não iniciada |
+| 0 | Bugs confirmados no emulador | 5 | ◐ 1/5 — 0.1 concluída |
 | 1 | `romId.ts` — a pedra angular | 1 | ☐ não iniciada |
 | 2 | Furar a ilha: a barra de três links | 1 | ☐ não iniciada |
 | 3 | Pontes baratas | 4 | ☐ não iniciada |
@@ -60,6 +60,25 @@ PATH="/c/Program Files/nodejs":$PATH npm run build
 
 **Atribuição nos commits:** siga o padrão dos commits anteriores do repo (autor é o dono;
 `Co-Authored-By` de Claude no rodapé). Não comite arquivos `.claude/`.
+
+### Infraestrutura de teste de hook — já montada pela Tarefa 0.1
+
+As tarefas 0.2 a 0.5 também precisam de teste de hook. O caminho já está aberto,
+e `src/emulator/useEmulator.test.ts` serve de molde. Três coisas custaram tempo
+e não precisam custar de novo:
+
+1. **`jsdom` e `@testing-library/react` já são devDependencies.** O arquivo de
+   teste abre com o docblock `// @vitest-environment jsdom`; o `vitest.config.ts`
+   continua com environment `node` para todo o resto.
+2. **`renderHook` sozinho não monta o core.** A inicialização só passa da guarda
+   `if (!stage) return` (`useEmulator.ts:249`) quando `stageRef` está preso a um
+   elemento real. É preciso um componente sonda que renderize
+   `createElement("div", { ref: emu.stageRef })`.
+3. **O core dublê não pode ter `then`.** Um Proxy que devolve função para
+   qualquer propriedade faz `Promise.resolve(core)` tratá-lo como *thenable*:
+   a promise chama `core.then(resolve)`, o no-op nunca resolve, e o hook fica
+   preso em `{kind:"loading"}` para sempre — sem erro nenhum. O trap tem que
+   devolver `undefined` para `then` e para símbolos.
 
 ### O buraco que explica tudo
 
@@ -117,22 +136,22 @@ diagnosticada e corrigida para o objeto `emu` — só passou batido no `setTurbo
 só. Rótulo diz 5×, jogo continua normal. Confirmação cruzada: segurar e soltar a barra de espaço
 (turbo) — ao soltar, `setTurbo(false)` roda com o `fastForward` atual e só então acelera.
 
-- [ ] **Passo 1 — teste que falha primeiro.** Criar `src/emulator/useEmulator.test.ts`. É o
+- [x] **Passo 1 — teste que falha primeiro.** Criar `src/emulator/useEmulator.test.ts`. É o
       primeiro teste de hook do módulo: precisa de `environment: "jsdom"` só para esse arquivo
       (docblock `// @vitest-environment jsdom` no topo) e de `@testing-library/react`. Se a
       dependência não existir, instale-a como devDependency. O teste monta o hook com um core
       dublê que registra as chamadas de `setFastForwardMultiplier`, muda `fastForward` de 1 para 5,
       e afirma que a **última** chamada recebida foi `5`.
-- [ ] **Passo 2 — rodar e ver falhar.** `npx vitest run src/emulator/useEmulator.test.ts`.
+- [x] **Passo 2 — rodar e ver falhar.** `npx vitest run src/emulator/useEmulator.test.ts`.
       Esperado: última chamada é `1`, não `5`.
-- [ ] **Passo 3 — corrigir.** Tirar `setTurbo` das dependências do efeito e da limpeza. O caminho
+- [x] **Passo 3 — corrigir.** Tirar `setTurbo` das dependências do efeito e da limpeza. O caminho
       limpo é um `useRef` que guarda a função de turbo mais recente, ou mover o desligamento do
       turbo para um `setFastForwardMultiplier` lido de ref. Siga o mesmo raciocínio que o autor já
       documentou nas linhas 131-134 para o objeto `emu`.
-- [ ] **Passo 4 — verificar.** O teste passa; `npm run typecheck` e `npm test` limpos.
-- [ ] **Passo 5 — verificar no navegador.** `npm run dev`, carregar ROM, ligar FPS, mexer na barra.
+- [x] **Passo 4 — verificar.** O teste passa; `npm run typecheck` e `npm test` limpos.
+- [x] **Passo 5 — verificar no navegador.** `npm run dev`, carregar ROM, ligar FPS, mexer na barra.
       A velocidade real tem que acompanhar o rótulo **sem** precisar apertar turbo.
-- [ ] **Passo 6 — commit.** `fix(emulador): barra de velocidade nao tinha efeito`
+- [x] **Passo 6 — commit.** `fix(emulador): barra de velocidade nao tinha efeito`
 
 ## Tarefa 0.2 — `FSSync()` sem catch prende a tela em "Carregando…" para sempre
 
