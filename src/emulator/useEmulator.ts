@@ -209,6 +209,47 @@ function baseDe(
   return info;
 }
 
+/**
+ * Modos de `emscripten_set_main_loop_timing`, que e o que
+ * `setMainLoopTiming(mode, value)` expoe.
+ */
+const EM_TIMING_SETTIMEOUT = 0;
+const EM_TIMING_RAF = 1;
+/** Quadros por segundo de um GBA. E a base que a velocidade multiplica. */
+const FPS_BASE = 60;
+
+/**
+ * Aplica a velocidade no core — de verdade.
+ *
+ * **`setFastForwardMultiplier` sozinho nao acelera o jogo.** Medido no
+ * navegador com Emerald rodando: chamar com 5 muda o valor interno (o
+ * `getFastForwardMultiplier` passa a responder 5), e o laco principal continua
+ * em `mode 1, value 1` — um tick por quadro de animacao, 60 Hz travados. O
+ * multiplicador alcanca o caminho do audio, que reamostra mais rapido, e por
+ * isso a musica acelerava sozinha enquanto a jogabilidade ficava igual.
+ *
+ * Quem manda no ritmo e `setMainLoopTiming`. Em 1x o laco volta para
+ * requestAnimationFrame, que e o caminho suave e casado com a tela. Acima
+ * disso ele vai para setTimeout no intervalo que a velocidade pedir — em 5x,
+ * 1000 / (60 x 5) = 3 ms.
+ *
+ * O multiplicador continua sendo aplicado junto: e ele que faz o audio
+ * acompanhar. Os dois trabalham em conjunto; faltava o segundo.
+ */
+function aplicarVelocidade(
+  core: mGBAEmulator | null | undefined,
+  multiplicador: number
+): void {
+  if (!core) return;
+  core.setFastForwardMultiplier(multiplicador);
+  if (multiplicador <= 1) {
+    core.setMainLoopTiming(EM_TIMING_RAF, 1);
+    return;
+  }
+  const intervalo = Math.max(1, Math.round(1000 / (FPS_BASE * multiplicador)));
+  core.setMainLoopTiming(EM_TIMING_SETTIMEOUT, intervalo);
+}
+
 /** Sufixo comum das mensagens: a cota e a causa provavel, e ela e visivel. */
 const DICA_DE_COTA =
   "O mais provável é a cota do navegador estar cheia — veja “Onde ficam seus saves” no painel ao lado.";
@@ -635,7 +676,7 @@ export function useEmulator() {
       }
       // Volume E velocidade: a barra guardava 5x e o jogo novo entrava em 1x.
       core.setVolume(volume / 100);
-      core.setFastForwardMultiplier(fastForward);
+      aplicarVelocidade(core, fastForward);
       rememberLastRom(flatName);
       setLoadedRom(flatName);
       setStatus({ kind: "running", rom: flatName });
@@ -659,7 +700,7 @@ export function useEmulator() {
       }
       // Volume E velocidade: a barra guardava 5x e o jogo novo entrava em 1x.
       core.setVolume(volume / 100);
-      core.setFastForwardMultiplier(fastForward);
+      aplicarVelocidade(core, fastForward);
       rememberLastRom(fileName);
       setLoadedRom(fileName);
       setStatus({ kind: "running", rom: fileName });
@@ -691,7 +732,7 @@ export function useEmulator() {
         return;
       }
       core.setVolume(volume / 100);
-      core.setFastForwardMultiplier(fastForward);
+      aplicarVelocidade(core, fastForward);
       setLoadedRom(fileName);
       setRomId(identifyRom(lerCabecalho(core, fileName)));
 
@@ -971,7 +1012,7 @@ export function useEmulator() {
   const setFastForward = useCallback((multiplier: number) => {
     setFastForwardState(multiplier);
     rememberFastForward(multiplier);
-    coreRef.current?.setFastForwardMultiplier(multiplier);
+    aplicarVelocidade(coreRef.current, multiplier);
   }, []);
 
   /**
@@ -998,7 +1039,8 @@ export function useEmulator() {
   fastForwardRef.current = fastForward;
 
   const setTurbo = useCallback((active: boolean) => {
-    coreRef.current?.setFastForwardMultiplier(
+    aplicarVelocidade(
+      coreRef.current,
       active ? TURBO_MULTIPLIER : fastForwardRef.current
     );
     setTurboActive(active);

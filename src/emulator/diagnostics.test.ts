@@ -115,14 +115,14 @@ describe("isAvSettings", () => {
 /**
  * Quem manda no ritmo da emulação.
  *
- * Relatado jogando: a barra de velocidade acelerava a música e não o jogo, e na
- * velocidade normal apareciam arrancadas em momentos aleatórios. Os dois
- * sintomas saem do mesmo ajuste — `timestepSync`, que o core traz ligado.
+ * Estes valores são os do core. Já apostei que `timestepSync` era a causa da
+ * barra de velocidade não funcionar — não era, e a medição mostrou que o
+ * problema estava no laço principal. Ver `aplicarVelocidade` no useEmulator.
  */
 describe("ritmo da emulação", () => {
-  it("o ritmo vem do áudio, não de passos discretos", () => {
-    expect(DEFAULT_AV.timestepSync).toBe(false);
-    expect(DEFAULT_AV.audioSync).toBe(true);
+  it("os defaults são os do core", () => {
+    expect(DEFAULT_AV.timestepSync).toBe(true);
+    expect(DEFAULT_AV.audioSync).toBe(false);
   });
 
   /** Preferência gravada antes deste campo existir tem que cair no default. */

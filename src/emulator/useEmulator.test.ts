@@ -16,6 +16,8 @@ import { act, render, waitFor } from "@testing-library/react";
 
 const dublê = vi.hoisted(() => ({
   multiplicadores: [] as number[],
+  /** Chamadas de setMainLoopTiming, que e quem realmente acelera o jogo. */
+  timings: [] as { mode: number; value: number }[],
   /** Liga a rejeição de `FSSync`, que é como a cota cheia se manifesta. */
   syncFalha: false,
   /** Faz `loadGame` recusar, como acontece com ROM corrompida. */
@@ -27,6 +29,9 @@ vi.mock("./core", () => {
   const registrado: Record<string, unknown> = {
     setFastForwardMultiplier: (n: number) => {
       dublê.multiplicadores.push(n);
+    },
+    setMainLoopTiming: (mode: number, value: number) => {
+      dublê.timings.push({ mode, value });
     },
     // A mensagem é a do core de verdade, conferida em public/emulator/mgba.js.
     FSSync: () =>
@@ -106,6 +111,7 @@ async function montar() {
 
 beforeEach(() => {
   multiplicadores.length = 0;
+  dublê.timings.length = 0;
   dublê.syncFalha = false;
   dublê.loadFalha = false;
   window.localStorage.clear();
@@ -273,5 +279,71 @@ describe("useEmulator — ROM nova que falha", () => {
     });
 
     expect(emu.atual.status.kind).toBe("error");
+  });
+});
+
+/**
+ * Quem acelera o jogo é o laço principal, não o multiplicador.
+ *
+ * Relatado jogando: a barra acelerava a música e não a jogabilidade. Medido no
+ * navegador com Emerald rodando — `setFastForwardMultiplier(5)` mudava o valor
+ * interno e `getMainLoopTimingMode/Value` continuavam em `1, 1`, ou seja um
+ * tick por quadro de animação, 60 Hz travados. O multiplicador só alcança o
+ * caminho do áudio, que reamostra mais rápido; daí a música correr sozinha.
+ */
+describe("useEmulator — a velocidade mexe no laço principal", () => {
+  const RAF = 1;
+  const SETTIMEOUT = 0;
+
+  it("1× devolve o laço ao requestAnimationFrame", async () => {
+    const emu = await montar();
+    await act(async () => {
+      emu.atual.setFastForward(1);
+    });
+    expect(dublê.timings.at(-1)).toEqual({ mode: RAF, value: 1 });
+  });
+
+  it("acima de 1× o laço vai para setTimeout no intervalo certo", async () => {
+    const emu = await montar();
+
+    await act(async () => {
+      emu.atual.setFastForward(5);
+    });
+    // 1000 / (60 × 5) = 3,33 -> 3
+    expect(dublê.timings.at(-1)).toEqual({ mode: SETTIMEOUT, value: 3 });
+
+    await act(async () => {
+      emu.atual.setFastForward(2);
+    });
+    // 1000 / (60 × 2) = 8,33 -> 8
+    expect(dublê.timings.at(-1)).toEqual({ mode: SETTIMEOUT, value: 8 });
+  });
+
+  /** É o "segurar espaço" que todo emulador tem, e era o caso do relato. */
+  it("o turbo acelera o laço e devolve ao soltar", async () => {
+    const emu = await montar();
+    await act(async () => {
+      emu.atual.setFastForward(1);
+    });
+
+    await act(async () => {
+      emu.atual.setTurbo(true);
+    });
+    expect(dublê.timings.at(-1)).toEqual({ mode: SETTIMEOUT, value: 3 });
+
+    await act(async () => {
+      emu.atual.setTurbo(false);
+    });
+    expect(dublê.timings.at(-1)).toEqual({ mode: RAF, value: 1 });
+  });
+
+  /** O multiplicador continua indo junto: é ele que faz o áudio acompanhar. */
+  it("o multiplicador continua sendo aplicado", async () => {
+    const emu = await montar();
+    await act(async () => {
+      emu.atual.setFastForward(4);
+    });
+    expect(multiplicadores.at(-1)).toBe(4);
+    expect(dublê.timings.at(-1)?.mode).toBe(SETTIMEOUT);
   });
 });

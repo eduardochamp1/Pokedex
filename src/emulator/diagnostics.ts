@@ -28,32 +28,23 @@ export interface AvSettings {
 }
 
 /**
- * O ritmo sai do audio, e nao de passos fixos.
+ * Os defaults do core, segundo a tipagem publicada.
  *
- * **Nao sao os defaults do core** — sao o oposto deles nos dois primeiros
- * campos, de proposito. O core vem com `timestepSync: true` e
- * `audioSync: false`, e essa combinacao produz dois sintomas que foram
- * relatados jogando:
+ * Ja tentei mexer aqui para resolver a barra de velocidade que acelerava so a
+ * musica, apostando que `timestepSync` era o culpado. **Nao era**, e a medicao
+ * mostrou onde estava: `setFastForwardMultiplier` mudava o valor interno e o
+ * laco principal continuava preso em `requestAnimationFrame`, um tick por
+ * quadro. A correcao ficou em `aplicarVelocidade`, no useEmulator, e estes
+ * valores voltaram para o que o core traz.
  *
- * 1. **a barra de velocidade acelera a musica e nao o jogo.** Com passos
- *    discretos de 1/60 s, a emulacao avanca a mesma quantidade por segundo
- *    independente do multiplicador; o que o multiplicador alcanca e o caminho
- *    do audio, que reamostara mais rapido. Dai a musica correr sozinha;
- * 2. **acelerada aleatoria na velocidade normal.** Passo discreto acumula
- *    quando o laco principal e engasgado — aba em segundo plano, coleta de
- *    lixo, um quadro pesado — e depois roda os passos atrasados de uma vez.
- *
- * Com o ritmo vindo do audio, o core anda na velocidade que o dispositivo de
- * som consome, que e uma base de tempo estavel, e o multiplicador passa a
- * escalar a emulacao inteira.
- *
- * Os dois continuam desligaveis na tela: quem tiver audio problematico pode
- * voltar ao comportamento antigo.
+ * O `timestepSync` continua alcancavel pela tela, que e um ganho que sobrou da
+ * tentativa: ele decide se o core anda em passos fixos de 1/60 s ou por tempo
+ * decorrido, e antes nao havia como experimentar.
  */
 export const DEFAULT_AV: AvSettings = {
-  audioSync: true,
+  audioSync: false,
   videoSync: false,
-  timestepSync: false,
+  timestepSync: true,
   showFpsCounter: false,
 };
 
