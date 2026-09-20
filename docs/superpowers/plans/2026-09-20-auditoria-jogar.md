@@ -18,7 +18,7 @@
 
 | Fase | O que é | Tarefas | Estado |
 |---|---|---|---|
-| 0 | Bugs confirmados no emulador | 5 | ◐ 4/5 — falta a 0.5 |
+| 0 | Bugs confirmados no emulador | 5 | ✅ concluída (menos a limpeza do .sav morto) |
 | 1 | `romId.ts` — a pedra angular | 1 | ☐ não iniciada |
 | 2 | Furar a ilha: a barra de três links | 1 | ☐ não iniciada |
 | 3 | Pontes baratas | 4 | ☐ não iniciada |
@@ -279,15 +279,15 @@ recebem src diferente e são redecodificados pelo navegador — o painel pisca j
 O mesmo custo se repete em "gravar", "regravar", "apagar slot", "capturar agora", "Importar…" e
 "remover da biblioteca", que também chamam `refreshLibrary`.
 
-- [ ] **Passo 1 — separar o que é caro do que é barato.** O tamanho do auto-state pode vir de
+- [x] **Passo 1 — separar o que é caro do que é barato.** O tamanho do auto-state pode vir de
       `FS.stat` em vez de ler o arquivo inteiro. As miniaturas só precisam ser relidas quando o
       slot correspondente muda — não a cada 30 s.
-- [ ] **Passo 2 — implementar.** Um `refreshLibrary({ thumbnails: false })` para o caminho do
+- [x] **Passo 2 — implementar.** Um `refreshLibrary({ thumbnails: false })` para o caminho do
       auto-state, e cache das `data:` URL por (slot, mtime) para manter a identidade da string
       estável entre passagens.
-- [ ] **Passo 3 — verificar no navegador.** `npm run dev`, gravar nos 6 slots, ligar "Mostrar FPS",
+- [x] **Passo 3 — verificar no navegador.** `npm run dev`, gravar nos 6 slots, ligar "Mostrar FPS",
       observar 2 minutos. Sem queda de FPS nem estalo a cada 30 s; o painel não pisca.
-- [ ] **Passo 4 — commit.** `perf(emulador): auto-state deixa de reler estado e 6 miniaturas a cada 30s`
+- [x] **Passo 4 — commit.** `perf(emulador): auto-state deixa de reler estado e 6 miniaturas a cada 30s`
 
 ---
 

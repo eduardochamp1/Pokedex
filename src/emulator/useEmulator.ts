@@ -22,6 +22,7 @@ import {
   type mGBAEmulator,
 } from "./types";
 import {
+  autoStateFileName,
   deleteStateFile,
   readStateEntries,
   slotsForRom,
@@ -96,6 +97,34 @@ async function syncFs(core: mGBAEmulator | undefined): Promise<string | null> {
   }
 }
 
+/**
+ * Tamanho do estado automatico sem ler o arquivo inteiro.
+ *
+ * `getAutoSaveState()` devolve `{ autoSaveStateName, data }` e o painel so usa
+ * `data.length`. Ler o estado inteiro — megabytes, dependendo do jogo — para
+ * descobrir o tamanho dele custava caro, e isso rodava a cada 30 segundos na
+ * mesma thread que desenha o canvas e conduz o core. `FS.stat` responde o mesmo
+ * sem tocar no conteudo.
+ *
+ * O arquivo mora em `/autosave`, e nao no diretorio de estados: o core monta o
+ * nome a partir do caminho do jogo e troca `/data/games/` por `/autosave/`.
+ */
+function autoStateInfo(
+  core: mGBAEmulator,
+  rom: string | undefined
+): { name: string; size: number } | null {
+  if (!rom) return null;
+  const name = autoStateFileName(rom);
+  try {
+    const stat = core.FS.stat(`${core.filePaths().autosave}/${name}`) as {
+      size?: number;
+    };
+    return stat?.size ? { name, size: stat.size } : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Sufixo comum das mensagens: a cota e a causa provavel, e ela e visivel. */
 const DICA_DE_COTA =
   "O mais provável é a cota do navegador estar cheia — veja “Onde ficam seus saves” no painel ao lado.";
@@ -158,31 +187,56 @@ export function useEmulator() {
   const statusRef = useRef(status);
   statusRef.current = status;
 
-  /** Relê do sistema de arquivos do core o que existe guardado. */
-  const refreshLibrary = useCallback(() => {
+  /**
+   * Miniaturas já lidas, por (ROM, slot), com o mtime que as produziu.
+   *
+   * Cada `data:` URL sai de `readStateThumbnail` como **string nova**, mesmo
+   * quando o arquivo não mudou. Os seis `<img src={info.thumbnail}>` recebiam
+   * src diferente a cada passagem e o navegador redecodificava todos — o painel
+   * piscava junto. Com a identidade estável, só o slot cujo mtime mudou é
+   * relido e recodificado; os outros devolvem a mesma string de antes.
+   */
+  const thumbCacheRef = useRef(
+    new Map<string, { modified?: number; url?: string }>()
+  );
+
+  /**
+   * Relê do sistema de arquivos do core o que existe guardado.
+   *
+   * `opts.roms` existe por causa do callback de 30 s: a captura automática muda
+   * só o estado automático, mas disparava a releitura inteira — lista de ROMs
+   * com um `stat` por arquivo e lista de saves — sem nada ter mudado nelas.
+   */
+  const refreshLibrary = useCallback((opts: { roms?: boolean } = {}) => {
+    const { roms: relerRoms = true } = opts;
     const core = coreRef.current;
     if (!core) return;
-    try {
-      const gamePath = core.filePaths().gamePath;
-      setRoms(
-        core
-          .listRoms()
-          .filter(isSupportedRom)
-          .map((fileName) => {
-            let size: number | undefined;
-            try {
-              size = (core.FS.stat(`${gamePath}/${fileName}`) as { size?: number })
-                .size;
-            } catch {
-              // sem stat: a lista continua valendo, só sem o tamanho
-            }
-            return { fileName, origin: "upload" as const, size };
-          })
-      );
-      // listSaves devolve o diretório cru, com as entradas "." e ".." do FS.
-      setSaves(core.listSaves().filter((name) => name !== "." && name !== ".."));
-    } catch {
-      // FS ainda nao pronto — a proxima chamada resolve
+    if (relerRoms) {
+      try {
+        const gamePath = core.filePaths().gamePath;
+        setRoms(
+          core
+            .listRoms()
+            .filter(isSupportedRom)
+            .map((fileName) => {
+              let size: number | undefined;
+              try {
+                size = (
+                  core.FS.stat(`${gamePath}/${fileName}`) as { size?: number }
+                ).size;
+              } catch {
+                // sem stat: a lista continua valendo, só sem o tamanho
+              }
+              return { fileName, origin: "upload" as const, size };
+            })
+        );
+        // listSaves devolve o diretório cru, com as entradas "." e ".." do FS.
+        setSaves(
+          core.listSaves().filter((name) => name !== "." && name !== "..")
+        );
+      } catch {
+        // FS ainda nao pronto — a proxima chamada resolve
+      }
     }
     // Os slots saem do diretório de estados, e a ROM corrente vem do módulo e
     // não do state: refreshLibrary é chamado de dentro de callbacks que foram
@@ -191,20 +245,21 @@ export function useEmulator() {
     // slotsForRom continua sendo só o cruzamento, testável sem core.
     const rom = getLoadedRom() ?? undefined;
     setSlots(
-      slotsForRom(readStateEntries(core), rom).map((slot) =>
-        slot.exists && rom
-          ? { ...slot, thumbnail: readStateThumbnail(core, rom, slot.slot) }
-          : slot
-      )
+      slotsForRom(readStateEntries(core), rom).map((slot) => {
+        if (!slot.exists || !rom) return slot;
+        const chave = `${rom}|${slot.slot}`;
+        const cache = thumbCacheRef.current.get(chave);
+        // Mesmo mtime, mesma imagem: devolve a string de antes, com a mesma
+        // identidade, em vez de reler o PNG e recodificar em base64.
+        if (cache && cache.modified === slot.modified) {
+          return { ...slot, thumbnail: cache.url };
+        }
+        const url = readStateThumbnail(core, rom, slot.slot);
+        thumbCacheRef.current.set(chave, { modified: slot.modified, url });
+        return { ...slot, thumbnail: url };
+      })
     );
-    try {
-      const auto = core.getAutoSaveState();
-      setAutoState(
-        auto ? { name: auto.autoSaveStateName, size: auto.data.length } : null
-      );
-    } catch {
-      setAutoState(null);
-    }
+    setAutoState(autoStateInfo(core, rom));
   }, []);
 
   // Pede armazenamento persistente e mede o uso, para a UI poder dizer a
@@ -305,7 +360,8 @@ export function useEmulator() {
           },
           // A cada captura automática (30 s) o painel de estados se atualiza —
           // senão "Continuar de onde parou" só apareceria ao trocar de jogo.
-          autoSaveStateCapturedCallback: () => refreshLibrary(),
+          // Sem reler a biblioteca: a captura não mexe em ROM nem em save.
+          autoSaveStateCapturedCallback: () => refreshLibrary({ roms: false }),
         });
         // Bindings explícitos: a legenda da UI lê do mesmo mapa.
         attachBindings(core);
