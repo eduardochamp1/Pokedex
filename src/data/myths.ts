@@ -86,7 +86,7 @@ export const MYTHS: Myth[] = [
   },
   {
     id: "mirage-island",
-    wiki: "Mirage Island",
+    wiki: "Mirage Island (Generation III)",
     title: "Mirage Island — a ilha que só aparece por instantes",
     region: "Hoenn",
     summary:

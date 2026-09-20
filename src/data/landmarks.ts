@@ -42,7 +42,7 @@ export const LANDMARKS: Landmark[] = [
     kind: "ilha",
     wiki: "Sevii Islands",
     summary:
-      "Arquipélago de nove ilhas a sudeste de Kanto, introduzido em FireRed & LeafGreen. Tem Pokédex própria, ruínas com escrita Unown e as Icefall e Rocket Warehouse — onde a Team Rocket tentou se reorganizar depois da queda de Giovanni.",
+      "Arquipélago de nove ilhas ao sul de Kanto, introduzido em FireRed & LeafGreen. As quatro primeiras abrem cedo; o resto só depois da Pokédex Nacional. Tem ruínas com escrita Unown, a Icefall Cave e o Rocket Warehouse — onde a Team Rocket tentou se reorganizar depois da queda de Giovanni.",
     pokemons: ["moltres", "lugia", "ho-oh"],
   },
   {
@@ -92,7 +92,7 @@ export const LANDMARKS: Landmark[] = [
     kind: "floresta",
     wiki: "Viridian Forest",
     summary:
-      "Labirinto natural entre Viridian e Pewter, tratado no anime como um lugar em que se entra e não se sabe sair. É onde a maioria dos treinadores de Kanto captura seu primeiro pokémon — e onde Ash pegou Caterpie e Pikachu enfrentou os Spearow.",
+      "Labirinto natural entre Viridian e Pewter, tratado no anime como um lugar em que se entra e não se sabe sair. É onde a maioria dos treinadores de Kanto captura seu primeiro pokémon — e onde Ash pegou seu Caterpie.",
     pokemons: ["pikachu", "caterpie", "weedle", "pidgey"],
   },
   {
@@ -103,7 +103,7 @@ export const LANDMARKS: Landmark[] = [
     wiki: "Silph Co.",
     summary:
       "Sede corporativa de onze andares em Saffron City, maior fabricante de pokébolas do mundo. Foi ocupada pela Team Rocket, que queria o protótipo da Master Ball. O prédio inteiro é um quebra-cabeça de teletransportadores — e Giovanni espera no último andar.",
-    pokemons: ["lapras", "mewtwo"],
+    pokemons: ["lapras", "kangaskhan", "rhyhorn"],
   },
   {
     id: "indigo-plateau",
@@ -122,7 +122,7 @@ export const LANDMARKS: Landmark[] = [
     kind: "marco",
     wiki: "Kanto Power Plant",
     summary:
-      "Usina desativada a leste de Cerulean, tomada por pokémon elétricos que se alimentam da corrente residual. Zapdos faz ninho lá dentro. Em Gen II, a usina volta a operar — e a peça roubada de seu gerador é o gancho para o arco da Radio Tower.",
+      "Usina desativada a leste de Cerulean, tomada por pokémon elétricos que se alimentam da corrente residual. Zapdos faz ninho lá dentro. Em Gen II ela volta a operar para alimentar o Magnet Train — e a peça roubada do gerador é o que trava a linha até o jogador recuperá-la.",
     pokemons: ["zapdos", "electabuzz", "magnemite", "voltorb"],
   },
   {
@@ -154,7 +154,7 @@ export const LANDMARKS: Landmark[] = [
     kind: "torre",
     wiki: "Bell Tower",
     summary:
-      "Torre de nove andares em Ecruteak onde Ho-Oh pousava. Sobreviveu ao incêndio que consumiu sua gêmea, a Brass Tower, há cento e cinquenta anos. Levando a Rainbow Wing ao topo, Ho-Oh desce — o único legendário da série que aparece por convite, não por emboscada.",
+      "Torre de dez andares em Ecruteak onde Ho-Oh pousava. Sobreviveu ao incêndio que consumiu sua gêmea, a Brass Tower, há cento e cinquenta anos. Levando a Rainbow Wing ao topo, Ho-Oh desce — o único legendário da série que aparece por convite, não por emboscada.",
     pokemons: ["ho-oh", "murkrow", "gastly"],
   },
   {
@@ -174,7 +174,7 @@ export const LANDMARKS: Landmark[] = [
     kind: "torre",
     wiki: "Sprout Tower",
     summary:
-      "Torre de Violet City construída em torno de um Bellsprout gigante de cem anos. O pilar central oscila sem parar, absorvendo terremotos. Os monges que a mantêm ensinam que pokémon e humano crescem na mesma direção — devagar, e para cima.",
+      "Pagode de Violet City com mais de trinta metros, sustentado por um pilar central que a lenda diz ter sido feito de um Bellsprout dessa mesma altura. O pilar oscila sem parar, absorvendo terremotos. Os monges que a mantêm ensinam que pokémon e humano crescem na mesma direção — devagar, e para cima.",
     pokemons: ["bellsprout", "hoothoot", "rattata"],
   },
   {
@@ -184,7 +184,7 @@ export const LANDMARKS: Landmark[] = [
     kind: "floresta",
     wiki: "Ilex Forest",
     summary:
-      "Floresta densa a oeste de Azalea, guardada por um santuário dedicado ao protetor do bosque — Celebi. É onde a GS Ball deveria ser usada, e no anime é o lugar por onde Celebi viaja no tempo. Sem o Farfetch'd fugitivo, não se atravessa.",
+      "Floresta densa a oeste de Azalea, guardada por um santuário dedicado ao protetor do bosque — Celebi. É onde a GS Ball deveria ser usada, e em HeartGold & SoulSilver é o santuário que manda o jogador de volta no tempo para enfrentar Giovanni. Sem o Farfetch'd fugitivo, não se atravessa.",
     pokemons: ["celebi", "farfetchd", "paras", "oddish"],
   },
   {
@@ -246,7 +246,7 @@ export const LANDMARKS: Landmark[] = [
     kind: "caverna",
     wiki: "Cave of Origin",
     summary:
-      "Caverna sob Sootopolis, tratada pelos moradores como o ponto onde a vida em Hoenn começou. Em Emerald é onde Groudon ou Kyogre se recolhe; em Omega Ruby & Alpha Sapphire, é onde a Primal Reversion acontece. O interior não tem pokémon selvagem nenhum.",
+      "Caverna sob Sootopolis, tratada pelos moradores como o ponto onde a vida em Hoenn começou. Em Ruby & Sapphire é onde Groudon ou Kyogre é encontrado, e em Omega Ruby & Alpha Sapphire onde a Primal Reversion acontece. Em Emerald não guarda legendário nenhum: é onde Wallace discute o paradeiro de Rayquaza. O interior não tem pokémon selvagem.",
     pokemons: ["groudon", "kyogre"],
   },
   {
@@ -274,7 +274,7 @@ export const LANDMARKS: Landmark[] = [
     name: "Ilha Miragem",
     regionId: "hoenn",
     kind: "ilha",
-    wiki: "Mirage Island",
+    wiki: "Mirage Island (Generation III)",
     summary:
       "Ilha que aparece na costa de Route 130 com chance de 1 em 65.536 por dia, comparando um valor oculto do save com um número aleatório. Um ancião de Pacifidlog passa o dia olhando o mar esperando vê-la. Guarda os Liechi Berry e Wynaut em profusão.",
     pokemons: ["wynaut", "wobbuffet"],
@@ -348,7 +348,7 @@ export const LANDMARKS: Landmark[] = [
     kind: "ruina",
     wiki: "Snowpoint Temple",
     summary:
-      "Templo de gelo de cinco andares sob Snowpoint City, onde os antigos selaram Regigigas. O selo só cede a quem trouxer os três Regis de Hoenn no time — o jogo exige que o jogador tenha resolvido uma região inteira antes.",
+      "Templo de gelo de seis andares — um térreo e cinco subsolos — sob Snowpoint City, onde os antigos selaram Regigigas. O selo só cede a quem trouxer os três Regis de Hoenn no time — o jogo exige que o jogador tenha resolvido uma região inteira antes.",
     pokemons: ["regigigas", "regirock", "regice", "registeel"],
   },
   {
@@ -368,7 +368,7 @@ export const LANDMARKS: Landmark[] = [
     kind: "lago",
     wiki: "Lake Verity",
     summary:
-      "Lago perto de Twinleaf onde vive Uxie, o Ser do Conhecimento. Os três lagos de Sinnoh formam um triângulo perfeito no mapa e nasceram, segundo o mito, do mesmo ovo que gerou os três espíritos.",
+      "Lago perto de Twinleaf onde vive Mesprit, o Ser da Emoção. Os três lagos de Sinnoh formam um triângulo no mapa, e o mito conta que os três espíritos que os habitam nasceram de um mesmo ovo.",
     pokemons: ["mesprit", "starly", "magikarp"],
   },
   {
@@ -388,7 +388,7 @@ export const LANDMARKS: Landmark[] = [
     kind: "lago",
     wiki: "Lake Acuity",
     summary:
-      "Lago congelado ao norte, onde habita Mesprit, o Ser da Emoção. É também o único ponto da história em que o rival do jogador perde uma batalha de forma decisiva — e o jogo se dá o trabalho de mostrar isso.",
+      "Lago congelado ao norte, onde habita Uxie, o Ser do Conhecimento. É também onde a Team Galactic derrota o rival do jogador — o jogo se dá o trabalho de mostrar a derrota, em vez de só mencioná-la.",
     pokemons: ["uxie", "sneasel", "snorunt"],
   },
   {
@@ -438,7 +438,7 @@ export const LANDMARKS: Landmark[] = [
     kind: "ruina",
     wiki: "Solaceon Ruins",
     summary:
-      "Rede subterrânea de galerias onde vivem os Unown de Sinnoh, com paredes cobertas de sua escrita. Reunir formas específicas revela mensagens; encontrar todas as 28 abre a câmara final. É o eco sinnohano das Ruínas de Alph.",
+      "Rede subterrânea de galerias onde vivem os Unown de Sinnoh, com paredes cobertas de sua escrita. Ver 26 formas diferentes faz o Ruin Maniac terminar o túnel que liga à Route 214 — e só então aparecem as formas \"!\" e \"?\". É o eco sinnohano das Ruínas de Alph.",
     pokemons: ["unown"],
   },
   {
@@ -448,7 +448,7 @@ export const LANDMARKS: Landmark[] = [
     kind: "ruina",
     wiki: "Sinjoh Ruins",
     summary:
-      "Sítio isolado que só se alcança levando um Arceus até uma casa em Johto. Lá, Arceus cria diante do jogador um ovo de Dialga, Palkia ou Giratina — o único momento em toda a franquia em que se assiste a um ato de criação divina.",
+      "Sítio isolado que só se alcança levando um Arceus como companheiro até as Ruínas de Alph, onde os Unown abrem a passagem. Lá, Arceus cria diante do jogador um ovo de Dialga, Palkia ou Giratina — o único momento em toda a franquia em que se assiste a um ato de criação divina.",
     pokemons: ["arceus", "dialga", "palkia", "giratina"],
   },
 
@@ -460,7 +460,7 @@ export const LANDMARKS: Landmark[] = [
     kind: "torre",
     wiki: "Dragonspiral Tower",
     summary:
-      "A construção mais antiga de Unova, onde o Dragão Original foi criado e depois partido em dois. É aqui que a Light Stone ou a Dark Stone desperta, e onde a Team Plasma leva Kyurem para reconstituir o dragão à força.",
+      "A construção mais antiga de Unova — ninguém sabe quem a ergueu, nem quando. É aqui que a Light Stone ou a Dark Stone desperta, e aonde a Team Plasma leva Kyurem para reconstituir à força o dragão que um dia foi partido em dois.",
     pokemons: ["reshiram", "zekrom", "kyurem", "druddigon"],
   },
   {
@@ -470,7 +470,7 @@ export const LANDMARKS: Landmark[] = [
     kind: "ruina",
     wiki: "Relic Castle",
     summary:
-      "Castelo soterrado pelo Desert Resort, cujos andares descem por areia movediça — quem cai não volta subindo. No fundo há uma câmara com Volcarona. Em Black 2 & White 2 é o esconderijo dos Plasma dissidentes.",
+      "Castelo soterrado pelo Desert Resort, cujos andares descem por areia movediça — quem cai não volta subindo. No fundo há uma câmara com Volcarona, e em Black & White é onde se encontra Ryoku, um dos Sete Sábios da Team Plasma. Em Black 2 & White 2 a areia fecha o miolo: sobram os dois primeiros andares e a sala de Volcarona, esta pela Relic Passage.",
     pokemons: ["volcarona", "darmanitan", "sandile", "yamask"],
   },
   {
@@ -490,7 +490,7 @@ export const LANDMARKS: Landmark[] = [
     kind: "ruina",
     wiki: "Abyssal Ruins",
     summary:
-      "Ruínas no fundo do mar de Undella, exploráveis só com Dive e com limite de passos — passar do limite expulsa o jogador. As paredes contam, em Braille, a história de um povo que afundou junto com sua cidade.",
+      "Ruínas no fundo do mar de Undella, exploráveis só com Dive e com limite de passos — passar do limite expulsa o jogador. As paredes trazem uma escrita cifrada que só se lê com os documentos deixados por Ghetsis, e mesmo decifrada ainda precisa ser lida de trás para frente.",
     pokemons: ["relicanth", "frillish", "jellicent"],
   },
   {
@@ -572,7 +572,7 @@ export const LANDMARKS: Landmark[] = [
     kind: "floresta",
     wiki: "Pokémon Village",
     summary:
-      "Clareira escondida atrás do Winding Woods onde vivem pokémon abandonados por seus treinadores. Eles atacam humanos por desconfiança. É o lugar mais melancólico de Kalos e o único ponto do mapa em que se encontra Ditto em grupo.",
+      "Clareira escondida atrás do Winding Woods onde vivem pokémon abandonados por seus treinadores. Eles atacam humanos por desconfiança. É o lugar mais melancólico de Kalos — e é entre as flores daqui que se encontra Ditto.",
     pokemons: ["ditto", "amoonguss", "sudowoodo"],
   },
   {
@@ -582,8 +582,8 @@ export const LANDMARKS: Landmark[] = [
     kind: "caverna",
     wiki: "Sea Spirit's Den",
     summary:
-      "Gruta marinha ao fim da Azure Bay onde Lugia aparece — em Kalos, e não em Johto. Só acessível depois de completar a Pokédex regional, e só quando o tempo abre. Um dos poucos cameos legendários fora da região de origem.",
-    pokemons: ["lugia"],
+      "Gruta pequena no norte da Azure Bay. Um dos três pássaros lendários aparece aqui depois que o jogador cruza onze vezes com ele vagando por Kalos — derrotado, volta ao ninho; se o jogador fugir, volta a vagar. O nome da gruta alude a Lugia, líder dos pássaros no anime, mas Lugia não está aqui.",
+    pokemons: ["articuno", "zapdos", "moltres"],
   },
   {
     id: "lost-hotel",
@@ -624,7 +624,7 @@ export const LANDMARKS: Landmark[] = [
     kind: "ilha",
     wiki: "Ula'ula Island",
     summary:
-      "Maior ilha de Alola, de Tapu Bulu e do Kahuna Nanu — que é, ao mesmo tempo, policial e ex-membro da Team Skull. Tem o Po Town tomado pela gangue e o Aether House, o orfanato de pokémon abandonados.",
+      "Maior ilha de Alola, de Tapu Bulu e do Kahuna Nanu — ex-membro da Polícia Internacional e antigo superior de Looker, que hoje deixa a Team Skull em paz. Tem o Po Town tomado pela gangue e o Aether House, o orfanato de pokémon abandonados.",
     pokemons: ["tapu-bulu", "mimikyu", "sandygast"],
   },
   {
@@ -654,7 +654,7 @@ export const LANDMARKS: Landmark[] = [
     kind: "ruina",
     wiki: "Ruins of Conflict",
     summary:
-      "Quatro santuários, um por ilha, cada um abrigando seu Tapu. Os quatro guardiões brigaram entre si no passado — o nome do primeiro santuário registra isso. Hoje protegem suas ilhas separadamente e não se falam.",
+      "Quatro santuários, um por ilha, cada um com o nome de um conceito e um guardião dentro: Conflito e Tapu Koko em Melemele, Vida e Tapu Lele em Akala, Abundância e Tapu Bulu em Ula'ula, Esperança e Tapu Fini em Poni. O primeiro fica ao norte da Mahalo Trail.",
     pokemons: ["tapu-koko", "tapu-lele", "tapu-bulu", "tapu-fini"],
   },
   {
@@ -684,7 +684,7 @@ export const LANDMARKS: Landmark[] = [
     kind: "ilha",
     wiki: "Exeggutor Island",
     summary:
-      "Ilhota ao largo de Akala coberta de Alolan Exeggutor — a forma regional de pescoço absurdamente longo que existe porque o sol de Alola nunca para. É uma piada visual do jogo levada a sério como bioma.",
+      "Ilhota ao largo de Poni, declarada reserva natural, coberta de Alolan Exeggutor — a forma regional de pescoço absurdamente longo que existe porque o sol de Alola nunca para. É uma piada visual do jogo levada a sério como bioma.",
     pokemons: ["exeggutor", "exeggcute", "pinsir"],
   },
   {
@@ -726,7 +726,7 @@ export const LANDMARKS: Landmark[] = [
     kind: "marco",
     wiki: "Hammerlocke",
     summary:
-      "Cidade fortificada em torno de um castelo medieval, sede da Macro Cosmos e do maior estádio de Galar. No museu do castelo ficam expostas a Rusted Sword e a Rusted Shield, tratadas como decoração até deixarem de ser.",
+      "Cidade fortificada em torno de um castelo medieval. O estádio é o maior prédio da cidade e esconde a Energy Plant da Macro Cosmos, a um elevador do saguão. No museu do castelo ficam expostas a Rusted Sword e a Rusted Shield, tratadas como decoração até deixarem de ser.",
     pokemons: ["duraludon", "dragapult"],
   },
   {
@@ -756,7 +756,7 @@ export const LANDMARKS: Landmark[] = [
     kind: "marco",
     wiki: "Freezington",
     summary:
-      "Vila minúscula na Crown Tundra que cultua Calyrex como o rei que fez a colheita prosperar. A estátua na praça mostra o rei montado — e falta o cavalo. Restaurar Calyrex é, literalmente, remontar a estátua.",
+      "Vila minúscula na Crown Tundra que cultua Calyrex como o Rei das Colheitas Fartas. No centro da praça há uma estátua dele, quebrada — e devolver a Calyrex o que ele perdeu passa, literalmente, por consertá-la.",
     pokemons: ["calyrex", "glastrier", "spectrier"],
   },
 
@@ -788,7 +788,7 @@ export const LANDMARKS: Landmark[] = [
     kind: "montanha",
     wiki: "Glaseado Mountain",
     summary:
-      "Cordilheira nevada que atravessa o norte de Paldea, com o Ginásio de Gelo de Grusha no topo. É o único ponto do mapa aberto em que a altitude muda a fauna de forma abrupta — e onde o Titan Orthworm cava.",
+      "Cordilheira nevada que atravessa o norte de Paldea, com o Ginásio de Gelo de Grusha no topo. É onde a altitude vira a fauna de forma mais abrupta no mapa aberto: Cetitan e Cryogonal aparecem assim que a neve começa.",
     pokemons: ["cetitan", "frigibax", "cryogonal"],
   },
   {
@@ -804,7 +804,7 @@ export const LANDMARKS: Landmark[] = [
   {
     id: "blueberry-academy",
     name: "Academia Blueberry",
-    regionId: "paldea",
+    regionId: "unova",
     kind: "laboratorio",
     wiki: "Blueberry Academy",
     summary:

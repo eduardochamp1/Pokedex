@@ -374,7 +374,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
-    wiki: "Pokémon Mansion",
+    wiki: "Pokémon Mansion (Kanto)",
     title: "Cinnabar Mansion — o nascimento de Mewtwo",
     body:
       "Na mansão abandonada de Cinnabar Island, diários encontrados por Red revelam a criação de Mewtwo. O dr. Fuji, cientista chefe, tentava clonar sua filha morta usando DNA de Mew. Mewtwo destruiu o laboratório antes de fugir.",
@@ -422,7 +422,7 @@ export const LORE_EVENTS: LoreEvent[] = [
   },
   {
     era: "Reinos humanos",
-    wiki: "Battle Frontier",
+    wiki: "Battle Frontier (Generation III)",
     title: "Battle Frontier — o desafio pós-Champion",
     body:
       "Além da Elite Four, o Battle Frontier oferecia sete Frontier Brains e regras cada vez mais brutais. Brandon (Regirock/Regice/Registeel), Anabel (Alakazam/Snorlax/Entei), Palmer (Rhyperior/Milotic/Dragonite) — os brains eram semi-lendários entre treinadores.",

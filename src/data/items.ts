@@ -384,7 +384,7 @@ export const ITEMS: ItemLore[] = [
     category: "chave",
     apiSlug: "secret-key",
     debut: "Platinum (2008)",
-    wiki: "Secret Key",
+    wiki: "Secret Key (Sinnoh)",
     summary:
       "Chave de evento que destranca uma sala nos fundos do Team Galactic HQ em Eterna. Lá dentro há eletrodomésticos que permitem a Rotom possuir cada um deles — as cinco formas alternativas do pokémon-fantasma elétrico.",
     pokemons: ["rotom"],

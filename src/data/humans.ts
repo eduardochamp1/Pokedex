@@ -241,7 +241,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
     name: "Red",
     category: "champion",
     color: "#dc0a2d",
-    wiki: "Red",
+    wiki: "Red (game)",
     role: "Champion silencioso de Kanto",
     region: "Kanto",
     summary:
@@ -252,7 +252,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
     name: "Blue Oak",
     category: "champion",
     color: "#3a6cb0",
-    wiki: "Blue",
+    wiki: "Blue (game)",
     role: "Ex-Champion, neto do Prof. Oak",
     region: "Kanto",
     summary:
@@ -263,7 +263,7 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
     name: "Silver",
     category: "champion",
     color: "#a1a1a6",
-    wiki: "Silver",
+    wiki: "Silver (game)",
     role: "Rival de Johto, filho de Giovanni",
     region: "Johto",
     summary:

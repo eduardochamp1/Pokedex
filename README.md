@@ -233,6 +233,7 @@ A aplicação abre em [http://localhost:3000](http://localhost:3000).
 | `npm run test:watch` | Vitest em watch |
 | `npm run sprites` | Baixa os sprites para `public/sprites/` (idempotente; `--force` rebaixa) |
 | `npm run names:check` | Confere se todo nome usado pelo site resolve para um slug da PokéAPI — a lore, as nove gerações e as 16 dex regionais (precisa de rede) |
+| `npm run wiki:check` | Confere se todo campo `wiki` aponta para um artigo real da Bulbapedia — sem página inexistente, sem redirect e sem desambiguação (precisa de rede) |
 | `npm run emulator:core` | Copia o core do emulador para `public/emulator/` (roda no predev/prebuild) |
 
 > **Deploy:** é uma SPA com `BrowserRouter`. O host precisa reescrever qualquer
@@ -394,7 +395,8 @@ carta na cor do tipo e o dourado reservado a raridade.
 - **O artwork grande não é local**: 475px × 1.351 daria ~176 MB. Ele continua saindo do objeto `Pokemon` que a PokéAPI já devolve nas telas que buscam o detalhe (card do grid, hero, sprite viewer).
 - **Imagens de personagens, regiões e organizações**: não vêm de wiki. O Bulbapedia bloqueia hotlink (`archives.bulbagarden.net` responde 403) e a arte é propriedade da Nintendo/Game Freak. Não existe retrato de treinador em fonte que o projeto possa usar: `PokeAPI/sprites` serve `pokemon`, `items`, `badges` e `types`, e nada de treinador. Então a ilustração dessas seções é SVG gerado no próprio projeto (`LoreArt.tsx`), e a wiki entra como **fonte citada**.
 - **A aba de Humanos ilustra pelo time**: cada verbete mostra os sprites dos pokémon da pessoa, que são imagem real de jogo e já estão em `public/sprites/`. O primeiro da lista é o parceiro de assinatura e aparece maior. Antes havia um monograma SVG com as iniciais no lugar — que não dizia nada e ainda colidia: o `id` do gradiente saía das iniciais, e `hb-L` era declarado quatro vezes (Lysandre, Lusamine, Leon, Lillie), então os quatro pintavam com o vermelho do primeiro.
-- **Fontes**: cada verbete curado tem um campo `wiki` com o título exato da página na Bulbapedia. Os ~250 títulos usados foram validados em lote via API do MediaWiki — nenhum aponta para página inexistente. O texto do site é resumo próprio, não cópia.
+- **Fontes**: cada verbete curado tem um campo `wiki` com o título exato da página na Bulbapedia, validado por `npm run wiki:check`. O texto do site é resumo próprio, não cópia.
+- **Título que existe não é título que serve**: a validação cobre três defeitos, e o terceiro passou despercebido por meses. Página inexistente é óbvia; redirect funciona hoje e quebra quando a wiki reorganiza; **página de desambiguação** existe, não é redirect, e mesmo assim não é fonte de nada — abre numa lista de "você quis dizer". Eram sete: `Red`, `Blue`, `Silver`, `Secret Key`, `Battle Frontier`, `Pokémon Mansion` e `Mirage Island`. Cada uma foi resolvida pelo que o próprio verbete descreve — a chave do Rotom é a de Sinnoh, a mansão dos diários do dr. Fuji é a de Kanto, o Frontier de sete Brains é o de Hoenn.
 - **Cache**: queries têm `staleTime` de 5–60 min, com `queryKey` compartilhada entre detail, evoluções e formas.
 - **Aborts**: todos os fetches recebem `AbortSignal` — trocar de página cancela requests pendentes.
 - **Erros**: `fetchJson` devolve `null` só em 404; qualquer outra falha propaga, para a UI distinguir "não existe" de "não deu para consultar".
