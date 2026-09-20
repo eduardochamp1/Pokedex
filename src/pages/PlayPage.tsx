@@ -24,6 +24,7 @@ import { rewindSeconds } from "../emulator/capture";
 import { useDisplay } from "../emulator/useDisplay";
 import { formatBytes } from "../emulator/storage";
 import ScreenshotThumb from "../components/ScreenshotThumb";
+import PlayTeam from "../components/PlayTeam";
 
 const GROUPS: KeyBinding["group"][] = [
   "direcional",
@@ -577,6 +578,10 @@ const PlayPage = () => {
               </p>
             </section>
           )}
+
+          {/* O save vira fonte de dados do site: os ids nacionais saem
+              dele e entram no mesmo hook que a grade usa. */}
+          <PlayTeam team={emu.team} lido={emu.teamLido} />
 
           {/* A captura virava download e sumia — mas o PNG ficava no FS e nada
               nunca o apagava, então a cota crescia sozinha e invisível. Aqui

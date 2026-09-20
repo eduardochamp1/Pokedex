@@ -38,6 +38,7 @@ import {
   toDataUrl,
 } from "./capture";
 import { GBA_HEADER_BYTES, identifyRom, type RomId } from "./romId";
+import { parseGen3Save, type Gen3PartyMember } from "./saveParse/gen3";
 import { TURBO_MULTIPLIER } from "./shortcuts";
 import { useDiagnostics } from "./useDiagnostics";
 import { useDiskBackup } from "./useDiskBackup";
@@ -279,6 +280,8 @@ export function useEmulator() {
   >(null);
   /** Mesma razão: a inicialização roda uma vez e precisa da versão atual. */
   const resumeLastRomRef = useRef<((rom: string) => void) | null>(null);
+  /** Mesma razao do backup: o callback do core e registrado uma vez so. */
+  const refreshTeamRef = useRef<(() => void) | null>(null);
   /**
    * O status corrente para a limpeza ler. O efeito de inicialização tem deps
    * vazias, então o `status` que ele fecharia é o da primeira renderização.
@@ -388,6 +391,7 @@ export function useEmulator() {
     backupToDiskRef.current = backupToDisk;
   }, [backupToDisk]);
 
+
   /**
    * Rele a pasta roms/. Exposto porque o manifesto e lido no carregamento —
    * sem isso, largar uma ROM nova na pasta nao mostra nada e parece defeito.
@@ -455,6 +459,9 @@ export function useEmulator() {
             core.FSSync().catch(() => undefined);
             const rom = getLoadedRom();
             if (rom) void backupToDiskRef.current?.(rom);
+            // O time so muda quando o jogo grava — e o core avisa exatamente
+            // aqui, entao nao ha o que sondar em intervalo.
+            refreshTeamRef.current?.();
           },
           coreCrashedCallback: () => {
             setStatus({
@@ -795,6 +802,8 @@ export function useEmulator() {
 
   const reset = useCallback(() => {
     coreRef.current?.quickReload();
+    // Reiniciar relê a flash: o time pode ter mudado se o save veio de fora.
+    refreshTeamRef.current?.();
     setNotice("Jogo reiniciado.");
   }, []);
 
@@ -1103,6 +1112,52 @@ export function useEmulator() {
   );
 
   /**
+   * O time do jogador, lido do save de bateria.
+   *
+   * `null` enquanto não há jogo, e `[]` quando há save mas nenhum pokémon — os
+   * dois casos são diferentes na tela. Romhack e jogo que não seja de Gen 3
+   * simplesmente não abrem: o painel diz isso em uma frase, e nunca fica num
+   * carregando eterno.
+   */
+  const [team, setTeam] = useState<Gen3PartyMember[] | null>(null);
+  const [teamLido, setTeamLido] = useState(false);
+
+  const refreshTeam = useCallback(() => {
+    const core = coreRef.current;
+    if (!core || !getLoadedRom()) {
+      setTeam(null);
+      setTeamLido(false);
+      return;
+    }
+    let bytes: Uint8Array | null = null;
+    try {
+      bytes = core.getSave();
+    } catch {
+      bytes = null;
+    }
+    setTeam(bytes ? (parseGen3Save(bytes)?.party ?? null) : null);
+    setTeamLido(true);
+  }, []);
+
+  // O callback do core é registrado uma vez; a ref leva a versão atual até lá.
+  useEffect(() => {
+    refreshTeamRef.current = refreshTeam;
+  }, [refreshTeam]);
+
+  /**
+   * Trazer um save de fora muda o time sem o jogo ter gravado nada — então o
+   * `saveDataUpdatedCallback`, que é o gatilho normal, não dispara. Aqui a
+   * releitura é explícita.
+   */
+  const restoreFromDiskERelerTime = useCallback(
+    async (fileName: string) => {
+      await restoreFromDisk(fileName);
+      refreshTeam();
+    },
+    [restoreFromDisk, refreshTeam]
+  );
+
+  /**
    * A galeria acompanha o jogo carregado.
    *
    * Depende do nome da ROM e não do objeto `status`: pausar e retomar trocam a
@@ -1114,9 +1169,15 @@ export function useEmulator() {
       ? status.rom
       : undefined;
   useEffect(() => {
-    if (romCarregada) refreshScreenshots();
-    else setScreenshots([]);
-  }, [romCarregada, refreshScreenshots]);
+    if (romCarregada) {
+      refreshScreenshots();
+      refreshTeam();
+    } else {
+      setScreenshots([]);
+      setTeam(null);
+      setTeamLido(false);
+    }
+  }, [romCarregada, refreshScreenshots, refreshTeam]);
 
   /** Pressiona/solta um botão pelo gamepad virtual (toque). */
   const pressButton = useCallback((button: string) => {
@@ -1292,6 +1353,8 @@ export function useEmulator() {
     setTurbo,
     setRewinding,
     takeScreenshot,
+    team,
+    teamLido,
     screenshots,
     refreshScreenshots,
     readScreenshot,
@@ -1301,6 +1364,6 @@ export function useEmulator() {
     localSaves,
     refreshLocalRoms,
     backupToDisk,
-    restoreFromDisk,
+    restoreFromDisk: restoreFromDiskERelerTime,
   };
 }

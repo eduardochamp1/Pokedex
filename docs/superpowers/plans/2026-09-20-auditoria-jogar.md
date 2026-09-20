@@ -22,7 +22,7 @@
 | 1 | `romId.ts` — a pedra angular | 1 | ✅ concluída |
 | 2 | Furar a ilha: a barra de três links | 1 | ✅ concluída |
 | 3 | Pontes baratas | 4 | ✅ concluída |
-| 4 | Parsing do save (com porta de pesquisa) | 4 | ◐ 4.1 concluída; 4.2 bloqueada (sem save real), 4.3 e 4.4 dependem dela |
+| 4 | Parsing do save (com porta de pesquisa) | 4 | ✅ concluída |
 
 **Ordem recomendada:** 0 → 1 → 2 → 3 → 4. A fase 1 destrava as fases 2, 3 e 4 — fora de ordem,
 elas ficam bem mais caras. Dentro de uma fase, qualquer ordem serve.
@@ -104,8 +104,10 @@ está descoberto — e é exatamente onde estão os bugs da Fase 0.
   (32 MB, hack de FireRed → se anuncia como BPRE). **Nenhuma de Gen 1 ou Gen 2.**
   Consequência: a estratégia óbvia de "começar por Gen 1, que é o formato mais simples" entrega
   **zero** para este projeto. O alvo é Gen 3, que é o formato difícil.
-- **`saves/Pokemon - Emerald.sav` tem 131072 bytes e está inteiramente zerado** (conferido byte a
-  byte). O jogo nunca gravou; o backup copiou a flash recém-alocada. Ver Tarefa 0.3.
+- **Sobre os saves** (atualizado ao executar): os quatro eram flash virgem — um uniforme `0x00`,
+  três uniformes `0xFF`. O `Pokemon - Emerald.sav` zerado foi apagado (Tarefa 0.3) e depois
+  substituído por um save real, jogado até o primeiro save de dentro do jogo, que é o que abriu a
+  Fase 4. Ele fica fora do git.
 
 ---
 
@@ -591,53 +593,60 @@ roda uma vez, na máquina de quem tem a ROM.
 **Obrigatória antes de qualquer linha de parser de save.** Hoje não há fixture: o único `.sav` está
 zerado, e teste escrito antes dela testa a imaginação de quem escreveu, não o formato.
 
-- [ ] **Passo 1** — jogar Emerald até o primeiro save dentro do jogo e exportar o `.sav` pela própria
+- [x] **Passo 1** — jogar Emerald até o primeiro save dentro do jogo e exportar o `.sav` pela própria
       aba. `saves/` já está no gitignore (`.gitignore:54`), então decida onde a fixture vive: fora do
       git, ou um recorte sintético comitado. **O plano tem que dizer qual** — escreva a decisão aqui.
-- [ ] **Passo 2** — confirmar a assinatura `0x08012025` em `0x0FF8` de algum setor de 4096 bytes.
+- [x] **Passo 2** — confirmar a assinatura `0x08012025` em `0x0FF8` de algum setor de 4096 bytes.
       A constante é real (existe no código das quatro ROMs), mas o **layout do save** não foi
       verificado. Se não aparecer, **pare**: a premissa está errada.
-- [ ] **Passo 3** — escolher o bloco atual entre os dois de 14 setores (offset `0` e `0xE000`) pelo
+- [x] **Passo 3** — escolher o bloco atual entre os dois de 14 setores (offset `0` e `0xE000`) pelo
       contador em `0x0FFC`.
-- [ ] **Passo 4 — descobrir `SECTOR_DATA_SIZE` em vez de assumir.** `3968` **não** está verificado
+- [x] **Passo 4 — descobrir `SECTOR_DATA_SIZE` em vez de assumir.** `3968` **não** está verificado
       nem para os jogos originais. E a tabela de layout lida da ROM de Unbound (`0x93A3570`) mostra
       **4080**. Meça na fixture; não escreva `const SECTOR_DATA_SIZE = 3968` como fato.
-- [ ] **Passo 5 — decisão.** Passou tudo? Siga para 4.3. Falhou? Documente **neste arquivo** e pare
+- [x] **Passo 5 — decisão.** Passou tudo? Siga para 4.3. Falhou? Documente **neste arquivo** e pare
       a fase — sem custo afundado, porque a 4.1 já entregou valor sozinha.
 
 
-> ## ⛔ A porta fechou — 2026-09-20
+> ## ✅ A porta abriu — 2026-09-20
 >
-> **A fase 4 para aqui, no passo 1, e a decisão do passo 5 é "pare".**
+> A primeira tentativa falhou: os quatro saves eram flash virgem (um uniforme
+> `0x00`, três uniformes `0xFF`), e isso expôs de quebra um buraco na Tarefa
+> 0.3, cujo guard só rejeitava zeros. Depois o dono jogou Emerald até o primeiro
+> save de dentro do jogo e exportou o `.sav` pela própria aba.
 >
-> Não existe save real para servir de fixture, e não dá para produzir um sem
-> jogar o jogo até o primeiro save de dentro da história — o que leva algo como
-> quinze minutos de partida com entrada de nome, caminhão, laboratório. Nenhum
-> agente faz isso.
+> **Os cinco passos passaram, e cada constante saiu de medição:**
 >
-> **Medido no FS do core, os quatro saves são flash virgem:**
+> | Passo | O que a medição mostrou |
+> |---|---|
+> | 2 — assinatura | **28 setores** com `0x08012025`, ou seja 14 + 14. A premissa vale. |
+> | 3 — bloco atual | Bloco A com contador **4**, bloco B com **3**. |
+> | 4 — `SECTOR_DATA_SIZE` | **3968**, medido: é o menor tamanho que valida os 28 checksums, e dois setores têm o último byte não-zero em 3967, o fim exato da região. |
 >
-> | Save | Bytes | Conteúdo | Setores com `0x08012025` |
-> |---|---|---|---|
-> | `Pokemon - Emerald.sav` | 131072 | uniforme `0x00` | 0 |
-> | `Pokemon - Leaf Green.sav` | 131072 | uniforme `0xFF` | 0 |
-> | `Pokemon Rocket - b3.0.sav` | 131072 | uniforme `0xFF` | 0 |
-> | `Pokemon Unbound (v2.1.1.1).sav` | 131072 | uniforme `0xFF` | 0 |
+> **Três coisas que o plano não previa e que a fixture revelou:**
 >
-> Os dois estados virgens aparecem: `0x00` é flash alocada e `0xFF` é flash
-> apagada. Nenhum dos 32 setores de nenhum deles traz a assinatura, então o
-> passo 2 também não teria como passar.
+> 1. **As seções giram dentro do bloco.** As posições físicas 0..13 carregavam
+>    os ids 10,11,12,13,0,1,…,9. Indexar por posição leria a seção errada — e é
+>    o tipo de erro que passa despercebido quando a rotação é zero por acaso.
+>    O parser indexa por id, e há teste com cinco rotações diferentes.
+> 2. **O arquivo tem 131088 bytes, não 131072.** O mGBA acrescenta um rodapé de
+>    16 bytes com data e hora (`26 09 20 00 12 11 58 40 …` = 2026-09-20
+>    12:11:58). Tudo além dos 131072 é ignorado.
+> 3. **`playerPartyCount` em `0x0234` confirmado**, e por varredura: procurando
+>    um u32 entre 1 e 6 nos primeiros 0x400 bytes, há **exatamente uma**
+>    posição. O `0x0034` de FRLG continua não verificado — ali a fixture guarda
+>    806170637.
 >
-> **Efeito colateral útil:** isso expôs um buraco na Tarefa 0.3. O guard que eu
-> tinha escrito rejeitava só buffer todo zero, e teria aceitado os três `0xFF`
-> como progresso de verdade. Corrigido no mesmo commit da 4.1 — o critério
-> agora é "não é uniforme", que cobre os dois casos e qualquer outro.
+> **Ressalva honesta sobre o `SECTOR_DATA_SIZE`:** esta fixture **não distingue**
+> 3968 de 4084, porque o espaço entre os dois é todo zero neste save e somar
+> zeros não muda o checksum. 3968 é o menor que valida e é o que está no código.
+> Um romhack pode usar outro — a Unbound declara 4080.
 >
-> **O que destrava:** jogar Emerald até o primeiro save e exportar o `.sav`
-> pela própria aba. Com essa fixture em mãos, 4.2 passos 2–4 e depois 4.3 e 4.4
-> seguem como escritos. Sem ela, qualquer parser escrito aqui testaria a
-> imaginação de quem escreveu, não o formato — que é exatamente o que esta
-> tarefa existe para impedir.
+> **Onde a fixture vive, que o passo 1 mandava decidir:** fora do git. `saves/`
+> está no `.gitignore` e o `.sav` é progresso de jogo de quem o gerou. A suíte
+> monta um save **sintético em código** — só possível porque o formato foi
+> medido antes — e quem tiver um real confere com
+> `npm run gen3:save-check "<arquivo.sav>"`.
 
 ## Tarefa 4.3 — `src/emulator/saveParse/gen3.ts`
 
@@ -689,33 +698,33 @@ escreva nenhum destes números como constante sem comentário de ressalva.
 
 ### Passos
 
-- [ ] **Passo 1 — teste do buraco do zero primeiro.** 604 bytes zerados precedidos de `u32 = 3`
+- [x] **Passo 1 — teste do buraco do zero primeiro.** 604 bytes zerados precedidos de `u32 = 3`
       devem devolver **nulo**. Se esse teste não existir, o bug vai passar: ele funciona lindamente
       com dados sintéticos não-zerados.
-- [ ] **Passo 2 — setores e bloco vencedor**, contra a fixture. Camada por camada, teste por camada.
-- [ ] **Passo 3 — varredura por setor** com os guardas e N ≥ 2.
-- [ ] **Passo 4 — decifragem e permutação** para extrair espécie, nível e HP. Nível e HP atual/máximo
+- [x] **Passo 2 — setores e bloco vencedor**, contra a fixture. Camada por camada, teste por camada.
+- [x] **Passo 3 — varredura por setor** com os guardas e N ≥ 2.
+- [x] **Passo 4 — decifragem e permutação** para extrair espécie, nível e HP. Nível e HP atual/máximo
       estão **não cifrados** em `@0x54` e `@0x56`/`@0x58`.
-- [ ] **Passo 5 — resultados honestos.** Três saídas distintas: `OK`, `NAO_ENCONTRADO` e `AMBIGUO`.
+- [x] **Passo 5 — resultados honestos.** Três saídas distintas: `OK`, `NAO_ENCONTRADO` e `AMBIGUO`.
       Se dois offsets casarem, **não** escolha o primeiro — devolva `AMBIGUO`. Em romhack,
       `NAO_ENCONTRADO` é resultado normal, não falha a ser "consertada" chutando outro offset.
-- [ ] **Passo 6 — copie os bytes antes de ler.** `getSave()` devolve view sobre `SharedArrayBuffer`
+- [x] **Passo 6 — copie os bytes antes de ler.** `getSave()` devolve view sobre `SharedArrayBuffer`
       com `byteOffset` que pode não ser zero; `new DataView(save.buffer)` direto lê offset errado e
       pode ver os bytes mudarem no meio da leitura. `exportSave` (`useEmulator.ts:659`) já mostra a
       cópia defensiva.
-- [ ] **Passo 7 — commit.** `feat(emulador): parser de save de gen 3`
+- [x] **Passo 7 — commit.** `feat(emulador): parser de save de gen 3`
 
 ## Tarefa 4.4 — Painel "Seu time" em /jogar
 
-- [ ] **Passo 1** — mais uma `section.play-panel` na lista que começa em `PlayPage.tsx:379`. O campo
+- [x] **Passo 1** — mais uma `section.play-panel` na lista que começa em `PlayPage.tsx:379`. O campo
       `team` entra no objeto `emu` (`useEmulator.ts:832-887`) ao lado de `slots`, `saves`, `localSaves`.
-- [ ] **Passo 2** — `usePokemonsByNames(ids.map(String))` → `<Card pokemon={...} variant="mini"
+- [x] **Passo 2** — `usePokemonsByNames(ids.map(String))` → `<Card pokemon={...} variant="mini"
       linkTo={/pokemon/${p.name}} />`. **Apelido, nível e HP entram como rodapé em volta da carta,
       não dentro dela** — `Card.tsx` fica intocado.
-- [ ] **Passo 3** — reparsear no `saveDataUpdatedCallback` com throttle de 5 s.
-- [ ] **Passo 4** — quando o parser devolver `NAO_ENCONTRADO`, o painel diz isso em uma frase
+- [x] **Passo 3** — reparsear no `saveDataUpdatedCallback` com throttle de 5 s.
+- [x] **Passo 4** — quando o parser devolver `NAO_ENCONTRADO`, o painel diz isso em uma frase
       honesta. **Nunca um spinner eterno** — romhack não ler é o esperado.
-- [ ] **Passo 5 — commit.** `feat(jogar): painel com o time do jogador lido do save`
+- [x] **Passo 5 — commit.** `feat(jogar): painel com o time do jogador lido do save`
 
 ---
 
