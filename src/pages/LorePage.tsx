@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import "../styles/lore.css";
 import { LORE_EVENTS, ERAS } from "../data/lore";
 import { REGIONS } from "../data/regions";
@@ -35,6 +35,7 @@ import {
 import { REGION_SHAPES } from "../data/regionMap";
 import { pixelSpriteUrl } from "../lib/sprites";
 import { STARTERS } from "../data/rarity";
+import { isPlayableGeneration } from "../emulator/playable";
 import {
   parseLoreTab,
   serializeLoreTab,
@@ -330,12 +331,26 @@ const LorePage = () => {
                       <span className="gen-slide-year">{g.year}</span>
                     </div>
                   </div>
+                  {/* Geracoes I a III rodam no core desta casa; da IV em
+                      diante e DS, 3DS e Switch. A assimetria e informacao: ela
+                      mostra de relance qual epoca da para jogar aqui. */}
                   <div className="gen-games">
-                    {g.mainGames.map((game) => (
-                      <span key={game} className="gen-game-badge">
-                        {game}
-                      </span>
-                    ))}
+                    {g.mainGames.map((game) =>
+                      isPlayableGeneration(g.id) ? (
+                        <Link
+                          key={game}
+                          to="/jogar"
+                          className="gen-game-badge gen-game-badge-jogavel"
+                          title={`${game} roda no emulador desta aba`}
+                        >
+                          {game}
+                        </Link>
+                      ) : (
+                        <span key={game} className="gen-game-badge">
+                          {game}
+                        </span>
+                      )
+                    )}
                   </div>
                   <p className="gen-slide-fact">{g.gimmick}</p>
                   <WikiSource wiki={g.wiki} />

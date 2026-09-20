@@ -1053,3 +1053,30 @@
   color: var(--text);
   border-bottom-color: var(--accent);
 }
+
+/* A ROM que /jogar?jogo= pediu. Se a biblioteca nao tiver o jogo, nada disto
+   aparece — o site nao distribui ROM e nao promete o que nao tem. */
+.play-rom-list button.is-pedida {
+  border-color: var(--accent-alt);
+  box-shadow: inset 0 0 0 1px var(--accent-alt);
+}
+.move-version-play {
+  margin-left: 8px;
+  font-size: 0.7rem;
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+.move-version-play:hover {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+.gen-game-badge-jogavel {
+  text-decoration: none;
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.gen-game-badge-jogavel:hover {
+  background: var(--accent);
+  color: var(--accent-ink);
+}

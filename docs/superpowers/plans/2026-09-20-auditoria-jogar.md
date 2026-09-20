@@ -485,13 +485,13 @@ Dois lugares nomeiam os jogos que o emulador roda e não oferecem jogá-los:
 - `LorePage.tsx:330-336` — badges `Red`/`Blue`/`Yellow` como `<span>` inerte, enquanto o
   `PokemonChip` logo abaixo (`:358-365`) é clicável. A própria página já sabe tornar badge acionável.
 
-- [ ] **Passo 1** — na MoveList, quando o versionGroup escolhido for jogável, link condicional para
+- [x] **Passo 1** — na MoveList, quando o versionGroup escolhido for jogável, link condicional para
       `/jogar?jogo=<id>`.
-- [ ] **Passo 2** — a PlayPage lê `?jogo=` e destaca (ou carrega) a ROM correspondente da biblioteca
+- [x] **Passo 2** — a PlayPage lê `?jogo=` e destaca (ou carrega) a ROM correspondente da biblioteca
       **se existir**. Se não existir, **fique calado** — o site não distribui ROM e não deve prometer.
-- [ ] **Passo 3** — na LorePage, badges de Gen I–III viram links; Gen IV+ continuam `<span>`, já que
+- [x] **Passo 3** — na LorePage, badges de Gen I–III viram links; Gen IV+ continuam `<span>`, já que
       o core não roda. A assimetria até reforça qual época é jogável aqui.
-- [ ] **Passo 4 — commit.** `feat(pokedex): badges de jogo levam para o emulador`
+- [x] **Passo 4 — commit.** `feat(pokedex): badges de jogo levam para o emulador`
 
 ---
 

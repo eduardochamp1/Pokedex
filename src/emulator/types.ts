@@ -20,6 +20,14 @@ export interface RomEntry {
    * quem manda na linha principal continua sendo o nome do arquivo.
    */
   base?: string;
+  /**
+   * Grupo de versao do jogo-base, nos ids de src/data/versionGroups.ts.
+   *
+   * E por ele que /jogar?jogo=emerald encontra a ROM certa na biblioteca. Nao
+   * serve como chave de nada que persista: dois romhacks de FireRed casariam
+   * no mesmo id.
+   */
+  versionGroupId?: string;
   /** Nome do arquivo dentro do sistema de arquivos virtual do core. */
   fileName: string;
   /** De onde veio: escolhido pelo usuario ou lido da pasta local roms/. */

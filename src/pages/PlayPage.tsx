@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type DragEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import "../styles/play.css";
 import { useEmulator } from "../emulator/useEmulator";
 import {
@@ -60,6 +60,19 @@ const PlayPage = () => {
   // A idade dos slots é relativa a este instante. Sem timer próprio: o painel
   // já re-renderiza a cada captura automática (30 s) e a cada ação de estado.
   const now = Date.now();
+
+  /**
+   * `?jogo=<versionGroupId>` — de onde a ficha e a lore apontam para ca.
+   *
+   * Destaca a ROM correspondente na biblioteca, se ela existir. Se nao existir,
+   * fica calado de proposito: o site nao distribui ROM e nao pode prometer um
+   * jogo que quem chegou aqui talvez nao tenha.
+   */
+  const [searchParams] = useSearchParams();
+  const jogoPedido = searchParams.get("jogo") ?? undefined;
+  const romPedida = jogoPedido
+    ? emu.roms.find((r) => r.versionGroupId === jogoPedido)?.fileName
+    : undefined;
 
   const currentRom =
     emu.status.kind === "running" || emu.status.kind === "paused"
@@ -508,7 +521,13 @@ const PlayPage = () => {
                   <li key={rom.fileName} className="play-rom-row">
                     <button
                       type="button"
-                      className={rom.fileName === currentRom ? "is-current" : ""}
+                      className={
+                        rom.fileName === currentRom
+                          ? "is-current"
+                          : rom.fileName === romPedida
+                            ? "is-pedida"
+                            : ""
+                      }
                       onClick={() => emu.playStored(rom.fileName)}
                     >
                       <span className="play-rom-name">{rom.fileName}</span>

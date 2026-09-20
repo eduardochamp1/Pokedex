@@ -175,14 +175,21 @@ function lerCabecalho(
  * passagem seria trabalho repetido a toa: o cabecalho de um arquivo nao muda.
  * Uma leitura de 192 bytes por ROM, uma vez por sessao.
  */
-const baseDaRom = new Map<string, string | undefined>();
+const baseDaRom = new Map<
+  string,
+  { base?: string; versionGroupId?: string }
+>();
 
-function baseDe(core: mGBAEmulator, fileName: string): string | undefined {
+function baseDe(
+  core: mGBAEmulator,
+  fileName: string
+): { base?: string; versionGroupId?: string } {
   const cache = baseDaRom.get(fileName);
-  if (cache !== undefined || baseDaRom.has(fileName)) return cache;
-  const base = identifyRom(lerCabecalho(core, fileName))?.jogo;
-  baseDaRom.set(fileName, base);
-  return base;
+  if (cache) return cache;
+  const id = identifyRom(lerCabecalho(core, fileName));
+  const info = { base: id?.jogo, versionGroupId: id?.versionGroupId };
+  baseDaRom.set(fileName, info);
+  return info;
 }
 
 /** Sufixo comum das mensagens: a cota e a causa provavel, e ela e visivel. */
@@ -299,7 +306,7 @@ export function useEmulator() {
                 fileName,
                 origin: "upload" as const,
                 size,
-                base: baseDe(core, fileName),
+                ...baseDe(core, fileName),
               };
             })
         );
