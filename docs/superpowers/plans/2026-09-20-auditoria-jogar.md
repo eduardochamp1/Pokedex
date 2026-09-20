@@ -456,11 +456,11 @@ miniatura de slot (`:614-616`), **nunca para captura** — então a cota cresce 
 sair de `/jogar` pausa. **Nenhuma tela fora da aba lê isso.** A Navbar já tem exatamente o padrão
 necessário: `Navbar.tsx:77-79` mostra `<span className="nav-count">` com a contagem de favoritos.
 
-- [ ] **Passo 1** — expor o estado do emulador acima da rota (um hook leve que lê `getLoadedRom()`,
+- [x] **Passo 1** — expor o estado do emulador acima da rota (um hook leve que lê `getLoadedRom()`,
       ou o `last-rom` que `session.ts:14` já guarda no localStorage sob o prefixo
       `pokedex:emulator:` de `prefs.ts:11`).
-- [ ] **Passo 2** — ponto ou etiqueta "pausado" no link Jogar, no mesmo molde do `nav-count`.
-- [ ] **Passo 3 — commit.** `feat(navbar): sinaliza jogo pausado no link Jogar`
+- [x] **Passo 2** — ponto ou etiqueta "pausado" no link Jogar, no mesmo molde do `nav-count`.
+- [x] **Passo 3 — commit.** `feat(navbar): sinaliza jogo pausado no link Jogar`
 
 ## Tarefa 3.3 — "Você parou em Pokemon - Emerald" na Home
 

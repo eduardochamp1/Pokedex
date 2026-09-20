@@ -3851,3 +3851,15 @@ html[data-scanline="on"] body::after {
   ::view-transition-old(card-flip),
   ::view-transition-new(card-flip) { animation: none; }
 }
+
+/* Jogo pausado esperando em /jogar. Molde do .nav-count, cor diferente: nao e
+   contagem, e estado — e o gold ja e a cor de "guardado" no resto do site. */
+.nav-paused {
+  margin-left: 5px;
+  padding: 0 5px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-alt);
+  color: var(--bg);
+  font-size: 0.55rem;
+  letter-spacing: -0.06em;
+}

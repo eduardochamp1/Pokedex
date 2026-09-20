@@ -2,9 +2,12 @@ import { useContext } from "react";
 import { Link, NavLink } from "react-router-dom";
 import FavoriteContext from "../contexts/favoritesContext";
 import ScanlineToggle from "./ScanlineToggle";
+import { usePausedGame } from "../emulator/usePausedGame";
 
 const Navbar = () => {
   const { favoritePokemons } = useContext(FavoriteContext);
+  // Sair de /jogar pausa o jogo, e ate aqui nenhuma tela dizia isso.
+  const pausado = usePausedGame();
   return (
     <nav className="navbar">
       <Link to="/" aria-label="Ir para a página inicial" className="navbar-brand">
@@ -44,6 +47,15 @@ const Navbar = () => {
           }
         >
           Jogar
+          {pausado && (
+            <span
+              className="nav-paused"
+              title={`${pausado} está pausado`}
+              aria-label={`${pausado} está pausado`}
+            >
+              <span aria-hidden="true">❚❚</span>
+            </span>
+          )}
         </NavLink>
         <NavLink
           to="/lore"
