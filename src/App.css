@@ -3863,3 +3863,39 @@ html[data-scanline="on"] body::after {
   font-size: 0.55rem;
   letter-spacing: -0.06em;
 }
+
+/* ========= "Você parou em…" =========
+   A Home sabia o último jogo desde sempre — `getLastRom()` já estava no
+   localStorage — e não usava. Um clique devolve a pessoa ao jogo, sem passar
+   pela biblioteca. */
+.home-resume {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 0 0 18px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  border: 2px solid var(--border);
+  border-left: 3px solid var(--accent-alt);
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color var(--dur-fast), background var(--dur-fast);
+}
+.home-resume:hover {
+  border-color: var(--accent-alt);
+  background: var(--surface-3);
+}
+.home-resume-label {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent-alt);
+}
+.home-resume strong { font-size: 0.9rem; }
+.home-resume-cta {
+  margin-left: auto;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}

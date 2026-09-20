@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import Searchbar from "../components/Searchbar";
 import Pokedex from "../components/Pokedex";
 import TypeFilter from "../components/TypeFilter";
@@ -9,6 +9,9 @@ import CardHero from "../components/CardHero";
 import { CardSkeleton } from "../components/Skeleton";
 import { useDebounce } from "../hooks/useDebounce";
 import { useFeaturedPokemon } from "../hooks/useFeaturedPokemon";
+// So o modulo de sessao, que le do localStorage: nao arrasta o core do
+// emulador, que sao ~1,8 MB para descobrir um nome de arquivo.
+import { getLastRom } from "../emulator/session";
 import {
   usePokemonList,
   usePokemonPage,
@@ -67,6 +70,14 @@ const HomePage = () => {
   const isSelecting = selection.names !== null;
 
   const featured = useFeaturedPokemon();
+  /**
+   * O ultimo jogo aberto em /jogar, se houver.
+   *
+   * "Fechar jogo" limpa esse registro de proposito, entao quem fechou nao e
+   * convidado de volta. Lido uma vez, no primeiro render: o valor so muda em
+   * outra aba do site, e voltar para a Home remonta a pagina.
+   */
+  const ultimoJogo = useMemo(() => getLastRom(), []);
   const featuredSpecies = usePokemonSpecies(featured.data?.species.url);
 
   const pokemons = isSelecting ? selected.pokemons : listQuery.data?.pokemons ?? [];
@@ -112,6 +123,14 @@ const HomePage = () => {
           </div>
           <CardHero pokemon={featured.data} />
         </section>
+      )}
+
+      {ultimoJogo && (
+        <Link to="/jogar" className="home-resume">
+          <span className="home-resume-label">Você parou em</span>
+          <strong>{ultimoJogo}</strong>
+          <span className="home-resume-cta">retomar →</span>
+        </Link>
       )}
 
       <div className="home-layout">

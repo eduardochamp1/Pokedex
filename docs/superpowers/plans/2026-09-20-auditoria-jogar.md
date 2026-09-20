@@ -470,11 +470,11 @@ necessário: `Navbar.tsx:77-79` mostra `<span className="nav-count">` com a cont
 usa. Um cartão discreto ao lado do pokémon em destaque (`HomePage.tsx:93-115` é o molde) devolve a
 pessoa ao jogo em um clique, **sem carregar 1,8 MB de emulador só para descobrir isso**.
 
-- [ ] **Passo 1** — ler `getLastRom()` na Home; se não houver, não renderizar nada.
-- [ ] **Passo 2 — o que NÃO dá para fazer:** mostrar idade ou tamanho do ponto automático.
+- [x] **Passo 1** — ler `getLastRom()` na Home; se não houver, não renderizar nada.
+- [x] **Passo 2 — o que NÃO dá para fazer:** mostrar idade ou tamanho do ponto automático.
       `autoState` vem de `core.getAutoSaveState()` e exige o core vivo. Se esse detalhe for
       desejado, grave um `savePref` com o carimbo na hora da captura — não tente ler da Home.
-- [ ] **Passo 3 — commit.** `feat(home): cartao de retomar o ultimo jogo`
+- [x] **Passo 3 — commit.** `feat(home): cartao de retomar o ultimo jogo`
 
 ## Tarefa 3.4 — Os badges de jogo viram links (MoveList e LorePage)
 
