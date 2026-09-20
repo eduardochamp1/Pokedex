@@ -59,7 +59,7 @@ via [mGBA](https://mgba.io) compilado para WebAssembly.
 - **"Continuar de onde parou"** — o core já capturava um estado automático a
   cada 30 s; agora ele tem um botão em vez de ser descartado
 - **Atalhos** — F1–F6 carregam um estado, Shift+F1–F6 gravam, e segurar Espaço
-  dá turbo 5× enquanto durar
+  dá turbo enquanto durar
 - **Biblioteca gerenciável** — cada ROM mostra quanto ocupa e pode ser removida;
   o save de bateria fica, então o progresso volta se a ROM voltar
 - **Backup automático em `saves/`** no disco, mais exportar/importar `.sav`
@@ -80,7 +80,7 @@ via [mGBA](https://mgba.io) compilado para WebAssembly.
   a nova. A legenda lê do mesmo mapa que o `bindKey`, então não mente
 - **Rebobinar** — segure e o jogo anda para trás, até ~10 s
 - **Captura de tela** em PNG, com download
-- **Volume e velocidade** (até 5×)
+- **Volume**, e turbo ao segurar Espaço
 - **Diagnóstico** quando falta isolamento: a página diz exatamente qual header
   está ausente em vez de falhar em silêncio
 
@@ -323,7 +323,7 @@ src/
 │   ├── useEmulator.ts          Hook que dirige o core (ROM, saves, estados)
 │   ├── storage.ts              Persistência: pasta saves/ + status do navegador
 │   ├── saveStates.ts           Estado real dos 6 slots, lido do FS do core
-│   ├── session.ts              Última ROM, volume e velocidade entre visitas
+│   ├── session.ts              Última ROM e volume entre visitas
 │   ├── shortcuts.ts            F1–F6, Shift+F1–F6 e turbo no Espaço
 │   ├── display.ts              Escala inteira; useDisplay.ts aplica e faz tela cheia
 │   ├── capture.ts              Nome das capturas + ajustes do buffer de rebobinar
@@ -442,6 +442,17 @@ carta na cor do tipo e o dourado reservado a raridade.
   por varredura — há exatamente um u32 entre 1 e 6 nos primeiros 0x400 bytes.
   `SECTOR_DATA_SIZE` é **3968**, o menor tamanho que valida os 28 checksums;
   esta fixture não o distingue de 4084, porque o espaço entre os dois é zero.
+- **Não há régua de velocidade, e isso é decisão medida.** O core não honra
+  `setFastForwardMultiplier` para a velocidade do jogo: medido com o relógio do
+  auto-state, que conta tempo emulado (validado pausando — pausado marca zero),
+  pedir 5× deu **1,10×** e pedir metade deu **1,00×**, contra 1,11× de base.
+  Nem `baseFpsTarget`, nem `setMainLoopTiming`, nem ligar ou desligar
+  `audioSync` movem esse número; o contador de FPS do próprio core marca 60
+  com o multiplicador em 5. O que o multiplicador alcança é o caminho do áudio,
+  e era daí que vinha "acelera a música e não o jogo". Uma régua que não faz
+  efeito é pior do que régua nenhuma, então ela saiu. O que ficou é o modelo do
+  mGBA de mesa, que também não tem régua: velocidade normal e turbo ao segurar
+  a tecla, sem teto (`fastForwardHeldRatio=-1`, `holdFastForward=Space`).
 - **`FSSync()` rejeita**, e engolir essa rejeição prendia a tela em
   "Carregando…" para sempre. Carregar é fatal e vira `status` de erro; gravar,
   apagar e importar são recuperáveis e viram aviso sem derrubar o jogo.

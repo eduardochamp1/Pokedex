@@ -45,6 +45,19 @@ function romano(geracao: number): string {
   );
 }
 
+/**
+ * Como anunciar o turbo.
+ *
+ * O atalho e a barra de espaco, mas ele so existe se a barra de espaco nao
+ * estiver mapeada para um botao do jogo — senao a tecla teria dois donos.
+ * Ver `shortcutFor` em shortcuts.ts.
+ */
+function teclaDoTurbo(bindings: KeyBinding[]): string {
+  return bindings.some((b) => b.sdlKey === "Space")
+    ? "a tecla de turbo (hoje ocupada pelo jogo)"
+    : "Espaço";
+}
+
 /** Nome da regiao como o resto do site a escreve. */
 function nomeDaRegiao(id: string): string {
   return REGIONS.find((r) => r.id === id)?.name ?? id;
@@ -396,20 +409,21 @@ const PlayPage = () => {
                   <span>{emu.volume}%</span>
                 </label>
 
-                <label className="play-slider">
-                  Velocidade
-                  <input
-                    type="range"
-                    min={1}
-                    max={5}
-                    step={1}
-                    value={emu.fastForward}
-                    onChange={(e) => emu.setFastForward(Number(e.target.value))}
-                  />
-                  <span>
-                    {emu.turboActive ? `${emu.fastForward}× → turbo` : `${emu.fastForward}×`}
-                  </span>
-                </label>
+                {/* Sem régua de velocidade, como no mGBA de mesa: lá também
+                    só existem velocidade normal e o turbo enquanto a tecla
+                    está segurada. A régua que havia aqui mentia — o core não
+                    honra o multiplicador, medido pedindo 5× e pedindo metade,
+                    e os dois davam 1×. */}
+                <span
+                  className={
+                    "play-turbo" + (emu.turboActive ? " is-on" : "")
+                  }
+                  role="status"
+                >
+                  {emu.turboActive
+                    ? "Turbo"
+                    : `Velocidade normal · segure ${teclaDoTurbo(emu.bindings)} para acelerar`}
+                </span>
               </div>
 
               {/* Gamepad virtual: sem ele o jogo é injogável no toque. */}

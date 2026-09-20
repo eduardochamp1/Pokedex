@@ -13,7 +13,6 @@ import { clearPref, loadPref, savePref } from "./prefs";
 
 const LAST_ROM = "last-rom";
 const VOLUME = "volume";
-const FAST_FORWARD = "fast-forward";
 
 const isString = (value: unknown): value is string =>
   typeof value === "string" && value.length > 0;
@@ -21,10 +20,6 @@ const isString = (value: unknown): value is string =>
 /** Volume em 0..100. */
 const isVolume = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100;
-
-/** Multiplicador de velocidade em 1..5, como a barra da tela oferece. */
-const isFastForward = (value: unknown): value is number =>
-  typeof value === "number" && Number.isInteger(value) && value >= 1 && value <= 5;
 
 /**
  * Ultima ROM jogada.
@@ -53,10 +48,3 @@ export function getVolume(): number {
   return loadPref(VOLUME, isVolume) ?? 100;
 }
 
-export function rememberFastForward(multiplier: number): void {
-  savePref(FAST_FORWARD, multiplier);
-}
-
-export function getFastForward(): number {
-  return loadPref(FAST_FORWARD, isFastForward) ?? 1;
-}

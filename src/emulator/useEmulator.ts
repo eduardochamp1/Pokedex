@@ -47,10 +47,8 @@ import { useKeyBindings } from "./useKeyBindings";
 
 import {
   forgetLastRom,
-  getFastForward,
   getLastRom,
   getVolume,
-  rememberFastForward,
   rememberLastRom,
   rememberVolume,
 } from "./session";
@@ -255,15 +253,29 @@ function baseDe(
  * que o navegador impõe a `setTimeout` aninhado, então aquele caminho nunca
  * teria entregue 5× de qualquer forma.
  */
+/**
+ * Modos de `emscripten_set_main_loop_timing`, que `setMainLoopTiming` expõe.
+ * `SETIMMEDIATE` é "assim que der", sem teto — o equivalente ao
+ * `fastForwardHeldRatio=-1` do mGBA de mesa.
+ */
+const EM_TIMING_SETIMMEDIATE = 2;
+const EM_TIMING_RAF = 1;
+
 function aplicarVelocidade(
   core: mGBAEmulator | null | undefined,
-  multiplicador: number,
+  turbo: boolean,
   audioSync: boolean
 ): void {
   if (!core) return;
-  core.setFastForwardMultiplier(multiplicador);
-  // Reafirmar DEPOIS não é redundância: é o que faz a nossa escolha valer.
-  // Ver o bloco "Dois donos para o mesmo byte" acima.
+  // Sem teto: o mGBA de mesa usa `fastForwardHeldRatio=-1`, que significa "o
+  // mais rápido que a máquina aguentar", e não um múltiplo escolhido.
+  core.setFastForwardMultiplier(turbo ? TURBO_MULTIPLIER : 1);
+  core.setMainLoopTiming(
+    turbo ? EM_TIMING_SETIMMEDIATE : EM_TIMING_RAF,
+    turbo ? 0 : 1
+  );
+  // Reafirmar DEPOIS não é redundância: `setFastForwardMultiplier` religa o
+  // `audioWait` no mesmo byte. Ver o bloco "Dois donos para o mesmo byte".
   core.setCoreSettings({ audioSync });
 }
 
@@ -290,7 +302,6 @@ export function useEmulator() {
   const [localRoms, setLocalRoms] = useState<LocalRom[] | null>(null);
   const [saves, setSaves] = useState<string[]>([]);
   const [volume, setVolumeState] = useState(getVolume);
-  const [fastForward, setFastForwardState] = useState(getFastForward);
   const [notice, setNotice] = useState<string | null>(null);
   /**
    * O jogo identificado pelo cabecalho do cartucho, quando da.
@@ -708,13 +719,13 @@ export function useEmulator() {
       }
       // Volume E velocidade: a barra guardava 5x e o jogo novo entrava em 1x.
       core.setVolume(volume / 100);
-      aplicarVelocidade(core, fastForward, audioSyncRef.current);
+      aplicarVelocidade(core, false, audioSyncRef.current);
       rememberLastRom(flatName);
       setLoadedRom(flatName);
       setStatus({ kind: "running", rom: flatName });
       refreshLibrary();
     },
-    [refreshLibrary, volume, fastForward, falhaAoCarregar]
+    [refreshLibrary, volume, falhaAoCarregar]
   );
 
   /** Roda uma ROM que já está guardada no FS do core. */
@@ -732,13 +743,13 @@ export function useEmulator() {
       }
       // Volume E velocidade: a barra guardava 5x e o jogo novo entrava em 1x.
       core.setVolume(volume / 100);
-      aplicarVelocidade(core, fastForward, audioSyncRef.current);
+      aplicarVelocidade(core, false, audioSyncRef.current);
       rememberLastRom(fileName);
       setLoadedRom(fileName);
       setStatus({ kind: "running", rom: fileName });
       refreshLibrary();
     },
-    [refreshLibrary, volume, fastForward, falhaAoCarregar]
+    [refreshLibrary, volume, falhaAoCarregar]
   );
 
   /**
@@ -764,7 +775,7 @@ export function useEmulator() {
         return;
       }
       core.setVolume(volume / 100);
-      aplicarVelocidade(core, fastForward, audioSyncRef.current);
+      aplicarVelocidade(core, false, audioSyncRef.current);
       setLoadedRom(fileName);
       setRomId(identifyRom(lerCabecalho(core, fileName)));
 
@@ -791,7 +802,7 @@ export function useEmulator() {
       );
       refreshLibrary();
     },
-    [refreshLibrary, volume, fastForward]
+    [refreshLibrary, volume]
   );
 
   useEffect(() => {
@@ -1041,41 +1052,20 @@ export function useEmulator() {
     coreRef.current?.setVolume(percent / 100);
   }, []);
 
-  const setFastForward = useCallback((multiplier: number) => {
-    setFastForwardState(multiplier);
-    rememberFastForward(multiplier);
-    aplicarVelocidade(coreRef.current, multiplier, audioSyncRef.current);
-  }, []);
-
   /**
    * Turbo momentâneo, enquanto a tecla estiver segurada.
    *
-   * Fala direto com o core e não passa por `setFastForward`: a barra de
-   * velocidade é a preferência de quem joga e é gravada — o turbo é um impulso
-   * e não pode sobrescrevê-la. Ao soltar, volta para o que a barra diz.
-   */
-  /**
-   * O valor da barra lido por ref, e nao pelo closure.
+   * É o modelo do mGBA de mesa, e o único que ele oferece: velocidade normal,
+   * ou segurar a tecla para acelerar sem teto. Não há régua de velocidade lá,
+   * e não há mais aqui — a que existia mentia, porque o core não honra o
+   * multiplicador (medido: pedir 5× e pedir metade dão 1× igual).
    *
-   * Com `[fastForward]` nas dependencias, a identidade de `setTurbo` mudava a
-   * cada mexida na barra. A PlayPage tem esse `setTurbo` nas dependencias do
-   * efeito de atalhos E o chama na limpeza — entao o React rodava a limpeza
-   * ANTIGA, que devolvia o core ao multiplicador ANTIGO logo depois de
-   * `setFastForward` ter acertado. O rotulo dizia 5x e o jogo rodava em 1x.
-   *
-   * Estavel, o efeito nao e remontado e a limpeza le sempre o valor atual.
-   * Mesmo idioma do `avRef` em useDiagnostics e do `bindingsRef` em
-   * useKeyBindings.
+   * Estável de propósito: a PlayPage tem este `setTurbo` nas dependências do
+   * efeito de atalhos E o chama na limpeza. Com identidade variável, o React
+   * rodava a limpeza antiga e desligava o turbo logo depois de ligá-lo.
    */
-  const fastForwardRef = useRef(fastForward);
-  fastForwardRef.current = fastForward;
-
   const setTurbo = useCallback((active: boolean) => {
-    aplicarVelocidade(
-      coreRef.current,
-      active ? TURBO_MULTIPLIER : fastForwardRef.current,
-      audioSyncRef.current
-    );
+    aplicarVelocidade(coreRef.current, active, audioSyncRef.current);
     setTurboActive(active);
   }, []);
 
@@ -1385,7 +1375,6 @@ export function useEmulator() {
     localRoms,
     saves,
     volume,
-    fastForward,
     romId,
     notice,
     dismissNotice: () => setNotice(null),
@@ -1409,7 +1398,6 @@ export function useEmulator() {
     exportSave,
     importSave,
     setVolume,
-    setFastForward,
     sync,
     pressButton,
     releaseButton,

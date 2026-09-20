@@ -1204,3 +1204,27 @@
   font-size: 0.68rem;
   color: var(--text-muted);
 }
+
+/* ========= Turbo =========
+   No lugar da régua de velocidade, que foi removida: o core não honra o
+   multiplicador (medido — pedir 5x e pedir metade davam 1x igual), e o mGBA
+   de mesa também não tem régua. Sobra o que ele tem: normal, e turbo
+   enquanto a tecla está segurada. */
+.play-turbo {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  transition: border-color var(--dur-fast), color var(--dur-fast),
+    background var(--dur-fast);
+}
+.play-turbo.is-on {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 700;
+}

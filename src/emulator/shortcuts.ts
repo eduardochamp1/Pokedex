@@ -63,5 +63,5 @@ export const TURBO_MULTIPLIER = 5;
 export const SHORTCUT_HELP = [
   { keys: "F1–F6", what: "carregar o estado do slot" },
   { keys: "Shift + F1–F6", what: "gravar no slot" },
-  { keys: "Espaço", what: `turbo ${TURBO_MULTIPLIER}× enquanto segura` },
+  { keys: "Espaço", what: "turbo enquanto segura" },
 ] as const;

@@ -1,10 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   forgetLastRom,
-  getFastForward,
   getLastRom,
   getVolume,
-  rememberFastForward,
   rememberLastRom,
   rememberVolume,
 } from "./session";
@@ -87,21 +85,16 @@ describe("volume", () => {
   });
 });
 
+/**
+ * A sessao nao guarda mais velocidade.
+ *
+ * A regua de velocidade saiu da tela: o modelo agora e o do mGBA de mesa —
+ * velocidade normal e turbo enquanto a tecla esta segurada, sem nada para
+ * lembrar entre visitas.
+ */
 describe("velocidade", () => {
-  it("padrao e 1x", () => {
-    expect(getFastForward()).toBe(1);
-  });
-
-  it("ida e volta dentro da faixa da barra", () => {
-    rememberFastForward(3);
-    expect(getFastForward()).toBe(3);
-  });
-
-  it("recusa fracao e fora da faixa", () => {
-    storage.raw.set("pokedex:emulator:fast-forward", "2.5");
-    expect(getFastForward()).toBe(1);
-    storage.raw.set("pokedex:emulator:fast-forward", "9");
-    expect(getFastForward()).toBe(1);
+  it("nao ha preferencia de velocidade para guardar", () => {
+    expect(storage.raw.has("pokedex:emulator:fast-forward")).toBe(false);
   });
 });
 
