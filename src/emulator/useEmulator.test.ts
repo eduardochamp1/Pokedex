@@ -14,13 +14,29 @@ import { createElement } from "react";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { act, render, waitFor } from "@testing-library/react";
 
-const multiplicadores = vi.hoisted(() => [] as number[]);
+const dublê = vi.hoisted(() => ({
+  multiplicadores: [] as number[],
+  /** Liga a rejeição de `FSSync`, que é como a cota cheia se manifesta. */
+  syncFalha: false,
+}));
+const multiplicadores = dublê.multiplicadores;
 
 vi.mock("./core", () => {
   const registrado: Record<string, unknown> = {
     setFastForwardMultiplier: (n: number) => {
-      multiplicadores.push(n);
+      dublê.multiplicadores.push(n);
     },
+    // A mensagem é a do core de verdade, conferida em public/emulator/mgba.js.
+    FSSync: () =>
+      dublê.syncFalha
+        ? Promise.reject(
+            new Error("Error syncing app data to IndexedDB: QuotaExceededError")
+          )
+        : Promise.resolve(),
+    uploadRom: (_arquivo: unknown, pronto: () => void) => pronto(),
+    loadGame: () => true,
+    filePaths: () => ({ gamePath: "/data/games", screenshotsPath: "/data/shots" }),
+    saveStateSlot: () => true,
   };
   const core = new Proxy(registrado, {
     get: (alvo, prop) => {
@@ -88,6 +104,7 @@ async function montar() {
 
 beforeEach(() => {
   multiplicadores.length = 0;
+  dublê.syncFalha = false;
   window.localStorage.clear();
 });
 
@@ -147,5 +164,55 @@ describe("useEmulator — barra de velocidade", () => {
 
     expect(durante).toBeGreaterThan(3);
     expect(multiplicadores.at(-1)).toBe(3);
+  });
+});
+
+/**
+ * `FSSync()` rejeita quando `FS.syncfs` devolve erro — o caso comum é a cota do
+ * navegador cheia. A definição está em `public/emulator/mgba.js`:
+ * `FSSync=()=>new Promise((resolve,reject)=>{FS.syncfs(err=>{if(err){reject(...)}resolve()})})`.
+ *
+ * Sem guarda, a rejeição virava unhandled rejection silenciosa: quem chama faz
+ * `void emu.playFile(file)`, então a tela ficava em "Carregando…" para sempre e
+ * a única saída era recarregar a página.
+ */
+describe("useEmulator — falha ao sincronizar com o IndexedDB", () => {
+  it("carregar ROM vira erro com saída, e não “Carregando…” eterno", async () => {
+    const emu = await montar();
+    dublê.syncFalha = true;
+
+    await act(async () => {
+      await emu.atual.playFile(new File([new Uint8Array(8)], "teste.gba"));
+    });
+
+    expect(emu.atual.status.kind).not.toBe("loading");
+    expect(emu.atual.status.kind).toBe("error");
+    const msg = emu.atual.status.kind === "error" ? emu.atual.status.message : "";
+    expect(msg.toLowerCase()).toContain("cota");
+  });
+
+  /** Gravar é recuperável: avisa sem derrubar o jogo que está rodando. */
+  it("gravar estado avisa que não persistiu, sem derrubar o jogo", async () => {
+    const emu = await montar();
+    dublê.syncFalha = true;
+
+    await act(async () => {
+      await emu.atual.saveState(1);
+    });
+
+    expect(emu.atual.notice).toBeTruthy();
+    expect(String(emu.atual.notice).toLowerCase()).toContain("cota");
+    expect(emu.atual.status.kind).not.toBe("error");
+  });
+
+  it("o botão de sincronizar não mente quando a gravação falha", async () => {
+    const emu = await montar();
+    dublê.syncFalha = true;
+
+    await act(async () => {
+      await emu.atual.sync();
+    });
+
+    expect(String(emu.atual.notice)).not.toContain("Progresso sincronizado");
   });
 });

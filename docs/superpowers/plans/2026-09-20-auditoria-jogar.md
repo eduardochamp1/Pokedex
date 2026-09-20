@@ -18,7 +18,7 @@
 
 | Fase | O que é | Tarefas | Estado |
 |---|---|---|---|
-| 0 | Bugs confirmados no emulador | 5 | ◐ 1/5 — 0.1 concluída |
+| 0 | Bugs confirmados no emulador | 5 | ◐ 2/5 — 0.1 e 0.2 concluídas |
 | 1 | `romId.ts` — a pedra angular | 1 | ☐ não iniciada |
 | 2 | Furar a ilha: a barra de três links | 1 | ☐ não iniciada |
 | 3 | Pontes baratas | 4 | ☐ não iniciada |
@@ -171,6 +171,13 @@ Se o sync rejeita, `playFile` rejeita; quem chama faz `void emu.playFile(file)`
 **Mesmo padrão sem guarda em:** `:449` (resumeLastRom), `:585` (saveState), `:620` (clearState),
 `:650` (captureAutoState), `:683` (importSave), `:764` (takeScreenshot), `:815` (sync).
 
+> **Correção feita ao executar (2026-09-20):** são **oito** pontos desguardados, não nove. O
+> `await core.FSSync()` de `deleteRom` já estava dentro de um `try/catch` que chama `setNotice` —
+> não precisava de nada. Em compensação apareceu um nono ponto que o plano não listava: o
+> `void core.FSSync()` da limpeza do efeito de inicialização. O `try/catch` em volta dele é
+> síncrono e não pega rejeição de promise, então sair da aba com a cota cheia virava rejeição não
+> tratada no console.
+
 **Que é descuido e não decisão está provado no mesmo arquivo:** as linhas 266 e 554 fazem
 `core.FSSync().catch(() => undefined)`.
 
@@ -179,18 +186,18 @@ Se o sync rejeita, `playFile` rejeita; quem chama faz `void emu.playFile(file)`
 `setNotice()` nunca rodam → o painel não muda e nenhuma mensagem aparece. Quem joga conclui que
 falhou e tenta de novo.
 
-- [ ] **Passo 1 — decidir a política antes de codar.** Há dois comportamentos distintos:
+- [x] **Passo 1 — decidir a política antes de codar.** Há dois comportamentos distintos:
       *falha ao carregar* deve virar status de erro com mensagem; *falha ao gravar/sincronizar*
       deve virar um `notice` visível sem derrubar o jogo. Não trate os 9 pontos igual.
-- [ ] **Passo 2 — teste que falha primeiro.** No `useEmulator.test.ts` da tarefa anterior, um caso
+- [x] **Passo 2 — teste que falha primeiro.** No `useEmulator.test.ts` da tarefa anterior, um caso
       com core dublê cujo `FSSync` rejeita: afirmar que o status **não** fica em `loading` e que
       uma mensagem chega ao usuário.
-- [ ] **Passo 3 — corrigir os 9 pontos** conforme a política do passo 1. Onde a falha for
+- [x] **Passo 3 — corrigir os 9 pontos** conforme a política do passo 1. Onde a falha for
       recuperável, `.catch()` com `setNotice`; onde for fatal para a operação, `setStatus({kind:"error"})`
       com texto que diz o que fazer (a cota é a causa provável — o painel "Onde ficam seus saves"
       já mostra uso/quota e pode ser citado na mensagem).
-- [ ] **Passo 4 — verificar.** Teste passa; `npm run typecheck`, `npm test`, `npm run build` limpos.
-- [ ] **Passo 5 — commit.** `fix(emulador): trata falha de FSSync em vez de travar em carregando`
+- [x] **Passo 4 — verificar.** Teste passa; `npm run typecheck`, `npm test`, `npm run build` limpos.
+- [x] **Passo 5 — commit.** `fix(emulador): trata falha de FSSync em vez de travar em carregando`
 
 ## Tarefa 0.3 — O backup em `saves/` grava arquivo zerado e diz que é progresso
 

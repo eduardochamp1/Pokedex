@@ -72,6 +72,35 @@ async function withTimeout(promise: Promise<void>, ms: number): Promise<boolean>
 }
 
 /**
+ * Grava o FS virtual no IndexedDB e devolve o motivo da falha, ou `null`.
+ *
+ * `FSSync()` **rejeita** quando `FS.syncfs` devolve erro — conferido no proprio
+ * `public/emulator/mgba.js`. A causa comum e a cota do navegador cheia.
+ *
+ * Sem guarda, essa rejeicao virava rejeicao nao tratada e sumia: quem chama faz
+ * `void emu.playFile(file)`, entao a tela ficava em "Carregando..." para sempre
+ * e a unica saida era recarregar a pagina. Gravar um save state falhava do
+ * mesmo jeito, so que sem mensagem nenhuma — o painel nao mudava e quem jogava
+ * concluia que nao tinha funcionado e tentava de novo.
+ *
+ * Quem chama decide o peso: carregar e fatal e vira `status`; gravar, apagar e
+ * importar sao recuperaveis e viram `notice`, sem derrubar o jogo.
+ */
+async function syncFs(core: mGBAEmulator | undefined): Promise<string | null> {
+  if (!core) return null;
+  try {
+    await core.FSSync();
+    return null;
+  } catch (error) {
+    return error instanceof Error ? error.message : String(error);
+  }
+}
+
+/** Sufixo comum das mensagens: a cota e a causa provavel, e ela e visivel. */
+const DICA_DE_COTA =
+  "O mais provável é a cota do navegador estar cheia — veja “Onde ficam seus saves” no painel ao lado.";
+
+/**
  * Dirige o core mGBA a partir de um canvas.
  *
  * Persistencia: `FSInit` monta IDBFS, entao ROMs enviadas, saves de bateria e
@@ -339,7 +368,11 @@ export function useEmulator() {
           setWasRunning(statusRef.current.kind === "running");
           core.pauseGame();
           core.pauseAudio();
-          void core.FSSync();
+          // O try/catch em volta é síncrono e não pega rejeição de promise:
+          // sem este catch, sair da aba com a cota cheia virava rejeição não
+          // tratada no console. Aqui não há a quem avisar — a tela está indo
+          // embora —, então só não deixamos escapar.
+          core.FSSync().catch(() => undefined);
         } catch {
           // sem jogo carregado: nada a pausar
         }
@@ -380,7 +413,14 @@ export function useEmulator() {
         });
         return;
       }
-      await core.FSSync();
+      const erroSync = await syncFs(core);
+      if (erroSync) {
+        setStatus({
+          kind: "error",
+          message: `Não deu para guardar ${flatName} no navegador. ${DICA_DE_COTA}`,
+        });
+        return;
+      }
 
       const ok = core.loadGame(`${core.filePaths().gamePath}/${flatName}`);
       if (!ok) {
@@ -446,7 +486,14 @@ export function useEmulator() {
       core.setFastForwardMultiplier(fastForward);
       setLoadedRom(fileName);
 
-      await core.FSSync();
+      const erroSync = await syncFs(core);
+      if (erroSync) {
+        setStatus({
+          kind: "error",
+          message: `${fileName} carregou, mas não deu para gravar no navegador. ${DICA_DE_COTA}`,
+        });
+        return;
+      }
       setStatus({ kind: "running", rom: fileName });
 
       // O ponto automático NÃO é aplicado aqui de propósito. `loadAutoSaveState`
@@ -582,11 +629,14 @@ export function useEmulator() {
       // e é a imagem que faz reconhecer o slot certo de relance.
       const rom = getLoadedRom();
       if (ok && rom) core.screenshot(stateThumbnailName(rom, slot));
-      await core.FSSync();
+      const erroSync = await syncFs(core);
       refreshLibrary();
-      setNotice(
-        ok ? `Estado gravado no slot ${slot}.` : `Falhou ao gravar o slot ${slot}.`
-      );
+      if (!ok) setNotice(`Falhou ao gravar o slot ${slot}.`);
+      else if (erroSync)
+        setNotice(
+          `Slot ${slot} gravado, mas não foi para o armazenamento — pode se perder ao recarregar. ${DICA_DE_COTA}`
+        );
+      else setNotice(`Estado gravado no slot ${slot}.`);
     },
     [refreshLibrary]
   );
@@ -607,6 +657,7 @@ export function useEmulator() {
       const rom = getLoadedRom();
       if (!core || !rom) return;
       const removed = deleteStateFile(core, rom, slot);
+      let erroSync: string | null = null;
       if (removed) {
         // A miniatura vai junto: imagem órfã apontaria para um estado que já
         // não existe.
@@ -617,12 +668,15 @@ export function useEmulator() {
         } catch {
           // estado antigo, gravado antes de haver miniatura
         }
-        await core.FSSync();
+        erroSync = await syncFs(core);
       }
       refreshLibrary();
-      setNotice(
-        removed ? `Slot ${slot} apagado.` : `Slot ${slot} já estava vazio.`
-      );
+      if (!removed) setNotice(`Slot ${slot} já estava vazio.`);
+      else if (erroSync)
+        setNotice(
+          `Slot ${slot} apagado, mas o armazenamento não confirmou — ele pode reaparecer ao recarregar. ${DICA_DE_COTA}`
+        );
+      else setNotice(`Slot ${slot} apagado.`);
     },
     [refreshLibrary]
   );
@@ -647,9 +701,12 @@ export function useEmulator() {
     const core = coreRef.current;
     if (!core) return;
     const ok = core.forceAutoSaveState();
-    await core.FSSync();
+    const erroSync = await syncFs(core);
     refreshLibrary();
-    setNotice(ok ? "Ponto automático capturado." : "Não deu para capturar.");
+    if (!ok) setNotice("Não deu para capturar.");
+    else if (erroSync)
+      setNotice(`Ponto capturado, mas não foi para o armazenamento. ${DICA_DE_COTA}`);
+    else setNotice("Ponto automático capturado.");
   }, [refreshLibrary]);
 
   /** Baixa o save de bateria (.sav) do jogo em execução. */
@@ -680,10 +737,12 @@ export function useEmulator() {
       const core = coreRef.current;
       if (!core) return;
       await new Promise<void>((done) => core.uploadSaveOrSaveState(file, done));
-      await core.FSSync();
+      const erroSync = await syncFs(core);
       refreshLibrary();
       setNotice(
-        `"${file.name}" importado. Recarregue o jogo para o save valer.`
+        erroSync
+          ? `"${file.name}" entrou, mas não foi gravado no navegador — some ao recarregar. ${DICA_DE_COTA}`
+          : `"${file.name}" importado. Recarregue o jogo para o save valer.`
       );
     },
     [refreshLibrary]
@@ -774,7 +833,11 @@ export function useEmulator() {
         setNotice("O core não conseguiu capturar a tela.");
         return;
       }
-      await core.FSSync();
+      const erroSync = await syncFs(core);
+      if (erroSync) {
+        setNotice(`A captura não foi gravada no navegador. ${DICA_DE_COTA}`);
+        return;
+      }
       try {
         const path = `${core.filePaths().screenshotsPath}/${fileName}`;
         const data = core.FS.readFile(path) as Uint8Array;
@@ -825,8 +888,12 @@ export function useEmulator() {
 
   /** Grava o save pendente — útil antes de fechar a aba. */
   const sync = useCallback(async () => {
-    await coreRef.current?.FSSync();
-    setNotice("Progresso sincronizado.");
+    const erroSync = await syncFs(coreRef.current ?? undefined);
+    setNotice(
+      erroSync
+        ? `Não deu para sincronizar o progresso. ${DICA_DE_COTA}`
+        : "Progresso sincronizado."
+    );
   }, []);
 
   // Garante que o save vai para o IndexedDB se a aba for fechada no meio.
