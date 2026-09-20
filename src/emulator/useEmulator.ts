@@ -39,6 +39,7 @@ import {
 } from "./capture";
 import { GBA_HEADER_BYTES, identifyRom, type RomId } from "./romId";
 import { parseGen3Save, type Gen3PartyMember } from "./saveParse/gen3";
+import { MGBA_CORE_SETTINGS } from "./mgbaDefaults";
 import { TURBO_MULTIPLIER } from "./shortcuts";
 import { useDiagnostics } from "./useDiagnostics";
 import { useDiskBackup } from "./useDiskBackup";
@@ -210,44 +211,60 @@ function baseDe(
 }
 
 /**
- * Modos de `emscripten_set_main_loop_timing`, que e o que
- * `setMainLoopTiming(mode, value)` expoe.
- */
-const EM_TIMING_SETTIMEOUT = 0;
-const EM_TIMING_RAF = 1;
-/** Quadros por segundo de um GBA. E a base que a velocidade multiplica. */
-const FPS_BASE = 60;
-
-/**
- * Aplica a velocidade no core — de verdade.
+ * Aplica a velocidade no core.
  *
- * **`setFastForwardMultiplier` sozinho nao acelera o jogo.** Medido no
- * navegador com Emerald rodando: chamar com 5 muda o valor interno (o
- * `getFastForwardMultiplier` passa a responder 5), e o laco principal continua
- * em `mode 1, value 1` — um tick por quadro de animacao, 60 Hz travados. O
- * multiplicador alcanca o caminho do audio, que reamostra mais rapido, e por
- * isso a musica acelerava sozinha enquanto a jogabilidade ficava igual.
+ * Uma chamada, e só. É o que o gbajs3 — a implementação de referência deste
+ * mesmo core, do mesmo autor — faz: `setFastForwardMultiplier` e nada mais.
+ * Ele não toca em `setMainLoopTiming` em lugar nenhum.
  *
- * Quem manda no ritmo e `setMainLoopTiming`. Em 1x o laco volta para
- * requestAnimationFrame, que e o caminho suave e casado com a tela. Acima
- * disso ele vai para setTimeout no intervalo que a velocidade pedir — em 5x,
- * 1000 / (60 x 5) = 3 ms.
+ * ### O que havia aqui antes, e por que saiu
  *
- * O multiplicador continua sendo aplicado junto: e ele que faz o audio
- * acompanhar. Os dois trabalham em conjunto; faltava o segundo.
+ * Uma versão anterior concluiu que "`setFastForwardMultiplier` sozinho não
+ * acelera o jogo" e passou a dirigir o laço principal na mão: `setTimeout` no
+ * intervalo `1000 / (60 × multiplicador)`, e `SETIMMEDIATE` no turbo.
+ *
+ * A medição que levou a essa conclusão era real, mas o culpado era outro: o
+ * `audioSync` estava ligado, herdado do `config.ini` do mGBA de mesa, e ele
+ * amarra o vídeo ao consumo de áudio em tempo real. Com esse freio, nenhum
+ * multiplicador acelera o jogo — só o resampler. O laço na mão era compensação
+ * para um freio que não devia estar lá, e as duas lógicas brigando produziam a
+ * arrancada e a lentidão intermitentes.
+ *
+ * ### Dois donos para o mesmo byte
+ *
+ * Desmontando o `mgba.wasm`: `setFastForwardMultiplier` chama `func#856`, que
+ * com `m > 1` faz **duas** coisas — define `sync->fpsTarget = m × baseFpsTarget`
+ * e **liga `audioWait`**, no byte `impl+272`. Esse é exatamente o byte que
+ * `setCoreSettings({ audioSync })` escreve.
+ *
+ * Ou seja: o próprio ato de acelerar religa o freio de áudio, por cima do que a
+ * tela de A/V pediu. Com `audioWait` em 1, `mCoreSyncProduceAudio` (`func#1028`)
+ * bloqueia numa condition variable dentro do caminho do quadro, contra um
+ * consumidor de taxa fixa — e o jogo volta a andar em tempo real.
+ *
+ * Por isso a ordem importa e a reafirmação é obrigatória: multiplicador
+ * primeiro, `audioSync` depois. Na ordem inversa não adianta nada.
+ *
+ * Com `m <= 1` o core restaura uma preferência interna própria (`ctx+272`) que
+ * `setCoreSettings` nunca atualiza — mais um motivo para reafirmar sempre, e
+ * não só quando acelera.
+ *
+ * ### Nota sobre o caminho antigo
+ *
+ * Em 5× o intervalo pedido era 3 ms, abaixo do piso de ~4 ms
+ * que o navegador impõe a `setTimeout` aninhado, então aquele caminho nunca
+ * teria entregue 5× de qualquer forma.
  */
 function aplicarVelocidade(
   core: mGBAEmulator | null | undefined,
-  multiplicador: number
+  multiplicador: number,
+  audioSync: boolean
 ): void {
   if (!core) return;
   core.setFastForwardMultiplier(multiplicador);
-  if (multiplicador <= 1) {
-    core.setMainLoopTiming(EM_TIMING_RAF, 1);
-    return;
-  }
-  const intervalo = Math.max(1, Math.round(1000 / (FPS_BASE * multiplicador)));
-  core.setMainLoopTiming(EM_TIMING_SETTIMEOUT, intervalo);
+  // Reafirmar DEPOIS não é redundância: é o que faz a nossa escolha valer.
+  // Ver o bloco "Dois donos para o mesmo byte" acima.
+  core.setCoreSettings({ audioSync });
 }
 
 /** Sufixo comum das mensagens: a cota e a causa provavel, e ela e visivel. */
@@ -312,6 +329,16 @@ export function useEmulator() {
   /** Sincronia de áudio/vídeo, contador de FPS e o log do core. */
   const diagnostics = useDiagnostics(coreRef);
   const attachDiagnostics = diagnostics.attach;
+  /**
+   * O `audioSync` em vigor, lido por ref.
+   *
+   * `aplicarVelocidade` precisa reafirmá-lo depois de cada troca de velocidade,
+   * e os callbacks que a chamam são estáveis (`useCallback` com lista vazia) de
+   * propósito — ver `fastForwardRef`. Pela ref, eles leem sempre o valor atual
+   * sem serem remontados.
+   */
+  const audioSyncRef = useRef(diagnostics.av.audioSync);
+  audioSyncRef.current = diagnostics.av.audioSync;
   /**
    * O callback do core e registrado uma vez na inicializacao; a ref evita
    * recriar aquele efeito so porque o backup mudou de identidade.
@@ -518,10 +545,15 @@ export function useEmulator() {
         // Bindings explícitos: a legenda da UI lê do mesmo mapa.
         attachBindings(core);
         core.setCoreSettings({
+          // Os ajustes do mGBA de mesa entram primeiro; o que vem depois é
+          // escolha desta casa e pode sobrepor.
+          ...MGBA_CORE_SETTINGS,
           autoSaveStateEnable: true,
           autoSaveStateTimerIntervalSeconds: 30,
           restoreAutoSaveStateOnLoad: false,
-          // O buffer de rebobinar já existia no core e nunca era ligado.
+          // O buffer de rebobinar já existia no core e nunca era ligado. O
+          // mGBA de mesa traz rewind desligado (`rewindEnable=0`); aqui ele
+          // fica ligado de propósito, porque a aba oferece o botão.
           ...REWIND_SETTINGS,
         });
         // Sincronia de áudio/vídeo gravada, e o log do core.
@@ -676,7 +708,7 @@ export function useEmulator() {
       }
       // Volume E velocidade: a barra guardava 5x e o jogo novo entrava em 1x.
       core.setVolume(volume / 100);
-      aplicarVelocidade(core, fastForward);
+      aplicarVelocidade(core, fastForward, audioSyncRef.current);
       rememberLastRom(flatName);
       setLoadedRom(flatName);
       setStatus({ kind: "running", rom: flatName });
@@ -700,7 +732,7 @@ export function useEmulator() {
       }
       // Volume E velocidade: a barra guardava 5x e o jogo novo entrava em 1x.
       core.setVolume(volume / 100);
-      aplicarVelocidade(core, fastForward);
+      aplicarVelocidade(core, fastForward, audioSyncRef.current);
       rememberLastRom(fileName);
       setLoadedRom(fileName);
       setStatus({ kind: "running", rom: fileName });
@@ -732,7 +764,7 @@ export function useEmulator() {
         return;
       }
       core.setVolume(volume / 100);
-      aplicarVelocidade(core, fastForward);
+      aplicarVelocidade(core, fastForward, audioSyncRef.current);
       setLoadedRom(fileName);
       setRomId(identifyRom(lerCabecalho(core, fileName)));
 
@@ -1012,7 +1044,7 @@ export function useEmulator() {
   const setFastForward = useCallback((multiplier: number) => {
     setFastForwardState(multiplier);
     rememberFastForward(multiplier);
-    aplicarVelocidade(coreRef.current, multiplier);
+    aplicarVelocidade(coreRef.current, multiplier, audioSyncRef.current);
   }, []);
 
   /**
@@ -1041,7 +1073,8 @@ export function useEmulator() {
   const setTurbo = useCallback((active: boolean) => {
     aplicarVelocidade(
       coreRef.current,
-      active ? TURBO_MULTIPLIER : fastForwardRef.current
+      active ? TURBO_MULTIPLIER : fastForwardRef.current,
+      audioSyncRef.current
     );
     setTurboActive(active);
   }, []);

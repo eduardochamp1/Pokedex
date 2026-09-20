@@ -7,6 +7,7 @@
  * lugar nenhum: quando um jogo se comportava mal, nao havia o que olhar.
  */
 import type { LogEntry, LogLevel } from "@thenick775/mgba-wasm";
+import { MGBA_CORE_SETTINGS } from "./mgbaDefaults";
 
 export interface AvSettings {
   /** Sincroniza o video com a velocidade do audio. Corta estalos. */
@@ -16,11 +17,10 @@ export interface AvSettings {
   /**
    * Avanca em passos discretos de `baseFpsTarget` em vez de tempo variavel.
    *
-   * E o ajuste que decide QUEM manda no ritmo da emulacao, e o core o traz
-   * ligado. Ligado, o core anda em incrementos fixos de 1/60 s e ignora
-   * quanto tempo real passou — entao a barra de velocidade nao tem por onde
-   * agir sobre o jogo, e so o audio acelera. Desligado, o ritmo vem do audio
-   * (com `audioSync`), que e o caminho por onde o multiplicador funciona.
+   * Ligado e o certo, e e o que o gbajs3 usa: o core anda em incrementos fixos
+   * de 1/60 s, e e justamente esse passo fixo que o multiplicador de velocidade
+   * escala. Desligado, cada tique avanca o tempo real decorrido e o
+   * multiplicador perde o que multiplicar.
    */
   timestepSync: boolean;
   /** Contador de quadros por segundo desenhado pelo proprio core. */
@@ -28,23 +28,23 @@ export interface AvSettings {
 }
 
 /**
- * Os defaults do core, segundo a tipagem publicada.
+ * O ponto de partida da tela de A/V.
  *
- * Ja tentei mexer aqui para resolver a barra de velocidade que acelerava so a
- * musica, apostando que `timestepSync` era o culpado. **Nao era**, e a medicao
- * mostrou onde estava: `setFastForwardMultiplier` mudava o valor interno e o
- * laco principal continuava preso em `requestAnimationFrame`, um tick por
- * quadro. A correcao ficou em `aplicarVelocidade`, no useEmulator, e estes
- * valores voltaram para o que o core traz.
+ * Os valores saem de `MGBA_CORE_SETTINGS`, que segue o **gbajs3** — a
+ * implementacao de referencia deste mesmo core. Importar dali em vez de repetir
+ * o literal evita que os dois lugares divirjam: a inicializacao aplica aquele
+ * objeto e esta tela roda depois, entao valores diferentes fariam a tela
+ * desfazer a configuracao.
  *
- * O `timestepSync` continua alcancavel pela tela, que e um ganho que sobrou da
- * tentativa: ele decide se o core anda em passos fixos de 1/60 s ou por tempo
- * decorrido, e antes nao havia como experimentar.
+ * `audioSync` vem **desligado**, e isso nao e descuido. Ligado, ele amarra o
+ * video ao consumo de audio em tempo real e a barra de velocidade para de
+ * funcionar — so o resampler acelera. O toggle segue na tela porque ligar
+ * ajuda quem ouve estalos, mas o padrao e desligado.
  */
 export const DEFAULT_AV: AvSettings = {
-  audioSync: false,
-  videoSync: false,
-  timestepSync: true,
+  audioSync: MGBA_CORE_SETTINGS.audioSync ?? false,
+  videoSync: MGBA_CORE_SETTINGS.videoSync ?? false,
+  timestepSync: MGBA_CORE_SETTINGS.timestepSync ?? true,
   showFpsCounter: false,
 };
 
@@ -81,8 +81,8 @@ export const AV_TOGGLES: {
     id: "timestepSync",
     label: "Passo fixo",
     hint:
-      "Avança em passos de 1/60 s em vez de seguir o áudio. Ligado, a barra de " +
-      "velocidade acelera só a música, e o jogo dá arrancadas quando a aba engasga.",
+      "Avança em passos de 1/60 s. É o que a barra de velocidade multiplica — " +
+      "desligue só para diagnosticar.",
   },
   {
     id: "showFpsCounter",

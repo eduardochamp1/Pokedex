@@ -9,7 +9,20 @@ import {
 import { loadPref, savePref } from "./prefs";
 import type { mGBAEmulator } from "./types";
 
-const AV_PREF = "av-settings";
+/**
+ * Chave versionada de propósito.
+ *
+ * A `av-settings` original gravava `audioSync: true`, herdado do `config.ini`
+ * do mGBA de mesa — e era esse valor que travava a barra de velocidade. Uma
+ * preferência antiga tem formato perfeitamente válido, então passaria pelo
+ * `isAvSettings` e venceria o padrão novo: quem já abriu a aba continuaria com
+ * o bug, e trocar o default não teria efeito nenhum.
+ *
+ * Subir a chave aposenta a preferência antiga em vez de migrá-la campo a campo.
+ * O custo é quem tinha ajustado A/V na mão voltar ao padrão uma vez — barato,
+ * perto de deixar o freio ligado sem que ninguém perceba.
+ */
+const AV_PREF = "av-settings-v2";
 
 /**
  * Sincronia de audio/video, contador de FPS e o log do core.

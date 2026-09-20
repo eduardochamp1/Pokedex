@@ -16,8 +16,24 @@ import { act, render, waitFor } from "@testing-library/react";
 
 const dublê = vi.hoisted(() => ({
   multiplicadores: [] as number[],
-  /** Chamadas de setMainLoopTiming, que e quem realmente acelera o jogo. */
+  /**
+   * Chamadas de `setMainLoopTiming`.
+   *
+   * Este build é pthreads e a emulação roda numa worker, então mexer no laço da
+   * thread principal não acelera nada — a lista existe para provar que ficou
+   * **vazia**, não para conferir valores.
+   */
   timings: [] as { mode: number; value: number }[],
+  /** Objetos passados a `setCoreSettings`, na ordem. */
+  coreSettings: [] as Record<string, unknown>[],
+  /**
+   * Nomes dos métodos chamados, na ordem.
+   *
+   * A ordem entre `setFastForwardMultiplier` e `setCoreSettings` é o que faz o
+   * turbo funcionar: os dois escrevem no mesmo byte de `audioWait` dentro do
+   * core, e o multiplicador liga o freio sozinho quando passa de 1.
+   */
+  chamadas: [] as string[],
   /** Liga a rejeição de `FSSync`, que é como a cota cheia se manifesta. */
   syncFalha: false,
   /** Faz `loadGame` recusar, como acontece com ROM corrompida. */
@@ -28,10 +44,16 @@ const multiplicadores = dublê.multiplicadores;
 vi.mock("./core", () => {
   const registrado: Record<string, unknown> = {
     setFastForwardMultiplier: (n: number) => {
+      dublê.chamadas.push("setFastForwardMultiplier");
       dublê.multiplicadores.push(n);
     },
     setMainLoopTiming: (mode: number, value: number) => {
+      dublê.chamadas.push("setMainLoopTiming");
       dublê.timings.push({ mode, value });
+    },
+    setCoreSettings: (s: Record<string, unknown>) => {
+      dublê.chamadas.push("setCoreSettings");
+      dublê.coreSettings.push(s);
     },
     // A mensagem é a do core de verdade, conferida em public/emulator/mgba.js.
     FSSync: () =>
@@ -88,6 +110,7 @@ vi.mock("./saveStates", async (original) => ({
 }));
 
 import { useEmulator } from "./useEmulator";
+import { TURBO_MULTIPLIER } from "./shortcuts";
 
 /**
  * Monta o hook e espera o core dublê ser adotado.
@@ -112,6 +135,8 @@ async function montar() {
 beforeEach(() => {
   multiplicadores.length = 0;
   dublê.timings.length = 0;
+  dublê.coreSettings.length = 0;
+  dublê.chamadas.length = 0;
   dublê.syncFalha = false;
   dublê.loadFalha = false;
   window.localStorage.clear();
@@ -283,67 +308,123 @@ describe("useEmulator — ROM nova que falha", () => {
 });
 
 /**
- * Quem acelera o jogo é o laço principal, não o multiplicador.
+ * A velocidade é o multiplicador, e só ele.
  *
- * Relatado jogando: a barra acelerava a música e não a jogabilidade. Medido no
- * navegador com Emerald rodando — `setFastForwardMultiplier(5)` mudava o valor
- * interno e `getMainLoopTimingMode/Value` continuavam em `1, 1`, ou seja um
- * tick por quadro de animação, 60 Hz travados. O multiplicador só alcança o
- * caminho do áudio, que reamostra mais rápido; daí a música correr sozinha.
+ * É o que o gbajs3 faz — a implementação de referência deste mesmo core, do
+ * mesmo autor: `setFastForwardMultiplier` e nada mais, sem tocar em
+ * `setMainLoopTiming`.
+ *
+ * Uma versão anterior deste arquivo travava o contrário: que a velocidade
+ * mexia no laço principal, com `setTimeout` no intervalo `1000/(60×mult)`.
+ * Aquilo era compensação para um freio que não devia existir — `audioSync`
+ * ligado, herdado do `config.ini` do mGBA de mesa, amarrava o vídeo ao consumo
+ * de áudio em tempo real. Com o freio, nenhum multiplicador acelerava o jogo;
+ * com a compensação, as duas lógicas brigavam e o jogo dava arrancadas.
+ *
+ * O teste que importa agora é o de baixo: que **não** mexemos no laço.
  */
-describe("useEmulator — a velocidade mexe no laço principal", () => {
-  const RAF = 1;
-  const SETTIMEOUT = 0;
-
-  it("1× devolve o laço ao requestAnimationFrame", async () => {
-    const emu = await montar();
-    await act(async () => {
-      emu.atual.setFastForward(1);
-    });
-    expect(dublê.timings.at(-1)).toEqual({ mode: RAF, value: 1 });
-  });
-
-  it("acima de 1× o laço vai para setTimeout no intervalo certo", async () => {
+describe("useEmulator — a velocidade é o multiplicador", () => {
+  it("a barra manda o multiplicador para o core", async () => {
     const emu = await montar();
 
     await act(async () => {
       emu.atual.setFastForward(5);
     });
-    // 1000 / (60 × 5) = 3,33 -> 3
-    expect(dublê.timings.at(-1)).toEqual({ mode: SETTIMEOUT, value: 3 });
+    expect(multiplicadores.at(-1)).toBe(5);
 
     await act(async () => {
       emu.atual.setFastForward(2);
     });
-    // 1000 / (60 × 2) = 8,33 -> 8
-    expect(dublê.timings.at(-1)).toEqual({ mode: SETTIMEOUT, value: 8 });
+    expect(multiplicadores.at(-1)).toBe(2);
   });
 
-  /** É o "segurar espaço" que todo emulador tem, e era o caso do relato. */
-  it("o turbo acelera o laço e devolve ao soltar", async () => {
+  it("1× volta o multiplicador para 1", async () => {
     const emu = await montar();
     await act(async () => {
       emu.atual.setFastForward(1);
+    });
+    expect(multiplicadores.at(-1)).toBe(1);
+  });
+
+  /** É o "segurar espaço" que todo emulador tem, e era o caso do relato. */
+  it("o turbo sobe o multiplicador e devolve ao soltar", async () => {
+    const emu = await montar();
+    await act(async () => {
+      emu.atual.setFastForward(2);
     });
 
     await act(async () => {
       emu.atual.setTurbo(true);
     });
-    expect(dublê.timings.at(-1)).toEqual({ mode: SETTIMEOUT, value: 3 });
+    expect(multiplicadores.at(-1)).toBe(TURBO_MULTIPLIER);
 
+    // Volta para a barra, não para 1: o turbo é um impulso sobre a preferência.
     await act(async () => {
       emu.atual.setTurbo(false);
     });
-    expect(dublê.timings.at(-1)).toEqual({ mode: RAF, value: 1 });
+    expect(multiplicadores.at(-1)).toBe(2);
   });
 
-  /** O multiplicador continua indo junto: é ele que faz o áudio acompanhar. */
-  it("o multiplicador continua sendo aplicado", async () => {
+  /**
+   * A regressão mais sutil das duas, e a que custou mais para achar.
+   *
+   * Desmontando o wasm: `setFastForwardMultiplier` com `m > 1` liga `audioWait`
+   * por conta própria, no mesmo byte que `setCoreSettings({audioSync})` escreve.
+   * Sem reafirmar o `audioSync` DEPOIS do multiplicador, acelerar religa o freio
+   * de áudio e o jogo volta a andar em tempo real — só a música acelera.
+   *
+   * A ordem é o que importa: inverter as duas chamadas não adianta nada.
+   */
+  it("reafirma o audioSync depois do multiplicador, nessa ordem", async () => {
     const emu = await montar();
+    dublê.chamadas.length = 0;
+
     await act(async () => {
-      emu.atual.setFastForward(4);
+      emu.atual.setFastForward(5);
     });
-    expect(multiplicadores.at(-1)).toBe(4);
-    expect(dublê.timings.at(-1)?.mode).toBe(SETTIMEOUT);
+
+    const ordem = dublê.chamadas.filter(
+      (c) => c === "setFastForwardMultiplier" || c === "setCoreSettings"
+    );
+    expect(ordem).toEqual(["setFastForwardMultiplier", "setCoreSettings"]);
+    expect(dublê.coreSettings.at(-1)?.audioSync).toBe(false);
+  });
+
+  /** O turbo passa pelo mesmo caminho, e é onde o relato começou. */
+  it("o turbo também reafirma o audioSync", async () => {
+    const emu = await montar();
+    dublê.chamadas.length = 0;
+
+    await act(async () => {
+      emu.atual.setTurbo(true);
+    });
+
+    expect(dublê.coreSettings.at(-1)?.audioSync).toBe(false);
+  });
+
+  /**
+   * A outra regressão.
+   *
+   * Este build é pthreads: a emulação roda numa worker e `setMainLoopTiming` só
+   * muda a cadência da thread principal — acelerar por ali nunca funcionou, e
+   * ainda roubava CPU do worker. Se alguém reintroduzir para "ajudar", cai aqui.
+   */
+  it("não toca no laço principal em nenhuma velocidade", async () => {
+    const emu = await montar();
+    const antes = dublê.timings.length;
+
+    for (const v of [1, 2, 5]) {
+      await act(async () => {
+        emu.atual.setFastForward(v);
+      });
+    }
+    await act(async () => {
+      emu.atual.setTurbo(true);
+    });
+    await act(async () => {
+      emu.atual.setTurbo(false);
+    });
+
+    expect(dublê.timings.length).toBe(antes);
   });
 });
