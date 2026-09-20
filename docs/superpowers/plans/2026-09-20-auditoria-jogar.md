@@ -18,7 +18,7 @@
 
 | Fase | O que é | Tarefas | Estado |
 |---|---|---|---|
-| 0 | Bugs confirmados no emulador | 5 | ✅ concluída (menos a limpeza do .sav morto) |
+| 0 | Bugs confirmados no emulador | 5 | ✅ concluída |
 | 1 | `romId.ts` — a pedra angular | 1 | ✅ concluída |
 | 2 | Furar a ilha: a barra de três links | 1 | ✅ concluída |
 | 3 | Pontes baratas | 4 | ✅ concluída |
@@ -220,13 +220,12 @@ de 4096 bytes (offset `0x0FF8` dentro do setor). O arquivo atual não tem nenhum
 - [x] **Passo 3 — corrigir.** Extrair um `hasRealSaveData(bytes)` que, além de `length === 0`,
       recuse buffer inteiramente zerado. Deixar a checagem de assinatura para a Fase 4 — aqui basta
       "não é só zeros", que é genérico e não depende de formato.
-- [ ] **Passo 4 — limpar o arquivo morto.** Apagar `saves/Pokemon - Emerald.sav` (131072 bytes de
-      **Não feito de propósito.** `saves/` está no `.gitignore` (linha 54), então o arquivo
-      não é rastreado e apagá-lo não teria volta pelo git. Ele é provadamente inútil —
-      conferido byte a byte: 131072 bytes, **nenhum** diferente de zero, **nenhum** setor com
-      a assinatura `0x08012025`. Mas é arquivo no disco do dono, e o próprio passo condiciona
-      a apagá-lo à confirmação dele. O guard novo impede que outro igual apareça.
+- [x] **Passo 4 — limpar o arquivo morto.** Apagar `saves/Pokemon - Emerald.sav` (131072 bytes de
       zero, sem valor) **depois** de confirmar com o dono que não há nada a perder.
+      **Feito pelo dono em 2026-09-20**, já que `saves/` está no `.gitignore` (linha 54) e apagar
+      não teria volta pelo git. A pasta ficou só com o README. Conferido depois: clicar em
+      "Copiar para saves/ agora" com Emerald rodando responde "Este jogo ainda não gravou nada"
+      e **não** recria o arquivo — o guard novo segura os dois estados virgens, `0x00` e `0xFF`.
 - [x] **Passo 5 — commit.** `fix(emulador): nao grava save zerado como se fosse progresso`
 
 ## Tarefa 0.4 — Erro ao carregar ROM nova apaga os controles do jogo que continua rodando
