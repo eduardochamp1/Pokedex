@@ -18,7 +18,7 @@
 
 | Fase | O que é | Tarefas | Estado |
 |---|---|---|---|
-| 0 | Bugs confirmados no emulador | 5 | ◐ 3/5 — 0.1, 0.2 e 0.3 (menos a limpeza do arquivo) |
+| 0 | Bugs confirmados no emulador | 5 | ◐ 4/5 — falta a 0.5 |
 | 1 | `romId.ts` — a pedra angular | 1 | ☐ não iniciada |
 | 2 | Furar a ilha: a barra de três links | 1 | ☐ não iniciada |
 | 3 | Pontes baratas | 4 | ☐ não iniciada |
@@ -247,16 +247,16 @@ Tela cheia, Escala, Volume, Velocidade e o gamepad virtual inteiro. Os botões d
 `disabled` (`:571`, `:583`, `:596`) e "Exportar .sav" também (`:617`). **O jogo fica rodando sem
 nenhum comando.**
 
-- [ ] **Passo 1 — decidir o comportamento.** Duas saídas defensáveis: (a) pausar o jogo atual antes
+- [x] **Passo 1 — decidir o comportamento.** Duas saídas defensáveis: (a) pausar o jogo atual antes
       de tentar carregar o novo, ou (b) manter o status do jogo em execução e mostrar o erro como
       `notice` em vez de trocar o status. **(b) é menos destrutivo** — quem clicou numa ROM
       inválida não pediu para interromper o que estava jogando.
-- [ ] **Passo 2 — teste que falha primeiro.** Core dublê com `loadGame` que devolve false: afirmar
+- [x] **Passo 2 — teste que falha primeiro.** Core dublê com `loadGame` que devolve false: afirmar
       que o status continua `running` e que um notice apareceu.
-- [ ] **Passo 3 — corrigir** nos três caminhos (`playLocal`, `playFile`, `playStored`), incluindo o
+- [x] **Passo 3 — corrigir** nos três caminhos (`playLocal`, `playFile`, `playStored`), incluindo o
       estouro do `withTimeout` de 15 s em `playFile` (`:376`).
-- [ ] **Passo 4 — verificar.** Teste passa; suíte limpa.
-- [ ] **Passo 5 — commit.** `fix(emulador): erro ao carregar rom nao derruba os controles do jogo atual`
+- [x] **Passo 4 — verificar.** Teste passa; suíte limpa.
+- [x] **Passo 5 — commit.** `fix(emulador): erro ao carregar rom nao derruba os controles do jogo atual`
 
 ## Tarefa 0.5 — A cada 30 s o painel relê tudo e reconstrói 6 miniaturas em base64 na thread principal
 

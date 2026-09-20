@@ -18,6 +18,8 @@ const dublê = vi.hoisted(() => ({
   multiplicadores: [] as number[],
   /** Liga a rejeição de `FSSync`, que é como a cota cheia se manifesta. */
   syncFalha: false,
+  /** Faz `loadGame` recusar, como acontece com ROM corrompida. */
+  loadFalha: false,
 }));
 const multiplicadores = dublê.multiplicadores;
 
@@ -34,7 +36,7 @@ vi.mock("./core", () => {
           )
         : Promise.resolve(),
     uploadRom: (_arquivo: unknown, pronto: () => void) => pronto(),
-    loadGame: () => true,
+    loadGame: () => !dublê.loadFalha,
     filePaths: () => ({ gamePath: "/data/games", screenshotsPath: "/data/shots" }),
     saveStateSlot: () => true,
   };
@@ -105,6 +107,7 @@ async function montar() {
 beforeEach(() => {
   multiplicadores.length = 0;
   dublê.syncFalha = false;
+  dublê.loadFalha = false;
   window.localStorage.clear();
 });
 
@@ -214,5 +217,61 @@ describe("useEmulator — falha ao sincronizar com o IndexedDB", () => {
     });
 
     expect(String(emu.atual.notice)).not.toContain("Progresso sincronizado");
+  });
+});
+
+/**
+ * Falhar ao carregar uma ROM **nova** não pode derrubar o jogo em andamento.
+ *
+ * Os três caminhos punham o status em `error` — e nenhum deles pausava o core.
+ * O jogo seguia emulando e tocando áudio, mas a PlayPage esconde Pausar,
+ * Rebobinar, Capturar, Reiniciar, Fechar, Sincronizar, Tela cheia, Escala,
+ * Volume, Velocidade e o gamepad inteiro atrás de `playing`, que só é
+ * verdadeiro em `running` e `paused`. O jogo ficava rodando sem comando algum.
+ */
+describe("useEmulator — ROM nova que falha", () => {
+  async function comJogoRodando() {
+    const emu = await montar();
+    await act(async () => {
+      await emu.atual.playFile(new File([new Uint8Array(8)], "bom.gba"));
+    });
+    expect(emu.atual.status).toEqual({ kind: "running", rom: "bom.gba" });
+    return emu;
+  }
+
+  it("mantém o jogo em andamento e avisa, em vez de trocar o status", async () => {
+    const emu = await comJogoRodando();
+    dublê.loadFalha = true;
+
+    await act(async () => {
+      await emu.atual.playFile(new File([new Uint8Array(8)], "ruim.gba"));
+    });
+
+    expect(emu.atual.status).toEqual({ kind: "running", rom: "bom.gba" });
+    expect(String(emu.atual.notice)).toContain("ruim.gba");
+  });
+
+  it("vale também para a ROM já guardada na biblioteca", async () => {
+    const emu = await comJogoRodando();
+    dublê.loadFalha = true;
+
+    await act(async () => {
+      emu.atual.playStored("outra.gba");
+    });
+
+    expect(emu.atual.status).toEqual({ kind: "running", rom: "bom.gba" });
+    expect(String(emu.atual.notice)).toContain("outra.gba");
+  });
+
+  /** Sem jogo em andamento, o erro precisa tomar a tela — senão não aparece. */
+  it("sem jogo rodando, a falha continua virando status de erro", async () => {
+    const emu = await montar();
+    dublê.loadFalha = true;
+
+    await act(async () => {
+      await emu.atual.playFile(new File([new Uint8Array(8)], "ruim.gba"));
+    });
+
+    expect(emu.atual.status.kind).toBe("error");
   });
 });

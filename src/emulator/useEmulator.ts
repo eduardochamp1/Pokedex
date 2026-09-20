@@ -383,6 +383,35 @@ export function useEmulator() {
   }, [refreshLibrary, attachDiagnostics, attachBindings]);
 
   /** Sobe uma ROM para o FS do core e inicia o jogo. */
+  /**
+   * Falha ao carregar uma ROM **nova**.
+   *
+   * Antes, os tres caminhos de carregamento punham o status em `error` quando a
+   * ROM nova falhava — e nenhum deles pausava o jogo que ja estava rodando. O
+   * core seguia emulando e tocando audio, o canvas seguia atualizando, e
+   * sumiam da tela ao mesmo tempo Pausar, Rebobinar, Capturar, Reiniciar,
+   * Fechar jogo, Sincronizar, Tela cheia, Escala, Volume, Velocidade e o
+   * gamepad inteiro — porque a PlayPage esconde tudo isso atras de `playing`,
+   * que so e verdadeiro nos status `running` e `paused`. O jogo ficava rodando
+   * sem nenhum comando.
+   *
+   * Quem clicou numa ROM invalida nao pediu para interromper o que estava
+   * jogando: se havia jogo, ele volta ao status que tinha e o erro vira aviso.
+   * So quando nao ha nada rodando o erro toma a tela — senao carregar um
+   * arquivo ruim do zero nao mostraria nada.
+   */
+  const falhaAoCarregar = useCallback(
+    (anterior: EmulatorStatus, message: string) => {
+      if (anterior.kind === "running" || anterior.kind === "paused") {
+        setStatus(anterior);
+        setNotice(message);
+      } else {
+        setStatus({ kind: "error", message });
+      }
+    },
+    []
+  );
+
   const playFile = useCallback(
     async (file: File) => {
       const core = coreRef.current;
@@ -391,6 +420,9 @@ export function useEmulator() {
         setNotice(`"${file.name}" não é .gb, .gbc nem .gba.`);
         return;
       }
+      // Capturado antes do "loading": e para ca que voltamos se a ROM nova
+      // falhar e houver jogo em andamento.
+      const anterior = statusRef.current;
       setNotice(null);
       setStatus({ kind: "loading" });
 
@@ -407,24 +439,24 @@ export function useEmulator() {
         15000
       );
       if (!uploaded) {
-        setStatus({
-          kind: "error",
-          message: `O core não confirmou a gravação de ${flatName}. Tente de novo.`,
-        });
+        falhaAoCarregar(
+          anterior,
+          `O core não confirmou a gravação de ${flatName}. Tente de novo.`
+        );
         return;
       }
       const erroSync = await syncFs(core);
       if (erroSync) {
-        setStatus({
-          kind: "error",
-          message: `Não deu para guardar ${flatName} no navegador. ${DICA_DE_COTA}`,
-        });
+        falhaAoCarregar(
+          anterior,
+          `Não deu para guardar ${flatName} no navegador. ${DICA_DE_COTA}`
+        );
         return;
       }
 
       const ok = core.loadGame(`${core.filePaths().gamePath}/${flatName}`);
       if (!ok) {
-        setStatus({ kind: "error", message: `Não deu para carregar ${flatName}.` });
+        falhaAoCarregar(anterior, `Não deu para carregar ${flatName}.`);
         return;
       }
       // Volume E velocidade: a barra guardava 5x e o jogo novo entrava em 1x.
@@ -435,7 +467,7 @@ export function useEmulator() {
       setStatus({ kind: "running", rom: flatName });
       refreshLibrary();
     },
-    [refreshLibrary, volume, fastForward]
+    [refreshLibrary, volume, fastForward, falhaAoCarregar]
   );
 
   /** Roda uma ROM que já está guardada no FS do core. */
@@ -443,10 +475,11 @@ export function useEmulator() {
     (fileName: string) => {
       const core = coreRef.current;
       if (!core) return;
+      const anterior = statusRef.current;
       setNotice(null);
       const ok = core.loadGame(`${core.filePaths().gamePath}/${fileName}`);
       if (!ok) {
-        setStatus({ kind: "error", message: `Não deu para carregar ${fileName}.` });
+        falhaAoCarregar(anterior, `Não deu para carregar ${fileName}.`);
         return;
       }
       // Volume E velocidade: a barra guardava 5x e o jogo novo entrava em 1x.
@@ -457,7 +490,7 @@ export function useEmulator() {
       setStatus({ kind: "running", rom: fileName });
       refreshLibrary();
     },
-    [refreshLibrary, volume, fastForward]
+    [refreshLibrary, volume, fastForward, falhaAoCarregar]
   );
 
   /**
@@ -556,23 +589,25 @@ export function useEmulator() {
   /** Puxa uma ROM da pasta local roms/ e joga. */
   const playLocal = useCallback(
     async (fileName: string) => {
+      // Quem poe "loading" e o playFile: se fosse aqui, o status do jogo em
+      // andamento ja estaria perdido quando ele captura o anterior.
+      const anterior = statusRef.current;
       setNotice(null);
-      setStatus({ kind: "loading" });
       try {
         const res = await fetch(`/local-roms/${encodeURIComponent(fileName)}`);
         if (!res.ok) throw new Error(`servidor respondeu ${res.status}`);
         const buffer = await res.arrayBuffer();
         await playFile(new File([buffer], fileName));
       } catch (error) {
-        setStatus({
-          kind: "error",
-          message: `Não deu para ler ${fileName} da pasta roms/ (${
+        falhaAoCarregar(
+          anterior,
+          `Não deu para ler ${fileName} da pasta roms/ (${
             error instanceof Error ? error.message : String(error)
-          }).`,
-        });
+          }).`
+        );
       }
     },
-    [playFile]
+    [playFile, falhaAoCarregar]
   );
 
   const pause = useCallback(() => {
