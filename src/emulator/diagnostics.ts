@@ -36,10 +36,12 @@ export interface AvSettings {
  * objeto e esta tela roda depois, entao valores diferentes fariam a tela
  * desfazer a configuracao.
  *
- * `audioSync` vem **desligado**, e isso nao e descuido. Ligado, ele amarra o
- * video ao consumo de audio em tempo real e a barra de velocidade para de
- * funcionar — so o resampler acelera. O toggle segue na tela porque ligar
- * ajuda quem ouve estalos, mas o padrao e desligado.
+ * `audioSync` vem **desligado**, como no gbajs3. Isso nao atrapalha o turbo:
+ * acelerar liga o `audioWait` dentro do core por conta propria, e e esse par
+ * (`fpsTarget` alto + `audioWait`) que puxa os quadros mais rapido. Por isso a
+ * preferencia daqui so e reafirmada ao **sair** do turbo — ver
+ * `aplicarVelocidade` em `useEmulator.ts`. O toggle segue na tela porque ligar
+ * ajuda quem ouve estalos em velocidade normal.
  */
 export const DEFAULT_AV: AvSettings = {
   audioSync: MGBA_CORE_SETTINGS.audioSync ?? false,

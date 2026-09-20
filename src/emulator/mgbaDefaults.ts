@@ -12,13 +12,13 @@
  * Uma versão anterior deste arquivo copiou o `config.ini` de um mGBA 0.10.5
  * instalado, com o raciocínio de que "o core é o mesmo dos dois lados, então a
  * configuração atravessa inteira". **Não atravessa.** O mGBA de mesa é um app
- * Qt nativo com pacing próprio e com um fast-forward que sabe suspender o
- * `audioSync` ao acelerar. O build wasm é dirigido por fora e não tem essa
- * lógica: ligar `audioSync` aqui amarra o vídeo ao consumo de áudio em tempo
- * real, e o jogo passa a não ter como acelerar — só o resampler acelera.
+ * Qt nativo com pacing próprio; o build wasm é dirigido por fora, e o que vale
+ * para ele é o que o gbajs3 exercita em produção.
  *
- * Era essa a causa de "a barra de velocidade só acelera o áudio, o jogo às
- * vezes dá uma arrancada e às vezes fica lento".
+ * `audioSync` fica desligado porque é assim no gbajs3, e não porque ele
+ * atrapalhe a aceleração — o turbo liga o `audioWait` por conta própria, e é
+ * justamente ele que puxa os quadros na taxa nova. Ver `aplicarVelocidade` em
+ * `useEmulator.ts`.
  *
  * ### Onde divergimos da referência, de propósito
  *
@@ -34,11 +34,11 @@ import type { coreSettings } from "@thenick775/mgba-wasm";
  *
  * | ajuste | gbajs3 | aqui | por quê |
  * |---|---|---|---|
- * | `audioSync` | false | false | ligado, trava a aceleração |
+ * | `audioSync` | false | false | o turbo liga o `audioWait` sozinho |
  * | `videoSync` | false | false | — |
  * | `timestepSync` | true | true | passo fixo de 1/60 s; é o que o multiplicador escala |
- * | `baseFpsTarget` | 60 | 60 | — |
- * | `frameSkip` | 0 | 0 | — |
+ * | `baseFpsTarget` | (não define) | 60 | o multiplicador escala este valor |
+ * | `frameSkip` | (não define) | 0 | — |
  * | `audioSampleRate` | 48000 | 48000 | o que este build espera |
  * | `audioBufferSize` | 1024 | 1024 | o que este build espera |
  * | `allowOpposingDirections` | true | **false** | jogabilidade de GBA |

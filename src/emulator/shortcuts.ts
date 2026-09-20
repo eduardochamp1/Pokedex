@@ -24,6 +24,15 @@ const MAX_SLOT = 6;
  *
  * Sem isto, o turbo roubaria a barra de espaco de um botao focado — a tecla que
  * o navegador usa para acionar botoes — e quebraria a navegacao por teclado.
+ *
+ * O preco disso era alto e passou despercebido: para comecar a jogar a pessoa
+ * **clica num botao** ("Continuar de onde parou", uma ROM da biblioteca,
+ * "Pausar"), e o foco fica nele. Com o botao focado, o Espaco caia aqui e o
+ * turbo nunca ligava — e, pior, acionava de novo o ultimo botao clicado. Era
+ * por isso que "no emulador normal segurar Espaco acelera e aqui nao".
+ *
+ * A saida nao e afrouxar esta regra, que esta certa: e tirar o foco do botao
+ * quando o jogo comeca. Quem cuida disso e `focarPalco`, na PlayPage.
  */
 export function isTypingTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;

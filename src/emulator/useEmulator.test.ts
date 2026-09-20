@@ -29,11 +29,15 @@ const dublê = vi.hoisted(() => ({
   /**
    * Nomes dos métodos chamados, na ordem.
    *
-   * A ordem entre `setFastForwardMultiplier` e `setCoreSettings` é o que faz o
-   * turbo funcionar: os dois escrevem no mesmo byte de `audioWait` dentro do
-   * core, e o multiplicador liga o freio sozinho quando passa de 1.
+   * O que faz o turbo funcionar é **não** haver `setCoreSettings` depois do
+   * multiplicador: os dois escrevem no mesmo byte de `audioWait`, e é o
+   * `audioWait` ligado pelo multiplicador que puxa os quadros na taxa nova.
    */
   chamadas: [] as string[],
+  /** Volume corrente do core, para o mudo do turbo. */
+  volume: 80,
+  /** Valores passados a `setVolume`, na ordem. */
+  volumes: [] as number[],
   /** Liga a rejeição de `FSSync`, que é como a cota cheia se manifesta. */
   syncFalha: false,
   /** Faz `loadGame` recusar, como acontece com ROM corrompida. */
@@ -54,6 +58,12 @@ vi.mock("./core", () => {
     setCoreSettings: (s: Record<string, unknown>) => {
       dublê.chamadas.push("setCoreSettings");
       dublê.coreSettings.push(s);
+    },
+    getVolume: () => dublê.volume,
+    setVolume: (v: number) => {
+      dublê.chamadas.push("setVolume");
+      dublê.volumes.push(v);
+      dublê.volume = v;
     },
     // A mensagem é a do core de verdade, conferida em public/emulator/mgba.js.
     FSSync: () =>
@@ -252,31 +262,57 @@ describe("useEmulator — ROM nova que falha", () => {
  * A velocidade, no modelo do mGBA de mesa.
  *
  * Lá não existe régua: há velocidade normal e há o turbo enquanto a tecla está
- * segurada, sem teto (`fastForwardHeldRatio=-1`, `holdFastForward=Space`). A
- * régua que existia aqui foi removida porque mentia — medido no navegador com
- * o relógio do auto-state, que conta tempo emulado: pedir 5× dava 1,10× e
- * pedir metade dava 1,00×, contra 1,11× de base. O core não honra o
- * multiplicador em nenhum dos dois sentidos.
+ * segurada, sem teto (`fastForwardHeldRatio=-1`, `holdFastForward=Space`).
  *
- * O que estes testes travam é o contrato da nossa ponta: turbo liga o
- * multiplicador e solta o laço, soltar devolve os dois, e o `audioSync` é
- * reafirmado DEPOIS — porque `setFastForwardMultiplier` religa o `audioWait`
- * no mesmo byte.
+ * Quem controla a velocidade neste build é **só** `setMainLoopTiming`. Medido
+ * no navegador com o contador de quadros do próprio mGBA: sob rAF o core fica
+ * em 60,0 qps com `setFastForwardMultiplier(5)` e em 60,1 com `(-5)` — inerte
+ * nos dois sentidos —, e sob `SETIMMEDIATE` vai a 835–913. A tabela inteira
+ * está na doc de `aplicarVelocidade`.
+ *
+ * Por isso estes testes travam o laço, e não o multiplicador.
  */
-describe("useEmulator — turbo, no modelo do mGBA", () => {
+describe("useEmulator — turbo, no modelo do mGBA de mesa", () => {
   const RAF = 1;
   const SETIMMEDIATE = 2;
 
-  it("segurar liga o multiplicador e solta o laço", async () => {
+  it("segurar solta o laço, que é o que realmente acelera", async () => {
     const emu = await montar();
     await act(async () => {
       emu.atual.setTurbo(true);
     });
-    expect(multiplicadores.at(-1)).toBe(TURBO_MULTIPLIER);
     expect(dublê.timings.at(-1)).toEqual({ mode: SETIMMEDIATE, value: 0 });
+    expect(multiplicadores.at(-1)).toBe(TURBO_MULTIPLIER);
   });
 
-  it("soltar devolve a velocidade normal e o laço ao rAF", async () => {
+  /**
+   * Reafirmar `audioSync` durante o turbo não quebra a aceleração (medido:
+   * 835 qps com a chamada no fim), mas não há razão para escrever num byte
+   * que o core acabou de assumir. Fora do turbo, sim.
+   */
+  it("não mexe nos ajustes do core enquanto acelera", async () => {
+    const emu = await montar();
+    dublê.chamadas.length = 0;
+    await act(async () => {
+      emu.atual.setTurbo(true);
+    });
+    expect(dublê.chamadas).not.toContain("setCoreSettings");
+  });
+
+  it("soltar devolve o laço ao rAF", async () => {
+    const emu = await montar();
+    await act(async () => {
+      emu.atual.setTurbo(true);
+    });
+    await act(async () => {
+      emu.atual.setTurbo(false);
+    });
+    // Sob rAF o `timestepSync` prende o core em 60 qps. Sem voltar para cá, um
+    // monitor de 120 Hz rodaria o jogo ao dobro da velocidade.
+    expect(dublê.timings.at(-1)).toEqual({ mode: RAF, value: 1 });
+  });
+
+  it("soltar devolve a velocidade normal", async () => {
     const emu = await montar();
     await act(async () => {
       emu.atual.setTurbo(true);
@@ -285,24 +321,38 @@ describe("useEmulator — turbo, no modelo do mGBA", () => {
       emu.atual.setTurbo(false);
     });
     expect(multiplicadores.at(-1)).toBe(1);
-    expect(dublê.timings.at(-1)).toEqual({ mode: RAF, value: 1 });
   });
 
   /**
-   * A ordem não é detalhe: `setFastForwardMultiplier` liga o `audioWait` no
-   * mesmo byte que `setCoreSettings({ audioSync })` escreve. Reafirmar antes
-   * não adianta nada.
+   * Em 1× ninguém disputa o byte, então é aqui — e só aqui — que a preferência
+   * da tela de A/V volta a valer.
    */
-  it("reafirma o audioSync depois do multiplicador", async () => {
+  it("reafirma o audioSync ao sair do turbo, não ao entrar", async () => {
     const emu = await montar();
-    dublê.chamadas.length = 0;
     await act(async () => {
       emu.atual.setTurbo(true);
+    });
+    dublê.chamadas.length = 0;
+    await act(async () => {
+      emu.atual.setTurbo(false);
     });
     const mult = dublê.chamadas.indexOf("setFastForwardMultiplier");
     const sync = dublê.chamadas.lastIndexOf("setCoreSettings");
     expect(mult).toBeGreaterThanOrEqual(0);
     expect(sync).toBeGreaterThan(mult);
+  });
+
+  it("silencia enquanto acelera e devolve o volume ao soltar", async () => {
+    const emu = await montar();
+    dublê.volume = 70;
+    await act(async () => {
+      emu.atual.setTurbo(true);
+    });
+    expect(dublê.volumes.at(-1)).toBe(0);
+    await act(async () => {
+      emu.atual.setTurbo(false);
+    });
+    expect(dublê.volumes.at(-1)).toBe(70);
   });
 
   /** A régua saiu: o hook não expõe mais nada para ajustá-la. */

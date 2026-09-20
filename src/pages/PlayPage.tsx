@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type DragEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type DragEvent } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import "../styles/play.css";
 import { useEmulator } from "../emulator/useEmulator";
@@ -139,6 +139,23 @@ const PlayPage = () => {
       emu.setInputEnabled(true);
     };
   }, [capturing, emu]);
+
+  /**
+   * Põe o foco no palco do emulador.
+   *
+   * Sem isto o teclado do jogo funciona e o turbo não: para começar a jogar a
+   * pessoa clica num botão, o foco fica nele, e `isTypingTarget` — com razão —
+   * descarta o Espaço vindo de um `<button>`. Com o palco focado o Espaço
+   * chega ao atalho, e de quebra deixa de reacionar o último botão clicado.
+   */
+  const focarPalco = useCallback(() => {
+    emu.stageRef.current?.focus({ preventScroll: true });
+  }, [emu.stageRef]);
+
+  /** Assim que o jogo passa a rodar, o teclado é dele. */
+  useEffect(() => {
+    if (playing && !capturing) focarPalco();
+  }, [playing, capturing, focarPalco]);
 
   /**
    * Atalhos de teclado. Só com jogo carregado, e nunca enquanto a tela espera
@@ -290,7 +307,16 @@ const PlayPage = () => {
           >
             {/* O canvas é criado fora do React e adotado aqui pelo hook: o
                 core é amarrado a ele na criação e retido pela sessão. */}
-            <div ref={emu.stageRef} className="play-canvas-host" />
+            {/* `tabIndex={-1}` para poder receber foco sem entrar na ordem do
+                Tab: o palco não é um controle, mas precisa ser focável para
+                que o Espaço do turbo não fique preso no último botão clicado.
+                Ver `focarPalco` e a doc de `isTypingTarget`. */}
+            <div
+              ref={emu.stageRef}
+              className="play-canvas-host"
+              tabIndex={-1}
+              onMouseDown={focarPalco}
+            />
 
             {!playing && (
               <div className="play-screen-overlay">
@@ -319,7 +345,10 @@ const PlayPage = () => {
 
           {playing && (
             <>
-              <div className="play-controls">
+              {/* Depois de acionar um controle o teclado volta para o jogo:
+                  senão o botão fica com o foco e o Espaço do turbo morre em
+                  `isTypingTarget` — e ainda reaciona aquele mesmo botão. */}
+              <div className="play-controls" onClick={focarPalco}>
                 {emu.status.kind === "running" ? (
                   <button type="button" onClick={emu.pause}>
                     ⏸ Pausar
