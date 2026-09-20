@@ -66,6 +66,12 @@ via [mGBA](https://mgba.io) compilado para WebAssembly.
 - **Tela cheia e escala inteira** — cada pixel do console vira exatamente N
   pixels na tela. Esticar com `object-fit` dava escala fracionária, e o
   arredondamento deixava uns pixels com 3 px de lado e outros com 4
+- **Sabe que jogo é** — o cabeçalho do cartucho é lido no carregamento e a tela
+  diz "base: Emerald · Geração III" além do nome do arquivo
+- **Ligada ao resto do site** — com um jogo rodando, três links levam à dex
+  daquela geração, à região no mapa e à geração na lore
+- **Galeria de capturas** por jogo, com miniatura, data, baixar de novo e
+  apagar — antes o PNG ficava no FS para sempre e a cota crescia invisível
 - **Gamepad virtual** para toque, **gamepad físico** pela Gamepad API (layout
   standard) e **teclas remapeáveis** — clique numa tecla da legenda e pressione
   a nova. A legenda lê do mesmo mapa que o `bindKey`, então não mente
@@ -233,6 +239,7 @@ A aplicação abre em [http://localhost:3000](http://localhost:3000).
 | `npm run test:watch` | Vitest em watch |
 | `npm run sprites` | Baixa os sprites para `public/sprites/` (idempotente; `--force` rebaixa) |
 | `npm run names:check` | Confere se todo nome usado pelo site resolve para um slug da PokéAPI — a lore, as nove gerações e as 16 dex regionais (precisa de rede) |
+| `npm run gen3:species <rom.gba>` | Regera `src/emulator/saveParse/gen3Species.ts` lendo a tabela de espécies da sua ROM. A ROM não entra no repo nem no bundle |
 | `npm run wiki:check` | Confere se todo campo `wiki` aponta para um artigo real da Bulbapedia — sem página inexistente, sem redirect e sem desambiguação (precisa de rede) |
 | `npm run emulator:core` | Copia o core do emulador para `public/emulator/` (roda no predev/prebuild) |
 
@@ -407,6 +414,27 @@ carta na cor do tipo e o dourado reservado a raridade.
 - **Virada de carta**: a transição da grade para a ficha usa a View Transitions API direto, não o `viewTransition` do react-router — o app monta o `BrowserRouter` clássico, e aquele hook exige data router. Como a ficha é lazy, a carta pré-carrega o módulo antes de começar a transição; sem isso o retrato novo pegaria o esqueleto do Suspense no lugar do hero.
 - **Costa do mapa**: os nove paths do `regionMap` são curvas suaves, legíveis no arquivo; o recorte de costa é calculado em runtime por `roughenPath`, com semente fixa — determinístico, então não muda entre renders nem entre visitas.
 - **Scanline**: ligada por padrão e desligável pela navbar. O estado mora num atributo do `<html>` aplicado antes do primeiro render, para a página não aparecer lisa e só depois ganhar a textura.
+- **Romhack tem o cabeçalho do jogo original, byte a byte**. Medido nas ROMs de
+  `roms/`: `Pokemon Rocket` e `Pokemon Unbound` têm o bloco `0xA0..0xBF`
+  idêntico ao de uma FireRed oficial — mesmo título, mesmo game code, mesmo
+  checksum. Não existe campo anti-hack, porque a BIOS valida o logo Nintendo no
+  boot e todo hack o preserva; nem o tamanho separa (Rocket tem os mesmos 16 MB
+  de uma FireRed). Por isso `romId.ts` devolve a **base** do cartucho e a tela
+  põe o nome do arquivo na linha principal. E por isso o game code **nunca**
+  pode virar chave de save: os dois hacks gerariam a mesma chave e
+  compartilhariam progresso.
+- **Tabela de espécies de Gen 3 sai da ROM, não de uma constante**. O save
+  guarda o índice interno da espécie, e `nacional = índice − 25` quebra a
+  partir do índice 301 — erra 109 das 135 espécies de Hoenn. A própria ROM traz
+  `sSpeciesToNationalPokedexNum`. O localizador acha as duas tabelas pelo
+  conteúdo (âncoras Bulbasaur/Celebi/Chimecho), e não por offset fixo, que não
+  sobrevive a romhack: a Unbound está repontada para `0x166A98C`.
+- **`FSSync()` rejeita**, e engolir essa rejeição prendia a tela em
+  "Carregando…" para sempre. Carregar é fatal e vira `status` de erro; gravar,
+  apagar e importar são recuperáveis e viram aviso sem derrubar o jogo.
+- **Save virgem não é progresso, e tem dois formatos**: flash alocada é toda
+  `0x00`, flash apagada é toda `0xFF`. O backup em `saves/` recusa qualquer
+  buffer uniforme — testar só contra zero deixava o `0xFF` passar.
 - **`nav` é seletor de elemento**: a regra da navbar era `nav { position: sticky; z-index: 100; height: 56px }` e pegava **qualquer** `<nav>` da página. Os índices de grupo da Lore (Humanos, Locais) são `<nav>` por semântica e herdavam tudo isso — as fichas boiavam por cima dos cards assim que a página rolava, sem fundo próprio. A regra agora é `.navbar`. Vale a lição para `section`, `header` e `aside`.
 - **Porcentagem dentro de custom property**: `--unidade: min(96px, calc((100% - 32px) / N))` é substituída como **texto** e resolvida por propriedade — a porcentagem resolve contra a largura no `width` e contra a **altura** no `height`. Usar a mesma variável nos dois dava uma caixa de 144×59 e o sprite encolhia para caber na menor. A arte de Humanos tira só a largura da variável e deixa a altura para o `aspect-ratio`. Mesma família da armadilha do `color-mix`: variável derivada tem que ser declarada onde a fonte existe.
 - **Slug não é nome**: os verbetes curados guardam o slug da PokéAPI (`tapu-koko`, `great-tusk`, `ponyta-galar`) porque é ele que resolve o sprite e a rota da ficha. O chip escrevia esse slug com `text-transform: capitalize`, e saía "Tapu-Koko", "Great-Tusk", "Ponyta-Galar" — nenhum é o nome da criatura. Quem traduz agora é `pokemonLabel`: hífen vira espaço, sufixo regional vira "de Galar", e os nomes de pontuação própria (Ho-Oh, Type: Null, Farfetch'd) ficam numa lista de exceções, porque a regra geral os estragaria.
