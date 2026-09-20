@@ -25,14 +25,17 @@ import {
   autoStateFileName,
   deleteStateFile,
   readStateEntries,
+  romBaseName,
   slotsForRom,
   type SlotInfo,
 } from "./saveStates";
 import {
   REWIND_SETTINGS,
+  parseScreenshotName,
   readStateThumbnail,
   screenshotFileName,
   stateThumbnailName,
+  toDataUrl,
 } from "./capture";
 import { GBA_HEADER_BYTES, identifyRom, type RomId } from "./romId";
 import { TURBO_MULTIPLIER } from "./shortcuts";
@@ -53,6 +56,19 @@ import {
 interface LocalRom {
   fileName: string;
   size: number;
+}
+
+/**
+ * Uma captura de tela guardada no FS do core.
+ *
+ * Só nome, data e tamanho — todos de `FS.stat`. A imagem é lida sob demanda:
+ * dezenas de PNGs de 240×160 convertidos em base64 de uma vez são inofensivos,
+ * centenas não.
+ */
+export interface Screenshot {
+  fileName: string;
+  when: Date;
+  size?: number;
 }
 
 /**
@@ -225,6 +241,14 @@ export function useEmulator() {
    * arquivo — ver romId.ts.
    */
   const [romId, setRomId] = useState<RomId | null>(null);
+  /**
+   * As capturas que estão no FS do core.
+   *
+   * Até aqui a captura virava download e sumia da vista — mas o PNG ficava
+   * gravado, e nada nunca o apagava: o `unlink` de imagem existia só para
+   * miniatura de slot. A cota crescia sozinha, invisível.
+   */
+  const [screenshots, setScreenshots] = useState<Screenshot[]>([]);
   const [storage, setStorage] = useState<StorageStatus | null>(null);
   /** Os seis slots com o estado real lido do FS do core. */
   const [slots, setSlots] = useState<SlotInfo[]>(() => slotsForRom([], undefined));
@@ -971,6 +995,129 @@ export function useEmulator() {
     setTurboActive(active);
   }, []);
 
+  /**
+   * Relê a pasta de capturas do jogo atual.
+   *
+   * Só do jogo atual: as capturas levam o nome-base da ROM, e mostrar as de
+   * outro jogo seria ruído no painel de quem está jogando este.
+   */
+  const refreshScreenshots = useCallback(() => {
+    const core = coreRef.current;
+    const rom = getLoadedRom();
+    if (!core || !rom) {
+      setScreenshots([]);
+      return;
+    }
+    const dir = core.filePaths().screenshotsPath;
+    const base = romBaseName(rom);
+    let nomes: string[];
+    try {
+      nomes = core.FS.readdir(dir);
+    } catch {
+      setScreenshots([]);
+      return;
+    }
+    const lista: Screenshot[] = [];
+    for (const nome of nomes) {
+      // As miniaturas de slot moram no mesmo diretório; `parseScreenshotName`
+      // devolve null para elas.
+      const lido = parseScreenshotName(nome);
+      if (!lido || lido.base !== base) continue;
+      let size: number | undefined;
+      try {
+        size = (core.FS.stat(`${dir}/${nome}`) as { size?: number }).size;
+      } catch {
+        // sem stat: a entrada continua valendo, só sem o tamanho
+      }
+      lista.push({ fileName: nome, when: lido.when, size });
+    }
+    lista.sort((a, b) => b.when.getTime() - a.when.getTime());
+    setScreenshots(lista);
+  }, []);
+
+  /** Lê uma captura como `data:` URL. Sob demanda, nunca em lote. */
+  const readScreenshot = useCallback((fileName: string): string | undefined => {
+    const core = coreRef.current;
+    if (!core) return undefined;
+    try {
+      const data = core.FS.readFile(
+        `${core.filePaths().screenshotsPath}/${fileName}`
+      ) as Uint8Array;
+      return data.length > 0 ? toDataUrl(data) : undefined;
+    } catch {
+      return undefined;
+    }
+  }, []);
+
+  /** Baixa de novo uma captura que já está guardada. */
+  const downloadScreenshot = useCallback((fileName: string) => {
+    const core = coreRef.current;
+    if (!core) return;
+    try {
+      const data = core.FS.readFile(
+        `${core.filePaths().screenshotsPath}/${fileName}`
+      ) as Uint8Array;
+      // Mesmo motivo do exportSave: o buffer pode ser SharedArrayBuffer, que o
+      // Blob não aceita.
+      const copy = new Uint8Array(data.length);
+      copy.set(data);
+      const url = URL.createObjectURL(new Blob([copy], { type: "image/png" }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      setNotice(
+        `Não deu para ler ${fileName}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }, []);
+
+  /** Apaga uma captura. É o caminho que faltava para a cota parar de crescer. */
+  const deleteScreenshot = useCallback(
+    async (fileName: string) => {
+      const core = coreRef.current;
+      if (!core) return;
+      try {
+        core.FS.unlink(`${core.filePaths().screenshotsPath}/${fileName}`);
+      } catch (error) {
+        setNotice(
+          `Não deu para apagar ${fileName}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        return;
+      }
+      const erroSync = await syncFs(core);
+      refreshScreenshots();
+      setNotice(
+        erroSync
+          ? `${fileName} apagado, mas o armazenamento não confirmou. ${DICA_DE_COTA}`
+          : `${fileName} apagado.`
+      );
+    },
+    [refreshScreenshots]
+  );
+
+  /**
+   * A galeria acompanha o jogo carregado.
+   *
+   * Depende do nome da ROM e não do objeto `status`: pausar e retomar trocam a
+   * identidade do status sem trocar de jogo, e reler a pasta a cada pausa seria
+   * trabalho à toa.
+   */
+  const romCarregada =
+    status.kind === "running" || status.kind === "paused"
+      ? status.rom
+      : undefined;
+  useEffect(() => {
+    if (romCarregada) refreshScreenshots();
+    else setScreenshots([]);
+  }, [romCarregada, refreshScreenshots]);
+
   /** Pressiona/solta um botão pelo gamepad virtual (toque). */
   const pressButton = useCallback((button: string) => {
     coreRef.current?.buttonPress(button);
@@ -1032,6 +1179,8 @@ export function useEmulator() {
         link.download = fileName;
         link.click();
         URL.revokeObjectURL(url);
+        // A captura continua no FS depois do download: a galeria precisa saber.
+        refreshScreenshots();
         setNotice(`${fileName} salvo (${formatBytes(copy.length)}).`);
       } catch (error) {
         setNotice(
@@ -1041,7 +1190,7 @@ export function useEmulator() {
         );
       }
     },
-    []
+    [refreshScreenshots]
   );
 
   /**
@@ -1143,6 +1292,11 @@ export function useEmulator() {
     setTurbo,
     setRewinding,
     takeScreenshot,
+    screenshots,
+    refreshScreenshots,
+    readScreenshot,
+    downloadScreenshot,
+    deleteScreenshot,
     storage,
     localSaves,
     refreshLocalRoms,

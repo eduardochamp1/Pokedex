@@ -4,6 +4,8 @@ import {
   rewindSeconds,
   screenshotFileName,
   stateThumbnailName,
+  parseScreenshotName,
+  isStateThumbnail,
   toDataUrl,
 } from "./capture";
 
@@ -98,5 +100,38 @@ describe("toDataUrl", () => {
 
   it("bytes vazios ainda dao uma URL valida", () => {
     expect(toDataUrl(new Uint8Array(0))).toBe("data:image/png;base64,");
+  });
+});
+
+describe("parseScreenshotName", () => {
+  it("lê a data de volta do nome", () => {
+    const quando = new Date(2026, 8, 20, 10, 15, 0);
+    const nome = screenshotFileName("Pokemon - Emerald.gba", quando);
+    const lido = parseScreenshotName(nome);
+    expect(lido?.base).toBe("Pokemon - Emerald");
+    expect(lido?.when.getTime()).toBe(quando.getTime());
+  });
+
+  /**
+   * As miniaturas de slot moram no mesmo diretório das capturas. Sem separá-las,
+   * a galeria mostraria os thumbnails dos save states como se fossem fotos.
+   */
+  it("recusa miniatura de save state", () => {
+    expect(parseScreenshotName("Pokemon - Emerald.ss1.png")).toBeNull();
+    expect(isStateThumbnail("Pokemon - Emerald.ss1.png")).toBe(true);
+    expect(isStateThumbnail("Pokemon - Emerald-20260920-101500.png")).toBe(false);
+  });
+
+  it("recusa qualquer outro arquivo", () => {
+    expect(parseScreenshotName("qualquer.png")).toBeNull();
+    expect(parseScreenshotName("Emerald-2026.png")).toBeNull();
+    expect(parseScreenshotName("")).toBeNull();
+  });
+
+  /** Nome com hífen e ponto no meio não pode confundir o parser. */
+  it("aguenta base com hífen e ponto", () => {
+    const quando = new Date(2026, 0, 2, 3, 4, 5);
+    const nome = screenshotFileName("Pokemon Unbound (v2.1.1.1).gba", quando);
+    expect(parseScreenshotName(nome)?.base).toBe("Pokemon Unbound (v2.1.1.1)");
   });
 });

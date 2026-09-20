@@ -1080,3 +1080,83 @@
   background: var(--accent);
   color: var(--accent-ink);
 }
+
+/* ========= Galeria de capturas =========
+   O PNG ficava no FS depois do download e nada nunca o apagava: o `unlink` de
+   imagem existia so para miniatura de slot. A cota crescia invisivel. */
+.play-shot-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+.play-shot-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.play-shot-thumb {
+  flex: 0 0 auto;
+  width: 60px;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.play-shot-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+  display: block;
+}
+.play-shot-placeholder {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--surface-2) 0 6px,
+    var(--surface-3) 6px 12px
+  );
+}
+.play-shot-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.play-shot-when {
+  font-size: 0.72rem;
+  color: var(--text);
+}
+.play-shot-size {
+  font-size: 0.66rem;
+  color: var(--text-muted);
+}
+.play-shot-actions {
+  display: flex;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+.play-shot-actions button {
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-1);
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+.play-shot-actions button:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+.play-shot-actions .play-shot-del:hover {
+  border-color: var(--fav);
+  color: var(--fav);
+}

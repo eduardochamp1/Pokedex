@@ -21,7 +21,7 @@
 | 0 | Bugs confirmados no emulador | 5 | ✅ concluída (menos a limpeza do .sav morto) |
 | 1 | `romId.ts` — a pedra angular | 1 | ✅ concluída |
 | 2 | Furar a ilha: a barra de três links | 1 | ✅ concluída |
-| 3 | Pontes baratas | 4 | ☐ não iniciada |
+| 3 | Pontes baratas | 4 | ✅ concluída |
 | 4 | Parsing do save (com porta de pesquisa) | 4 | ☐ não iniciada |
 
 **Ordem recomendada:** 0 → 1 → 2 → 3 → 4. A fase 1 destrava as fases 2, 3 e 4 — fora de ordem,
@@ -438,15 +438,15 @@ core** — e o painel já sabe renderizar PNG capturado: `capture.ts:55-71` (`re
 desenha `<img className="play-slot-thumb" src={info.thumbnail} />`. O `unlink` de PNG existe só para
 miniatura de slot (`:614-616`), **nunca para captura** — então a cota cresce sozinha, invisível.
 
-- [ ] **Passo 1** — listar `core.FS.readdir(filePaths().screenshotsPath)` filtrando os `.ssN.png`
+- [x] **Passo 1** — listar `core.FS.readdir(filePaths().screenshotsPath)` filtrando os `.ssN.png`
       que são miniatura de slot. O nome já é ordenável por data de propósito (`capture.ts:18-24`),
       então a ordem cronológica sai de graça.
-- [ ] **Passo 2** — painel novo na sidebar, no mesmo molde das `section.play-panel` existentes, com
+- [x] **Passo 2** — painel novo na sidebar, no mesmo molde das `section.play-panel` existentes, com
       miniatura, data, baixar de novo e apagar (`FS.unlink`).
-- [ ] **Passo 3 — cuidado com memória.** Não materialize todas as `data:` URL de uma vez: leia
+- [x] **Passo 3 — cuidado com memória.** Não materialize todas as `data:` URL de uma vez: leia
       tamanho por `FS.stat` e só converta as visíveis. Dezenas de PNGs de 240×160 são inofensivas;
       centenas não.
-- [ ] **Passo 4 — commit.** `feat(jogar): galeria de capturas por jogo`
+- [x] **Passo 4 — commit.** `feat(jogar): galeria de capturas por jogo`
 
 ## Tarefa 3.2 — A Navbar mostra que tem jogo pausado
 

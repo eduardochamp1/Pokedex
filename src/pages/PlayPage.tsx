@@ -23,6 +23,7 @@ import { SCALE_MODES } from "../emulator/display";
 import { rewindSeconds } from "../emulator/capture";
 import { useDisplay } from "../emulator/useDisplay";
 import { formatBytes } from "../emulator/storage";
+import ScreenshotThumb from "../components/ScreenshotThumb";
 
 const GROUPS: KeyBinding["group"][] = [
   "direcional",
@@ -574,6 +575,53 @@ const PlayPage = () => {
                 Remover libera espaço no navegador e <strong>mantém o save</strong>
                 : se a mesma ROM voltar, o progresso volta com ela.
               </p>
+            </section>
+          )}
+
+          {/* A captura virava download e sumia — mas o PNG ficava no FS e nada
+              nunca o apagava, então a cota crescia sozinha e invisível. Aqui
+              elas aparecem, dá para baixar de novo, e dá para apagar. */}
+          {emu.screenshots.length > 0 && (
+            <section className="play-panel">
+              <h2>Capturas</h2>
+              <ul className="play-shot-list">
+                {emu.screenshots.map((shot) => (
+                  <li key={shot.fileName} className="play-shot-row">
+                    <ScreenshotThumb
+                      fileName={shot.fileName}
+                      read={emu.readScreenshot}
+                    />
+                    <div className="play-shot-info">
+                      <span className="play-shot-when">
+                        {shot.when.toLocaleString("pt-BR")}
+                      </span>
+                      {shot.size !== undefined && (
+                        <span className="play-shot-size">
+                          {formatBytes(shot.size)}
+                        </span>
+                      )}
+                    </div>
+                    <div className="play-shot-actions">
+                      <button
+                        type="button"
+                        onClick={() => emu.downloadScreenshot(shot.fileName)}
+                        title={`Baixar ${shot.fileName}`}
+                      >
+                        baixar
+                      </button>
+                      <button
+                        type="button"
+                        className="play-shot-del"
+                        onClick={() => void emu.deleteScreenshot(shot.fileName)}
+                        title={`Apagar ${shot.fileName}`}
+                        aria-label={`Apagar captura de ${shot.when.toLocaleString("pt-BR")}`}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </section>
           )}
 

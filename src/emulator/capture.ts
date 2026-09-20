@@ -93,3 +93,40 @@ export function rewindSeconds(
   if (fps <= 0 || interval <= 0) return 0;
   return Math.round((capacity * interval) / fps);
 }
+
+/**
+ * Inverso de `screenshotFileName`.
+ *
+ * Devolve `null` para qualquer coisa que não seja uma captura — em especial
+ * para as miniaturas de slot, que moram no **mesmo diretório** e terminam em
+ * `.ssN.png`. Sem essa separação a galeria mostraria as miniaturas dos save
+ * states como se fossem fotos tiradas por quem joga.
+ */
+export function parseScreenshotName(
+  fileName: string
+): { base: string; when: Date } | null {
+  const m = fileName.match(
+    /^(.*)-(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})\.png$/
+  );
+  if (!m) return null;
+  const [, base, ano, mes, dia, hora, min, seg] = m;
+  // A miniatura de slot tem o formato `<base>.ssN.png` e não casaria com o
+  // padrão acima, mas o `.*` inicial é ganancioso: um nome como
+  // "Jogo.ss1-20260920-101500.png" passaria. Não existe hoje, e barrar aqui
+  // custa uma linha.
+  if (/\.ss\d+$/.test(base)) return null;
+  const when = new Date(
+    Number(ano),
+    Number(mes) - 1,
+    Number(dia),
+    Number(hora),
+    Number(min),
+    Number(seg)
+  );
+  return Number.isNaN(when.getTime()) ? null : { base, when };
+}
+
+/** É miniatura de save state, e não captura de quem joga? */
+export function isStateThumbnail(fileName: string): boolean {
+  return /\.ss\d+\.png$/.test(fileName);
+}
