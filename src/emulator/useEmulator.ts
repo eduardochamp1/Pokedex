@@ -34,6 +34,7 @@ import {
   screenshotFileName,
   stateThumbnailName,
 } from "./capture";
+import { GBA_HEADER_BYTES, identifyRom, type RomId } from "./romId";
 import { TURBO_MULTIPLIER } from "./shortcuts";
 import { useDiagnostics } from "./useDiagnostics";
 import { useDiskBackup } from "./useDiskBackup";
@@ -125,6 +126,65 @@ function autoStateInfo(
   }
 }
 
+/**
+ * Le so o cabecalho de uma ROM que ja esta no FS do core.
+ *
+ * `FS.readFile` traria o arquivo inteiro — 16 MB numa FireRed, 32 numa Unbound
+ * — para olhar 192 bytes. `FS.open`/`FS.read` leem a janela que interessa e
+ * nada mais; conferido no navegador, devolve 192 bytes de um arquivo de 16 MB.
+ */
+function lerCabecalho(
+  core: mGBAEmulator,
+  fileName: string
+): Uint8Array | null {
+  const caminho = `${core.filePaths().gamePath}/${fileName}`;
+  const fs = core.FS as unknown as {
+    open: (path: string, flags: string) => unknown;
+    read: (
+      stream: unknown,
+      buffer: Uint8Array,
+      offset: number,
+      length: number,
+      position: number
+    ) => number;
+    close: (stream: unknown) => void;
+  };
+  let stream: unknown;
+  try {
+    stream = fs.open(caminho, "r");
+    const bytes = new Uint8Array(GBA_HEADER_BYTES);
+    const lidos = fs.read(stream, bytes, 0, GBA_HEADER_BYTES, 0);
+    return lidos === GBA_HEADER_BYTES ? bytes : null;
+  } catch {
+    return null;
+  } finally {
+    if (stream !== undefined) {
+      try {
+        fs.close(stream);
+      } catch {
+        // stream ja fechado ou FS indisponivel
+      }
+    }
+  }
+}
+
+/**
+ * Base ja lida de cada ROM da biblioteca, por nome de arquivo.
+ *
+ * `refreshLibrary` roda com frequencia e abrir um arquivo por ROM a cada
+ * passagem seria trabalho repetido a toa: o cabecalho de um arquivo nao muda.
+ * Uma leitura de 192 bytes por ROM, uma vez por sessao.
+ */
+const baseDaRom = new Map<string, string | undefined>();
+
+function baseDe(core: mGBAEmulator, fileName: string): string | undefined {
+  const cache = baseDaRom.get(fileName);
+  if (cache !== undefined || baseDaRom.has(fileName)) return cache;
+  const base = identifyRom(lerCabecalho(core, fileName))?.jogo;
+  baseDaRom.set(fileName, base);
+  return base;
+}
+
 /** Sufixo comum das mensagens: a cota e a causa provavel, e ela e visivel. */
 const DICA_DE_COTA =
   "O mais provável é a cota do navegador estar cheia — veja “Onde ficam seus saves” no painel ao lado.";
@@ -150,6 +210,14 @@ export function useEmulator() {
   const [volume, setVolumeState] = useState(getVolume);
   const [fastForward, setFastForwardState] = useState(getFastForward);
   const [notice, setNotice] = useState<string | null>(null);
+  /**
+   * O jogo identificado pelo cabecalho do cartucho, quando da.
+   *
+   * Vale a BASE do cartucho, nao "o jogo": romhack tem cabecalho identico ao do
+   * original. Quem manda na linha principal da tela continua sendo o nome do
+   * arquivo — ver romId.ts.
+   */
+  const [romId, setRomId] = useState<RomId | null>(null);
   const [storage, setStorage] = useState<StorageStatus | null>(null);
   /** Os seis slots com o estado real lido do FS do core. */
   const [slots, setSlots] = useState<SlotInfo[]>(() => slotsForRom([], undefined));
@@ -227,7 +295,12 @@ export function useEmulator() {
               } catch {
                 // sem stat: a lista continua valendo, só sem o tamanho
               }
-              return { fileName, origin: "upload" as const, size };
+              return {
+                fileName,
+                origin: "upload" as const,
+                size,
+                base: baseDe(core, fileName),
+              };
             })
         );
         // listSaves devolve o diretório cru, com as entradas "." e ".." do FS.
@@ -490,6 +563,13 @@ export function useEmulator() {
       const flatFile =
         flatName === file.name ? file : new File([file], flatName);
 
+      // Os 192 primeiros bytes bastam, e o arquivo ja esta em memoria.
+      setRomId(
+        identifyRom(
+          new Uint8Array(await flatFile.slice(0, GBA_HEADER_BYTES).arrayBuffer())
+        )
+      );
+
       const uploaded = await withTimeout(
         new Promise<void>((done) => core.uploadRom(flatFile, done)),
         15000
@@ -534,6 +614,7 @@ export function useEmulator() {
       const anterior = statusRef.current;
       setNotice(null);
       const ok = core.loadGame(`${core.filePaths().gamePath}/${fileName}`);
+      if (ok) setRomId(identifyRom(lerCabecalho(core, fileName)));
       if (!ok) {
         falhaAoCarregar(anterior, `Não deu para carregar ${fileName}.`);
         return;
@@ -574,6 +655,7 @@ export function useEmulator() {
       core.setVolume(volume / 100);
       core.setFastForwardMultiplier(fastForward);
       setLoadedRom(fileName);
+      setRomId(identifyRom(lerCabecalho(core, fileName)));
 
       const erroSync = await syncFs(core);
       if (erroSync) {
@@ -691,6 +773,7 @@ export function useEmulator() {
     core.quitGame();
     core.FSSync().catch(() => undefined);
     setLoadedRom(null);
+    setRomId(null);
     // Fechar é dizer que não quer este jogo de volta na próxima visita — sem
     // isso, retomar automático seria uma decisão impossível de desfazer.
     setWasRunning(false);
@@ -1011,6 +1094,7 @@ export function useEmulator() {
     saves,
     volume,
     fastForward,
+    romId,
     notice,
     dismissNotice: () => setNotice(null),
     /** Para quem dirige partes da tela de fora daqui (escala, tela cheia). */

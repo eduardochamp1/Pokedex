@@ -13,6 +13,13 @@ export const SAVE_STATE_SLOTS = [1, 2, 3, 4, 5, 6] as const;
 export type SaveStateSlot = (typeof SAVE_STATE_SLOTS)[number];
 
 export interface RomEntry {
+  /**
+   * Jogo-base lido do cabecalho do cartucho, quando reconhecido.
+   *
+   * E "base" e nao "jogo": romhack tem cabecalho identico ao do original, entao
+   * quem manda na linha principal continua sendo o nome do arquivo.
+   */
+  base?: string;
   /** Nome do arquivo dentro do sistema de arquivos virtual do core. */
   fileName: string;
   /** De onde veio: escolhido pelo usuario ou lido da pasta local roms/. */

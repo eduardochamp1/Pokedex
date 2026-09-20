@@ -19,7 +19,7 @@
 | Fase | O que é | Tarefas | Estado |
 |---|---|---|---|
 | 0 | Bugs confirmados no emulador | 5 | ✅ concluída (menos a limpeza do .sav morto) |
-| 1 | `romId.ts` — a pedra angular | 1 | ☐ não iniciada |
+| 1 | `romId.ts` — a pedra angular | 1 | ✅ concluída |
 | 2 | Furar a ilha: a barra de três links | 1 | ☐ não iniciada |
 | 3 | Pontes baratas | 4 | ☐ não iniciada |
 | 4 | Parsing do save (com porta de pesquisa) | 4 | ☐ não iniciada |
@@ -367,24 +367,28 @@ ocorrências** (Gen 3 usa codificação própria, não ASCII).
 - **Cuidado ao normalizar o nome.** `Pokemon Unbound (v2.1.1.1).gba` e `Pokemon Rocket - b3.0.gba`
   têm pontos no meio. Regex que corta depois do primeiro `.` vira `v2` e `b3`. Remova só a extensão final.
 
-- [ ] **Passo 1 — testes primeiro.** `romId.test.ts` com buffers montados à mão (não precisa de ROM
+- [x] **Passo 1 — testes primeiro.** `romId.test.ts` com buffers montados à mão (não precisa de ROM
       real): um com game code `BPEE` deve devolver Emerald/Gen III/Hoenn; um com `BPGE` deve devolver
       LeafGreen/Gen III/Kanto; um com código desconhecido deve devolver `null` sem estourar; um
       buffer curto demais deve devolver `null`.
-- [ ] **Passo 2 — rodar e ver falhar.** `npx vitest run src/emulator/romId.test.ts`
-- [ ] **Passo 3 — implementar `romId.ts`.** Módulo puro, sem dependência do core. A tabela de game
+- [x] **Passo 2 — rodar e ver falhar.** `npx vitest run src/emulator/romId.test.ts`
+- [x] **Passo 3 — implementar `romId.ts`.** Módulo puro, sem dependência do core. A tabela de game
       code → `{ versionGroupId, generation, region }` casa com os ids que já existem em
       `src/data/versionGroups.ts:18-51`, `src/data/generations.ts:16-90` e `src/data/regions.ts` —
       **reuse esses ids, não invente novos**, senão a Fase 2 não vai conseguir montar os links.
-- [ ] **Passo 4 — ligar em `useEmulator`.** Chamar no carregamento e guardar o resultado no estado
+- [x] **Passo 4 — ligar em `useEmulator`.** Chamar no carregamento e guardar o resultado no estado
       que `PlayPage` já lê. `consoleOf` (`types.ts:42`) continua como fallback quando `romId`
       devolver `null`.
-- [ ] **Passo 5 — mostrar.** O bloco `play-now` (`PlayPage.tsx:153-159`) passa a dizer
+- [x] **Passo 5 — mostrar.** O bloco `play-now` (`PlayPage.tsx:153-159`) passa a dizer
+      **Parcial de propósito:** a lista da pasta `roms/` ficou sem a base. Os arquivos de lá
+      não estão no FS do core, então ler o cabeçalho exigiria requisição HTTP com `Range` ao
+      `vite-plugin-local-roms.ts`, que não implementa Range. A biblioteca (essa sim no FS)
+      mostra a base, com cache por nome de arquivo — 192 bytes lidos uma vez por ROM.
       "Emerald · Geração III · Hoenn" em vez de só o nome do arquivo. A lista da pasta `roms/` e a
       biblioteca ganham o título de verdade como linha principal — respeitando a regra do romhack.
-- [ ] **Passo 6 — verificar.** Suíte limpa. No navegador: carregar cada uma das 4 ROMs de `roms/`
+- [x] **Passo 6 — verificar.** Suíte limpa. No navegador: carregar cada uma das 4 ROMs de `roms/`
       e conferir que Unbound **não** se apresenta como FireRed.
-- [ ] **Passo 7 — commit.** `feat(emulador): identifica o jogo pelo cabecalho da rom`
+- [x] **Passo 7 — commit.** `feat(emulador): identifica o jogo pelo cabecalho da rom`
 
 ---
 

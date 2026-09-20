@@ -15,6 +15,7 @@ import {
 } from "../emulator/diagnostics";
 import { useGamepad } from "../emulator/useGamepad";
 import { SUPPORTED_LABEL, consoleOf, type SaveStateSlot } from "../emulator/types";
+import { GAME_GENERATIONS } from "../data/generations";
 import { describeAge } from "../emulator/saveStates";
 import { SCALE_MODES } from "../emulator/display";
 import { rewindSeconds } from "../emulator/capture";
@@ -27,6 +28,18 @@ const GROUPS: KeyBinding["group"][] = [
   "ombro",
   "sistema",
 ];
+
+/**
+ * Algarismo romano da geracao, tirado do mesmo dado que a Lore publica.
+ *
+ * Reusar em vez de converter numero para romano aqui: se um dia a tabela
+ * mudar, as duas telas mudam juntas.
+ */
+function romano(geracao: number): string {
+  return (
+    GAME_GENERATIONS.find((g) => g.id === geracao)?.roman ?? String(geracao)
+  );
+}
 
 const PlayPage = () => {
   const emu = useEmulator();
@@ -153,8 +166,16 @@ const PlayPage = () => {
         {playing && (
           <div className="play-now">
             <span className="play-now-label">Rodando</span>
+            {/* O nome do arquivo manda na linha principal, e isso é regra, não
+                estilo: romhack tem o cabeçalho byte a byte igual ao do jogo
+                original, então o detectado só pode vir como base. Escrever
+                "FireRed" em cima de um Unbound seria mentir. */}
             <strong>{currentRom}</strong>
-            <span className="play-now-console">{consoleOf(currentRom)}</span>
+            <span className="play-now-console">
+              {emu.romId
+                ? `${emu.romId.console} · base: ${emu.romId.jogo} · Geração ${romano(emu.romId.geracao)}`
+                : consoleOf(currentRom)}
+            </span>
           </div>
         )}
       </header>
@@ -469,6 +490,7 @@ const PlayPage = () => {
                       <span className="play-rom-name">{rom.fileName}</span>
                       <span className="play-rom-meta">
                         {consoleOf(rom.fileName)}
+                        {rom.base && ` · base: ${rom.base}`}
                         {rom.size !== undefined && ` · ${formatBytes(rom.size)}`}
                       </span>
                     </button>
