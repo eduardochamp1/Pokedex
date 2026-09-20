@@ -760,6 +760,47 @@ export const LANDMARKS: Landmark[] = [
     pokemons: ["calyrex", "glastrier", "spectrier"],
   },
 
+  {
+    id: "wyndon",
+    name: "Wyndon",
+    regionId: "galar",
+    kind: "marco",
+    wiki: "Wyndon",
+    summary:
+      "Cidade mais populosa de Galar, no extremo norte, onde a Gym Challenge termina. Ao norte da praça fica a Rose Tower — o escritório de Rose, que abriga todas as subsidiárias da Macro Cosmos. É dali que o presidente sai no meio da final para ligar a Energy Plant em Hammerlocke.",
+    pokemons: ["charizard", "eternatus", "copperajah"],
+  },
+  {
+    id: "glimwood-tangle",
+    name: "Bosque Glimwood",
+    regionId: "galar",
+    kind: "floresta",
+    wiki: "Glimwood Tangle",
+    summary:
+      "Floresta permanentemente escura entre Stow-on-Side e Ballonlea. Quem ilumina a trilha são cogumelos luminescentes espalhados pelo chão — tocar um faz ele brilhar mais forte e abrir um círculo maior de luz. O nome japonês é literal: Floresta do Labirinto Luminoso.",
+    pokemons: ["ponyta-galar", "impidimp", "sinistea"],
+  },
+  {
+    id: "stow-on-side",
+    name: "Stow-on-Side",
+    regionId: "galar",
+    kind: "ruina",
+    wiki: "Stow-on-Side",
+    summary:
+      "Vila de montanha que cresceu em volta de um mural antigo, no alto de dois lances de escada. Bede tenta destruí-lo atrás de Wishing Stars e o derruba — e a parede caída revela uma câmara escondida, com as estátuas de Zacian, Zamazenta e dos primeiros reis de Galar.",
+    pokemons: ["zacian", "zamazenta"],
+  },
+  {
+    id: "turffield",
+    name: "Turffield",
+    regionId: "galar",
+    kind: "ruina",
+    wiki: "Turffield",
+    summary:
+      "Vila rural do primeiro ginásio de Galar, com um geoglifo enorme numa encosta a oeste: um pokémon gigantesco sob um turbilhão de escuridão. É o Darkest Day desenhado no chão muito antes de o jogo dizer o que foi — e só se enxerga inteiro do alto do morro vizinho.",
+    pokemons: ["eternatus", "stonjourner", "gossifleur"],
+  },
+
   // ==================== PALDEA ====================
   {
     id: "area-zero",
@@ -810,5 +851,55 @@ export const LANDMARKS: Landmark[] = [
     summary:
       "Escola dentro de uma cúpula submarina em Unova, com quatro biomas artificiais construídos para treino de campo. É onde Terapagos é encontrado — e onde a irmandade acadêmica de Paldea ganha um espelho estrangeiro.",
     pokemons: ["terapagos", "archaludon"],
+  },
+  {
+    id: "mesagoza",
+    name: "Mesagoza",
+    regionId: "paldea",
+    kind: "marco",
+    wiki: "Mesagoza",
+    summary:
+      "Maior cidade de Paldea, no centro geográfico da região — e a mais populosa de todo o mundo pokémon até onde se sabe. Duas escadarias sobem da praça central até a academia, e é subindo-as, entre duas brigas com a Team Star, que o jogador recebe seu Tera Orb.",
+    pokemons: ["gimmighoul", "koraidon", "miraidon"],
+  },
+  {
+    id: "paldea-academy",
+    name: "Academia Naranja / Uva",
+    regionId: "paldea",
+    kind: "laboratorio",
+    wiki: "Naranja Academy",
+    summary:
+      "Escola no alto de Mesagoza — Naranja em Scarlet, Uva em Violet — e escola-irmã da Blueberry, no fundo do mar de Unova. O diretor Clavell entrega a cada aluno um projeto de estudo independente: a Caça ao Tesouro. E deixa registrado que a Grande Cratera de Paldea é área proibida para qualquer um deles.",
+    pokemons: ["sprigatito", "fuecoco", "quaxly"],
+  },
+  {
+    id: "casseroya-lake",
+    name: "Lago Casseroya",
+    regionId: "paldea",
+    kind: "lago",
+    wiki: "Casseroya Lake",
+    summary:
+      "Lago grande no noroeste de Paldea, com ilhotas e a Socarrat Trail dentro dele. É a casa do Titã Falso Dragão, que não é dragão nem é um pokémon só: Dondozo faz o trabalho, e quem manda é o Tatsugiri enfiado na boca dele.",
+    pokemons: ["dondozo", "tatsugiri", "cetitan"],
+  },
+  {
+    id: "asado-desert",
+    name: "Deserto Asado",
+    regionId: "paldea",
+    kind: "marco",
+    wiki: "Asado Desert",
+    summary:
+      "Deserto que toma boa parte da West Province e engole a cidade de Cascarrafa. Ali vive o Titã Terra Trêmula — Great Tusk em Scarlet, Iron Treads em Violet: o mesmo nicho ocupado por um bicho do passado remoto ou do futuro distante, conforme a versão.",
+    pokemons: ["great-tusk", "iron-treads", "orthworm"],
+  },
+  {
+    id: "alfornada-cavern",
+    name: "Caverna Alfornada",
+    regionId: "paldea",
+    kind: "caverna",
+    wiki: "Alfornada Cavern",
+    summary:
+      "Passagem no sudoeste que liga a South Province a Alfornada por terra — o caminho de quem não quer enfrentar o Titã Falso Dragão para chegar lá. No pós-jogo vira ninho de Groudon, que aparece aqui depois que Snacksworth entrega o petisco certo.",
+    pokemons: ["groudon"],
   },
 ];
