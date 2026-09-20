@@ -1030,3 +1030,26 @@
   .play-stage { padding: 10px; border-radius: 14px; }
   .play-deck-grille { width: 62px; }
 }
+
+/* ========= Os links que furam a ilha =========
+   A aba nao tinha um unico Link: o emulador e o resto do site viviam de costas
+   um para o outro. Estas tres paginas ja existiam — faltava o vao. */
+.play-now-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+}
+.play-now-links a {
+  font-size: 0.7rem;
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--dur-fast), color var(--dur-fast);
+}
+.play-now-links a:hover {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type DragEvent } from "react";
+import { Link } from "react-router-dom";
 import "../styles/play.css";
 import { useEmulator } from "../emulator/useEmulator";
 import {
@@ -16,6 +17,7 @@ import {
 import { useGamepad } from "../emulator/useGamepad";
 import { SUPPORTED_LABEL, consoleOf, type SaveStateSlot } from "../emulator/types";
 import { GAME_GENERATIONS } from "../data/generations";
+import { REGIONS } from "../data/regions";
 import { describeAge } from "../emulator/saveStates";
 import { SCALE_MODES } from "../emulator/display";
 import { rewindSeconds } from "../emulator/capture";
@@ -39,6 +41,11 @@ function romano(geracao: number): string {
   return (
     GAME_GENERATIONS.find((g) => g.id === geracao)?.roman ?? String(geracao)
   );
+}
+
+/** Nome da regiao como o resto do site a escreve. */
+function nomeDaRegiao(id: string): string {
+  return REGIONS.find((r) => r.id === id)?.name ?? id;
 }
 
 const PlayPage = () => {
@@ -176,6 +183,23 @@ const PlayPage = () => {
                 ? `${emu.romId.console} · base: ${emu.romId.jogo} · Geração ${romano(emu.romId.geracao)}`
                 : consoleOf(currentRom)}
             </span>
+            {/* A aba era uma ilha: 870 linhas sem um único Link, e só três
+                arquivos do site inteiro citavam /jogar. Estas três páginas já
+                existiam — faltava o vão do meio. */}
+            {emu.romId && (
+              <nav className="play-now-links" aria-label="Sobre este jogo">
+                {/* "Geração III" é fato; "a dex de Emerald" seria aproximação:
+                    FireRed e LeafGreen usam a dex de Kanto mas trazem espécies
+                    de Johto no pós-jogo. */}
+                <Link to={`/?ger=${emu.romId.geracao}`}>
+                  Pokémon da Geração {romano(emu.romId.geracao)}
+                </Link>
+                <Link to={`/mapa?region=${emu.romId.regiaoId}`}>
+                  {nomeDaRegiao(emu.romId.regiaoId)} no mapa
+                </Link>
+                <Link to="/lore?aba=generations">Geração na lore</Link>
+              </nav>
+            )}
           </div>
         )}
       </header>

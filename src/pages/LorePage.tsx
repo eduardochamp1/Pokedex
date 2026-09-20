@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import "../styles/lore.css";
 import { LORE_EVENTS, ERAS } from "../data/lore";
 import { REGIONS } from "../data/regions";
@@ -34,23 +35,15 @@ import {
 import { REGION_SHAPES } from "../data/regionMap";
 import { pixelSpriteUrl } from "../lib/sprites";
 import { STARTERS } from "../data/rarity";
+import {
+  parseLoreTab,
+  serializeLoreTab,
+  type LoreTab,
+} from "../lib/loreParams";
 
 // Cor temática por humano (derivada de sua saga / pokemon principal)
 
-type Tab =
-  | "timeline"
-  | "genealogy"
-  | "generations"
-  | "regions"
-  | "humans"
-  | "villains"
-  | "dimensions"
-  | "battles"
-  | "myths"
-  | "civilizations"
-  | "breeding"
-  | "items"
-  | "landmarks";
+type Tab = LoreTab;
 
 const TAB_LABELS: Record<Tab, string> = {
   timeline: "Cronologia",
@@ -88,7 +81,17 @@ const allPokemonNames = Array.from(
 );
 
 const LorePage = () => {
-  const [tab, setTab] = useState<Tab>("timeline");
+  /**
+   * A aba mora na URL, nao em useState.
+   *
+   * Sem isso a Lore nao era enderecavel: nao dava para mandar link para a
+   * Cronologia, nem para a aba de Geracoes, nem para voltar onde se estava
+   * depois de recarregar — e quem quisesse apontar para ca, como a aba
+   * /jogar, so conseguia apontar para a Lore inteira.
+   */
+  const [params, setParams] = useSearchParams();
+  const tab = parseLoreTab(params);
+  const setTab = (nova: Tab) => setParams(serializeLoreTab(nova));
   const [eraFilter, setEraFilter] = useState<string | undefined>(undefined);
   const [pokemonFilter, setPokemonFilter] = useState<string | undefined>(undefined);
 

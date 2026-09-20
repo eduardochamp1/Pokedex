@@ -20,7 +20,7 @@
 |---|---|---|---|
 | 0 | Bugs confirmados no emulador | 5 | ✅ concluída (menos a limpeza do .sav morto) |
 | 1 | `romId.ts` — a pedra angular | 1 | ✅ concluída |
-| 2 | Furar a ilha: a barra de três links | 1 | ☐ não iniciada |
+| 2 | Furar a ilha: a barra de três links | 1 | ✅ concluída |
 | 3 | Pontes baratas | 4 | ☐ não iniciada |
 | 4 | Parsing do save (com porta de pesquisa) | 4 | ☐ não iniciada |
 
@@ -407,20 +407,20 @@ dentro de `/jogar`. Com Emerald rodando, três links aparecem no bloco `play-now
 | Hoenn no mapa | `/mapa?region=hoenn` | `MapPage.tsx:15-22` já faz deep-link |
 | Geração III na lore | `/lore?aba=generations` | **não** — ver o passo 3 |
 
-- [ ] **Passo 1 — o mais barato primeiro.** Importar `Link` de `react-router-dom` em `PlayPage.tsx`
+- [x] **Passo 1 — o mais barato primeiro.** Importar `Link` de `react-router-dom` em `PlayPage.tsx`
       (hoje o arquivo não importa nada de roteamento) e adicionar os dois primeiros links, que não
       exigem mudança fora da aba.
-- [ ] **Passo 2 — verificar no navegador** que os dois levam ao lugar certo com a região/geração
+- [x] **Passo 2 — verificar no navegador** que os dois levam ao lugar certo com a região/geração
       corretas para cada uma das 4 ROMs.
-- [ ] **Passo 3 — o terceiro link exige mudar a LorePage.** `LorePage.tsx:91` guarda a aba ativa em
+- [x] **Passo 3 — o terceiro link exige mudar a LorePage.** `LorePage.tsx:91` guarda a aba ativa em
       `useState`, não na URL — a lore não é endereçável. Adicionar um parâmetro (`/lore?aba=`) e ler
       o estado inicial dele, no mesmo padrão que `homeParams.ts` já usa. É mudança em página fora de
       `/jogar`: faça com teste do parser de parâmetro, como os outros.
-- [ ] **Passo 4 — ressalva honesta.** A dex regional não cobre tudo: FireRed/LeafGreen usam a dex de
+- [x] **Passo 4 — ressalva honesta.** A dex regional não cobre tudo: FireRed/LeafGreen usam a dex de
       Kanto mas incluem espécies de Johto no pós-jogo. Se o link prometer "a dex deste jogo", ele
       mente um pouco. Prefira rotular como "Geração III" (fato) em vez de "a dex de Emerald"
       (aproximação).
-- [ ] **Passo 5 — commit.** `feat(jogar): links para a dex, o mapa e a lore do jogo em execucao`
+- [x] **Passo 5 — commit.** `feat(jogar): links para a dex, o mapa e a lore do jogo em execucao`
 
 ---
 
