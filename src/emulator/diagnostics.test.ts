@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  AV_TOGGLES,
   DEFAULT_AV,
   appendLog,
   formatLogLine,
@@ -108,5 +109,29 @@ describe("isAvSettings", () => {
     expect(isAvSettings({ ...DEFAULT_AV, videoSync: "sim" })).toBe(false);
     expect(isAvSettings(null)).toBe(false);
     expect(isAvSettings("audioSync")).toBe(false);
+  });
+});
+
+/**
+ * Quem manda no ritmo da emulação.
+ *
+ * Relatado jogando: a barra de velocidade acelerava a música e não o jogo, e na
+ * velocidade normal apareciam arrancadas em momentos aleatórios. Os dois
+ * sintomas saem do mesmo ajuste — `timestepSync`, que o core traz ligado.
+ */
+describe("ritmo da emulação", () => {
+  it("o ritmo vem do áudio, não de passos discretos", () => {
+    expect(DEFAULT_AV.timestepSync).toBe(false);
+    expect(DEFAULT_AV.audioSync).toBe(true);
+  });
+
+  /** Preferência gravada antes deste campo existir tem que cair no default. */
+  it("preferência antiga, sem timestepSync, é recusada pelo validador", () => {
+    const antiga = { audioSync: false, videoSync: false, showFpsCounter: false };
+    expect(isAvSettings(antiga)).toBe(false);
+  });
+
+  it("o passo fixo continua alcançável pela tela", () => {
+    expect(AV_TOGGLES.map((t) => t.id)).toContain("timestepSync");
   });
 });

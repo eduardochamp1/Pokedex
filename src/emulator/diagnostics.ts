@@ -13,14 +13,47 @@ export interface AvSettings {
   audioSync: boolean;
   /** Sincroniza o video com o refresh do monitor (vsync). */
   videoSync: boolean;
+  /**
+   * Avanca em passos discretos de `baseFpsTarget` em vez de tempo variavel.
+   *
+   * E o ajuste que decide QUEM manda no ritmo da emulacao, e o core o traz
+   * ligado. Ligado, o core anda em incrementos fixos de 1/60 s e ignora
+   * quanto tempo real passou — entao a barra de velocidade nao tem por onde
+   * agir sobre o jogo, e so o audio acelera. Desligado, o ritmo vem do audio
+   * (com `audioSync`), que e o caminho por onde o multiplicador funciona.
+   */
+  timestepSync: boolean;
   /** Contador de quadros por segundo desenhado pelo proprio core. */
   showFpsCounter: boolean;
 }
 
-/** Os defaults do core, segundo a tipagem publicada. */
+/**
+ * O ritmo sai do audio, e nao de passos fixos.
+ *
+ * **Nao sao os defaults do core** — sao o oposto deles nos dois primeiros
+ * campos, de proposito. O core vem com `timestepSync: true` e
+ * `audioSync: false`, e essa combinacao produz dois sintomas que foram
+ * relatados jogando:
+ *
+ * 1. **a barra de velocidade acelera a musica e nao o jogo.** Com passos
+ *    discretos de 1/60 s, a emulacao avanca a mesma quantidade por segundo
+ *    independente do multiplicador; o que o multiplicador alcanca e o caminho
+ *    do audio, que reamostara mais rapido. Dai a musica correr sozinha;
+ * 2. **acelerada aleatoria na velocidade normal.** Passo discreto acumula
+ *    quando o laco principal e engasgado — aba em segundo plano, coleta de
+ *    lixo, um quadro pesado — e depois roda os passos atrasados de uma vez.
+ *
+ * Com o ritmo vindo do audio, o core anda na velocidade que o dispositivo de
+ * som consome, que e uma base de tempo estavel, e o multiplicador passa a
+ * escalar a emulacao inteira.
+ *
+ * Os dois continuam desligaveis na tela: quem tiver audio problematico pode
+ * voltar ao comportamento antigo.
+ */
 export const DEFAULT_AV: AvSettings = {
-  audioSync: false,
+  audioSync: true,
   videoSync: false,
+  timestepSync: false,
   showFpsCounter: false,
 };
 
@@ -30,6 +63,10 @@ export function isAvSettings(value: unknown): value is AvSettings {
   return (
     typeof v.audioSync === "boolean" &&
     typeof v.videoSync === "boolean" &&
+    // Preferencia gravada por uma versao anterior nao tem este campo, entao
+    // cai no default — que e exatamente o que se quer aqui: o valor antigo era
+    // o que produzia a aceleracao esquisita.
+    typeof v.timestepSync === "boolean" &&
     typeof v.showFpsCounter === "boolean"
   );
 }
@@ -48,6 +85,13 @@ export const AV_TOGGLES: {
     id: "videoSync",
     label: "Sincronizar vídeo",
     hint: "Amarra os quadros ao refresh do monitor (vsync). Ligue se a imagem rasgar.",
+  },
+  {
+    id: "timestepSync",
+    label: "Passo fixo",
+    hint:
+      "Avança em passos de 1/60 s em vez de seguir o áudio. Ligado, a barra de " +
+      "velocidade acelera só a música, e o jogo dá arrancadas quando a aba engasga.",
   },
   {
     id: "showFpsCounter",
