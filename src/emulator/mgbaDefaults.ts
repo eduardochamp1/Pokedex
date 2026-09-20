@@ -35,6 +35,21 @@
  * declara `saveStateSlot`/`loadStateSlot` nas typings, embora as tenha em
  * tempo de execução; `types.ts` cobre isso.
  *
+ * ### `baseFpsTarget` e `frameSkip` ficam de fora, e isso importa
+ *
+ * `setCoreSettings` só escreve as chaves definidas, então não listar um ajuste
+ * é diferente de listá-lo com o valor "padrão": o que não vem aqui mantém o
+ * que o core decidiu sozinho.
+ *
+ * Uma versão anterior escrevia `baseFpsTarget: 60`. **Um GBA não roda a 60
+ * quadros por segundo, roda a 59,7275.** Forçar 60 faz o core produzir áudio
+ * para uma taxa que o jogo não tem, e a diferença — meio por cento — vira
+ * deriva audível depois de alguns minutos. Era essa a dessincronia do som.
+ *
+ * O gbajs3 não define nenhum dos dois, e é por isso que lá o som não deriva.
+ * O nome do branch `core-settings-native-fps` no repositório do core diz de
+ * onde vem o valor certo: do próprio jogo, não da nossa opinião.
+ *
  * ### Onde divergimos da referência, de propósito
  *
  * `allowOpposingDirections` é o único: gbajs3 deixa ligado, nós desligamos.
@@ -49,11 +64,11 @@ import type { coreSettings } from "@thenick775/mgba-wasm";
  *
  * | ajuste | gbajs3 | aqui | por quê |
  * |---|---|---|---|
- * | `audioSync` | false | false | o turbo liga o `audioWait` sozinho |
+ * | `audioSync` | false | false | — |
  * | `videoSync` | false | false | — |
- * | `timestepSync` | true | true | passo fixo de 1/60 s; é o que o multiplicador escala |
- * | `baseFpsTarget` | (não define) | 60 | o multiplicador escala este valor |
- * | `frameSkip` | (não define) | 0 | — |
+ * | `timestepSync` | true | true | passo fixo; segura o jogo na velocidade certa |
+ * | `baseFpsTarget` | **não define** | **não define** | ver abaixo |
+ * | `frameSkip` | **não define** | **não define** | idem |
  * | `audioSampleRate` | 48000 | 48000 | o que este build espera |
  * | `audioBufferSize` | 1024 | 1024 | o que este build espera |
  * | `allowOpposingDirections` | true | **false** | jogabilidade de GBA |
@@ -62,8 +77,6 @@ export const MGBA_CORE_SETTINGS: coreSettings = {
   audioSync: false,
   videoSync: false,
   timestepSync: true,
-  baseFpsTarget: 60,
-  frameSkip: 0,
   audioSampleRate: 48000,
   audioBufferSize: 1024,
   allowOpposingDirections: false,
