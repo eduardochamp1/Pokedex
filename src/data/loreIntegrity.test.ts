@@ -3,7 +3,11 @@ import { REGIONS } from "./regions";
 import { REGION_SHAPES } from "./regionMap";
 import { LANDMARKS, LANDMARK_KIND_LABELS } from "./landmarks";
 import { ITEMS } from "./items";
-import { HUMAN_LEGENDS } from "./humans";
+import {
+  HUMAN_CATEGORY_LABELS,
+  HUMAN_CATEGORY_ORDER,
+  HUMAN_LEGENDS,
+} from "./humans";
 import { VILLAIN_TEAMS } from "./villains";
 import { MYTHS } from "./myths";
 import { BATTLES } from "./battles";
@@ -103,6 +107,35 @@ describe("genealogia", () => {
     const esperado = [GENEALOGY_ROOT.name, ...nodes.map((n) => n.name)];
     expect(genealogyNames().sort()).toEqual(esperado.sort());
     expect(dupes(genealogyNames())).toEqual([]);
+  });
+});
+
+describe("humanos", () => {
+  it("todo humano cai num grupo que a aba sabe desenhar", () => {
+    const soltos = HUMAN_LEGENDS.filter(
+      (h) => !HUMAN_CATEGORY_ORDER.includes(h.category)
+    );
+    expect(soltos.map((h) => `${h.name} -> ${h.category}`)).toEqual([]);
+  });
+
+  it("todo grupo da ordem tem rótulo e ao menos um humano", () => {
+    const vazios = HUMAN_CATEGORY_ORDER.filter(
+      (c) => !HUMAN_CATEGORY_LABELS[c] || !HUMAN_LEGENDS.some((h) => h.category === c)
+    );
+    expect(vazios).toEqual([]);
+  });
+
+  // A cor vivia num Record indexado por nome dentro da pagina: renomear um
+  // humano derrubava a cor em silencio. Agora ela e obrigatoria no dado.
+  it("todo humano tem cor em hexadecimal", () => {
+    const ruins = HUMAN_LEGENDS.filter((h) => !/^#[0-9a-f]{6}$/i.test(h.color));
+    expect(ruins.map((h) => `${h.name}: ${h.color}`)).toEqual([]);
+  });
+
+  // A arte do card e o time: sem pokemon, o card abre com o slot vazio.
+  it("todo humano cita ao menos um pokémon", () => {
+    const vazios = HUMAN_LEGENDS.filter((h) => h.pokemons.length === 0);
+    expect(vazios.map((h) => h.name)).toEqual([]);
   });
 });
 

@@ -2,7 +2,11 @@ import { useCallback, useMemo, useState } from "react";
 import "../styles/lore.css";
 import { LORE_EVENTS, ERAS } from "../data/lore";
 import { REGIONS } from "../data/regions";
-import { HUMAN_LEGENDS } from "../data/humans";
+import {
+  HUMAN_CATEGORY_LABELS,
+  HUMAN_CATEGORY_ORDER,
+  HUMAN_LEGENDS,
+} from "../data/humans";
 import { genealogyNames } from "../data/genealogy";
 import { GAME_GENERATIONS } from "../data/generations";
 import { VILLAIN_TEAMS } from "../data/villains";
@@ -24,7 +28,6 @@ import WikiSource from "../components/WikiSource";
 import ItemSprite from "../components/ItemSprite";
 import {
   DimensionPortal,
-  HumanBadge,
   RegionMapIcon,
   VillainEmblem,
 } from "../components/LoreArt";
@@ -33,46 +36,6 @@ import { pixelSpriteUrl } from "../lib/sprites";
 import { STARTERS } from "../data/rarity";
 
 // Cor temática por humano (derivada de sua saga / pokemon principal)
-const HUMAN_COLORS: Record<string, string> = {
-  // Heróis antigos
-  "Sir Aaron": "#c48d3a",
-  "AZ": "#7ac74c",
-  "Rei de Galar": "#c48d3a",
-  // Professores
-  "Professor Samuel Oak": "#a83a2c",
-  "Professor Elm": "#c48d3a",
-  "Professor Birch": "#7ac74c",
-  "Professor Rowan": "#3a6cb0",
-  "Professora Juniper": "#1a1a1a",
-  "Professor Sycamore": "#c8ab74",
-  "Professor Kukui": "#f7b32b",
-  "Professora Magnolia": "#3d5a80",
-  "Professores Sada e Turo": "#e63946",
-  // Vilões
-  "Cyrus": "#6b4a9b",
-  "N (Natural Harmonia Gropius)": "#3d5a80",
-  "Ghetsis": "#3a3a4a",
-  "Lysandre": "#e63946",
-  "Lusamine": "#f7d02c",
-  "Volo": "#735797",
-  // Champions
-  "Red": "#dc0a2d",
-  "Blue Oak": "#3a6cb0",
-  "Silver": "#a1a1a6",
-  "Steven Stone": "#b7b7ce",
-  "Cynthia": "#c48d3a",
-  "Alder": "#c22e28",
-  "Iris": "#6f35fc",
-  "Diantha": "#d685ad",
-  "Hau": "#f7d02c",
-  "Leon": "#dc0a2d",
-  "Nemona": "#7ac74c",
-  // Rivais e coadjuvantes
-  "Lillie": "#96d9d6",
-  "Gladion": "#3a3a4a",
-  "Hop": "#3d5a80",
-  "Marnie": "#a33ea1",
-};
 
 type Tab =
   | "timeline"
@@ -500,50 +463,110 @@ const LorePage = () => {
         )}
 
         {tab === "humans" && (
-          <div className="editorial-grid">
-            {visibleHumans.map((h) => {
-              const color = HUMAN_COLORS[h.name] ?? "#c48d3a";
-              const sigName = h.pokemons[0];
-              const sigArt = pixelSpriteUrl(sigName ? idOf(sigName) : undefined);
+          <div className="human-grid">
+            {(() => {
+              const grupos = HUMAN_CATEGORY_ORDER.filter((c) =>
+                visibleHumans.some((h) => h.category === c)
+              );
+              if (grupos.length < 2) return null;
               return (
-                <article
-                  key={h.name}
-                  className="editorial-card editorial-card-human editorial-card-with-art"
-                  style={{ ["--card-accent" as string]: color }}
-                >
-                  <div className="editorial-art editorial-art-portrait">
-                    {sigArt && (
-                      <img
-                        src={sigArt}
-                        alt={sigName ?? ""}
-                        className="portrait-sprite"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    )}
-                    <div className="portrait-badge">
-                      <HumanBadge name={h.name} color={color} />
-                    </div>
-                  </div>
-                  <h3>{h.name}</h3>
-                  <p className="subtitle">
-                    {h.role} · {h.region}
-                  </p>
-                  <p>{h.summary}</p>
-                  <WikiSource wiki={h.wiki} />
-                  <div className="lore-chips">
-                    {h.pokemons.map((name) => (
-                      <PokemonChip
-                        key={name}
-                        name={name}
-                        id={idOf(name)}
-                        onFilter={() => focusPokemon(name)}
-                      />
+                <nav className="human-index" aria-label="Ir para um grupo">
+                  {grupos.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      className="human-index-btn"
+                      onClick={() =>
+                        document
+                          .getElementById("humanos-" + c)
+                          ?.scrollIntoView({ block: "start" })
+                      }
+                    >
+                      {HUMAN_CATEGORY_LABELS[c]}
+                      <span className="human-index-count">
+                        {visibleHumans.filter((h) => h.category === c).length}
+                      </span>
+                    </button>
+                  ))}
+                </nav>
+              );
+            })()}
+            {HUMAN_CATEGORY_ORDER.filter((c) =>
+              visibleHumans.some((h) => h.category === c)
+            ).map((cat) => {
+              const doGrupo = visibleHumans.filter((h) => h.category === cat);
+              return (
+                <section key={cat} id={"humanos-" + cat} className="human-section">
+                  <header className="human-section-head">
+                    <h3 className="human-section-name">
+                      {HUMAN_CATEGORY_LABELS[cat]}
+                    </h3>
+                    <p className="human-section-count">
+                      {doGrupo.length} {doGrupo.length === 1 ? "verbete" : "verbetes"}
+                    </p>
+                  </header>
+                  <div className="editorial-grid">
+                    {doGrupo.map((h) => (
+                      <article
+                        key={h.name}
+                        className="editorial-card editorial-card-with-art"
+                        style={{ ["--card-accent" as string]: h.color }}
+                      >
+                        {/* O time inteiro vira a arte. Retrato de treinador nao
+                            existe em fonte que o projeto possa usar, e o
+                            monograma de iniciais que ficava aqui nao dizia
+                            nada — o primeiro sprite e o parceiro de assinatura,
+                            os demais completam a escalacao. */}
+                        <div
+                          className="editorial-art human-art"
+                          aria-hidden="true"
+                          style={{ ["--time" as string]: h.pokemons.length }}
+                        >
+                          {h.pokemons.map((nome, i) => {
+                            const arte = pixelSpriteUrl(idOf(nome));
+                            if (!arte) return null;
+                            return (
+                              <img
+                                key={nome}
+                                src={arte}
+                                alt=""
+                                className={i === 0 ? "human-art-ace" : "human-art-time"}
+                                loading="lazy"
+                                decoding="async"
+                              />
+                            );
+                          })}
+                        </div>
+                        <h4 className="human-name">{h.name}</h4>
+                        <p className="subtitle">
+                          {h.role} · {h.region}
+                        </p>
+                        <p>{h.summary}</p>
+                        <WikiSource wiki={h.wiki} />
+                        <div className="lore-chips">
+                          {h.pokemons.map((name) => (
+                            <PokemonChip
+                              key={name}
+                              name={name}
+                              id={idOf(name)}
+                              onFilter={() => focusPokemon(name)}
+                            />
+                          ))}
+                        </div>
+                      </article>
                     ))}
                   </div>
-                </article>
+                </section>
               );
             })}
+            {visibleHumans.length === 0 && (
+              <div className="lore-empty">
+                Nenhum humano com <b>{pokemonFilter}</b>.
+                <button onClick={clearFilters} className="lore-clear-btn">
+                  limpar busca
+                </button>
+              </div>
+            )}
           </div>
         )}
 

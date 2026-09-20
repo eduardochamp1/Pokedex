@@ -1,7 +1,30 @@
 import type { WikiSourced } from "../lib/wiki";
 
+/** As cinco secoes da aba, que ate aqui eram so comentario no arquivo. */
+export type HumanCategory = "heroi" | "professor" | "vilao" | "champion" | "rival";
+
+export const HUMAN_CATEGORY_LABELS: Record<HumanCategory, string> = {
+  heroi: "Heróis antigos",
+  professor: "Professores",
+  vilao: "Vilões",
+  champion: "Champions",
+  rival: "Rivais e coadjuvantes",
+};
+
+/** Ordem em que os grupos aparecem na aba — cronologica, do mito ao presente. */
+export const HUMAN_CATEGORY_ORDER: HumanCategory[] = [
+  "heroi",
+  "professor",
+  "vilao",
+  "champion",
+  "rival",
+];
+
 export interface HumanLegend extends WikiSourced {
   name: string;
+  category: HumanCategory;
+  /** Cor de identidade do verbete; vira --card-accent na tela. */
+  color: string;
   role: string;
   region: string;
   summary: string;
@@ -12,6 +35,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   // ==================== HERÓIS ANTIGOS ====================
   {
     name: "Sir Aaron",
+    category: "heroi",
+    color: "#c48d3a",
     wiki: "Sir Aaron",
     role: "Guardião do Reino de Rota",
     region: "Kanto (lendas antigas)",
@@ -21,6 +46,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "AZ",
+    category: "heroi",
+    color: "#7ac74c",
     wiki: "AZ",
     role: "Rei imortal de Kalos",
     region: "Kalos (há 3000 anos)",
@@ -30,6 +57,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Rei de Galar",
+    category: "heroi",
+    color: "#c48d3a",
     wiki: "Darkest Day",
     role: "Herói do Darkest Day",
     region: "Galar (há 3000 anos)",
@@ -41,6 +70,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   // ==================== PROFESSORES ====================
   {
     name: "Professor Samuel Oak",
+    category: "professor",
+    color: "#a83a2c",
     wiki: "Professor Oak",
     role: "Pioneiro da pesquisa Pokémon",
     region: "Kanto (Pallet Town)",
@@ -50,6 +81,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Professor Elm",
+    category: "professor",
+    color: "#c48d3a",
     wiki: "Professor Elm",
     role: "Especialista em breeding",
     region: "Johto (New Bark Town)",
@@ -59,6 +92,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Professor Birch",
+    category: "professor",
+    color: "#7ac74c",
     wiki: "Professor Birch",
     role: "Estudioso de habitats",
     region: "Hoenn (Littleroot Town)",
@@ -68,6 +103,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Professor Rowan",
+    category: "professor",
+    color: "#3a6cb0",
     wiki: "Professor Rowan",
     role: "Autoridade em evoluções",
     region: "Sinnoh (Sandgem Town)",
@@ -77,6 +114,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Professora Juniper",
+    category: "professor",
+    color: "#55556b",
     wiki: "Professor Juniper",
     role: "Origens dos pokémon",
     region: "Unova (Nuvema Town)",
@@ -86,6 +125,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Professor Sycamore",
+    category: "professor",
+    color: "#c8ab74",
     wiki: "Professor Sycamore",
     role: "Especialista em Mega Evolução",
     region: "Kalos (Lumiose City)",
@@ -95,6 +136,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Professor Kukui",
+    category: "professor",
+    color: "#f7b32b",
     wiki: "Professor Kukui",
     role: "Estudioso de Z-Moves",
     region: "Alola",
@@ -104,6 +147,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Professora Magnolia",
+    category: "professor",
+    color: "#3d5a80",
     wiki: "Professor Magnolia",
     role: "Pioneira do Dynamax",
     region: "Galar",
@@ -113,6 +158,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Professores Sada e Turo",
+    category: "professor",
+    color: "#e63946",
     wiki: "Professor Sada",
     role: "Pesquisadores do tempo",
     region: "Paldea (Área Zero)",
@@ -124,6 +171,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   // ==================== VILÕES ====================
   {
     name: "Cyrus",
+    category: "vilao",
+    color: "#6b4a9b",
     wiki: "Cyrus",
     role: "Líder do Team Galactic",
     region: "Sinnoh",
@@ -133,6 +182,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "N (Natural Harmonia Gropius)",
+    category: "vilao",
+    color: "#3d5a80",
     wiki: "N",
     role: "Rei da Team Plasma",
     region: "Unova",
@@ -142,6 +193,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Ghetsis",
+    category: "vilao",
+    color: "#3a3a4a",
     wiki: "Ghetsis",
     role: "Verdadeiro líder da Team Plasma",
     region: "Unova",
@@ -151,6 +204,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Lysandre",
+    category: "vilao",
+    color: "#e63946",
     wiki: "Lysandre",
     role: "Líder da Team Flare",
     region: "Kalos",
@@ -160,6 +215,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Lusamine",
+    category: "vilao",
+    color: "#f7d02c",
     wiki: "Lusamine",
     role: "Presidente da Aether Foundation",
     region: "Alola",
@@ -169,6 +226,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Volo",
+    category: "vilao",
+    color: "#735797",
     wiki: "Volo",
     role: "Mercador ambulante de Hisui",
     region: "Hisui (Sinnoh ancestral)",
@@ -180,6 +239,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   // ==================== CHAMPIONS ====================
   {
     name: "Red",
+    category: "champion",
+    color: "#dc0a2d",
     wiki: "Red",
     role: "Champion silencioso de Kanto",
     region: "Kanto",
@@ -189,6 +250,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Blue Oak",
+    category: "champion",
+    color: "#3a6cb0",
     wiki: "Blue",
     role: "Ex-Champion, neto do Prof. Oak",
     region: "Kanto",
@@ -198,6 +261,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Silver",
+    category: "champion",
+    color: "#a1a1a6",
     wiki: "Silver",
     role: "Rival de Johto, filho de Giovanni",
     region: "Johto",
@@ -207,6 +272,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Steven Stone",
+    category: "champion",
+    color: "#b7b7ce",
     wiki: "Steven Stone",
     role: "Champion de Hoenn, geólogo",
     region: "Hoenn",
@@ -216,6 +283,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Cynthia",
+    category: "champion",
+    color: "#c48d3a",
     wiki: "Cynthia",
     role: "Champion de Sinnoh, historiadora",
     region: "Sinnoh",
@@ -225,6 +294,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Alder",
+    category: "champion",
+    color: "#c22e28",
     wiki: "Alder",
     role: "Champion errante de Unova",
     region: "Unova",
@@ -234,6 +305,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Iris",
+    category: "champion",
+    color: "#6f35fc",
     wiki: "Iris",
     role: "Champion de Unova (BW2)",
     region: "Unova",
@@ -243,6 +316,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Diantha",
+    category: "champion",
+    color: "#d685ad",
     wiki: "Diantha",
     role: "Champion de Kalos, atriz",
     region: "Kalos",
@@ -252,6 +327,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Hau",
+    category: "champion",
+    color: "#f7d02c",
     wiki: "Hau",
     role: "Champion inicial de Alola",
     region: "Alola",
@@ -261,6 +338,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Leon",
+    category: "champion",
+    color: "#dc0a2d",
     wiki: "Leon",
     role: "Champion invicto de Galar",
     region: "Galar",
@@ -270,6 +349,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Nemona",
+    category: "champion",
+    color: "#7ac74c",
     wiki: "Nemona",
     role: "Rival e Champion de Paldea",
     region: "Paldea",
@@ -281,6 +362,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   // ==================== RIVAIS E COADJUVANTES ====================
   {
     name: "Lillie",
+    category: "rival",
+    color: "#96d9d6",
     wiki: "Lillie",
     role: "Aluna da Aether Foundation",
     region: "Alola",
@@ -290,6 +373,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Gladion",
+    category: "rival",
+    color: "#3a3a4a",
     wiki: "Gladion",
     role: "Ex-Team Skull, filho de Lusamine",
     region: "Alola",
@@ -299,6 +384,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Hop",
+    category: "rival",
+    color: "#3d5a80",
     wiki: "Hop",
     role: "Rival de Galar, irmão do Champion",
     region: "Galar",
@@ -308,6 +395,8 @@ export const HUMAN_LEGENDS: HumanLegend[] = [
   },
   {
     name: "Marnie",
+    category: "rival",
+    color: "#a33ea1",
     wiki: "Marnie",
     role: "Idol e rival de Galar",
     region: "Galar",

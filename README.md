@@ -286,7 +286,7 @@ src/
 │   ├── GenealogyTree.tsx       Árvore de criação: Arceus + painéis de clã
 │   ├── WorldMap.tsx            Mapa em papel (folha 1000x640) + legenda acessível
 │   ├── ScanlineToggle.tsx      Liga/desliga a scanline, guardada no localStorage
-│   └── LoreArt.tsx             Arte SVG (regiões, humanos, vilões, portais)
+│   └── LoreArt.tsx             Arte SVG (regiões, vilões, portais)
 │
 ├── hooks/
 │   ├── usePokemon.ts           React Query wrappers (índice, seleção, página, species, evolution)
@@ -392,7 +392,8 @@ carta na cor do tipo e o dourado reservado a raridade.
 - **Geração ≠ dex regional**: são dois filtros, e confundi-los é o erro mais fácil de cometer. A geração IX trouxe **120 espécies novas**; a dex de **Paldea tem 400 entradas**, porque lista tudo que aparece na região venha de onde vier. Os dois números estão certos — por isso o `DexFilter` separa os dois em grupos rotulados, em vez de oferecer só "Geração: IX — Paldea" e deixar o número parecer errado. Kalos e Galar não têm dex única: os jogos dividem em partes, e a lista reflete isso.
 - **Sprites locais**: os 1.342 sprites pixelados e os 36 de item ficam em `public/sprites/` (~1,4 MB), baixados uma vez por `npm run sprites` e commitados. Como o caminho é determinístico (id do pokémon / slug do item), a Lore renderiza 140+ chips com **zero** request por pokémon e sem depender de CDN de terceiros.
 - **O artwork grande não é local**: 475px × 1.351 daria ~176 MB. Ele continua saindo do objeto `Pokemon` que a PokéAPI já devolve nas telas que buscam o detalhe (card do grid, hero, sprite viewer).
-- **Imagens de personagens, regiões e organizações**: não vêm de wiki. O Bulbapedia bloqueia hotlink (`archives.bulbagarden.net` responde 403) e a arte é propriedade da Nintendo/Game Freak — então a ilustração dessas seções é SVG gerado no próprio projeto (`LoreArt.tsx`), e a wiki entra como **fonte citada**.
+- **Imagens de personagens, regiões e organizações**: não vêm de wiki. O Bulbapedia bloqueia hotlink (`archives.bulbagarden.net` responde 403) e a arte é propriedade da Nintendo/Game Freak. Não existe retrato de treinador em fonte que o projeto possa usar: `PokeAPI/sprites` serve `pokemon`, `items`, `badges` e `types`, e nada de treinador. Então a ilustração dessas seções é SVG gerado no próprio projeto (`LoreArt.tsx`), e a wiki entra como **fonte citada**.
+- **A aba de Humanos ilustra pelo time**: cada verbete mostra os sprites dos pokémon da pessoa, que são imagem real de jogo e já estão em `public/sprites/`. O primeiro da lista é o parceiro de assinatura e aparece maior. Antes havia um monograma SVG com as iniciais no lugar — que não dizia nada e ainda colidia: o `id` do gradiente saía das iniciais, e `hb-L` era declarado quatro vezes (Lysandre, Lusamine, Leon, Lillie), então os quatro pintavam com o vermelho do primeiro.
 - **Fontes**: cada verbete curado tem um campo `wiki` com o título exato da página na Bulbapedia. Os ~250 títulos usados foram validados em lote via API do MediaWiki — nenhum aponta para página inexistente. O texto do site é resumo próprio, não cópia.
 - **Cache**: queries têm `staleTime` de 5–60 min, com `queryKey` compartilhada entre detail, evoluções e formas.
 - **Aborts**: todos os fetches recebem `AbortSignal` — trocar de página cancela requests pendentes.
@@ -404,9 +405,8 @@ carta na cor do tipo e o dourado reservado a raridade.
 - **Virada de carta**: a transição da grade para a ficha usa a View Transitions API direto, não o `viewTransition` do react-router — o app monta o `BrowserRouter` clássico, e aquele hook exige data router. Como a ficha é lazy, a carta pré-carrega o módulo antes de começar a transição; sem isso o retrato novo pegaria o esqueleto do Suspense no lugar do hero.
 - **Costa do mapa**: os nove paths do `regionMap` são curvas suaves, legíveis no arquivo; o recorte de costa é calculado em runtime por `roughenPath`, com semente fixa — determinístico, então não muda entre renders nem entre visitas.
 - **Scanline**: ligada por padrão e desligável pela navbar. O estado mora num atributo do `<html>` aplicado antes do primeiro render, para a página não aparecer lisa e só depois ganhar a textura.
-- **Virada de carta**: a transição da grade para a ficha usa a View Transitions API direto, não o `viewTransition` do react-router — o app monta o `BrowserRouter` clássico, e aquele hook exige data router. Como a ficha é lazy, a carta pré-carrega o módulo antes de começar a transição; sem isso o retrato novo pegaria o esqueleto do Suspense no lugar do hero.
-- **Costa do mapa**: os nove paths do `regionMap` são curvas suaves, legíveis no arquivo; o recorte de costa é calculado em runtime por `roughenPath`, com semente fixa — determinístico, então não muda entre renders nem entre visitas.
-- **Scanline**: ligada por padrão e desligável pela navbar. O estado mora num atributo do `<html>` aplicado antes do primeiro render, para a página não aparecer lisa e só depois ganhar a textura.
+- **`nav` é seletor de elemento**: a regra da navbar era `nav { position: sticky; z-index: 100; height: 56px }` e pegava **qualquer** `<nav>` da página. Os índices de grupo da Lore (Humanos, Locais) são `<nav>` por semântica e herdavam tudo isso — as fichas boiavam por cima dos cards assim que a página rolava, sem fundo próprio. A regra agora é `.navbar`. Vale a lição para `section`, `header` e `aside`.
+- **Porcentagem dentro de custom property**: `--unidade: min(96px, calc((100% - 32px) / N))` é substituída como **texto** e resolvida por propriedade — a porcentagem resolve contra a largura no `width` e contra a **altura** no `height`. Usar a mesma variável nos dois dava uma caixa de 144×59 e o sprite encolhia para caber na menor. A arte de Humanos tira só a largura da variável e deixa a altura para o `aspect-ratio`. Mesma família da armadilha do `color-mix`: variável derivada tem que ser declarada onde a fonte existe.
 - **Testes**: `src/lib/*.test.ts` e `src/data/typeMatchups.test.ts` cobrem a lógica pura (interseção de filtros, busca, resolução de região, matriz de tipos). Os componentes não têm testes de render.
 
 ---

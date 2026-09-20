@@ -27,8 +27,12 @@ img { display: block; max-width: 100%; }
 }
 ::selection { background: var(--accent); color: var(--accent-ink); }
 
-/* ========= Navbar ========= */
-nav {
+/* ========= Navbar =========
+   A regra era `nav`, seletor de elemento: pegava qualquer <nav> da pagina.
+   Os indices de grupo da Lore sao <nav> por semantica e herdavam sticky,
+   z-index 100 e altura 56px — as fichas ficavam boiando por cima dos cards
+   assim que a pagina rolava, sem fundo proprio. Agora a regra e da navbar. */
+.navbar {
   position: sticky;
   top: 0;
   z-index: 100;
@@ -2109,10 +2113,6 @@ nav {
 
 .editorial-art-emblem { padding: 12px 0; background: color-mix(in srgb, var(--card-accent) 15%, var(--surface-2)); }
 .editorial-art-portal { padding: 0; }
-.editorial-art-human {
-  padding: 16px 0;
-  background: color-mix(in srgb, var(--card-accent) 20%, var(--surface-2));
-}
 
 /* Portrait: signature pokemon como fundo + emblema no canto */
 .editorial-art-portrait {
@@ -2152,6 +2152,102 @@ nav {
   height: 100% !important;
   padding: 0 !important;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+}
+
+
+/* ========= Humanos =========
+   Retrato de treinador nao existe em fonte que o projeto possa usar: o
+   repositorio de sprites da PokeAPI so serve pokemon, item, insignia e tipo,
+   e o Bulbapedia responde 403 em hotlink de imagem. O que existe de imagem
+   real de cada humano e o time dele — e o time diz mais do que o monograma
+   de iniciais que ocupava esse espaco. */
+.human-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.human-section { scroll-margin-top: 76px; }
+.human-section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--border);
+}
+.human-section-name::before { content: "▸"; margin-right: 7px; }
+.human-section-name {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  margin: 0;
+  color: var(--text);
+}
+.human-section-count {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* A escalacao: o parceiro de assinatura grande, o resto do time atras dele.
+   Alinhados pela base, como um time posando. */
+.human-art {
+  /* O time varia de 1 a 6 membros: com tamanho fixo, um time de seis
+     estourava 74px e o overflow: hidden do slot comia os das pontas. A
+     unidade sai da largura disponivel dividida pelo time, com o parceiro
+     valendo uma vez e meia — e um teto para o time de um nao virar gigante. */
+  --unidade: min(96px, calc((100% - 32px) / (var(--time, 3) + 0.5)));
+  /* O PNG da PokeAPI e 96x96, mas o desenho ocupa so ~46x63 dele: quase
+     metade e transparencia. Medido no Lucario. Por isso a caixa e maior que
+     o slot — o que transborda e margem vazia, e o bicho fica do tamanho que
+     parece certo. */
+  height: 132px;
+  padding: 0 16px;
+  gap: 2px;
+  align-items: flex-end;
+  justify-content: center;
+  background:
+    radial-gradient(
+      ellipse at 50% 110%,
+      color-mix(in srgb, var(--card-accent) 55%, transparent) 0%,
+      color-mix(in srgb, var(--card-accent) 18%, transparent) 48%,
+      transparent 74%
+    ),
+    var(--surface-2);
+}
+.human-art img {
+  /* So a largura sai de --unidade. A altura vem do aspect-ratio, e nao de
+     outro calc: a porcentagem dentro de uma custom property e substituida
+     como texto e resolvida por propriedade — contra a largura no width e
+     contra a ALTURA no height. Com height: calc(var(--unidade)...) a caixa
+     saia 144x59 e o sprite encolhia para caber na menor das duas. */
+  aspect-ratio: 1;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.55));
+}
+.human-art-ace {
+  width: calc(var(--unidade) * 1.5);
+}
+/* Os coadjuvantes seguem o parceiro, menores e um pouco recuados. */
+.human-art-time {
+  width: var(--unidade);
+  opacity: 0.92;
+  margin-bottom: 6px;
+}
+
+.human-name {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: var(--card-ink);
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .human-art { height: 112px; --unidade: min(78px, calc((100% - 24px) / (var(--time, 3) + 0.5))); }
 }
 
 /* ========= World map ========= */
@@ -2484,7 +2580,7 @@ nav {
     --shadow-card-hover: 3px 3px 0 var(--shadow-hard);
     --shadow-hero: 3px 3px 0 var(--shadow-hard);
   }
-  nav { padding: 0 14px; height: 48px; }
+  .navbar { padding: 0 14px; height: 48px; }
   .navbar-title { display: none; }
   .nav-link { padding: 6px 8px; font-size: 0.75rem; }
 }
@@ -2787,7 +2883,8 @@ nav {
 }
 /* Indice de regioes: a aba tem 76 locais em nove secoes, quase treze mil
    pixels de rolagem. Sem ele, chegar em Paldea custa a pagina inteira. */
-.landmark-index {
+.landmark-index,
+.human-index {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
@@ -2795,7 +2892,8 @@ nav {
   padding-bottom: 18px;
   border-bottom: 2px solid var(--border);
 }
-.landmark-index-btn {
+.landmark-index-btn,
+.human-index-btn {
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -2810,12 +2908,14 @@ nav {
   transition: border-color var(--dur-fast), color var(--dur-fast),
     background var(--dur-fast);
 }
-.landmark-index-btn:hover {
+.landmark-index-btn:hover,
+.human-index-btn:hover {
   border-color: var(--accent);
   color: var(--text);
   background: var(--surface-3);
 }
-.landmark-index-count {
+.landmark-index-count,
+.human-index-count {
   font-family: var(--font-pixel);
   font-size: 8px;
   color: var(--accent);
@@ -2848,7 +2948,7 @@ nav {
 }
 .landmark-region-count {
   margin: 2px 0 0;
-  color: var(--text-dim);
+  color: var(--text-muted);
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;

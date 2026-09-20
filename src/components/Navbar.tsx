@@ -6,7 +6,7 @@ import ScanlineToggle from "./ScanlineToggle";
 const Navbar = () => {
   const { favoritePokemons } = useContext(FavoriteContext);
   return (
-    <nav>
+    <nav className="navbar">
       <Link to="/" aria-label="Ir para a página inicial" className="navbar-brand">
         <span className="navbar-pokeball" aria-hidden="true" />
         <span className="navbar-title">Pokédex</span>
