@@ -4,7 +4,7 @@
 >
 > O dado cru e integral (evidência literal, cenários passo a passo) está em `auditoria-jogar.raw.json`, ao lado deste arquivo.
 
-Auditoria de 2026-09-20: 8 lentes, 42 achados, 31 refutadores, 5 ângulos de oportunidade.
+Auditoria de 2026-09-20: 8 lentes, 42 achados, 31 refutadores, 4 ângulos de oportunidade (20 propostas) e uma varredura de bugs no core.
 
 ---
 
@@ -211,7 +211,7 @@ Auditoria de 2026-09-20: 8 lentes, 42 achados, 31 refutadores, 5 ângulos de opo
 
 ---
 
-## 25 oportunidades
+## 20 oportunidades
 
 ### Detecção de ROM
 

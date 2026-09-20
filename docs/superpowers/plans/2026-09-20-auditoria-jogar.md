@@ -8,8 +8,8 @@
 > primeira tarefa não marcada da fase mais baixa, e execute só ela. Não leia o backlog inteiro.
 
 **Origem:** auditoria de 2026-09-20 — 8 lentes paralelas, 42 achados, 31 refutadores adversariais,
-5 ângulos de oportunidade. Arquivos irmãos:
-- [`2026-09-20-auditoria-jogar-backlog.md`](2026-09-20-auditoria-jogar-backlog.md) — os 42 achados e 25 oportunidades que **não** entraram nas fases abaixo. Consulta, não roteiro.
+4 ângulos de oportunidade (20 propostas) e uma varredura de bugs no core. Arquivos irmãos:
+- [`2026-09-20-auditoria-jogar-backlog.md`](2026-09-20-auditoria-jogar-backlog.md) — os 42 achados e as 20 oportunidades que **não** entraram nas fases abaixo. Consulta, não roteiro.
 - `auditoria-jogar.raw.json` — o dado bruto integral (evidência literal, cenários passo a passo).
 
 ---
@@ -22,10 +22,16 @@
 | 1 | `romId.ts` — a pedra angular | 1 | ☐ não iniciada |
 | 2 | Furar a ilha: a barra de três links | 1 | ☐ não iniciada |
 | 3 | Pontes baratas | 4 | ☐ não iniciada |
-| 4 | Parsing do save (com porta de pesquisa) | 3 | ☐ não iniciada |
+| 4 | Parsing do save (com porta de pesquisa) | 4 | ☐ não iniciada |
 
 **Ordem recomendada:** 0 → 1 → 2 → 3 → 4. A fase 1 destrava as fases 2, 3 e 4 — fora de ordem,
 elas ficam bem mais caras. Dentro de uma fase, qualquer ordem serve.
+
+**Duas exceções à ordem:**
+- **Tarefa 4.1** (script gerador da tabela de espécies) não depende de nada: viabilidade provada,
+  horas, e não precisa de save. Pode ser feita a qualquer momento, inclusive antes da Fase 0.
+- **Tarefa 4.2** é uma porta de pesquisa que exige jogar até um save real. Se ela falhar, a fase 4
+  para ali — mas a 4.1 já terá entregue valor sozinha.
 
 ---
 
@@ -273,19 +279,62 @@ o core roda. Grep de `versionGroups` em `src/emulator/`: **zero**.
 **Onde os bytes já estão:** `useEmulator.ts:353-399` (`playFile`) e `:510-529` (`playLocal`) — a ROM
 já passa por memória no carregamento. Ler alguns bytes de um buffer que já existe é quase de graça.
 
-**Offsets — atenção ao nível de confiança:**
-- **GBA** (é o que importa aqui — todas as 4 ROMs do repo são GBA): título, game code de 4 letras
-  e maker code em offsets fixos do cabeçalho. Os game codes das suas ROMs foram lidos dos arquivos
-  reais: **BPEE** = Emerald, **BPGE** = LeafGreen, **BPRE** = FireRed.
-- **GB/GBC** (logo em `0x0104`, título em `0x0134`, flag CGB em `0x0143`): **não verificado.** Esses
-  offsets vieram da memória de um agente e não há nenhum `.gb`/`.gbc` no repo para conferir.
-  **Confira contra o Pan Docs antes de codar essa metade**, ou deixe-a para depois — ela não bloqueia
-  nada, já que a biblioteca real é toda GBA.
+### Cabeçalho GBA — lido byte a byte das suas 4 ROMs (não é memória)
 
-**A regra de honestidade com romhack — não pule esta parte.** `Pokemon Unbound` se anuncia como
-**BPRE** (FireRed). Mostrar "Pokemon FireRed" para quem clicou em Unbound é mentira de cara limpa.
-**Regra:** quando o nome do arquivo e o título interno divergem, **o nome do arquivo manda na linha
-principal** e o detectado vira subtítulo (ex.: "base: FireRed").
+```
+0x000-0x003  branch ARM            7f 00 00 ea (idêntico nas quatro)
+0x004-0x09F  logo Nintendo         156 bytes, sha1 17daa0fe… idêntico nas quatro
+0x0A0-0x0AB  título                12 bytes ASCII
+0x0AC-0x0AF  game code             4 bytes ASCII
+0x0B0-0x0B1  maker code            2 bytes ASCII ("01" nas quatro)
+0x0B2        byte fixo             0x96
+0x0BC        versão do software
+0x0BD        checksum do cabeçalho
+0x0BF        fim — bastam 192 bytes (0xC0) para identificar
+```
+
+| Arquivo | Título | Code | Ver | Chk | Tamanho |
+|---|---|---|---|---|---|
+| `Pokemon - Emerald.gba` | `POKEMON EMER` | BPEE | 0 | 0x72 | 16 MB |
+| `Pokemon - Leaf Green.gba` | `POKEMON LEAF` | BPGE | 1 | 0x80 | 16 MB |
+| `Pokemon Rocket - b3.0.gba` | `POKEMON FIRE` | BPRE | 0 | 0x68 | 16 MB |
+| `Pokemon Unbound (v2.1.1.1).gba` | `POKEMON FIRE` | BPRE | 0 | 0x68 | 32 MB |
+
+**GB/GBC continua no escuro.** Não há `.gb` nem `.gbc` no repo. Os offsets `0x0104`/`0x0134`/`0x0143`
+vieram de memória. **Implemente a metade GBA primeiro e deixe GB/GBC como passo separado,
+bloqueado por verificação contra o Pan Docs** — senão sai de memória e ninguém nota até aparecer
+uma `.gbc` na pasta.
+
+### A regra do romhack é a única identidade que existe — não é cosmética
+
+`Pokemon Rocket` e `Pokemon Unbound` têm cabeçalho **byte a byte idêntico** (mesmo sha1 do bloco
+`0xA0..0xBF`: `6af3ecec…`). O detector não consegue separar nem um hack do outro, quanto mais hack
+de oficial. E Rocket tem 16 MB, exatamente o tamanho de uma FireRed oficial — nem o tamanho salva
+(só Unbound se denuncia, com 32 MB).
+
+**Não existe campo anti-hack.** Verificado: os quatro checksums de cabeçalho são válidos; o logo
+Nintendo é idêntico nos quatro (hacks preservam porque a BIOS valida no boot); a versão só reflete
+a revisão da base. Busca por `"Unbound"`/`"Rocket"`/`"hack"` em ASCII nos arquivos inteiros: **zero
+ocorrências** (Gen 3 usa codificação própria, não ASCII).
+
+**Regra:** o nome do arquivo manda na linha principal; o detectado vira subtítulo ("base: FireRed").
+**Nunca** trate "checksum válido" como "ROM oficial" — os dois hacks passam.
+
+### Armadilhas do parser de cabeçalho
+
+- **O título ocupa os 12 bytes inteiros, sem terminador.** `POKEMON EMER` são exatos 12 chars e não
+  há `0x00`. Procurar NUL produz `"POKEMON EMERBPEE"`. Corte 12 bytes fixos, depois apare `\0` e
+  espaços à direita.
+- **Decodifique como latin1, não UTF-8.** `TextDecoder('utf-8', {fatal:true})` explode em título com
+  byte ≥ 0x80.
+- **Não leia a ROM inteira.** Unbound tem 33.554.432 bytes. No browser, `file.slice(0, 192)`; com
+  `fetch`, `Range: bytes=0-191` — e **confira antes** se `vite-plugin-local-roms.ts` implementa
+  Range, com fallback se não implementar.
+- **NUNCA use o game code como chave de persistência.** Rocket e Unbound geram a mesma chave: se
+  virar chave de save, de cache ou de índice de biblioteca, **os dois jogos compartilham o mesmo
+  save e o progresso corrompe**. A chave tem que sair do caminho/nome do arquivo.
+- **Cuidado ao normalizar o nome.** `Pokemon Unbound (v2.1.1.1).gba` e `Pokemon Rocket - b3.0.gba`
+  têm pontos no meio. Regex que corta depois do primeiro `.` vira `v2` e `b3`. Remova só a extensão final.
 
 - [ ] **Passo 1 — testes primeiro.** `romId.test.ts` com buffers montados à mão (não precisa de ROM
       real): um com game code `BPEE` deve devolver Emerald/Gen III/Hoenn; um com `BPGE` deve devolver
@@ -413,79 +462,182 @@ Dois lugares nomeiam os jogos que o emulador roda e não oferecem jogá-los:
 
 # Fase 4 — Parsing do save
 
-**A aposta ambiciosa. Payoff transformador, e o único item com risco real de pesquisa.**
+**A aposta ambiciosa.** A tese: ler o `.sav` e mostrar o time do jogador com as mesmas cartas da
+Pokédex. O emulador deixa de ser ilha e vira **fonte de dados do site**.
 
-A tese: ler o `.sav` e mostrar o time do jogador com as mesmas cartas da Pokédex. O emulador deixa
-de ser ilha e vira **fonte de dados do site**.
+O risco desta fase caiu bastante depois da rodada de verificação de 2026-09-20, que leu as ROMs do
+disco em vez de confiar em memória. A tabela de espécies e a conversão para dex nacional saíram de
+"obstáculo real" para "script de meia hora, auto-validado". O que continua arriscado é só o **parser
+do save**, e ele agora tem porta de pesquisa própria (Tarefa 4.2) separada do resto.
 
-### O que já está provado
+### O que está provado — verificado lendo bytes das suas ROMs em 2026-09-20
 
-- **Os bytes estão na mão do JavaScript.** `node_modules/@thenick775/mgba-wasm/dist/mgba.d.ts:288`
-  declara `getSave(): Uint8Array | null` — síncrono, é o conteúdo da SRAM/flash, não um handle.
-  `useEmulator.ts:659` (exportSave) e `useDiskBackup.ts:50` já consomem isso em produção. O
-  comentário em `:664` explica a cópia defensiva contra `SharedArrayBuffer` — o parser precisa do
-  mesmo cuidado.
+- **Os bytes do save estão na mão do JavaScript.** `node_modules/@thenick775/mgba-wasm/dist/mgba.d.ts:288`
+  declara `getSave(): Uint8Array | null` — síncrono, conteúdo da SRAM/flash, não handle.
+  `useEmulator.ts:659` e `useDiskBackup.ts:50` já consomem isso em produção. O comentário em `:664`
+  explica a cópia defensiva contra `SharedArrayBuffer`; o parser precisa do mesmo cuidado.
 - **O gatilho existe.** `useEmulator.ts:266` registra `saveDataUpdatedCallback`: o core **avisa**
-  quando o jogo grava. Use o mesmo throttle de 5 s que `useDiskBackup.ts:47` já aplica.
+  quando o jogo grava. Use o throttle de 5 s que `useDiskBackup.ts:47` já aplica.
 - **O destino existe e não precisa de componente novo.** `usePokemon.ts:300` exporta
-  `usePokemonsByNames(names: string[])`, que devolve `Pokemon[]` pronto. `searchPokemon`
-  (`api.ts:107`) aceita id como string — passar `"25"` funciona igual a `"pikachu"`. A ponte inteira
-  é: **save → ids nacionais → `usePokemonsByNames` → `<Card>`**. `Card.tsx:18-25` só lê `pokemon`.
-- **A tabela de espécies foi extraída das suas ROMs.** Emerald: base `0x3185C8`. LeafGreen:
-  `0x245F2C`. 11 bytes por entrada, `0xFF` termina, índice 0 = `"??????????"`.
-- **Aritmética não resolve a conversão.** Índices 1–251 batem com o dex nacional; 252–276 são 25
-  slots vazios; 277–411 são as 135 espécies de Gen 3. O começo parece aritmético
-  (277=TREECKO=nac 252), mas o fim prova que não é: **411=CHIMECHO=nac 358** — fim da ordem interna,
-  meio da nacional. **Tabela de conversão é obrigatória.**
+  `usePokemonsByNames(names)`, que devolve `Pokemon[]` pronto; `searchPokemon` (`api.ts:107`) aceita
+  id como string. A ponte é **save → ids nacionais → `usePokemonsByNames` → `<Card>`**.
+- **Tabela de espécies: 412 entradas exatas, 11 bytes cada, terminador `0xFF`.** A contagem tem
+  prova de borda: `0x3185C8 + 412×11 = 0x31977C`, e em `0x31977C` começa a tabela de nomes de
+  **golpes** (13 bytes/entrada, `"-"`, `"POUND"`, `"KARATE CHOP"`). Emerald e LeafGreen decodificam
+  **idênticas nas 412 entradas**.
+- **Charset deduzido empiricamente:** `A-Z` = `0xBB..0xD4`, `a-z` = `0xD5..0xEE`, `0x00` = espaço,
+  `0xAD` = `.`, `0xAE` = `-`, `0xB4` = apóstrofo, `0xB5`/`0xB6` = ♂/♀, `0xAC` = `?`, `0xA3` = `2`
+  (único dígito da tabela oficial, em PORYGON2), `0xFF` = terminador.
+- **A ROM carrega a própria tabela de conversão.** `sSpeciesToNationalPokedexNum` é um `u16[411]`
+  indexado por `(espécie − 1)`, com valores **idênticos nas quatro ROMs**, e é **bijetiva** (os 386
+  nacionais cobertos, sem duplicata nem falta):
+
+  | ROM | Tabela de nomes | Tabela de conversão |
+  |---|---|---|
+  | Emerald | `0x3185C8` | `0x31DC82` |
+  | LeafGreen | `0x245F2C` | `0x25203A` |
+  | Rocket | `0x245EE0` | `0x251FEE` |
+  | Unbound | `0x166A98C` | `0x1A41FEC` |
+
+### Quatro correções ao que eu tinha escrito antes
+
+1. **Os slots 252–276 não são vazios** — contêm `ac ff`, ou seja a string `"?"`. Filtrar por string
+   vazia não pega nada.
+2. **`nacional = índice − 25` é muito pior do que "3 casos especiais".** Quebra **a partir do índice
+   301** (NINCADA → 290) e erra em **109 das 135** espécies de Hoenn. Tratar como exceção pontual
+   seria um bug grande.
+3. **Não é preciso embutir tabela de conversão nenhuma** — leia da ROM (acima). Isso elimina o
+   trabalho manual inteiro.
+4. **Offset fixo não serve para romhack.** Rocket está em `0x245EE0` (offset da FireRed, não da
+   LeafGreen) e Unbound foi repontada para `0x166A98C`, com **1294 entradas** indo até Gen 8, nomes
+   em caixa mista e preenchimento `0xFF` em vez de `0x00`.
+
+**A solução: localizador, não offset.** Procure os bytes de `IVYSAUR` **e** de `Ivysaur` (caixa
+mista dos hacks), subtraia 22 (2 entradas), e valide três âncoras: idx 1 = Bulbasaur, idx 251 =
+Celebi, idx 411 = Chimecho. Testado: **hit único nas quatro ROMs**. O mesmo vale para a tabela de
+conversão (run `u16` de 1..251, validando `entry[276] == 252` e `entry[410] == 358`).
+⚠️ Não ancore pela assinatura ingênua de 10× `0xAC`: ela dá **falso positivo** no Unbound em `0x879DA6`.
 
 ### O que NÃO está provado
 
-O parser nunca foi validado contra save real, porque o único `.sav` do repo está zerado (Tarefa 0.3).
-**Nenhuma linha de UI antes da Tarefa 4.1.**
+O **parser de save** nunca foi validado contra save real: o único `.sav` do repo tem 131.072 bytes
+todos zero (Tarefa 0.3). Continuam sendo memória, sem nenhum byte que comprove:
+`SECTOR_DATA_SIZE = 3968` dos jogos originais; o registro de 100 bytes com PV@`0x00`, OTID@`0x04`,
+checksum@`0x1C`, 48 B cifrados@`0x20`; os offsets `0x0234` (RSE) e `0x0034` (FRLG) do
+`playerPartyCount`; a tabela de 24 permutações.
 
-## Tarefa 4.1 — Porta de pesquisa: obter um save real e validar o parser
+**Mas a Tarefa 4.1 abaixo não depende de save nenhum** — é 100% ROM, e pode ser feita hoje.
 
-**Faça isto primeiro. Se falhar, a fase 4 para aqui sem custo afundado.**
+## Tarefa 4.1 — Script gerador da tabela de espécies
 
-- [ ] **Passo 1** — jogar Emerald até o primeiro save dentro do jogo, exportar o `.sav` pela própria
-      aba, e guardar como fixture de teste (fora do git se for grande; `saves/` já está no gitignore —
-      confira antes).
-- [ ] **Passo 2** — confirmar a assinatura `0x08012025` no offset `0x0FF8` de algum setor de 4096
-      bytes. Se não aparecer, **pare**: a premissa do formato está errada e o resto do plano é inválido.
-- [ ] **Passo 3** — escolher qual dos dois blocos de 14 setores (offset `0` e `0xE000`) é o atual,
-      pelo contador de gravação em `0x0FFC`.
-- [ ] **Passo 4** — localizar a seção do time e conferir que a contagem bate com o time real do jogo.
-- [ ] **Passo 5 — decisão.** Os quatro passos acima passaram? Siga para 4.2. Algum falhou?
-      Documente o que se aprendeu **neste arquivo** e pare a fase.
+**Viabilidade provada. Horas. Não depende de save — pode ser feita hoje, antes de tudo.**
 
-## Tarefa 4.2 — `src/emulator/saveParse/gen3.ts`
+Um script offline em `scripts/` (a pasta já existe) que lê a ROM, extrai nomes **e** a conversão
+para dex nacional, e comita um `.ts`. **A ROM não vai para o repo nem para o bundle** — o script
+roda uma vez, na máquina de quem tem a ROM.
 
-**Só depois da 4.1.** Módulo puro, testável com a fixture real.
+- [ ] **Passo 1 — localizar, não assumir offset.** Implemente o localizador: procure os bytes de
+      `IVYSAUR` e de `Ivysaur` (caixa mista), subtraia 22, e valide as três âncoras (idx 1 =
+      Bulbasaur, idx 251 = Celebi, idx 411 = Chimecho). Só aceite hit único. Idem para a tabela de
+      conversão. Testado e com hit único nas quatro ROMs do repo.
+- [ ] **Passo 2 — decodificar.** 11 bytes por entrada, `0xFF` termina. Use o charset provado acima.
+      Nomes de hack vêm em caixa mista — normalize antes de comparar.
+- [ ] **Passo 3 — converter.** `nacional = tabelaConversao[especie − 1]`. Descarte os índices cujo
+      nacional cai fora de 1..386 — os 25 sentinelas 252–276 mapeiam para 387..411 e **não são
+      espécies**.
+- [ ] **Passo 4 — validação automática, não revisão manual.** `filters.ts:13` (`buildNameIndex`) já
+      constrói o Map nome→id nacional a partir do índice completo da PokéAPI (`usePokemon.ts:100`).
+      Cruze as duas fontes e **falhe o script** em qualquer divergência. Não revise 412 linhas à mão.
+- [ ] **Passo 5 — emitir** `src/emulator/saveParse/gen3Species.ts` com a tabela e um teste que
+      confere as três âncoras e a bijetividade (386 nacionais, sem duplicata, sem falta).
+- [ ] **Passo 6 — commit.** `feat(emulador): tabela de especies de gen 3 gerada da rom`
 
-**Estrutura do formato** (verificar cada passo contra a fixture, não confiar na descrição):
-1. Cortar em 32 setores de 4096 bytes. Rodapé nos últimos 16: id da seção (u16 `@0x0FF4`),
-   checksum (u16 `@0x0FF6`), assinatura `0x08012025` (u32 `@0x0FF8`), contador (u32 `@0x0FFC`).
+## Tarefa 4.2 — Porta de pesquisa: obter um save real
+
+**Obrigatória antes de qualquer linha de parser de save.** Hoje não há fixture: o único `.sav` está
+zerado, e teste escrito antes dela testa a imaginação de quem escreveu, não o formato.
+
+- [ ] **Passo 1** — jogar Emerald até o primeiro save dentro do jogo e exportar o `.sav` pela própria
+      aba. `saves/` já está no gitignore (`.gitignore:54`), então decida onde a fixture vive: fora do
+      git, ou um recorte sintético comitado. **O plano tem que dizer qual** — escreva a decisão aqui.
+- [ ] **Passo 2** — confirmar a assinatura `0x08012025` em `0x0FF8` de algum setor de 4096 bytes.
+      A constante é real (existe no código das quatro ROMs), mas o **layout do save** não foi
+      verificado. Se não aparecer, **pare**: a premissa está errada.
+- [ ] **Passo 3** — escolher o bloco atual entre os dois de 14 setores (offset `0` e `0xE000`) pelo
+      contador em `0x0FFC`.
+- [ ] **Passo 4 — descobrir `SECTOR_DATA_SIZE` em vez de assumir.** `3968` **não** está verificado
+      nem para os jogos originais. E a tabela de layout lida da ROM de Unbound (`0x93A3570`) mostra
+      **4080**. Meça na fixture; não escreva `const SECTOR_DATA_SIZE = 3968` como fato.
+- [ ] **Passo 5 — decisão.** Passou tudo? Siga para 4.3. Falhou? Documente **neste arquivo** e pare
+      a fase — sem custo afundado, porque a 4.1 já entregou valor sozinha.
+
+## Tarefa 4.3 — `src/emulator/saveParse/gen3.ts`
+
+**Só depois da 4.2.** Módulo puro, testado contra a fixture real.
+
+### A varredura auto-validada, com as correções que a verificação impôs
+
+A ideia: em vez de confiar num offset lembrado, varrer procurando algo que só um time real
+consegue ser — cada pokémon carrega o próprio checksum em `0x1C-0x1D`. **Mas a versão ingênua dessa
+ideia está errada de quatro formas, e todas foram calculadas:**
+
+- **O buraco do zero é fatal e não é probabilístico.** Registro todo zerado → PV=0, OTID=0 → chave
+  `PV ^ OTID` = 0 → decifragem é identidade → 48 bytes zero → soma = 0 → checksum armazenado também
+  é 0 → **passa com probabilidade 1**. Save tem regiões zeradas grandes: qualquer `u32` de valor
+  1..6 antes de um run de zeros casa a varredura inteira. Sem guardas, o parser acha "um time" em
+  praticamente todo save. **`PV != 0`, `checksum != 0` e `espécie != 0` são obrigatórios.**
+  (Regiões de flash apagada, `0xFF`, **não** geram falso positivo: soma dá `0xFFE8` contra `0xFFFF`
+  armazenado.)
+- **"1 em 65536" descreve UM registro, não a varredura.** Com N=1 e 3.943 offsets testados o risco é
+  **5,8×10⁻²** — 1 em 17, erro de ~3.800×. Em N=2 cai para 9,1×10⁻⁷; em N=3, 1,4×10⁻¹¹. Exija
+  **N ≥ 2** e some bits de sanidade (espécie decifrada em 1..411 ≈ 7,4 bits; nível em 1..100 ≈ 1,4 bits).
+- **Não monte `SaveBlock1` antes de varrer.** Isso troca um chute (offset do time) por outro (o
+  tamanho útil da seção, que é 3968 em uns e 4080 em Unbound). **Varra a área de dados de cada setor
+  de 4096 bytes separadamente** — com os offsets lembrados, o time inteiro cabe dentro da primeira
+  seção nos dois casos, então varrer por setor funciona sem precisar saber `D`.
+- **A permutação `PV % 24` é irrelevante para o checksum.** O XOR aplica a mesma chave a cada `u32`
+  uniformemente, e soma é comutativa. **Valide o checksum sem a tabela de permutações**; ela só é
+  necessária depois, para *interpretar* espécie, EVs e IVs. Separe as duas etapas no código.
+
+### Referência do formato — ⚠️ nada disto foi verificado contra byte
+
+Tudo abaixo é memória. **Confira cada item contra a fixture da Tarefa 4.2 antes de codar**, e não
+escreva nenhum destes números como constante sem comentário de ressalva.
+
+1. Cortar em 32 setores de 4096 bytes. Rodapé nos últimos 16: id da seção (`u16 @0x0FF4`),
+   checksum (`u16 @0x0FF6`), assinatura `0x08012025` (`u32 @0x0FF8`), contador (`u32 @0x0FFC`).
+   *A assinatura é o único item com apoio: a constante existe no código das quatro ROMs.*
 2. Dois blocos de 14 setores são gravações alternadas; vence o de contador maior.
 3. Seções vêm em ordem rotativa — leia **por id**, nunca por posição.
-4. `SaveBlock1` = concatenação dos 3968 bytes úteis das seções de id 1, 2, 3, 4, nessa ordem.
-   É lá que fica o time: u32 com a contagem (1..6) seguido de até seis registros de 100 bytes.
-5. Cada pokémon: personality value (u32 `@0x00`), OT ID (u32 `@0x04`), apelido (10 bytes `@0x08`,
-   charset próprio), checksum (u16 `@0x1C`), 48 bytes cifrados `@0x20`.
-6. Decifra: XOR de cada palavra de 4 bytes com `(PV ^ OTID)`. Os 48 bytes são quatro sub-blocos de
-   12 — Growth, Attacks, EVs, Misc — **na permutação nº `PV % 24`** das 24 possíveis.
-7. Growth dá espécie (u16) e experiência; Misc dá os IVs em 5 bits cada num u32 e o bit de ovo;
-   nível e HP atual/máximo estão **não cifrados** em `@0x54` e `@0x56`/`@0x58`.
+4. Registro de pokémon: PV (`u32 @0x00`), OT ID (`u32 @0x04`), apelido (10 bytes `@0x08`, charset
+   próprio), checksum (`u16 @0x1C`), 48 bytes cifrados `@0x20`. Nível e HP atual/máximo **não
+   cifrados** em `@0x54` e `@0x56`/`@0x58`.
+5. Decifra: XOR de cada `u32` com `(PV ^ OTID)`. Os 48 bytes são quatro sub-blocos de 12 — Growth,
+   Attacks, EVs, Misc — na permutação nº `PV % 24`. Growth dá espécie (`u16`) e experiência;
+   Misc dá IVs em 5 bits cada num `u32` e o bit de ovo.
+6. `playerPartyCount` estaria em `0x0234` (RSE) e `0x0034` (FRLG) dentro do `SaveBlock1` — **é
+   exatamente o chute que a varredura existe para eliminar.** Use como pista para conferir o
+   resultado da varredura, nunca como caminho principal.
 
-- [ ] **Passo 1** — testes contra a fixture real, começando pelo mais externo (setores, assinatura,
-      bloco vencedor) e só então descendo para a decifragem.
-- [ ] **Passo 2** — implementar em camadas, cada uma com seu teste.
-- [ ] **Passo 3** — tabela de conversão índice interno → id nacional. **Validador automático:**
-      `filters.ts:13` (`buildNameIndex`) já constrói o Map nome→id nacional a partir do índice
-      completo da PokéAPI (`usePokemon.ts:100`) — use isso para conferir a tabela em vez de revisar
-      411 linhas à mão.
-- [ ] **Passo 4 — commit.** `feat(emulador): parser de save de gen 3`
+### Passos
 
-## Tarefa 4.3 — Painel "Seu time" em /jogar
+- [ ] **Passo 1 — teste do buraco do zero primeiro.** 604 bytes zerados precedidos de `u32 = 3`
+      devem devolver **nulo**. Se esse teste não existir, o bug vai passar: ele funciona lindamente
+      com dados sintéticos não-zerados.
+- [ ] **Passo 2 — setores e bloco vencedor**, contra a fixture. Camada por camada, teste por camada.
+- [ ] **Passo 3 — varredura por setor** com os guardas e N ≥ 2.
+- [ ] **Passo 4 — decifragem e permutação** para extrair espécie, nível e HP. Nível e HP atual/máximo
+      estão **não cifrados** em `@0x54` e `@0x56`/`@0x58`.
+- [ ] **Passo 5 — resultados honestos.** Três saídas distintas: `OK`, `NAO_ENCONTRADO` e `AMBIGUO`.
+      Se dois offsets casarem, **não** escolha o primeiro — devolva `AMBIGUO`. Em romhack,
+      `NAO_ENCONTRADO` é resultado normal, não falha a ser "consertada" chutando outro offset.
+- [ ] **Passo 6 — copie os bytes antes de ler.** `getSave()` devolve view sobre `SharedArrayBuffer`
+      com `byteOffset` que pode não ser zero; `new DataView(save.buffer)` direto lê offset errado e
+      pode ver os bytes mudarem no meio da leitura. `exportSave` (`useEmulator.ts:659`) já mostra a
+      cópia defensiva.
+- [ ] **Passo 7 — commit.** `feat(emulador): parser de save de gen 3`
+
+## Tarefa 4.4 — Painel "Seu time" em /jogar
 
 - [ ] **Passo 1** — mais uma `section.play-panel` na lista que começa em `PlayPage.tsx:379`. O campo
       `team` entra no objeto `emu` (`useEmulator.ts:832-887`) ao lado de `slots`, `saves`, `localSaves`.
@@ -493,7 +645,9 @@ O parser nunca foi validado contra save real, porque o único `.sav` do repo est
       linkTo={/pokemon/${p.name}} />`. **Apelido, nível e HP entram como rodapé em volta da carta,
       não dentro dela** — `Card.tsx` fica intocado.
 - [ ] **Passo 3** — reparsear no `saveDataUpdatedCallback` com throttle de 5 s.
-- [ ] **Passo 4 — commit.** `feat(jogar): painel com o time do jogador lido do save`
+- [ ] **Passo 4** — quando o parser devolver `NAO_ENCONTRADO`, o painel diz isso em uma frase
+      honesta. **Nunca um spinner eterno** — romhack não ler é o esperado.
+- [ ] **Passo 5 — commit.** `feat(jogar): painel com o time do jogador lido do save`
 
 ---
 
@@ -528,3 +682,21 @@ fullscreen, e no toque ele é o único jeito de jogar.
 Os cinco bugs da Fase 0 vieram de um agente separado que leu `src/emulator/` inteiro e o `mgba.js`,
 e que descartou três suspeitas com prova. **Eles não passaram por refutação independente** — trate a
 evidência como forte, mas confirme reproduzindo antes de corrigir.
+
+### Rodada de verificação — 2026-09-20
+
+As Fases 1 e 4 passaram depois por uma verificação **empírica**: três agentes lendo as ROMs do disco
+com `fs.readFileSync`, não recitando memória. Ela produziu o cabeçalho GBA byte a byte, a tabela de
+espécies com prova de borda, a descoberta de que a ROM carrega a própria tabela de conversão, e o
+localizador que funciona nas quatro ROMs.
+
+**Ela também derrubou a primeira versão desta Fase 4.** A proposta original de "varredura
+auto-validada por checksum" tinha um furo fatal — registro zerado passa com probabilidade 1, não
+1 em 65536 — e teria feito o parser achar um time em praticamente todo save. A matemática do falso
+positivo estava errada por ~3.800×. Isso está corrigido no texto da Tarefa 4.3, com os guardas
+obrigatórios.
+
+Lição para quem continuar: **o mecanismo que parece elegante numa proposta é exatamente o que
+merece ser verificado antes de virar plano.** Quando uma tarefa aqui afirmar um offset ou um
+algoritmo, confira se o texto diz de onde veio — "lido da ROM" e "lembrado" não valem a mesma coisa,
+e o plano marca a diferença de propósito.
