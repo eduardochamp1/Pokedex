@@ -22,7 +22,7 @@
 | 1 | `romId.ts` — a pedra angular | 1 | ✅ concluída |
 | 2 | Furar a ilha: a barra de três links | 1 | ✅ concluída |
 | 3 | Pontes baratas | 4 | ✅ concluída |
-| 4 | Parsing do save (com porta de pesquisa) | 4 | ☐ não iniciada |
+| 4 | Parsing do save (com porta de pesquisa) | 4 | ◐ 4.1 concluída; 4.2 bloqueada (sem save real), 4.3 e 4.4 dependem dela |
 
 **Ordem recomendada:** 0 → 1 → 2 → 3 → 4. A fase 1 destrava as fases 2, 3 e 4 — fora de ordem,
 elas ficam bem mais caras. Dentro de uma fase, qualquer ordem serve.
@@ -571,21 +571,21 @@ Um script offline em `scripts/` (a pasta já existe) que lê a ROM, extrai nomes
 para dex nacional, e comita um `.ts`. **A ROM não vai para o repo nem para o bundle** — o script
 roda uma vez, na máquina de quem tem a ROM.
 
-- [ ] **Passo 1 — localizar, não assumir offset.** Implemente o localizador: procure os bytes de
+- [x] **Passo 1 — localizar, não assumir offset.** Implemente o localizador: procure os bytes de
       `IVYSAUR` e de `Ivysaur` (caixa mista), subtraia 22, e valide as três âncoras (idx 1 =
       Bulbasaur, idx 251 = Celebi, idx 411 = Chimecho). Só aceite hit único. Idem para a tabela de
       conversão. Testado e com hit único nas quatro ROMs do repo.
-- [ ] **Passo 2 — decodificar.** 11 bytes por entrada, `0xFF` termina. Use o charset provado acima.
+- [x] **Passo 2 — decodificar.** 11 bytes por entrada, `0xFF` termina. Use o charset provado acima.
       Nomes de hack vêm em caixa mista — normalize antes de comparar.
-- [ ] **Passo 3 — converter.** `nacional = tabelaConversao[especie − 1]`. Descarte os índices cujo
+- [x] **Passo 3 — converter.** `nacional = tabelaConversao[especie − 1]`. Descarte os índices cujo
       nacional cai fora de 1..386 — os 25 sentinelas 252–276 mapeiam para 387..411 e **não são
       espécies**.
-- [ ] **Passo 4 — validação automática, não revisão manual.** `filters.ts:13` (`buildNameIndex`) já
+- [x] **Passo 4 — validação automática, não revisão manual.** `filters.ts:13` (`buildNameIndex`) já
       constrói o Map nome→id nacional a partir do índice completo da PokéAPI (`usePokemon.ts:100`).
       Cruze as duas fontes e **falhe o script** em qualquer divergência. Não revise 412 linhas à mão.
-- [ ] **Passo 5 — emitir** `src/emulator/saveParse/gen3Species.ts` com a tabela e um teste que
+- [x] **Passo 5 — emitir** `src/emulator/saveParse/gen3Species.ts` com a tabela e um teste que
       confere as três âncoras e a bijetividade (386 nacionais, sem duplicata, sem falta).
-- [ ] **Passo 6 — commit.** `feat(emulador): tabela de especies de gen 3 gerada da rom`
+- [x] **Passo 6 — commit.** `feat(emulador): tabela de especies de gen 3 gerada da rom`
 
 ## Tarefa 4.2 — Porta de pesquisa: obter um save real
 
@@ -605,6 +605,40 @@ zerado, e teste escrito antes dela testa a imaginação de quem escreveu, não o
       **4080**. Meça na fixture; não escreva `const SECTOR_DATA_SIZE = 3968` como fato.
 - [ ] **Passo 5 — decisão.** Passou tudo? Siga para 4.3. Falhou? Documente **neste arquivo** e pare
       a fase — sem custo afundado, porque a 4.1 já entregou valor sozinha.
+
+
+> ## ⛔ A porta fechou — 2026-09-20
+>
+> **A fase 4 para aqui, no passo 1, e a decisão do passo 5 é "pare".**
+>
+> Não existe save real para servir de fixture, e não dá para produzir um sem
+> jogar o jogo até o primeiro save de dentro da história — o que leva algo como
+> quinze minutos de partida com entrada de nome, caminhão, laboratório. Nenhum
+> agente faz isso.
+>
+> **Medido no FS do core, os quatro saves são flash virgem:**
+>
+> | Save | Bytes | Conteúdo | Setores com `0x08012025` |
+> |---|---|---|---|
+> | `Pokemon - Emerald.sav` | 131072 | uniforme `0x00` | 0 |
+> | `Pokemon - Leaf Green.sav` | 131072 | uniforme `0xFF` | 0 |
+> | `Pokemon Rocket - b3.0.sav` | 131072 | uniforme `0xFF` | 0 |
+> | `Pokemon Unbound (v2.1.1.1).sav` | 131072 | uniforme `0xFF` | 0 |
+>
+> Os dois estados virgens aparecem: `0x00` é flash alocada e `0xFF` é flash
+> apagada. Nenhum dos 32 setores de nenhum deles traz a assinatura, então o
+> passo 2 também não teria como passar.
+>
+> **Efeito colateral útil:** isso expôs um buraco na Tarefa 0.3. O guard que eu
+> tinha escrito rejeitava só buffer todo zero, e teria aceitado os três `0xFF`
+> como progresso de verdade. Corrigido no mesmo commit da 4.1 — o critério
+> agora é "não é uniforme", que cobre os dois casos e qualquer outro.
+>
+> **O que destrava:** jogar Emerald até o primeiro save e exportar o `.sav`
+> pela própria aba. Com essa fixture em mãos, 4.2 passos 2–4 e depois 4.3 e 4.4
+> seguem como escritos. Sem ela, qualquer parser escrito aqui testaria a
+> imaginação de quem escreveu, não o formato — que é exatamente o que esta
+> tarefa existe para impedir.
 
 ## Tarefa 4.3 — `src/emulator/saveParse/gen3.ts`
 

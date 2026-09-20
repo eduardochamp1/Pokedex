@@ -15,7 +15,8 @@
     "sprites": "node scripts/fetch-sprites.mjs",
     "names:check": "node scripts/check-names.mjs",
     "emulator:core": "node scripts/copy-emulator-core.mjs",
-    "wiki:check": "node scripts/check-wiki.mjs"
+    "wiki:check": "node scripts/check-wiki.mjs",
+    "gen3:species": "node scripts/gen3-species.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.102.2",

@@ -27,6 +27,21 @@ describe("hasRealSaveData", () => {
     expect(hasRealSaveData(new Uint8Array(32768))).toBe(false);
   });
 
+  /**
+   * O outro estado virgem, e o que passou despercebido na primeira versão deste
+   * guard: flash **apagada** é toda `0xFF`, não zero. Medido nos quatro saves
+   * do repositório — Emerald está uniforme `0x00`, mas Leaf Green, Rocket e
+   * Unbound estão uniformes `0xFF`. Um teste de "tem byte diferente de zero"
+   * aprovaria os três como se fossem progresso.
+   */
+  it("recusa flash apagada, que é toda 0xFF", () => {
+    expect(hasRealSaveData(new Uint8Array(131072).fill(0xff))).toBe(false);
+  });
+
+  it("recusa qualquer buffer uniforme, seja qual for o byte", () => {
+    expect(hasRealSaveData(new Uint8Array(1024).fill(0x5a))).toBe(false);
+  });
+
   it("aceita qualquer buffer com conteúdo", () => {
     const quaseZerado = new Uint8Array(131072);
     quaseZerado[131071] = 1;
