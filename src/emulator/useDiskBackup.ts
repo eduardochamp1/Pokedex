@@ -55,6 +55,8 @@ export function useDiskBackup(
   /** null = pasta `saves/` indisponivel (producao). */
   const [localSaves, setLocalSaves] = useState<LocalSave[] | null>(null);
   const lastBackupRef = useRef(0);
+  /** A gravacao anterior falhou? Evita repetir o aviso a cada cinco segundos. */
+  const falhouAntesRef = useRef(false);
 
   const refreshLocalSaves = useCallback(async () => {
     setLocalSaves(await listLocalSaves());
@@ -91,18 +93,25 @@ export function useDiskBackup(
       try {
         await writeLocalSave(fileName, data);
         await refreshLocalSaves();
+        falhouAntesRef.current = false;
         if (opts.force) {
           notify(`${fileName} copiado para saves/ (${data.length} bytes).`);
         }
         return true;
       } catch (error) {
-        if (opts.force) {
-          notify(
-            `Não deu para gravar em saves/: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
+        const motivo =
+          error instanceof Error ? error.message : String(error);
+        // O backup automatico falhando em silencio e o pior caso: quem joga
+        // acredita que o progresso esta espelhado em disco e nao esta. Antes,
+        // o aviso so saia no clique manual.
+        //
+        // Avisa uma vez por sequencia de falhas, e nao a cada gravacao: o core
+        // dispara saveDataUpdated com frequencia, e repetir o aviso a cada
+        // cinco segundos viraria ruido que a pessoa aprende a ignorar.
+        if (opts.force || !falhouAntesRef.current) {
+          notify(`Não deu para gravar ${fileName} em saves/: ${motivo}`);
         }
+        falhouAntesRef.current = true;
         return false;
       }
     },
