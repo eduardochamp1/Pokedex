@@ -8,6 +8,17 @@ import { useEffect, useRef, useState } from "react";
  * anterior, traduzindo a diferenca em press/release para o core — que e a forma
  * que ele entende, a mesma do gamepad virtual de toque.
  *
+ * ### O laco so roda com controle conectado
+ *
+ * A versao anterior chamava `navigator.getGamepads()` a cada quadro sempre,
+ * mesmo sem controle nenhum ligado — e esse e o caso comum. `getGamepads()`
+ * nao devolve uma referencia viva: ele monta objetos novos a cada chamada.
+ *
+ * O emulador divide com esta pagina o mesmo orcamento de quadro, entao tudo
+ * que se gasta aqui sai da emulacao. Agora o laco nasce parado e so liga
+ * quando o navegador avisa que um controle apareceu (`gamepadconnected`),
+ * desligando quando o ultimo sai. Sem controle, o custo por quadro e zero.
+ *
  * O mapeamento segue o layout "standard" da especificacao, que e o que o
  * navegador entrega para qualquer controle reconhecido (Xbox, DualShock,
  * genericos). Controles fora desse layout aparecem com `mapping: ""` e sao
@@ -101,12 +112,47 @@ export function useGamepad(api: GamepadApi, active: boolean): string | null {
       frame = requestAnimationFrame(poll);
     };
 
-    frame = requestAnimationFrame(poll);
-    return () => {
+    let rodando = false;
+
+    /** Ha algum controle no layout standard agora? */
+    const temControle = () =>
+      Array.from(navigator.getGamepads()).some(
+        (p) => p && p.mapping === "standard"
+      );
+
+    /** Idempotente: o evento de conexao pode repetir. */
+    const ligar = () => {
+      if (rodando) return;
+      rodando = true;
+      frame = requestAnimationFrame(poll);
+    };
+
+    const desligar = () => {
+      if (!rodando) return;
+      rodando = false;
       cancelAnimationFrame(frame);
+      setConnected(null);
       for (const [button, down] of held) {
         if (down) apiRef.current.release(button);
       }
+      held.clear();
+    };
+
+    // No evento de desconexao o controle que saiu ainda aparece na lista, e
+    // por isso a decisao olha o conjunto inteiro em vez do que saiu.
+    const aoDesconectar = () => {
+      if (!temControle()) desligar();
+    };
+
+    window.addEventListener("gamepadconnected", ligar);
+    window.addEventListener("gamepaddisconnected", aoDesconectar);
+    // Um controle ja ligado antes desta tela montar nao dispara o evento.
+    if (temControle()) ligar();
+
+    return () => {
+      window.removeEventListener("gamepadconnected", ligar);
+      window.removeEventListener("gamepaddisconnected", aoDesconectar);
+      desligar();
     };
   }, [active]);
 

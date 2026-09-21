@@ -1,0 +1,116 @@
+<!doctype html>
+<!--
+  Página de isolamento do core — TEMPORÁRIA, para diagnóstico.
+
+  É a instanciação "vanilla" que a README do @thenick775/mgba-wasm documenta:
+  um canvas, a fábrica do core, FSInit, e nada mais. Sem React, sem roteador,
+  sem a Pokédex em volta.
+
+  Serve para uma pergunta só: o teto de velocidade do turbo é do core nesta
+  máquina, ou é a nossa página? Ela mede quadros **emulados** por segundo com
+  `keysReadCallback`, que o core dispara uma vez por quadro.
+
+  Fica em `dev/` e nao em `public/`: so `public/` vai para `dist/`, e esta
+  pagina nao tem por que ir para producao. Em dev o Vite serve a partir da
+  raiz, entao o endereco e /dev/teste-core.html.
+-->
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Isolamento do core</title>
+    <style>
+      body {
+        margin: 0;
+        background: #111;
+        color: #eee;
+        font: 14px/1.5 system-ui, sans-serif;
+        display: grid;
+        gap: 12px;
+        justify-items: center;
+        padding: 16px;
+      }
+      canvas {
+        image-rendering: pixelated;
+        width: 480px;
+        height: 320px;
+        background: #000;
+      }
+      #medida {
+        font-size: 28px;
+        font-variant-numeric: tabular-nums;
+      }
+      button {
+        font: inherit;
+        padding: 6px 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="tela" width="240" height="160"></canvas>
+    <div id="medida">—</div>
+    <div>
+      <button id="turbo">Segure para acelerar</button>
+      <span id="estado">carregando…</span>
+    </div>
+
+    <script type="module">
+      const estado = document.getElementById("estado");
+      const medida = document.getElementById("medida");
+
+      const { default: mGBA } = await import(
+        "/node_modules/@thenick775/mgba-wasm/dist/mgba.js"
+      );
+      const core = await mGBA({ canvas: document.getElementById("tela") });
+      await core.FSInit();
+
+      // Os mesmos ajustes que a Pokédex aplica, para a comparação ser justa.
+      core.setCoreSettings({
+        audioSync: false,
+        videoSync: false,
+        timestepSync: true,
+        audioSampleRate: 48000,
+        audioBufferSize: 1024,
+        allowOpposingDirections: false,
+      });
+
+      let quadros = 0;
+      core.addCoreCallbacks({ keysReadCallback: () => quadros++ });
+
+      const lista = await (await fetch("/local-roms.json")).json();
+      const rom = lista.find((r) => /emerald/i.test(r.fileName)) ?? lista[0];
+      const bytes = new Uint8Array(
+        await (await fetch(`/local-roms/${encodeURIComponent(rom.fileName)}`)).arrayBuffer()
+      );
+      const caminho = `${core.filePaths().gamePath}/${rom.fileName}`;
+      core.FS.writeFile(caminho, bytes);
+      core.loadGame(caminho);
+      estado.textContent = rom.fileName;
+
+      let anterior = quadros;
+      let quando = performance.now();
+      setInterval(() => {
+        const agora = performance.now();
+        const qps = (quadros - anterior) / ((agora - quando) / 1000);
+        anterior = quadros;
+        quando = agora;
+        medida.textContent = `${qps.toFixed(1)} qps · ${(qps / 59.7275).toFixed(2)}×`;
+      }, 1000);
+
+      const botao = document.getElementById("turbo");
+      const acelerar = (ligado) => core.setFastForwardMultiplier(ligado ? 5 : 1);
+      botao.addEventListener("pointerdown", () => acelerar(true));
+      botao.addEventListener("pointerup", () => acelerar(false));
+      addEventListener("keydown", (e) => {
+        if (e.key === " " && !e.repeat) {
+          e.preventDefault();
+          acelerar(true);
+        }
+      });
+      addEventListener("keyup", (e) => {
+        if (e.key === " ") acelerar(false);
+      });
+      window.__core__ = core;
+      window.__acelerar__ = acelerar;
+    </script>
+  </body>
+</html>
