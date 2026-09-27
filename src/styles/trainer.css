@@ -1,0 +1,211 @@
+/* ========= /treinador: a ficha e a linha do tempo lidas do save ========= */
+.trainer-shell {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.trainer-header {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 16px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+}
+.trainer-header h1 {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.trainer-rom a { color: var(--accent); }
+.trainer-shell h2 {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  margin-bottom: 12px;
+}
+.trainer-shell h3 {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  margin: 12px 0 8px;
+}
+.trainer-de { color: var(--text-muted); font-weight: 400; letter-spacing: 0; }
+.trainer-sub { display: block; font-size: 0.78rem; color: var(--text-muted); }
+.trainer-sub a { color: var(--accent); }
+.trainer-vazio { color: var(--text-muted); max-width: 60ch; }
+.trainer-vazio a { color: var(--accent); }
+
+/* O cartão: papel, como as cartas da Pokédex. */
+.trainer-card {
+  background: var(--paper);
+  color: var(--paper-ink);
+  border: 3px solid var(--paper-edge);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-hero);
+  padding: 20px 24px;
+  display: grid;
+  gap: 16px;
+}
+.trainer-card-rotulo,
+.trainer-card-dados dt {
+  display: block;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--paper-ink-soft);
+}
+.trainer-card-nome strong {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+}
+.trainer-card-dados {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px 20px;
+  margin: 0;
+  border-top: 2px solid var(--paper-line);
+  padding-top: 14px;
+}
+.trainer-card-dados dd {
+  margin: 2px 0 0;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
+.trainer-card-dados a { color: var(--paper-ps); }
+.trainer-card .trainer-de { color: var(--paper-ink-soft); }
+
+.trainer-grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 28px;
+}
+
+/* Insígnia que falta fica apagada; a ganha tem ◆ cheio e a cor de destaque. */
+.trainer-insignias {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.trainer-insignias li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  opacity: 0.55;
+}
+.trainer-insignias li.tem { opacity: 1; border-color: var(--accent); }
+.trainer-insignia-marca { color: var(--text-dim); font-size: 1.1rem; }
+.trainer-insignias li.tem .trainer-insignia-marca { color: var(--accent); }
+
+.trainer-cidades {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.trainer-cidades li {
+  font-size: 0.78rem;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px dashed var(--border-strong);
+  color: var(--text-dim);
+}
+.trainer-cidades li.foi {
+  border-style: solid;
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.trainer-minis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.trainer-mini {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 88px;
+  padding: 6px 4px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+}
+a.trainer-mini:hover,
+a.trainer-mini:focus-visible { border-color: var(--accent); }
+.trainer-mini img { image-rendering: pixelated; }
+.trainer-mini-vazio {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  color: var(--text-dim);
+}
+.trainer-mini-nome {
+  font-size: 0.72rem;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.trainer-mini-sub { font-size: 0.68rem; color: var(--text-muted); }
+
+/* Linha do tempo: tempo de jogo à esquerda, que é o relógio que importa. */
+.trainer-linha {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0 0 0 14px;
+  border-left: 2px solid var(--border-strong);
+  display: grid;
+  gap: 10px;
+}
+.trainer-evento {
+  position: relative;
+  display: grid;
+  grid-template-columns: 5.5rem 1fr auto;
+  align-items: baseline;
+  gap: 12px;
+}
+.trainer-evento::before {
+  content: "";
+  position: absolute;
+  left: -20px;
+  top: 0.45em;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--surface-3);
+  border: 2px solid var(--border-strong);
+}
+.trainer-evento-captured::before,
+.trainer-evento-evolved::before { background: var(--accent); border-color: var(--accent); }
+.trainer-evento-badge::before { background: var(--accent-alt); border-color: var(--accent-alt); }
+.trainer-evento-rewind::before { background: var(--fav); border-color: var(--fav); }
+.trainer-evento-tempo {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  color: var(--text-muted);
+}
+.trainer-evento-data { font-size: 0.72rem; color: var(--text-dim); }
+
+@media (max-width: 600px) {
+  .trainer-shell { padding: 20px 16px 48px; }
+  .trainer-evento { grid-template-columns: 1fr; gap: 2px; }
+}

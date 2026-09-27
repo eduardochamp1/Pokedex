@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Card from "./Card";
 import TeamMemberSheet from "./TeamMemberSheet";
 import { usePokemonsByNames } from "../hooks/usePokemon";
@@ -83,6 +84,9 @@ const PlayTeam = ({ team, lido }: Props) => {
           );
         })}
       </ul>
+      <p className="play-panel-hint">
+        <Link to="/treinador">Ficha do treinador e linha do tempo →</Link>
+      </p>
       {isLoading && (
         <p className="play-panel-hint">Buscando os dados de cada um…</p>
       )}

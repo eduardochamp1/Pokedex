@@ -28,7 +28,10 @@ const PlayerDexFilter = ({ entry, value, onChange }: Props) => {
   return (
     <div className="player-dex">
       <p className="player-dex-jogo">
-        <strong>{entry.playerName || "Você"}</strong> ·{" "}
+        <Link to="/treinador" className="player-dex-treinador" title="Ficha do treinador">
+          <strong>{entry.playerName || "Você"}</strong>
+        </Link>{" "}
+        ·{" "}
         <Link to="/jogar">{semExtensao(entry.rom)}</Link>
       </p>
       <div
