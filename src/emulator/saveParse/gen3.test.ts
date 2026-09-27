@@ -56,6 +56,9 @@ function montarSave(opts: {
   contadorB?: number;
   /** Bytes extras depois dos 131072, como o rodapé de RTC que o mGBA junta. */
   rodape?: number;
+  /** Números nacionais marcados como vistos / capturados na dex do jogo. */
+  vistos?: number[];
+  capturados?: number[];
 }): Uint8Array {
   const rotacao = opts.rotacao ?? 4;
   const bytes = new Uint8Array(131072 + (opts.rodape ?? 0));
@@ -95,7 +98,14 @@ function montarSave(opts: {
   for (let pos = 0; pos < 14; pos++) {
     const id = (pos + rotacao) % 14;
     const base = pos * SETOR;
-    if (id === 0) escreverTexto(bytes, base, opts.nome);
+    if (id === 0) {
+      escreverTexto(bytes, base, opts.nome);
+      const marcar = (offset: number, n: number) => {
+        bytes[base + offset + ((n - 1) >> 3)] |= 1 << ((n - 1) & 7);
+      };
+      for (const n of opts.capturados ?? []) marcar(0x28, n);
+      for (const n of opts.vistos ?? []) marcar(0x5c, n);
+    }
     const indiceNoSb1 = [1, 2, 3, 4].indexOf(id);
     if (indiceNoSb1 >= 0) {
       bytes.set(sb1.subarray(indiceNoSb1 * DADOS, (indiceNoSb1 + 1) * DADOS), base);
@@ -232,5 +242,60 @@ describe("parseGen3Save", () => {
     view.setUint16(alvo + 0x0ff6, ((soma >>> 16) + (soma & 0xffff)) & 0xffff, true);
 
     expect(parseGen3Save(bytes)).toBeNull();
+  });
+
+  // ---- a dex do jogo
+
+  /**
+   * Offsets medidos no save real de Emerald: capturados em 0x28 e vistos em
+   * 0x5C da seção 0, um bit por número nacional. Lá deu capturados [258] e
+   * vistos [252, 258, 261, 263, 265, 278].
+   */
+  it("lê vistos e capturados da dex", () => {
+    const save = parseGen3Save(
+      montarSave({
+        nome: "ZE",
+        time: [MUDKIP],
+        vistos: [252, 258, 261, 263, 265, 278],
+        capturados: [258],
+      })
+    );
+    expect(save?.pokedex).toEqual({
+      seen: [252, 258, 261, 263, 265, 278],
+      owned: [258],
+    });
+  });
+
+  it("lê as pontas da dex de Gen 3: 1 e 386", () => {
+    const save = parseGen3Save(
+      montarSave({ nome: "ZE", time: [], vistos: [1, 8, 9, 386], capturados: [1, 386] })
+    );
+    expect(save?.pokedex).toEqual({ seen: [1, 8, 9, 386], owned: [1, 386] });
+  });
+
+  it("dex vazia é dex, não ausência", () => {
+    const save = parseGen3Save(montarSave({ nome: "ZE", time: [] }));
+    expect(save?.pokedex).toEqual({ seen: [], owned: [] });
+  });
+
+  /** Os 52 bytes têm 416 bits; os 30 depois do 386 não são pokémon nenhum. */
+  it("ignora bits depois do 386", () => {
+    const save = parseGen3Save(
+      montarSave({ nome: "ZE", time: [], vistos: [258, 387, 416], capturados: [258] })
+    );
+    expect(save?.pokedex).toEqual({ seen: [258], owned: [258] });
+  });
+
+  /**
+   * O jogo marca visto ao capturar. Capturado sem visto quer dizer que os
+   * offsets não são os deste jogo — e aí mostrar nada é melhor que mostrar lixo.
+   */
+  it("descarta a dex quando capturado não está contido em visto", () => {
+    const save = parseGen3Save(
+      montarSave({ nome: "ZE", time: [MUDKIP], vistos: [252], capturados: [258] })
+    );
+    expect(save).not.toBeNull();
+    expect(save?.party[0]?.national).toBe(258);
+    expect(save?.pokedex).toBeNull();
   });
 });

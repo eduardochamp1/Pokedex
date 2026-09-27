@@ -1,5 +1,5 @@
 /**
- * Lê o time do jogador de um save de Gen 3.
+ * Lê o time e a dex do jogador de um save de Gen 3.
  *
  * **Todas as constantes daqui foram medidas**, não copiadas de memória. A
  * fixture foi um save real de Pokémon Emerald, exportado pela própria aba em
@@ -69,6 +69,22 @@ const OFF_PRIMEIRO_DO_TIME = 0x0238;
 const TAMANHO_DO_REGISTRO = 100;
 const MAX_NO_TIME = 6;
 
+/**
+ * A dex do jogo, dentro da seção 0 (SaveBlock2): um bit por número nacional,
+ * bit `n-1` para o pokémon `n`, 52 bytes cada.
+ *
+ * Medido no save real de Emerald: capturados deu `[258]` (o Mudkip do time) e
+ * vistos deu `[252, 258, 261, 263, 265, 278]` — Treecko, Mudkip, Poochyena,
+ * Zigzagoon, Wurmple e Wingull, que é o começo de Emerald. A cópia de "vistos"
+ * que o jogo mantém em SaveBlock1 `0x988` bateu bit a bit com a daqui, o que
+ * confirma o offset por uma segunda fonte. Ruby, Sapphire e FR/LG têm o mesmo
+ * SaveBlock2 nas decompilações, mas isso **não** foi medido.
+ */
+const OFF_DEX_CAPTURADOS = 0x28;
+const OFF_DEX_VISTOS = 0x5c;
+/** 52 bytes guardam 416 bits; só 386 são pokémon. */
+const TOTAL_DA_DEX = 386;
+
 const OFF_PV = 0x00;
 const OFF_OTID = 0x04;
 const OFF_APELIDO = 0x08;
@@ -125,9 +141,17 @@ export interface Gen3PartyMember {
   level: number;
 }
 
+/** Números nacionais, em ordem crescente. `owned` está sempre contido em `seen`. */
+export interface Gen3Pokedex {
+  seen: number[];
+  owned: number[];
+}
+
 export interface Gen3Save {
   playerName: string;
   party: Gen3PartyMember[];
+  /** `null` quando os bits não passam na sanidade — ver `lerDex`. */
+  pokedex: Gen3Pokedex | null;
 }
 
 function lerTexto(bytes: Uint8Array, offset: number, tamanho: number): string {
@@ -168,8 +192,30 @@ function checksumDoSetor(view: DataView, base: number): number {
   return ((soma >>> 16) + (soma & 0xffff)) & 0xffff;
 }
 
+function lerBits(bytes: Uint8Array, offset: number): number[] {
+  const numeros: number[] = [];
+  for (let n = 1; n <= TOTAL_DA_DEX; n++) {
+    const i = n - 1;
+    if ((bytes[offset + (i >> 3)] ?? 0) & (1 << (i & 7))) numeros.push(n);
+  }
+  return numeros;
+}
+
 /**
- * Lê o time do jogador. Devolve `null` quando os bytes não são um save de Gen 3
+ * O jogo marca visto ao capturar, então capturado fora de visto quer dizer que
+ * estes offsets não são os deste jogo. Aí é `null`: não mostrar nada é melhor
+ * que pintar a Pokédex de quem joga com lixo.
+ */
+function lerDex(bytes: Uint8Array, secao0: number): Gen3Pokedex | null {
+  const seen = lerBits(bytes, secao0 + OFF_DEX_VISTOS);
+  const owned = lerBits(bytes, secao0 + OFF_DEX_CAPTURADOS);
+  const vistos = new Set(seen);
+  if (!owned.every((n) => vistos.has(n))) return null;
+  return { seen, owned };
+}
+
+/**
+ * Lê o time e a dex do jogador. Devolve `null` quando os bytes não são um save de Gen 3
  * reconhecível — inclusive quando são flash virgem, que é o caso mais comum.
  */
 export function parseGen3Save(bytes: Uint8Array): Gen3Save | null {
@@ -247,5 +293,5 @@ export function parseGen3Save(bytes: Uint8Array): Gen3Save | null {
     });
   }
 
-  return { playerName, party };
+  return { playerName, party, pokedex: lerDex(bytes, secao0) };
 }

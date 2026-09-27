@@ -37,10 +37,17 @@ describe.runIf(CAMINHO)("parser contra um save real", () => {
       expect(p.level).toBeLessThanOrEqual(100);
     }
 
+    // A dex precisa passar na sanidade, e todo pokémon do time foi capturado.
+    const dex = save?.pokedex;
+    expect(dex, "a dex não passou na sanidade").not.toBeNull();
+    const capturados = new Set(dex?.owned);
+    for (const p of save?.party ?? []) expect(capturados.has(p.national)).toBe(true);
+
     console.log(
       `jogador ${save?.playerName} · ` +
         (save?.party.map((p) => `#${p.national} ${p.nickname} nv${p.level}`).join(", ") ||
-          "time vazio")
+          "time vazio") +
+        ` · dex: ${dex?.owned.length} capturados, ${dex?.seen.length} vistos`
     );
   });
 });
