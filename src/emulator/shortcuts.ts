@@ -74,7 +74,7 @@ export const TURBO_MULTIPLIER = 5;
 
 /** Legenda dos atalhos, para a tela poder ensina-los sem repetir a regra. */
 export const SHORTCUT_HELP = [
-  { keys: "F1–F6", what: "carregar o estado do slot" },
-  { keys: "Shift + F1–F6", what: "gravar no slot" },
-  { keys: "Espaço", what: "turbo enquanto segura" },
+  { keys: "F1–F6", keysEn: "F1–F6", what: "carregar o estado do slot", whatEn: "load the slot's state" },
+  { keys: "Shift + F1–F6", keysEn: "Shift + F1–F6", what: "gravar no slot", whatEn: "save to the slot" },
+  { keys: "Espaço", keysEn: "Space", what: "turbo enquanto segura", whatEn: "turbo while held" },
 ] as const;

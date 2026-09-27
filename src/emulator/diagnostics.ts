@@ -68,16 +68,23 @@ export const AV_TOGGLES: {
   id: keyof AvSettings;
   label: string;
   hint: string;
+  /** Inglês; sem ele, a tela em inglês cai no português. */
+  labelEn?: string;
+  hintEn?: string;
 }[] = [
   {
     id: "audioSync",
     label: "Sincronizar áudio",
     hint: "Amarra o vídeo à velocidade do áudio. Ligue se ouvir estalos ou cortes.",
+    labelEn: "Sync audio",
+    hintEn: "Ties the video to the audio speed. Turn it on if you hear pops or dropouts.",
   },
   {
     id: "videoSync",
     label: "Sincronizar vídeo",
     hint: "Amarra os quadros ao refresh do monitor (vsync). Ligue se a imagem rasgar.",
+    labelEn: "Sync video",
+    hintEn: "Ties the frames to the monitor refresh (vsync). Turn it on if the image tears.",
   },
   {
     id: "timestepSync",
@@ -91,6 +98,8 @@ export const AV_TOGGLES: {
     id: "showFpsCounter",
     label: "Mostrar FPS",
     hint: "Contador de quadros por segundo, desenhado pelo próprio core.",
+    labelEn: "Show FPS",
+    hintEn: "Frames-per-second counter, drawn by the core itself.",
   },
 ];
 

@@ -995,15 +995,15 @@ const PlayPage = () => {
             <h2>{tx("Áudio e vídeo", "Audio and video")}</h2>
             <div className="play-av">
               {AV_TOGGLES.map((t) => (
-                <label key={t.id} className="play-av-row" title={t.hint}>
+                <label key={t.id} className="play-av-row" title={en ? (t.hintEn ?? t.hint) : t.hint}>
                   <input
                     type="checkbox"
                     checked={emu.av[t.id]}
                     onChange={(e) => emu.setAv({ [t.id]: e.target.checked })}
                   />
                   <span>
-                    <strong>{t.label}</strong>
-                    <em>{t.hint}</em>
+                    <strong>{en ? (t.labelEn ?? t.label) : t.label}</strong>
+                    <em>{en ? (t.hintEn ?? t.hint) : t.hint}</em>
                   </span>
                 </label>
               ))}
@@ -1112,8 +1112,8 @@ const PlayPage = () => {
                 <dd>
                   {SHORTCUT_HELP.map((s) => (
                     <span key={s.keys} className="play-shortcut">
-                      <kbd>{s.keys}</kbd>
-                      {s.what}
+                      <kbd>{en ? s.keysEn : s.keys}</kbd>
+                      {en ? s.whatEn : s.what}
                     </span>
                   ))}
                 </dd>

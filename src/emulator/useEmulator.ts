@@ -41,6 +41,7 @@ import { GBA_HEADER_BYTES, identifyRom, type RomId } from "./romId";
 import { parseGen3Save, type Gen3PartyMember } from "./saveParse/gen3";
 import { recordPlayerDex } from "../lib/playerDex";
 import { recordTrainerSave } from "../lib/trainerLog";
+import { getLang, tr } from "../i18n/lang";
 import { MGBA_CORE_SETTINGS } from "./mgbaDefaults";
 import { TURBO_MULTIPLIER } from "./shortcuts";
 import { useDiagnostics } from "./useDiagnostics";
@@ -293,9 +294,16 @@ function aplicarVelocidade(
   }
 }
 
-/** Sufixo comum das mensagens: a cota e a causa provavel, e ela e visivel. */
-const DICA_DE_COTA =
-  "O mais provável é a cota do navegador estar cheia — veja “Onde ficam seus saves” no painel ao lado.";
+/**
+ * Sufixo comum das mensagens: a cota e a causa provavel, e ela e visivel.
+ * Funcao, e nao constante: o idioma pode mudar depois de o modulo carregar.
+ */
+const dicaDeCota = () =>
+  tr(
+    getLang(),
+    "O mais provável é a cota do navegador estar cheia — veja “Onde ficam seus saves” no painel ao lado.",
+    "The browser quota is most likely full — see “Where your saves live” in the side panel."
+  );
 
 /**
  * Dirige o core mGBA a partir de um canvas.
@@ -530,12 +538,12 @@ export function useEmulator() {
       setStatus({
         kind: "unsupported",
         reason: !isolation.webAssembly
-          ? "Este navegador não tem WebAssembly."
-          : "Esta página não está cross-origin isolated.",
+          ? tr(getLang(), "Este navegador não tem WebAssembly.", "This browser has no WebAssembly.")
+          : tr(getLang(), "Esta página não está cross-origin isolated.", "This page is not cross-origin isolated."),
         detail: !isolation.webAssembly
-          ? "Sem WebAssembly não há como rodar o core."
-          : `O core usa threads, e threads exigem SharedArrayBuffer — que o navegador só libera com os headers Cross-Origin-Opener-Policy: same-origin e Cross-Origin-Embedder-Policy: require-corp. ` +
-            `Estado atual: crossOriginIsolated=${isolation.crossOriginIsolated}, SharedArrayBuffer=${isolation.sharedArrayBuffer}.`,
+          ? tr(getLang(), "Sem WebAssembly não há como rodar o core.", "Without WebAssembly the core can't run.")
+          : tr(getLang(), `O core usa threads, e threads exigem SharedArrayBuffer — que o navegador só libera com os headers Cross-Origin-Opener-Policy: same-origin e Cross-Origin-Embedder-Policy: require-corp. `, `The core uses threads, and threads need SharedArrayBuffer — which the browser only enables with the headers Cross-Origin-Opener-Policy: same-origin and Cross-Origin-Embedder-Policy: require-corp. `) +
+            tr(getLang(), `Estado atual: crossOriginIsolated=${isolation.crossOriginIsolated}, SharedArrayBuffer=${isolation.sharedArrayBuffer}.`, `Current state: crossOriginIsolated=${isolation.crossOriginIsolated}, SharedArrayBuffer=${isolation.sharedArrayBuffer}.`),
       });
       return;
     }
@@ -568,7 +576,7 @@ export function useEmulator() {
           coreCrashedCallback: () => {
             setStatus({
               kind: "error",
-              message: "O core travou. Recarregue a página para tentar de novo.",
+              message: tr(getLang(), "O core travou. Recarregue a página para tentar de novo.", "The core crashed. Reload the page to try again."),
             });
           },
           // A cada captura automática (30 s) o painel de estados se atualiza —
@@ -691,7 +699,7 @@ export function useEmulator() {
       const core = coreRef.current;
       if (!core) return;
       if (!isSupportedRom(file.name)) {
-        setNotice(`"${file.name}" não é .gb, .gbc nem .gba.`);
+        setNotice(tr(getLang(), `"${file.name}" não é .gb, .gbc nem .gba.`, `"${file.name}" is not a .gb, .gbc or .gba file.`));
         return;
       }
       // Capturado antes do "loading": e para ca que voltamos se a ROM nova
@@ -722,7 +730,7 @@ export function useEmulator() {
       if (!uploaded) {
         falhaAoCarregar(
           anterior,
-          `O core não confirmou a gravação de ${flatName}. Tente de novo.`
+          tr(getLang(), `O core não confirmou a gravação de ${flatName}. Tente de novo.`, `The core didn't confirm writing ${flatName}. Try again.`)
         );
         return;
       }
@@ -730,14 +738,14 @@ export function useEmulator() {
       if (erroSync) {
         falhaAoCarregar(
           anterior,
-          `Não deu para guardar ${flatName} no navegador. ${DICA_DE_COTA}`
+          tr(getLang(), `Não deu para guardar ${flatName} no navegador. ${dicaDeCota()}`, `Couldn't store ${flatName} in the browser. ${dicaDeCota()}`)
         );
         return;
       }
 
       const ok = core.loadGame(`${core.filePaths().gamePath}/${flatName}`);
       if (!ok) {
-        falhaAoCarregar(anterior, `Não deu para carregar ${flatName}.`);
+        falhaAoCarregar(anterior, tr(getLang(), `Não deu para carregar ${flatName}.`, `Couldn't load ${flatName}.`));
         return;
       }
       // Volume E velocidade: a barra guardava 5x e o jogo novo entrava em 1x.
@@ -761,7 +769,7 @@ export function useEmulator() {
       const ok = core.loadGame(`${core.filePaths().gamePath}/${fileName}`);
       if (ok) setRomId(identifyRom(lerCabecalho(core, fileName)));
       if (!ok) {
-        falhaAoCarregar(anterior, `Não deu para carregar ${fileName}.`);
+        falhaAoCarregar(anterior, tr(getLang(), `Não deu para carregar ${fileName}.`, `Couldn't load ${fileName}.`));
         return;
       }
       // Volume E velocidade: a barra guardava 5x e o jogo novo entrava em 1x.
@@ -806,7 +814,7 @@ export function useEmulator() {
       if (erroSync) {
         setStatus({
           kind: "error",
-          message: `${fileName} carregou, mas não deu para gravar no navegador. ${DICA_DE_COTA}`,
+          message: tr(getLang(), `${fileName} carregou, mas não deu para gravar no navegador. ${dicaDeCota()}`, `${fileName} loaded, but couldn't be saved in the browser. ${dicaDeCota()}`),
         });
         return;
       }
@@ -820,8 +828,8 @@ export function useEmulator() {
       const hasAuto = core.getAutoSaveState() !== null;
       setNotice(
         hasAuto
-          ? `${fileName} recarregado. Use "Continuar de onde parou" para voltar ao ponto automático.`
-          : `${fileName} recarregado. Use "Fechar jogo" se não quiser que ele volte sozinho.`
+          ? tr(getLang(), `${fileName} recarregado. Use "Continuar de onde parou" para voltar ao ponto automático.`, `${fileName} reloaded. Use "Continue where you left off" to go back to the auto save point.`)
+          : tr(getLang(), `${fileName} recarregado. Use "Fechar jogo" se não quiser que ele volte sozinho.`, `${fileName} reloaded. Use "Close game" if you don't want it to come back on its own.`)
       );
       refreshLibrary();
     },
@@ -847,7 +855,7 @@ export function useEmulator() {
       const core = coreRef.current;
       if (!core) return;
       if (fileName === getLoadedRom()) {
-        setNotice(`Feche ${fileName} antes de removê-lo da biblioteca.`);
+        setNotice(tr(getLang(), `Feche ${fileName} antes de removê-lo da biblioteca.`, `Close ${fileName} before removing it from the library.`));
         return;
       }
       try {
@@ -864,7 +872,7 @@ export function useEmulator() {
       // Sem isso a próxima visita tentaria recarregar uma ROM que não existe.
       if (getLastRom() === fileName) forgetLastRom();
       refreshLibrary();
-      setNotice(`${fileName} removido da biblioteca. O save foi mantido.`);
+      setNotice(tr(getLang(), `${fileName} removido da biblioteca. O save foi mantido.`, `${fileName} removed from the library. The save was kept.`));
     },
     [refreshLibrary]
   );
@@ -911,7 +919,7 @@ export function useEmulator() {
     coreRef.current?.quickReload();
     // Reiniciar relê a flash: o time pode ter mudado se o save veio de fora.
     refreshTeamRef.current?.();
-    setNotice("Jogo reiniciado.");
+    setNotice(tr(getLang(), "Jogo reiniciado.", "Game reset."));
   }, []);
 
   const stop = useCallback(() => {
@@ -952,12 +960,12 @@ export function useEmulator() {
       if (ok && rom) core.screenshot(stateThumbnailName(rom, slot));
       const erroSync = await syncFs(core);
       refreshLibrary();
-      if (!ok) setNotice(`Falhou ao gravar o slot ${slot}.`);
+      if (!ok) setNotice(tr(getLang(), `Falhou ao gravar o slot ${slot}.`, `Failed to save slot ${slot}.`));
       else if (erroSync)
         setNotice(
-          `Slot ${slot} gravado, mas não foi para o armazenamento — pode se perder ao recarregar. ${DICA_DE_COTA}`
+          tr(getLang(), `Slot ${slot} gravado, mas não foi para o armazenamento — pode se perder ao recarregar. ${dicaDeCota()}`, `Slot ${slot} saved, but it didn't reach storage — it may be lost on reload. ${dicaDeCota()}`)
         );
-      else setNotice(`Estado gravado no slot ${slot}.`);
+      else setNotice(tr(getLang(), `Estado gravado no slot ${slot}.`, `State saved to slot ${slot}.`));
     },
     [refreshLibrary]
   );
@@ -967,7 +975,9 @@ export function useEmulator() {
     if (!core) return;
     const ok = core.loadStateSlot(slot);
     setNotice(
-      ok ? `Estado do slot ${slot} carregado.` : `Slot ${slot} está vazio.`
+      ok
+        ? tr(getLang(), `Estado do slot ${slot} carregado.`, `Slot ${slot} state loaded.`)
+        : tr(getLang(), `Slot ${slot} está vazio.`, `Slot ${slot} is empty.`)
     );
   }, []);
 
@@ -992,12 +1002,12 @@ export function useEmulator() {
         erroSync = await syncFs(core);
       }
       refreshLibrary();
-      if (!removed) setNotice(`Slot ${slot} já estava vazio.`);
+      if (!removed) setNotice(tr(getLang(), `Slot ${slot} já estava vazio.`, `Slot ${slot} was already empty.`));
       else if (erroSync)
         setNotice(
-          `Slot ${slot} apagado, mas o armazenamento não confirmou — ele pode reaparecer ao recarregar. ${DICA_DE_COTA}`
+          tr(getLang(), `Slot ${slot} apagado, mas o armazenamento não confirmou — ele pode reaparecer ao recarregar. ${dicaDeCota()}`, `Slot ${slot} cleared, but storage didn't confirm — it may reappear on reload. ${dicaDeCota()}`)
         );
-      else setNotice(`Slot ${slot} apagado.`);
+      else setNotice(tr(getLang(), `Slot ${slot} apagado.`, `Slot ${slot} cleared.`));
     },
     [refreshLibrary]
   );
@@ -1012,8 +1022,8 @@ export function useEmulator() {
     const ok = core.loadAutoSaveState();
     setNotice(
       ok
-        ? "Retomado do estado automático."
-        : "Não havia estado automático para este jogo."
+        ? tr(getLang(), "Retomado do estado automático.", "Resumed from the auto save state.")
+        : tr(getLang(), "Não havia estado automático para este jogo.", "There was no auto save state for this game.")
     );
   }, []);
 
@@ -1024,10 +1034,10 @@ export function useEmulator() {
     const ok = core.forceAutoSaveState();
     const erroSync = await syncFs(core);
     refreshLibrary();
-    if (!ok) setNotice("Não deu para capturar.");
+    if (!ok) setNotice(tr(getLang(), "Não deu para capturar.", "Couldn't capture."));
     else if (erroSync)
-      setNotice(`Ponto capturado, mas não foi para o armazenamento. ${DICA_DE_COTA}`);
-    else setNotice("Ponto automático capturado.");
+      setNotice(tr(getLang(), `Ponto capturado, mas não foi para o armazenamento. ${dicaDeCota()}`, `Point captured, but it didn't reach storage. ${dicaDeCota()}`));
+    else setNotice(tr(getLang(), "Ponto automático capturado.", "Auto save point captured."));
   }, [refreshLibrary]);
 
   /** Baixa o save de bateria (.sav) do jogo em execução. */
@@ -1036,7 +1046,7 @@ export function useEmulator() {
     if (!core) return;
     const data = core.getSave();
     if (!data || data.length === 0) {
-      setNotice("Este jogo ainda não gravou nada.");
+      setNotice(tr(getLang(), "Este jogo ainda não gravou nada.", "This game hasn't saved anything yet."));
       return;
     }
     // Copia para um ArrayBuffer proprio: o buffer do core pode ser um
@@ -1062,8 +1072,8 @@ export function useEmulator() {
       refreshLibrary();
       setNotice(
         erroSync
-          ? `"${file.name}" entrou, mas não foi gravado no navegador — some ao recarregar. ${DICA_DE_COTA}`
-          : `"${file.name}" importado. Recarregue o jogo para o save valer.`
+          ? tr(getLang(), `"${file.name}" entrou, mas não foi gravado no navegador — some ao recarregar. ${dicaDeCota()}`, `"${file.name}" came in, but wasn't saved in the browser — it disappears on reload. ${dicaDeCota()}`)
+          : tr(getLang(), `"${file.name}" importado. Recarregue o jogo para o save valer.`, `"${file.name}" imported. Reload the game for the save to take effect.`)
       );
     },
     [refreshLibrary]
@@ -1192,8 +1202,8 @@ export function useEmulator() {
       refreshScreenshots();
       setNotice(
         erroSync
-          ? `${fileName} apagado, mas o armazenamento não confirmou. ${DICA_DE_COTA}`
-          : `${fileName} apagado.`
+          ? tr(getLang(), `${fileName} apagado, mas o armazenamento não confirmou. ${dicaDeCota()}`, `${fileName} deleted, but storage didn't confirm. ${dicaDeCota()}`)
+          : tr(getLang(), `${fileName} apagado.`, `${fileName} deleted.`)
       );
     },
     [refreshScreenshots]
@@ -1313,12 +1323,12 @@ export function useEmulator() {
       if (!core) return;
       const fileName = screenshotFileName(romName, new Date());
       if (!core.screenshot(fileName)) {
-        setNotice("O core não conseguiu capturar a tela.");
+        setNotice(tr(getLang(), "O core não conseguiu capturar a tela.", "The core couldn't capture the screen."));
         return;
       }
       const erroSync = await syncFs(core);
       if (erroSync) {
-        setNotice(`A captura não foi gravada no navegador. ${DICA_DE_COTA}`);
+        setNotice(tr(getLang(), `A captura não foi gravada no navegador. ${dicaDeCota()}`, `The screenshot wasn't saved in the browser. ${dicaDeCota()}`));
         return;
       }
       try {
@@ -1376,8 +1386,8 @@ export function useEmulator() {
     const erroSync = await syncFs(coreRef.current ?? undefined);
     setNotice(
       erroSync
-        ? `Não deu para sincronizar o progresso. ${DICA_DE_COTA}`
-        : "Progresso sincronizado."
+        ? tr(getLang(), `Não deu para sincronizar o progresso. ${dicaDeCota()}`, `Couldn't sync the progress. ${dicaDeCota()}`)
+        : tr(getLang(), "Progresso sincronizado.", "Progress synced.")
     );
   }, []);
 
