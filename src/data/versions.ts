@@ -73,6 +73,11 @@ export function versionRegion(name: string): string | undefined {
   return V[name]?.region;
 }
 
+/** O grupo de versão ("emerald" -> "emerald", "leafgreen" -> "firered-leafgreen"). */
+export function versionGroupOf(name: string): string | undefined {
+  return V[name]?.group;
+}
+
 /**
  * Posição cronológica. Dentro do mesmo grupo vale a ordem da tabela acima
  * (Ruby antes de Sapphire); desconhecida vai para o fim.

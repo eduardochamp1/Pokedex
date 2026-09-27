@@ -240,6 +240,12 @@ Calculadora de dano de Gen 3, seguindo a decompilação (pokeemerald:
 - **Resultado** — faixa de dano, % do HP, nocaute garantido ou com chance em
   N golpes, e as 16 rolagens
 
+### Jogos (`/jogos`)
+Os 24 jogos principais de 1996 até hoje, por ano de lançamento no Japão, com
+plataforma, geração, região e remake. Cada um liga à região no mapa, à aba
+de Gerações da lore e, os nove de GB/GBC/GBA, a `/jogar?jogo=…`; o jogo do
+seu save aparece marcado. Filtros por geração, remakes e só os jogáveis.
+
 ### Evoluções (`/evolucoes`)
 As árvores de evolução de todas as espécies, com a condição em cada seta.
 Filtro por método (nível, pedra/item, troca, amizade, item segurado, golpe,

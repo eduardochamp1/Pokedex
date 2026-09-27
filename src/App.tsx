@@ -26,6 +26,7 @@ const SaveComparePage = lazy(() => import("./pages/SaveComparePage"));
 const DamagePage = lazy(() => import("./pages/DamagePage"));
 const GymsPage = lazy(() => import("./pages/GymsPage"));
 const EvolutionsPage = lazy(() => import("./pages/EvolutionsPage"));
+const GamesPage = lazy(() => import("./pages/GamesPage"));
 const TeamBuilderPage = lazy(() => import("./pages/TeamBuilderPage"));
 const AbilityPage = lazy(() => import("./pages/AbilityPage"));
 const QuizPage = lazy(() => import("./pages/QuizPage"));
@@ -70,6 +71,7 @@ function App() {
             <Route path="/dano" element={<DamagePage />} />
             <Route path="/ginasios" element={<GymsPage />} />
             <Route path="/evolucoes" element={<EvolutionsPage />} />
+            <Route path="/jogos" element={<GamesPage />} />
             <Route path="/time" element={<TeamBuilderPage />} />
             <Route path="/habilidade/:slug" element={<AbilityPage />} />
             <Route path="/quiz" element={<QuizPage />} />
