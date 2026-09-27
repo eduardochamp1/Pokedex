@@ -32,6 +32,7 @@ function escreverTexto(destino: Uint8Array, offset: number, texto: string) {
     if (ch === " ") destino[offset + i] = 0x00;
     else if (code >= 65 && code <= 90) destino[offset + i] = 0xbb + (code - 65);
     else if (code >= 97 && code <= 122) destino[offset + i] = 0xd5 + (code - 97);
+    else if (code >= 48 && code <= 57) destino[offset + i] = 0xa1 + (code - 48);
     else destino[offset + i] = 0x00;
     i++;
   }
@@ -55,6 +56,91 @@ interface Membro {
   status?: number[];
 }
 
+/**
+ * Escreve um registro de pokémon: 80 bytes na caixa, 100 no time (os 20 a mais
+ * são nível e status, que só o time guarda).
+ */
+function escreverRegistro(destino: Uint8Array, off: number, m: Membro, doTime: boolean) {
+  const vd = new DataView(destino.buffer, destino.byteOffset, destino.byteLength);
+  const pv = m.pv ?? 0x25b7b8b0;
+  const otid = m.otid ?? 0xbaa8b045;
+  vd.setUint32(off + 0x00, pv, true);
+  vd.setUint32(off + 0x04, otid, true);
+  escreverTexto(destino, off + 0x08, m.apelido);
+  if (doTime) {
+    destino[off + 0x54] = m.nivel;
+    const offStatus = [0x56, 0x58, 0x5a, 0x5c, 0x5e, 0x60, 0x62];
+    (m.status ?? []).forEach((st, i) => vd.setUint16(off + offStatus[i], st, true));
+  }
+
+  // Monta os 48 bytes em claro, com a espécie na subestrutura de crescimento,
+  // e só então cifra com PV ^ OTID.
+  const claro = new DataView(new ArrayBuffer(48));
+  const ordem = ORDENS[pv % 24];
+  const G = ordem.indexOf("G") * 12;
+  const A = ordem.indexOf("A") * 12;
+  const E = ordem.indexOf("E") * 12;
+  const M = ordem.indexOf("M") * 12;
+  claro.setUint16(G, m.indice, true);
+  claro.setUint8(G + 9, m.amizade ?? 0);
+  (m.golpes ?? []).forEach((g, i) => {
+    claro.setUint16(A + i * 2, g.id, true);
+    claro.setUint8(A + 8 + i, g.pp);
+  });
+  (m.evs ?? []).forEach((ev, i) => claro.setUint8(E + i, ev));
+  let ivs = 0;
+  (m.ivs ?? []).forEach((iv, i) => (ivs |= iv << (i * 5)));
+  if (m.habilidade) ivs |= 1 << 31;
+  claro.setUint32(M + 4, ivs >>> 0, true);
+
+  let soma = 0;
+  for (let p = 0; p < 48; p += 2) soma = (soma + claro.getUint16(p, true)) & 0xffff;
+  vd.setUint16(off + 0x1c, soma, true);
+
+  const chave = (pv ^ otid) >>> 0;
+  for (let w = 0; w < 12; w++) {
+    vd.setUint32(off + 0x20 + w * 4, (claro.getUint32(w * 4, true) ^ chave) >>> 0, true);
+  }
+}
+
+interface Treinador {
+  genero: number;
+  tid: number;
+  sid: number;
+  horas: number;
+  minutos: number;
+  segundos: number;
+  dinheiro: number;
+  /** Chave de segurança de Emerald. 0 é Ruby/Sapphire, 1 é FR/LG. */
+  chave: number;
+  /** Índices 0..7 das insígnias ganhas. */
+  insignias: number[];
+  /** Índices 0..15 na ordem das flags de cidade visitada. */
+  visitadas: number[];
+  mapa: [number, number];
+}
+
+/** Os valores do save real: ZE, 0h45m50s, 3300 de dinheiro, em Oldale. */
+const TREINADOR_PADRAO: Treinador = {
+  genero: 0,
+  tid: 45125,
+  sid: 47784,
+  horas: 0,
+  minutos: 45,
+  segundos: 50,
+  dinheiro: 3300,
+  chave: 0x6c959aae,
+  insignias: [],
+  visitadas: [0, 1],
+  mapa: [0, 10],
+};
+
+interface Caixas {
+  atual?: number;
+  nomes?: string[];
+  pokemon?: { caixa: number; slot: number; membro: Membro }[];
+}
+
 function montarSave(opts: {
   nome: string;
   time: Membro[];
@@ -67,6 +153,8 @@ function montarSave(opts: {
   /** Números nacionais marcados como vistos / capturados na dex do jogo. */
   vistos?: number[];
   capturados?: number[];
+  treinador?: Treinador;
+  caixas?: Caixas;
 }): Uint8Array {
   const rotacao = opts.rotacao ?? 4;
   const bytes = new Uint8Array(131072 + (opts.rodape ?? 0));
@@ -77,46 +165,27 @@ function montarSave(opts: {
   const vb1 = new DataView(sb1.buffer);
   vb1.setUint32(0x0234, opts.time.length, true);
 
-  opts.time.forEach((m, slot) => {
-    const off = 0x0238 + slot * 100;
-    const pv = m.pv ?? 0x25b7b8b0;
-    const otid = m.otid ?? 0xbaa8b045;
-    vb1.setUint32(off + 0x00, pv, true);
-    vb1.setUint32(off + 0x04, otid, true);
-    escreverTexto(sb1, off + 0x08, m.apelido);
-    sb1[off + 0x54] = m.nivel;
+  opts.time.forEach((m, slot) => escreverRegistro(sb1, 0x0238 + slot * 100, m, true));
 
-    // Monta os 48 bytes em claro, com a espécie na subestrutura de crescimento,
-    // e só então cifra com PV ^ OTID.
-    const claro = new DataView(new ArrayBuffer(48));
-    const ordem = ORDENS[pv % 24];
-    const G = ordem.indexOf("G") * 12;
-    const A = ordem.indexOf("A") * 12;
-    const E = ordem.indexOf("E") * 12;
-    const M = ordem.indexOf("M") * 12;
-    claro.setUint16(G, m.indice, true);
-    claro.setUint8(G + 9, m.amizade ?? 0);
-    (m.golpes ?? []).forEach((g, i) => {
-      claro.setUint16(A + i * 2, g.id, true);
-      claro.setUint8(A + 8 + i, g.pp);
-    });
-    (m.evs ?? []).forEach((ev, i) => claro.setUint8(E + i, ev));
-    let ivs = 0;
-    (m.ivs ?? []).forEach((iv, i) => (ivs |= iv << (i * 5)));
-    if (m.habilidade) ivs |= 1 << 31;
-    claro.setUint32(M + 4, ivs >>> 0, true);
-    const offStatus = [0x56, 0x58, 0x5a, 0x5c, 0x5e, 0x60, 0x62];
-    (m.status ?? []).forEach((s, i) => vb1.setUint16(off + offStatus[i], s, true));
+  // --- treinador: dinheiro cifrado, flags e posição, tudo em SaveBlock1
+  const t = { ...TREINADOR_PADRAO, ...opts.treinador };
+  vb1.setUint32(0x0490, (t.dinheiro ^ t.chave) >>> 0, true);
+  const flag = (f: number) => (sb1[0x1270 + (f >> 3)] |= 1 << (f & 7));
+  for (const i of t.insignias) flag(0x867 + i);
+  for (const i of t.visitadas) flag(0x86f + i);
+  sb1[4] = t.mapa[0];
+  sb1[5] = t.mapa[1];
 
-    let soma = 0;
-    for (let p = 0; p < 48; p += 2) soma = (soma + claro.getUint16(p, true)) & 0xffff;
-    vb1.setUint16(off + 0x1c, soma, true);
-
-    const chave = (pv ^ otid) >>> 0;
-    for (let w = 0; w < 12; w++) {
-      vb1.setUint32(off + 0x20 + w * 4, (claro.getUint32(w * 4, true) ^ chave) >>> 0, true);
-    }
-  });
+  // --- caixas do PC: seções 5 a 13, concatenadas
+  const pc = new Uint8Array(9 * DADOS);
+  const vpc = new DataView(pc.buffer);
+  vpc.setUint32(0, opts.caixas?.atual ?? 0, true);
+  for (let i = 0; i < 14; i++) {
+    escreverTexto(pc, 4 + 14 * 30 * 80 + i * 9, opts.caixas?.nomes?.[i] ?? `BOX${i + 1}`);
+  }
+  for (const { caixa, slot, membro } of opts.caixas?.pokemon ?? []) {
+    escreverRegistro(pc, 4 + (caixa * 30 + slot) * 80, membro, false);
+  }
 
   // --- distribui as seções pelos 14 setores do bloco A, girando os ids
   for (let pos = 0; pos < 14; pos++) {
@@ -129,6 +198,17 @@ function montarSave(opts: {
       };
       for (const n of opts.capturados ?? []) marcar(0x28, n);
       for (const n of opts.vistos ?? []) marcar(0x5c, n);
+      bytes[base + 0x08] = t.genero;
+      view.setUint16(base + 0x0a, t.tid, true);
+      view.setUint16(base + 0x0c, t.sid, true);
+      view.setUint16(base + 0x0e, t.horas, true);
+      bytes[base + 0x10] = t.minutos;
+      bytes[base + 0x11] = t.segundos;
+      view.setUint32(base + 0xac, t.chave, true);
+    }
+    const indiceNoPc = id - 5;
+    if (indiceNoPc >= 0) {
+      bytes.set(pc.subarray(indiceNoPc * DADOS, (indiceNoPc + 1) * DADOS), base);
     }
     const indiceNoSb1 = [1, 2, 3, 4].indexOf(id);
     if (indiceNoSb1 >= 0) {
@@ -389,5 +469,98 @@ describe("parseGen3Save", () => {
     const [m] = parseGen3Save(montarSave({ nome: "ZE", time: [shiny] }))?.party ?? [];
     expect(m?.national).toBe(258);
     expect(m?.shiny).toBe(true);
+  });
+
+  // ---- o treinador
+
+  /**
+   * Medido no save real de Emerald. O TID/SID bateram com o OT gravado no
+   * Mudkip, e o dinheiro só dá 3300 depois do XOR pela chave de segurança.
+   */
+  it("lê a ficha do treinador", () => {
+    const save = parseGen3Save(montarSave({ nome: "ZE", time: [MUDKIP] }));
+    expect(save?.trainer).toEqual({
+      gender: "male",
+      trainerId: 45125,
+      secretId: 47784,
+      playTime: { hours: 0, minutes: 45, seconds: 50 },
+      money: 3300,
+      badges: [false, false, false, false, false, false, false, false],
+      visitedTowns: [0, 1],
+      location: { group: 0, num: 10 },
+    });
+  });
+
+  it("lê insígnias e cidades espalhadas pelos bytes de flag", () => {
+    const save = parseGen3Save(
+      montarSave({
+        nome: "ANA",
+        time: [],
+        treinador: { ...TREINADOR_PADRAO, genero: 1, insignias: [0, 1, 7], visitadas: [0, 1, 7, 15], horas: 123 },
+      })
+    );
+    expect(save?.trainer?.gender).toBe("female");
+    expect(save?.trainer?.badges).toEqual([true, true, false, false, false, false, false, true]);
+    expect(save?.trainer?.visitedTowns).toEqual([0, 1, 7, 15]);
+    expect(save?.trainer?.playTime.hours).toBe(123);
+  });
+
+  /**
+   * Só Emerald foi medido. Ruby e Sapphire guardam as flags em outro lugar e
+   * não cifram o dinheiro; o campo 0xAC deles vale 0 (e 1 em FR/LG).
+   */
+  it("não inventa ficha de treinador fora de Emerald", () => {
+    for (const chave of [0, 1]) {
+      const save = parseGen3Save(
+        montarSave({ nome: "ZE", time: [MUDKIP], treinador: { ...TREINADOR_PADRAO, chave } })
+      );
+      expect(save?.party).toHaveLength(1);
+      expect(save?.trainer).toBeNull();
+    }
+  });
+
+  it("o time guarda o PV, que identifica o pokémon quando ele evolui", () => {
+    const [m] = parseGen3Save(montarSave({ nome: "ZE", time: [MUDKIP] }))?.party ?? [];
+    expect(m?.personality).toBe(0x25b7b8b0);
+  });
+
+  // ---- as caixas do PC
+
+  it("caixas vazias, com os nomes medidos: BOX1 a BOX14", () => {
+    const pc = parseGen3Save(montarSave({ nome: "ZE", time: [MUDKIP] }))?.boxes;
+    expect(pc?.current).toBe(0);
+    expect(pc?.boxes).toHaveLength(14);
+    expect(pc?.boxes.map((c) => c.name)).toEqual(
+      Array.from({ length: 14 }, (_, i) => `BOX${i + 1}`)
+    );
+    expect(pc?.boxes.every((c) => c.pokemon.length === 0)).toBe(true);
+  });
+
+  /** A última caixa cai na seção 13, depois da fronteira entre seções. */
+  it("lê pokémon nas caixas, inclusive na última", () => {
+    const pc = parseGen3Save(
+      montarSave({
+        nome: "ZE",
+        time: [MUDKIP],
+        caixas: {
+          atual: 13,
+          nomes: ["TIME B"],
+          pokemon: [
+            { caixa: 0, slot: 0, membro: { indice: 277, apelido: "TREECKO", nivel: 0 } },
+            { caixa: 0, slot: 29, membro: { indice: 1, apelido: "BULBA", nivel: 0, pv: 7 } },
+            { caixa: 13, slot: 29, membro: { indice: 411, apelido: "CHIMECHO", nivel: 0 } },
+          ],
+        },
+      })
+    )?.boxes;
+    expect(pc?.current).toBe(13);
+    expect(pc?.boxes[0].name).toBe("TIME B");
+    expect(pc?.boxes[0].pokemon).toEqual([
+      { slot: 0, national: 252, nickname: "TREECKO", personality: 0x25b7b8b0 },
+      { slot: 29, national: 1, nickname: "BULBA", personality: 7 },
+    ]);
+    expect(pc?.boxes[13].pokemon).toEqual([
+      { slot: 29, national: 358, nickname: "CHIMECHO", personality: 0x25b7b8b0 },
+    ]);
   });
 });

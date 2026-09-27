@@ -43,6 +43,20 @@ describe.runIf(CAMINHO)("parser contra um save real", () => {
     const capturados = new Set(dex?.owned);
     for (const p of save?.party ?? []) expect(capturados.has(p.national)).toBe(true);
 
+    // Só Emerald tem ficha de treinador; nos outros, `trainer` é null.
+    const t = save?.trainer;
+    if (t) {
+      expect(t.badges).toHaveLength(8);
+      expect(t.money).toBeLessThanOrEqual(999999);
+      expect(t.playTime.minutes).toBeLessThan(60);
+      console.log(
+        `treinador ${t.trainerId}/${t.secretId} · ${t.playTime.hours}h${t.playTime.minutes}m · ` +
+          `$${t.money} · ${t.badges.filter(Boolean).length} insígnias · cidades ${t.visitedTowns} · ` +
+          `mapa ${t.location.group}.${t.location.num} · ` +
+          `PC ${save?.boxes?.boxes.reduce((n, c) => n + c.pokemon.length, 0)} pokémon`
+      );
+    }
+
     console.log(
       `jogador ${save?.playerName} · ` +
         (save?.party.map((p) => `#${p.national} ${p.nickname} nv${p.level}`).join(", ") ||

@@ -85,6 +85,55 @@ const OFF_DEX_VISTOS = 0x5c;
 /** 52 bytes guardam 416 bits; só 386 são pokémon. */
 const TOTAL_DA_DEX = 386;
 
+/**
+ * O treinador, medido no save real de Emerald (ZE, 0h45m50s, em Oldale).
+ *
+ * Na seção 0: gênero em 0x08; TID e SID em 0x0A e 0x0C — 45125 e 47784, os
+ * mesmos do OT gravado no Mudkip do time, que é uma fonte independente; tempo
+ * de jogo em 0x0E (u16 horas), 0x10 (min), 0x11 (s).
+ *
+ * Em 0xAC, a chave de segurança de Emerald. O dinheiro, em SaveBlock1 0x490,
+ * vem cifrado com ela: o valor bruto era 1.821.742.666, e com o XOR deu 3300 —
+ * os 3000 do começo de jogo mais o que se ganha em batalha. Ruby/Sapphire
+ * gravam 0 em 0xAC e FR/LG gravam 1; neles o layout é outro e nada disto vale.
+ */
+const OFF_GENERO = 0x08;
+const OFF_TID = 0x0a;
+const OFF_SID = 0x0c;
+const OFF_HORAS = 0x0e;
+const OFF_MINUTOS = 0x10;
+const OFF_SEGUNDOS = 0x11;
+const OFF_CHAVE_DE_SEGURANCA = 0xac;
+const OFF_DINHEIRO = 0x490;
+/** Grupo e número do mapa. Medido: 0 e 10, Oldale Town — onde o save foi feito. */
+const OFF_MAPA = 0x04;
+
+/**
+ * As flags do jogo começam em SaveBlock1 0x1270, uma por bit. Medido na
+ * vizinhança das insígnias: 0x860 (tem pokémon) e 0x861 (tem Pokédex) ligadas,
+ * 0x862 (PokéNav) desligada, as oito insígnias 0x867–0x86E desligadas e
+ * 0x86F (visitou Littleroot) e 0x870 (visitou Oldale) ligadas — exatamente o
+ * começo de Emerald, com as insígnias entre flags que se confirmaram.
+ */
+const OFF_FLAGS = 0x1270;
+const FLAG_PRIMEIRA_INSIGNIA = 0x867;
+const FLAG_PRIMEIRA_CIDADE = 0x86f;
+const INSIGNIAS = 8;
+const CIDADES = 16;
+
+/**
+ * As caixas do PC: seções 5 a 13 juntas. Um u32 com a caixa atual, 14 caixas ×
+ * 30 registros de 80 bytes, e depois os 14 nomes de 9 bytes — medidos: "BOX1"
+ * a "BOX14". O registro de caixa é o do time sem os 20 bytes finais.
+ */
+const SECOES_DO_PC = [5, 6, 7, 8, 9, 10, 11, 12, 13];
+const CAIXAS = 14;
+const POR_CAIXA = 30;
+const TAMANHO_NA_CAIXA = 80;
+const OFF_PRIMEIRA_CAIXA = 4;
+const OFF_NOMES_DAS_CAIXAS = OFF_PRIMEIRA_CAIXA + CAIXAS * POR_CAIXA * TAMANHO_NA_CAIXA;
+const TAMANHO_DO_NOME_DA_CAIXA = 9;
+
 const OFF_PV = 0x00;
 const OFF_OTID = 0x04;
 const OFF_APELIDO = 0x08;
@@ -169,6 +218,35 @@ export interface Gen3PartyMember {
   shiny: boolean;
   /** Qual das (até) duas habilidades comuns da espécie. */
   abilitySlot: 0 | 1;
+  /** O PV não muda ao evoluir: é o que identifica o mesmo pokémon entre saves. */
+  personality: number;
+}
+
+export interface Gen3Trainer {
+  gender: "male" | "female";
+  trainerId: number;
+  secretId: number;
+  playTime: { hours: number; minutes: number; seconds: number };
+  money: number;
+  /** As oito insígnias de Hoenn, na ordem dos ginásios. */
+  badges: boolean[];
+  /** Índices, na ordem das flags de cidade visitada, das já visitadas. */
+  visitedTowns: number[];
+  /** Grupo e número do mapa onde o jogo foi salvo. */
+  location: { group: number; num: number };
+}
+
+export interface Gen3BoxMon {
+  slot: number;
+  national: number;
+  nickname: string;
+  personality: number;
+}
+
+export interface Gen3Storage {
+  /** Caixa aberta por último, 0..13. */
+  current: number;
+  boxes: { name: string; pokemon: Gen3BoxMon[] }[];
 }
 
 export interface Gen3StatSpread {
@@ -191,6 +269,9 @@ export interface Gen3Save {
   party: Gen3PartyMember[];
   /** `null` quando os bits não passam na sanidade — ver `lerDex`. */
   pokedex: Gen3Pokedex | null;
+  /** `null` fora de Emerald: só ele foi medido. */
+  trainer: Gen3Trainer | null;
+  boxes: Gen3Storage | null;
 }
 
 function lerTexto(bytes: Uint8Array, offset: number, tamanho: number): string {
@@ -253,6 +334,115 @@ function lerDex(bytes: Uint8Array, secao0: number): Gen3Pokedex | null {
   return { seen, owned };
 }
 
+interface Registro {
+  pv: number;
+  otid: number;
+  claro: DataView;
+  ordem: string;
+  national: number;
+  nickname: string;
+}
+
+/**
+ * Decifra os primeiros 80 bytes de um registro — a parte comum a time e caixa.
+ * `null` para slot vazio, checksum que não bate ou espécie desconhecida:
+ * melhor pular do que inventar um pokémon.
+ */
+function decifrarRegistro(dados: Uint8Array, off: number): Registro | null {
+  const v = new DataView(dados.buffer, dados.byteOffset, dados.byteLength);
+  const pv = v.getUint32(off + OFF_PV, true);
+  const otid = v.getUint32(off + OFF_OTID, true);
+  const chave = (pv ^ otid) >>> 0;
+
+  const claro = new DataView(new ArrayBuffer(TAMANHO_CIFRADO));
+  for (let w = 0; w * 4 < TAMANHO_CIFRADO; w++) {
+    const cifrado = v.getUint32(off + OFF_CIFRADO + w * 4, true);
+    claro.setUint32(w * 4, (cifrado ^ chave) >>> 0, true);
+  }
+
+  // Soma u16 sobre os 48 bytes decifrados. Se não bater, a chave ou a leitura
+  // estão erradas e o registro não vale.
+  let soma = 0;
+  for (let p = 0; p < TAMANHO_CIFRADO; p += 2) {
+    soma = (soma + claro.getUint16(p, true)) & 0xffff;
+  }
+  if (soma !== v.getUint16(off + OFF_CHECKSUM_DO_REGISTRO, true)) return null;
+
+  const ordem = ORDENS[pv % 24];
+  const national = nationalFromGen3Species(claro.getUint16(ordem.indexOf("G") * 12, true));
+  if (national === undefined) return null;
+
+  return {
+    pv,
+    otid,
+    claro,
+    ordem,
+    national,
+    nickname: lerTexto(dados, off + OFF_APELIDO, TAMANHO_DO_APELIDO),
+  };
+}
+
+/** Junta seções pelo id, na ordem pedida. `null` se faltar alguma. */
+function juntarSecoes(
+  bytes: Uint8Array,
+  secoes: Map<number, number>,
+  ids: number[]
+): Uint8Array | null {
+  const out = new Uint8Array(ids.length * DADOS_POR_SETOR);
+  for (let i = 0; i < ids.length; i++) {
+    const base = secoes.get(ids[i]);
+    if (base === undefined) return null;
+    out.set(bytes.subarray(base, base + DADOS_POR_SETOR), i * DADOS_POR_SETOR);
+  }
+  return out;
+}
+
+function lerTreinador(
+  view: DataView,
+  bytes: Uint8Array,
+  secao0: number,
+  sb1: Uint8Array
+): Gen3Trainer | null {
+  const chave = view.getUint32(secao0 + OFF_CHAVE_DE_SEGURANCA, true);
+  if (chave === 0 || chave === 1) return null;
+
+  const vb1 = new DataView(sb1.buffer, sb1.byteOffset, sb1.byteLength);
+  const flag = (f: number) => ((sb1[OFF_FLAGS + (f >> 3)] ?? 0) >> (f & 7)) & 1;
+  const visitedTowns: number[] = [];
+  for (let i = 0; i < CIDADES; i++) if (flag(FLAG_PRIMEIRA_CIDADE + i)) visitedTowns.push(i);
+
+  return {
+    gender: bytes[secao0 + OFF_GENERO] === 1 ? "female" : "male",
+    trainerId: view.getUint16(secao0 + OFF_TID, true),
+    secretId: view.getUint16(secao0 + OFF_SID, true),
+    playTime: {
+      hours: view.getUint16(secao0 + OFF_HORAS, true),
+      minutes: bytes[secao0 + OFF_MINUTOS] ?? 0,
+      seconds: bytes[secao0 + OFF_SEGUNDOS] ?? 0,
+    },
+    money: (vb1.getUint32(OFF_DINHEIRO, true) ^ chave) >>> 0,
+    badges: Array.from({ length: INSIGNIAS }, (_, i) => flag(FLAG_PRIMEIRA_INSIGNIA + i) === 1),
+    visitedTowns,
+    location: { group: sb1[OFF_MAPA] ?? 0, num: sb1[OFF_MAPA + 1] ?? 0 },
+  };
+}
+
+function lerCaixas(pc: Uint8Array): Gen3Storage {
+  const v = new DataView(pc.buffer, pc.byteOffset, pc.byteLength);
+  const boxes: Gen3Storage["boxes"] = [];
+  for (let c = 0; c < CAIXAS; c++) {
+    const pokemon: Gen3BoxMon[] = [];
+    for (let slot = 0; slot < POR_CAIXA; slot++) {
+      const off = OFF_PRIMEIRA_CAIXA + (c * POR_CAIXA + slot) * TAMANHO_NA_CAIXA;
+      const r = decifrarRegistro(pc, off);
+      if (r) pokemon.push({ slot, national: r.national, nickname: r.nickname, personality: r.pv });
+    }
+    const nome = OFF_NOMES_DAS_CAIXAS + c * TAMANHO_DO_NOME_DA_CAIXA;
+    boxes.push({ name: lerTexto(pc, nome, TAMANHO_DO_NOME_DA_CAIXA), pokemon });
+  }
+  return { current: v.getUint32(0, true), boxes };
+}
+
 /**
  * Lê o time e a dex do jogador. Devolve `null` quando os bytes não são um save de Gen 3
  * reconhecível — inclusive quando são flash virgem, que é o caso mais comum.
@@ -284,12 +474,8 @@ export function parseGen3Save(bytes: Uint8Array): Gen3Save | null {
 
   // SaveBlock1 é montado juntando as quatro seções: o time atravessa a
   // fronteira entre elas, então ler seção por seção partiria registros ao meio.
-  const sb1 = new Uint8Array(SECOES_DO_SAVEBLOCK1.length * DADOS_POR_SETOR);
-  for (let i = 0; i < SECOES_DO_SAVEBLOCK1.length; i++) {
-    const base = atual.secoes.get(SECOES_DO_SAVEBLOCK1[i]);
-    if (base === undefined) return null;
-    sb1.set(bytes.subarray(base, base + DADOS_POR_SETOR), i * DADOS_POR_SETOR);
-  }
+  const sb1 = juntarSecoes(bytes, atual.secoes, SECOES_DO_SAVEBLOCK1);
+  if (!sb1) return null;
   const vb1 = new DataView(sb1.buffer, sb1.byteOffset, sb1.byteLength);
 
   const contagem = vb1.getUint32(OFF_CONTAGEM_DO_TIME, true);
@@ -299,31 +485,11 @@ export function parseGen3Save(bytes: Uint8Array): Gen3Save | null {
   for (let slot = 0; slot < contagem; slot++) {
     const off = OFF_PRIMEIRO_DO_TIME + slot * TAMANHO_DO_REGISTRO;
     if (off + TAMANHO_DO_REGISTRO > sb1.length) break;
+    const r = decifrarRegistro(sb1, off);
+    if (!r) continue;
+    const { pv, otid, claro, ordem } = r;
 
-    const pv = vb1.getUint32(off + OFF_PV, true);
-    const otid = vb1.getUint32(off + OFF_OTID, true);
-    const chave = (pv ^ otid) >>> 0;
-
-    const claro = new DataView(new ArrayBuffer(TAMANHO_CIFRADO));
-    for (let w = 0; w * 4 < TAMANHO_CIFRADO; w++) {
-      const cifrado = vb1.getUint32(off + OFF_CIFRADO + w * 4, true);
-      claro.setUint32(w * 4, (cifrado ^ chave) >>> 0, true);
-    }
-
-    // Soma u16 sobre os 48 bytes decifrados. Se não bater, a chave ou a leitura
-    // estão erradas e o registro não vale — melhor pular do que inventar um
-    // pokémon.
-    let soma = 0;
-    for (let p = 0; p < TAMANHO_CIFRADO; p += 2) {
-      soma = (soma + claro.getUint16(p, true)) & 0xffff;
-    }
-    if (soma !== vb1.getUint16(off + OFF_CHECKSUM_DO_REGISTRO, true)) continue;
-
-    const ordem = ORDENS[pv % 24];
     const G = ordem.indexOf("G") * 12;
-    const national = nationalFromGen3Species(claro.getUint16(G, true));
-    if (national === undefined) continue;
-
     const A = ordem.indexOf("A") * 12;
     const E = ordem.indexOf("E") * 12;
     const M = ordem.indexOf("M") * 12;
@@ -344,8 +510,8 @@ export function parseGen3Save(bytes: Uint8Array): Gen3Save | null {
 
     party.push({
       slot,
-      national,
-      nickname: lerTexto(sb1, off + OFF_APELIDO, TAMANHO_DO_APELIDO),
+      national: r.national,
+      nickname: r.nickname,
       level: sb1[off + OFF_NIVEL] ?? 0,
       nature: pv % 25,
       // A ordem do jogo põe a velocidade antes dos especiais.
@@ -364,8 +530,17 @@ export function parseGen3Save(bytes: Uint8Array): Gen3Save | null {
       },
       shiny: (tid ^ sid ^ (pv >>> 16) ^ (pv & 0xffff)) < 8,
       abilitySlot: (palavraIv >>> 31) as 0 | 1,
+      personality: pv,
     });
   }
 
-  return { playerName, party, pokedex: lerDex(bytes, secao0) };
+  const pc = juntarSecoes(bytes, atual.secoes, SECOES_DO_PC);
+
+  return {
+    playerName,
+    party,
+    pokedex: lerDex(bytes, secao0),
+    trainer: lerTreinador(view, bytes, secao0, sb1),
+    boxes: pc ? lerCaixas(pc) : null,
+  };
 }
