@@ -45,6 +45,14 @@ interface Membro {
   nivel: number;
   pv?: number;
   otid?: number;
+  /** Ordem do jogo: hp, atq, def, vel, atq esp, def esp. */
+  ivs?: number[];
+  evs?: number[];
+  golpes?: { id: number; pp: number }[];
+  amizade?: number;
+  habilidade?: 0 | 1;
+  /** hp atual, hp máximo, atq, def, vel, atq esp, def esp — fora da cifra. */
+  status?: number[];
 }
 
 function montarSave(opts: {
@@ -81,8 +89,24 @@ function montarSave(opts: {
     // Monta os 48 bytes em claro, com a espécie na subestrutura de crescimento,
     // e só então cifra com PV ^ OTID.
     const claro = new DataView(new ArrayBuffer(48));
-    const posG = ORDENS[pv % 24].indexOf("G");
-    claro.setUint16(posG * 12, m.indice, true);
+    const ordem = ORDENS[pv % 24];
+    const G = ordem.indexOf("G") * 12;
+    const A = ordem.indexOf("A") * 12;
+    const E = ordem.indexOf("E") * 12;
+    const M = ordem.indexOf("M") * 12;
+    claro.setUint16(G, m.indice, true);
+    claro.setUint8(G + 9, m.amizade ?? 0);
+    (m.golpes ?? []).forEach((g, i) => {
+      claro.setUint16(A + i * 2, g.id, true);
+      claro.setUint8(A + 8 + i, g.pp);
+    });
+    (m.evs ?? []).forEach((ev, i) => claro.setUint8(E + i, ev));
+    let ivs = 0;
+    (m.ivs ?? []).forEach((iv, i) => (ivs |= iv << (i * 5)));
+    if (m.habilidade) ivs |= 1 << 31;
+    claro.setUint32(M + 4, ivs >>> 0, true);
+    const offStatus = [0x56, 0x58, 0x5a, 0x5c, 0x5e, 0x60, 0x62];
+    (m.status ?? []).forEach((s, i) => vb1.setUint16(off + offStatus[i], s, true));
 
     let soma = 0;
     for (let p = 0; p < 48; p += 2) soma = (soma + claro.getUint16(p, true)) & 0xffff;
@@ -140,7 +164,7 @@ describe("parseGen3Save", () => {
     const save = parseGen3Save(montarSave({ nome: "ZE", time: [MUDKIP] }));
     expect(save).not.toBeNull();
     expect(save?.playerName).toBe("ZE");
-    expect(save?.party).toEqual([
+    expect(save?.party).toMatchObject([
       { slot: 0, national: 258, nickname: "MUDKIP", level: 5 },
     ]);
   });
@@ -297,5 +321,73 @@ describe("parseGen3Save", () => {
     expect(save).not.toBeNull();
     expect(save?.party[0]?.national).toBe(258);
     expect(save?.pokedex).toBeNull();
+  });
+
+  // ---- a ficha de cada membro
+
+  /**
+   * O Mudkip do save real, campo por campo. Os status gravados fecharam com a
+   * fórmula de Gen 3 usando estes IVs, EVs e a natureza Timid — é o que prova
+   * a ordem dos IVs e EVs (hp, atq, def, vel, atq esp, def esp).
+   */
+  const MUDKIP_REAL = {
+    ...MUDKIP,
+    nivel: 8,
+    ivs: [24, 1, 0, 0, 6, 13],
+    evs: [2, 3, 0, 4, 0, 0],
+    golpes: [
+      { id: 33, pp: 35 },
+      { id: 45, pp: 40 },
+      { id: 189, pp: 10 },
+    ],
+    amizade: 87,
+    status: [27, 27, 14, 13, 12, 13, 14],
+  };
+
+  it("lê natureza, IVs, EVs, golpes, amizade e status", () => {
+    const [m] = parseGen3Save(montarSave({ nome: "ZE", time: [MUDKIP_REAL] }))?.party ?? [];
+    expect(m).toMatchObject({
+      nature: 10,
+      ivs: { hp: 24, atk: 1, def: 0, spe: 0, spa: 6, spd: 13 },
+      evs: { hp: 2, atk: 3, def: 0, spe: 4, spa: 0, spd: 0 },
+      moves: [
+        { id: 33, pp: 35 },
+        { id: 45, pp: 40 },
+        { id: 189, pp: 10 },
+      ],
+      friendship: 87,
+      stats: { hp: 27, maxHp: 27, atk: 14, def: 13, spe: 12, spa: 13, spd: 14 },
+      shiny: false,
+      abilitySlot: 0,
+    });
+  });
+
+  it("golpe vazio não entra na lista", () => {
+    const [m] = parseGen3Save(montarSave({ nome: "ZE", time: [MUDKIP_REAL] }))?.party ?? [];
+    expect(m?.moves).toHaveLength(3);
+  });
+
+  it("lê o segundo slot de habilidade", () => {
+    const [m] =
+      parseGen3Save(montarSave({ nome: "ZE", time: [{ ...MUDKIP, habilidade: 1 }] }))?.party ?? [];
+    expect(m?.abilitySlot).toBe(1);
+  });
+
+  /** IV 31 em tudo usa os 30 bits inteiros: nenhum campo pode vazar no vizinho. */
+  it("IVs máximos não vazam entre campos", () => {
+    const [m] =
+      parseGen3Save(
+        montarSave({ nome: "ZE", time: [{ ...MUDKIP, ivs: [31, 31, 31, 31, 31, 31], habilidade: 1 }] })
+      )?.party ?? [];
+    expect(m?.ivs).toEqual({ hp: 31, atk: 31, def: 31, spe: 31, spa: 31, spd: 31 });
+    expect(m?.abilitySlot).toBe(1);
+  });
+
+  /** Shiny em Gen 3: TID ^ SID ^ metade alta do PV ^ metade baixa < 8. */
+  it("reconhece shiny", () => {
+    const shiny = { ...MUDKIP, pv: 0x00010002, otid: 0x00000003 };
+    const [m] = parseGen3Save(montarSave({ nome: "ZE", time: [shiny] }))?.party ?? [];
+    expect(m?.national).toBe(258);
+    expect(m?.shiny).toBe(true);
   });
 });

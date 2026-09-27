@@ -94,6 +94,24 @@ const OFF_CIFRADO = 0x20;
 const TAMANHO_CIFRADO = 48;
 /** Medido na fixture: 5, num Mudkip inicial, com HP 21/21 logo em seguida. */
 const OFF_NIVEL = 0x54;
+/**
+ * Depois do nível vêm os status já calculados, u16 cada: HP atual, HP máximo,
+ * atq, def, vel, atq esp, def esp. Medido num Mudkip nv 8: 27/27, 14, 13, 12,
+ * 13, 14 — e esses números fecharam com a fórmula de Gen 3 aplicada aos IVs,
+ * EVs e natureza lidos abaixo, os seis. É essa conta que prova a ordem.
+ */
+const OFF_HP_ATUAL = 0x56;
+const OFF_STATUS = [0x58, 0x5a, 0x5c, 0x5e, 0x60, 0x62];
+
+/**
+ * Dentro das subestruturas decifradas. Medido no mesmo Mudkip: amizade 87;
+ * golpes 33, 45, 189 (Tackle, Growl, Mud-Slap) com PP 35, 40, 10; EVs e IVs na
+ * ordem hp, atq, def, vel, atq esp, def esp — 5 bits por IV, e o bit 31 da
+ * palavra é o slot de habilidade.
+ */
+const OFF_G_AMIZADE = 9;
+const OFF_A_PP = 8;
+const OFF_M_IVS = 4;
 
 /**
  * As 24 ordens possíveis das quatro subestruturas de 12 bytes.
@@ -139,6 +157,27 @@ export interface Gen3PartyMember {
   /** Apelido como está gravado — costuma ser o nome da espécie em maiúsculas. */
   nickname: string;
   level: number;
+  /** 0..24, `PV % 25`. O nome e o efeito ficam em `lib/gen3Stats`. */
+  nature: number;
+  ivs: Gen3StatSpread;
+  evs: Gen3StatSpread;
+  /** Só os slots ocupados. `id` é o número do golpe, igual ao da PokéAPI. */
+  moves: { id: number; pp: number }[];
+  friendship: number;
+  /** Os status como o jogo calculou e gravou — o registro de time os guarda. */
+  stats: Gen3StatSpread & { maxHp: number };
+  shiny: boolean;
+  /** Qual das (até) duas habilidades comuns da espécie. */
+  abilitySlot: 0 | 1;
+}
+
+export interface Gen3StatSpread {
+  hp: number;
+  atk: number;
+  def: number;
+  spa: number;
+  spd: number;
+  spe: number;
 }
 
 /** Números nacionais, em ordem crescente. `owned` está sempre contido em `seen`. */
@@ -281,15 +320,50 @@ export function parseGen3Save(bytes: Uint8Array): Gen3Save | null {
     if (soma !== vb1.getUint16(off + OFF_CHECKSUM_DO_REGISTRO, true)) continue;
 
     const ordem = ORDENS[pv % 24];
-    const indice = claro.getUint16(ordem.indexOf("G") * 12, true);
-    const national = nationalFromGen3Species(indice);
+    const G = ordem.indexOf("G") * 12;
+    const national = nationalFromGen3Species(claro.getUint16(G, true));
     if (national === undefined) continue;
+
+    const A = ordem.indexOf("A") * 12;
+    const E = ordem.indexOf("E") * 12;
+    const M = ordem.indexOf("M") * 12;
+
+    const moves: { id: number; pp: number }[] = [];
+    for (let i = 0; i < 4; i++) {
+      const id = claro.getUint16(A + i * 2, true);
+      if (id !== 0) moves.push({ id, pp: claro.getUint8(A + OFF_A_PP + i) });
+    }
+
+    const palavraIv = claro.getUint32(M + OFF_M_IVS, true);
+    const iv = (i: number) => (palavraIv >>> (i * 5)) & 31;
+    const ev = (i: number) => claro.getUint8(E + i);
+    const status = OFF_STATUS.map((o) => vb1.getUint16(off + o, true));
+
+    const tid = otid & 0xffff;
+    const sid = otid >>> 16;
 
     party.push({
       slot,
       national,
       nickname: lerTexto(sb1, off + OFF_APELIDO, TAMANHO_DO_APELIDO),
       level: sb1[off + OFF_NIVEL] ?? 0,
+      nature: pv % 25,
+      // A ordem do jogo põe a velocidade antes dos especiais.
+      ivs: { hp: iv(0), atk: iv(1), def: iv(2), spe: iv(3), spa: iv(4), spd: iv(5) },
+      evs: { hp: ev(0), atk: ev(1), def: ev(2), spe: ev(3), spa: ev(4), spd: ev(5) },
+      moves,
+      friendship: claro.getUint8(G + OFF_G_AMIZADE),
+      stats: {
+        hp: vb1.getUint16(off + OFF_HP_ATUAL, true),
+        maxHp: status[0],
+        atk: status[1],
+        def: status[2],
+        spe: status[3],
+        spa: status[4],
+        spd: status[5],
+      },
+      shiny: (tid ^ sid ^ (pv >>> 16) ^ (pv & 0xffff)) < 8,
+      abilitySlot: (palavraIv >>> 31) as 0 | 1,
     });
   }
 
