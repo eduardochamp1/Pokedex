@@ -9,6 +9,7 @@
  * Sem ler esse diretorio a UI so descobre que um slot esta vazio DEPOIS de
  * clicar em "carregar" e o core devolver false. Aqui a tela passa a dizer antes.
  */
+import { getLang, type Lang } from "../i18n/lang";
 import { SAVE_STATE_SLOTS, type SaveStateSlot, type mGBAEmulator } from "./types";
 
 /** Uma entrada crua do diretorio de estados. */
@@ -86,17 +87,24 @@ export function slotsForRom(
 }
 
 /** "agora", "3 min", "2 h", "12/03 14:07" — cabe na etiqueta estreita do slot. */
-export function describeAge(modified: number | undefined, now: number): string {
-  if (modified === undefined) return "gravado";
+export function describeAge(
+  modified: number | undefined,
+  now: number,
+  lang: Lang = getLang()
+): string {
+  const en = lang === "en";
+  if (modified === undefined) return en ? "saved" : "gravado";
   const diff = now - modified;
-  if (diff < 60_000) return "agora";
+  if (diff < 60_000) return en ? "now" : "agora";
   if (diff < 3_600_000) return `${Math.floor(diff / 60_000)} min`;
   if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)} h`;
   const d = new Date(modified);
   const pad = (n: number) => String(n).padStart(2, "0");
-  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)} ${pad(d.getHours())}:${pad(
-    d.getMinutes()
-  )}`;
+  // Dia/mês em português, mês/dia em inglês.
+  const data = en
+    ? `${pad(d.getMonth() + 1)}/${pad(d.getDate())}`
+    : `${pad(d.getDate())}/${pad(d.getMonth() + 1)}`;
+  return `${data} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 /**

@@ -1,3 +1,4 @@
+import { getLang, tr } from "../i18n/lang";
 import { computeScale, HUMAN_HEIGHT_DM } from "../lib/sizeScale";
 import type { Slot } from "../lib/comparatorStore";
 
@@ -58,7 +59,7 @@ const SizeCanvas = ({ items, height = 420 }: Props) => {
         className="size-canvas"
         viewBox={`0 0 ${width} ${height}`}
         role="img"
-        aria-label="Comparação de tamanho"
+        aria-label={tr(getLang(), "Comparação de tamanho", "Size comparison")}
       >
       {/* Régua vertical */}
       <line
@@ -178,7 +179,7 @@ const SizeCanvas = ({ items, height = 420 }: Props) => {
           fontSize={9}
           textAnchor="start"
         >
-          escala não linear abaixo de 30cm
+          {tr(getLang(), "escala não linear abaixo de 30cm", "non-linear scale below 30cm")}
         </text>
       )}
       </svg>

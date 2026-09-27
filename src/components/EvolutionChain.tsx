@@ -1,5 +1,6 @@
 import { useQueries } from "@tanstack/react-query";
 import { evolutionConditionText } from "../lib/evolution";
+import { getLang, tr } from "../i18n/lang";
 import { Link } from "react-router-dom";
 import { searchPokemon } from "../api";
 import Card from "./Card";
@@ -22,7 +23,7 @@ const EvolutionChain = ({ steps, currentName }: Props) => {
   });
 
   if (steps.length <= 1)
-    return <p className="detail-muted">Esse pokémon não evolui.</p>;
+    return <p className="detail-muted">{tr(getLang(), "Esse pokémon não evolui.", "This Pokémon doesn't evolve.")}</p>;
 
   return (
     <div className="evo-chain">

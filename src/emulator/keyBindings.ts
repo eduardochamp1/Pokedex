@@ -46,6 +46,13 @@ export const GROUP_LABELS: Record<KeyBinding["group"], string> = {
   sistema: "Sistema",
 };
 
+export const GROUP_LABELS_EN: Record<KeyBinding["group"], string> = {
+  direcional: "D-pad",
+  acao: "Action",
+  ombro: "Shoulder",
+  sistema: "System",
+};
+
 /** Botões do gamepad virtual (toque), na ordem em que aparecem na tela. */
 export const TOUCH_BUTTONS = [
   { button: "Up", label: "↑", area: "up" },

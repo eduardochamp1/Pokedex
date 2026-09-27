@@ -29,27 +29,39 @@ export type ScaleMode = "auto" | "integer" | "fit" | 1 | 2 | 3 | 4;
  */
 const INTEGER_WORTH_IT = 2;
 
-export const SCALE_MODES: { id: ScaleMode; label: string; title: string }[] = [
+export const SCALE_MODES: {
+  id: ScaleMode;
+  label: string;
+  labelEn: string;
+  title: string;
+  titleEn: string;
+}[] = [
   {
     id: "auto",
     label: "Auto",
+    labelEn: "Auto",
     title:
       "Escala inteira quando cabe 2× ou mais; abaixo disso preenche, para não desperdiçar a tela",
+    titleEn: "Integer scale when 2× or more fits; below that it fills, so the screen isn't wasted",
   },
   {
     id: "integer",
     label: "Nítido",
+    labelEn: "Sharp",
     title: "Maior escala inteira que cabe — cada pixel do jogo vira N pixels exatos",
+    titleEn: "Largest integer scale that fits — each game pixel becomes exactly N pixels",
   },
   {
     id: "fit",
     label: "Preencher",
+    labelEn: "Fill",
     title: "Usa toda a altura disponível, mesmo com escala fracionária",
+    titleEn: "Uses all the available height, even with a fractional scale",
   },
-  { id: 1, label: "1×", title: "Resolução nativa" },
-  { id: 2, label: "2×", title: "Dobro da resolução nativa" },
-  { id: 3, label: "3×", title: "Três vezes a resolução nativa" },
-  { id: 4, label: "4×", title: "Quatro vezes a resolução nativa" },
+  { id: 1, label: "1×", labelEn: "1×", title: "Resolução nativa", titleEn: "Native resolution" },
+  { id: 2, label: "2×", labelEn: "2×", title: "Dobro da resolução nativa", titleEn: "Twice the native resolution" },
+  { id: 3, label: "3×", labelEn: "3×", title: "Três vezes a resolução nativa", titleEn: "Three times the native resolution" },
+  { id: 4, label: "4×", labelEn: "4×", title: "Quatro vezes a resolução nativa", titleEn: "Four times the native resolution" },
 ];
 
 export interface Size {

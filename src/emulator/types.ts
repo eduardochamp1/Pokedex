@@ -1,3 +1,4 @@
+import { getLang, type Lang } from "../i18n/lang";
 import type { mGBAEmulator as mGBABase } from "@thenick775/mgba-wasm";
 
 /**
@@ -20,6 +21,7 @@ export type mGBAEmulator = mGBABase & {
 export const SUPPORTED_EXTENSIONS = [".gb", ".gbc", ".gba"] as const;
 
 export const SUPPORTED_LABEL = "GB, GBC e GBA";
+export const SUPPORTED_LABEL_EN = "GB, GBC and GBA";
 
 /** Quantos slots de save state a UI oferece. */
 export const SAVE_STATE_SLOTS = [1, 2, 3, 4, 5, 6] as const;
@@ -68,10 +70,10 @@ export function isSupportedRom(fileName: string): boolean {
 }
 
 /** Rotulo legivel do console, a partir da extensao. */
-export function consoleOf(fileName: string): string {
+export function consoleOf(fileName: string, lang: Lang = getLang()): string {
   const lower = fileName.toLowerCase();
   if (lower.endsWith(".gba")) return "Game Boy Advance";
   if (lower.endsWith(".gbc")) return "Game Boy Color";
   if (lower.endsWith(".gb")) return "Game Boy";
-  return "desconhecido";
+  return lang === "en" ? "unknown" : "desconhecido";
 }

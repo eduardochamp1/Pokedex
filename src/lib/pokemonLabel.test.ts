@@ -34,3 +34,11 @@ describe("pokemonLabel", () => {
     expect(pokemonLabel("  Pikachu  ")).toBe("Pikachu");
   });
 });
+
+describe("pokemonLabel em inglês", () => {
+  it("forma regional vira adjetivo antes do nome", () => {
+    expect(pokemonLabel("vulpix-alola", "en")).toBe("Alolan Vulpix");
+    expect(pokemonLabel("zorua-hisui", "en")).toBe("Hisuian Zorua");
+    expect(pokemonLabel("vulpix-alola", "pt")).toBe("Vulpix de Alola");
+  });
+});

@@ -1,3 +1,4 @@
+import { getLang, type Lang } from "../i18n/lang";
 /**
  * Rótulo legível para um pokémon guardado pelo slug da API.
  *
@@ -29,26 +30,30 @@ const EXCECOES: Record<string, string> = {
   "nidoran-m": "Nidoran ♂",
 };
 
-/** Sufixo de forma regional: é o nome de uma região, não do bicho. */
-const REGIONAIS: Record<string, string> = {
-  alola: "de Alola",
-  galar: "de Galar",
-  hisui: "de Hisui",
-  paldea: "de Paldea",
+/**
+ * Forma regional: é o nome de uma região, não do bicho. Em português vem
+ * depois ("Vulpix de Alola"); em inglês, como adjetivo antes ("Alolan Vulpix").
+ */
+const REGIONAIS: Record<string, [string, string]> = {
+  alola: ["de Alola", "Alolan"],
+  galar: ["de Galar", "Galarian"],
+  hisui: ["de Hisui", "Hisuian"],
+  paldea: ["de Paldea", "Paldean"],
 };
 
 const maiuscula = (parte: string) =>
   parte.charAt(0).toUpperCase() + parte.slice(1);
 
-export function pokemonLabel(slug: string): string {
+export function pokemonLabel(slug: string, lang: Lang = getLang()): string {
   const limpo = slug.toLowerCase().trim();
   if (!limpo) return "";
   if (EXCECOES[limpo]) return EXCECOES[limpo];
 
   const partes = limpo.split("-");
-  const sufixo = REGIONAIS[partes[partes.length - 1]];
-  if (partes.length > 1 && sufixo) {
-    return `${partes.slice(0, -1).map(maiuscula).join(" ")} ${sufixo}`;
+  const regional = REGIONAIS[partes[partes.length - 1]];
+  if (partes.length > 1 && regional) {
+    const nome = partes.slice(0, -1).map(maiuscula).join(" ");
+    return lang === "en" ? `${regional[1]} ${nome}` : `${nome} ${regional[0]}`;
   }
   return partes.map(maiuscula).join(" ");
 }

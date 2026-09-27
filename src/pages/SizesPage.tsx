@@ -4,15 +4,16 @@ import { searchPokemon } from "../api";
 import SizeCanvas from "../components/SizeCanvas";
 import { add, clear, useComparator } from "../lib/comparatorStore";
 import { parseTamanhosParams, toSearchParams } from "../lib/tamanhosParams";
+import { useT } from "../i18n/lang";
 
-const PRESETS: { title: string; names: string[] }[] = [
-  { title: "Wailord vs Joltik", names: ["wailord", "joltik"] },
+const PRESETS: { title: [string, string]; names: string[] }[] = [
+  { title: ["Wailord vs Joltik", "Wailord vs Joltik"], names: ["wailord", "joltik"] },
   {
-    title: "Lendários de Kanto",
+    title: ["Lendários de Kanto", "Kanto legendaries"],
     names: ["articuno", "zapdos", "moltres", "mewtwo"],
   },
   {
-    title: "Do menor ao maior",
+    title: ["Do menor ao maior", "Smallest to largest"],
     names: ["joltik", "pikachu", "charizard", "onix", "wailord"],
   },
 ];
@@ -37,6 +38,7 @@ const SizesPage = () => {
   const [params, setParams] = useSearchParams();
   const cart = useComparator();
   const hydrated = useRef(false);
+  const t = useT();
 
   // Sincroniza URL -> cart no mount
   useEffect(() => {
@@ -71,31 +73,34 @@ const SizesPage = () => {
 
   return (
     <div className="sizes-page">
-      <h2>Comparador de tamanho</h2>
+      <h2>{t("Comparador de tamanho", "Size comparison")}</h2>
       {cart.length === 0 ? (
         <div className="sizes-empty">
-          <p>Escolha uma comparação pra começar:</p>
+          <p>{t("Escolha uma comparação pra começar:", "Pick a comparison to start:")}</p>
           <div className="sizes-presets">
             {PRESETS.map((p) => (
               <button
-                key={p.title}
+                key={p.title[0]}
                 type="button"
                 onClick={() => loadPreset(p.names)}
               >
-                {p.title}
+                {t(...p.title)}
               </button>
             ))}
           </div>
           <p className="sizes-hint">
-            Ou adicione pokémons a partir da listagem clicando no botão 📏 de cada card.
+            {t(
+              "Ou adicione pokémons a partir da listagem clicando no botão 📏 de cada card.",
+              "Or add Pokémon from the list by clicking the 📏 button on each card."
+            )}
           </p>
         </div>
       ) : (
         <>
           <SizeCanvas items={cart} />
           <div className="sizes-actions">
-            <button type="button" onClick={share}>Copiar link</button>
-            <button type="button" onClick={clear}>Limpar</button>
+            <button type="button" onClick={share}>{t("Copiar link", "Copy link")}</button>
+            <button type="button" onClick={clear}>{t("Limpar", "Clear")}</button>
           </div>
         </>
       )}
