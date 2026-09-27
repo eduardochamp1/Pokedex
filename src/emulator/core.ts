@@ -121,6 +121,21 @@ export function getCore(): Promise<mGBAEmulator> {
 }
 
 /**
+ * Liga ou desliga o teclado do jogo, **se** já existe um core com jogo.
+ *
+ * Para sobreposições como a busca (Ctrl+K): o core recebe as teclas pelo SDL
+ * do Emscripten, que não sabe de campo de texto nenhum — digitar "mudkip" na
+ * busca andaria com o personagem, e o Enter apertaria Start. Nunca cria o
+ * core: abrir a busca na Home não pode baixar 2 MB de emulador.
+ */
+export function setGameKeyboard(enabled: boolean): void {
+  if (!corePromise || !loadedRom) return;
+  corePromise.then((core) => core.toggleInput(enabled)).catch(() => {
+    // sem core não há teclado a ligar
+  });
+}
+
+/**
  * ROM carregada no core, se houver.
  *
  * Precisa viver aqui e nao em estado do React: o core sobrevive a desmontagem

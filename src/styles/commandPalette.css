@@ -1,0 +1,82 @@
+/* ========= Busca (Ctrl+K) ========= */
+.palette {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  width: min(640px, calc(100vw - 32px));
+  max-height: min(70vh, 560px);
+  margin: 12vh auto auto;
+  overflow: visible;
+}
+.palette::backdrop { background: rgb(0 0 0 / 0.6); }
+.palette-caixa {
+  display: flex;
+  flex-direction: column;
+  max-height: min(70vh, 560px);
+  background: var(--surface-1);
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-hero);
+  overflow: hidden;
+}
+.palette-input {
+  padding: 14px 16px;
+  border: 0;
+  border-bottom: 2px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 1rem;
+}
+.palette-input:focus-visible { outline: none; border-bottom-color: var(--accent); }
+.palette-lista {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+}
+.palette-item {
+  display: grid;
+  grid-template-columns: 32px 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.palette-item.is-ativo { background: var(--surface-3); box-shadow: inset 3px 0 0 var(--accent); }
+.palette-item img { image-rendering: pixelated; }
+.palette-icone {
+  width: 10px;
+  height: 10px;
+  justify-self: center;
+  border-radius: 2px;
+  background: var(--border-strong);
+}
+.palette-rotulo { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.palette-dica { font-size: 0.75rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.palette-tipo {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+.palette-vazio { padding: 16px; color: var(--text-muted); }
+.palette-rodape {
+  padding: 8px 14px;
+  border-top: 1px solid var(--border);
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+.palette-rodape kbd {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  background: var(--surface-3);
+  color: var(--text-muted);
+}
+@media (max-width: 480px) {
+  .palette { margin-top: 8px; }
+  .palette-dica { display: none; }
+  .palette-rodape { display: none; }
+}

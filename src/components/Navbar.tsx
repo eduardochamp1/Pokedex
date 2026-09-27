@@ -2,6 +2,7 @@ import { useContext } from "react";
 import { Link, NavLink } from "react-router-dom";
 import FavoriteContext from "../contexts/favoritesContext";
 import ScanlineToggle from "./ScanlineToggle";
+import { openSearch } from "../lib/searchEvents";
 import { usePausedGame } from "../emulator/usePausedGame";
 
 const Navbar = () => {
@@ -107,6 +108,16 @@ const Navbar = () => {
           )}
         </NavLink>
       </div>
+      <button
+        type="button"
+        className="nav-search"
+        onClick={openSearch}
+        aria-label="Buscar no site (Ctrl+K)"
+        title="Buscar no site (Ctrl+K)"
+      >
+        <span aria-hidden="true">⌕</span>
+        <kbd className="nav-search-kbd">Ctrl K</kbd>
+      </button>
       <ScanlineToggle />
     </nav>
   );

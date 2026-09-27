@@ -2,6 +2,7 @@ import { Suspense, lazy } from "react";
 import { Route, Routes } from "react-router-dom";
 import "./App.css";
 import Navbar from "./components/Navbar";
+import CommandLauncher from "./components/CommandLauncher";
 import HomePage from "./pages/HomePage";
 import { RouteFallback } from "./components/Skeleton";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -40,6 +41,7 @@ function App() {
         Pular para o conteúdo
       </a>
       <Navbar />
+      <CommandLauncher />
       {/* tabIndex -1 para o link acima conseguir mover o foco para cá; o
           leitor de tela anuncia a região ao chegar. */}
       <div id="conteudo" tabIndex={-1}>
