@@ -4,6 +4,7 @@ import "../styles/play.css";
 import { useEmulator } from "../emulator/useEmulator";
 import {
   GROUP_LABELS,
+  GROUP_LABELS_EN,
   TOUCH_BUTTONS,
   type KeyBinding,
 } from "../emulator/keyBindings";
@@ -15,7 +16,12 @@ import {
   isProblem,
 } from "../emulator/diagnostics";
 import { useGamepad } from "../emulator/useGamepad";
-import { SUPPORTED_LABEL, consoleOf, type SaveStateSlot } from "../emulator/types";
+import {
+  SUPPORTED_LABEL,
+  SUPPORTED_LABEL_EN,
+  consoleOf,
+  type SaveStateSlot,
+} from "../emulator/types";
 import { GAME_GENERATIONS } from "../data/generations";
 import { REGIONS } from "../data/regions";
 import { describeAge } from "../emulator/saveStates";
@@ -25,6 +31,8 @@ import { useDisplay } from "../emulator/useDisplay";
 import { formatBytes } from "../emulator/storage";
 import ScreenshotThumb from "../components/ScreenshotThumb";
 import PlayTeam from "../components/PlayTeam";
+import { localeOf, useLang, tr } from "../i18n/lang";
+import { generationLabel } from "../i18n/common";
 
 const GROUPS: KeyBinding["group"][] = [
   "direcional",
@@ -65,6 +73,10 @@ function nomeDaRegiao(id: string): string {
 
 const PlayPage = () => {
   const emu = useEmulator();
+  const lang = useLang();
+  const en = lang === "en";
+  // `t` já é usado nos laços desta página; a tradução se chama `tx`.
+  const tx = (pt: string, enText: string) => tr(lang, pt, enText);
   const romInputRef = useRef<HTMLInputElement>(null);
   const saveInputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
@@ -215,15 +227,17 @@ const PlayPage = () => {
     <div className="play-shell">
       <header className="play-header">
         <div>
-          <h1>Jogar</h1>
+          <h1>{tx("Jogar", "Play")}</h1>
           <p className="play-sub">
-            Emulador {SUPPORTED_LABEL} rodando no navegador.
+            {en
+              ? `${SUPPORTED_LABEL_EN} emulator running in the browser.`
+              : `Emulador ${SUPPORTED_LABEL} rodando no navegador.`}
             {emu.version && <span className="play-core"> {emu.version}</span>}
           </p>
         </div>
         {playing && (
           <div className="play-now">
-            <span className="play-now-label">Rodando</span>
+            <span className="play-now-label">{tx("Rodando", "Running")}</span>
             {/* O nome do arquivo manda na linha principal, e isso é regra, não
                 estilo: romhack tem o cabeçalho byte a byte igual ao do jogo
                 original, então o detectado só pode vir como base. Escrever
@@ -231,24 +245,26 @@ const PlayPage = () => {
             <strong>{currentRom}</strong>
             <span className="play-now-console">
               {emu.romId
-                ? `${emu.romId.console} · base: ${emu.romId.jogo} · Geração ${romano(emu.romId.geracao)}`
+                ? `${emu.romId.console} · base: ${emu.romId.jogo} · ${generationLabel(emu.romId.geracao, lang)}`
                 : consoleOf(currentRom)}
             </span>
             {/* A aba era uma ilha: 870 linhas sem um único Link, e só três
                 arquivos do site inteiro citavam /jogar. Estas três páginas já
                 existiam — faltava o vão do meio. */}
             {emu.romId && (
-              <nav className="play-now-links" aria-label="Sobre este jogo">
+              <nav className="play-now-links" aria-label={tx("Sobre este jogo", "About this game")}>
                 {/* "Geração III" é fato; "a dex de Emerald" seria aproximação:
                     FireRed e LeafGreen usam a dex de Kanto mas trazem espécies
                     de Johto no pós-jogo. */}
                 <Link to={`/?ger=${emu.romId.geracao}`}>
-                  Pokémon da Geração {romano(emu.romId.geracao)}
+                  {en
+                    ? `Generation ${romano(emu.romId.geracao)} Pokémon`
+                    : `Pokémon da Geração ${romano(emu.romId.geracao)}`}
                 </Link>
                 <Link to={`/mapa?region=${emu.romId.regiaoId}`}>
-                  {nomeDaRegiao(emu.romId.regiaoId)} no mapa
+                  {nomeDaRegiao(emu.romId.regiaoId)} {tx("no mapa", "on the map")}
                 </Link>
-                <Link to="/lore?aba=generations">Geração na lore</Link>
+                <Link to="/lore?aba=generations">{tx("Geração na lore", "Generation in the lore")}</Link>
               </nav>
             )}
           </div>
@@ -260,17 +276,28 @@ const PlayPage = () => {
           <h2>{emu.status.reason}</h2>
           <p>{emu.status.detail}</p>
           <p className="play-diag-fix">
-            Em <code>npm run dev</code> e <code>npm run preview</code> os headers
-            já vão configurados no <code>vite.config.ts</code>. Se você abriu o{" "}
-            <code>dist/</code> por outro servidor, ele precisa mandar os mesmos
-            dois headers — veja <code>public/_headers</code>.
+            {en ? (
+              <>
+                With <code>npm run dev</code> and <code>npm run preview</code> the headers
+                are already set in <code>vite.config.ts</code>. If you opened{" "}
+                <code>dist/</code> through another server, it has to send the same two
+                headers — see <code>public/_headers</code>.
+              </>
+            ) : (
+              <>
+                Em <code>npm run dev</code> e <code>npm run preview</code> os headers
+                já vão configurados no <code>vite.config.ts</code>. Se você abriu o{" "}
+                <code>dist/</code> por outro servidor, ele precisa mandar os mesmos
+                dois headers — veja <code>public/_headers</code>.
+              </>
+            )}
           </p>
         </section>
       )}
 
       {emu.status.kind === "error" && (
         <section className="play-diag play-diag-error" role="alert">
-          <h2>Falhou</h2>
+          <h2>{tx("Falhou", "Failed")}</h2>
           <p>{emu.status.message}</p>
         </section>
       )}
@@ -278,7 +305,7 @@ const PlayPage = () => {
       {emu.notice && (
         <div className="play-notice" role="status">
           {emu.notice}
-          <button type="button" onClick={emu.dismissNotice} aria-label="Fechar">
+          <button type="button" onClick={emu.dismissNotice} aria-label={tx("Fechar", "Close")}>
             ✕
           </button>
         </div>
@@ -325,17 +352,19 @@ const PlayPage = () => {
             {!playing && (
               <div className="play-screen-overlay">
                 {emu.status.kind === "loading" ? (
-                  <p>Carregando…</p>
+                  <p>{tx("Carregando…", "Loading…")}</p>
                 ) : emu.status.kind === "ready" ? (
                   <>
-                    <p className="play-overlay-title">Nenhum jogo carregado</p>
+                    <p className="play-overlay-title">{tx("Nenhum jogo carregado", "No game loaded")}</p>
                     <p className="play-overlay-hint">
-                      Arraste uma ROM aqui, escolha um arquivo ou pegue da sua
-                      biblioteca ao lado.
+                      {tx(
+                        "Arraste uma ROM aqui, escolha um arquivo ou pegue da sua biblioteca ao lado.",
+                        "Drag a ROM here, pick a file or take one from your library on the side."
+                      )}
                     </p>
                   </>
                 ) : emu.status.kind === "checking" ? (
-                  <p>Verificando o navegador…</p>
+                  <p>{tx("Verificando o navegador…", "Checking the browser…")}</p>
                 ) : null}
               </div>
             )}
@@ -343,7 +372,7 @@ const PlayPage = () => {
             {/* Em tela cheia os controles da página somem junto com ela: a
                 saída precisa estar dita aqui dentro. */}
             {display.isFullscreen && (
-              <p className="play-fs-hint">Esc para sair da tela cheia</p>
+              <p className="play-fs-hint">{tx("Esc para sair da tela cheia", "Esc to exit full screen")}</p>
             )}
           </div>
 
@@ -353,11 +382,11 @@ const PlayPage = () => {
               <div className="play-controls" onClick={focarPalco}>
                 {emu.status.kind === "running" ? (
                   <button type="button" onClick={emu.pause}>
-                    ⏸ Pausar
+                    ⏸ {tx("Pausar", "Pause")}
                   </button>
                 ) : (
                   <button type="button" onClick={emu.resume}>
-                    ▶ Continuar
+                    ▶ {tx("Continuar", "Resume")}
                   </button>
                 )}
                 {/* Segurar, não alternar: rebobinar é correção de curso —
@@ -367,7 +396,10 @@ const PlayPage = () => {
                   className={
                     "play-rewind" + (emu.rewinding ? " is-rewinding" : "")
                   }
-                  title={`Segure para voltar no tempo (até ${rewindSeconds()} s)`}
+                  title={tx(
+                    `Segure para voltar no tempo (até ${rewindSeconds()} s)`,
+                    `Hold to go back in time (up to ${rewindSeconds()} s)`
+                  )}
                   onPointerDown={(e) => {
                     e.preventDefault();
                     emu.setRewinding(true);
@@ -376,38 +408,40 @@ const PlayPage = () => {
                   onPointerLeave={() => emu.setRewinding(false)}
                   onPointerCancel={() => emu.setRewinding(false)}
                 >
-                  ⏪ Rebobinar
+                  ⏪ {tx("Rebobinar", "Rewind")}
                 </button>
                 <button
                   type="button"
                   onClick={() => currentRom && void emu.takeScreenshot(currentRom)}
                 >
-                  📷 Capturar
+                  📷 {tx("Capturar", "Screenshot")}
                 </button>
                 <button type="button" onClick={emu.reset}>
-                  ↺ Reiniciar
+                  ↺ {tx("Reiniciar", "Reset")}
                 </button>
                 <button type="button" onClick={emu.stop}>
-                  ⏹ Fechar jogo
+                  ⏹ {tx("Fechar jogo", "Close game")}
                 </button>
                 <button type="button" onClick={() => void emu.sync()}>
-                  💾 Sincronizar
+                  💾 {tx("Sincronizar", "Sync")}
                 </button>
                 {display.fullscreenSupported && (
                   <button
                     type="button"
                     onClick={() => void display.toggleFullscreen()}
                   >
-                    {display.isFullscreen ? "⤡ Sair da tela cheia" : "⛶ Tela cheia"}
+                    {display.isFullscreen
+                      ? tx("⤡ Sair da tela cheia", "⤡ Exit full screen")
+                      : tx("⛶ Tela cheia", "⛶ Full screen")}
                   </button>
                 )}
 
                 <div
                   className="play-scale"
                   role="group"
-                  aria-label="Escala da tela"
+                  aria-label={tx("Escala da tela", "Screen scale")}
                 >
-                  <span className="play-scale-label">Escala</span>
+                  <span className="play-scale-label">{tx("Escala", "Scale")}</span>
                   {SCALE_MODES.map((mode) => (
                     <button
                       key={String(mode.id)}
@@ -417,10 +451,10 @@ const PlayPage = () => {
                         (display.scaleMode === mode.id ? " is-active" : "")
                       }
                       aria-pressed={display.scaleMode === mode.id}
-                      title={mode.title}
+                      title={en ? mode.titleEn : mode.title}
                       onClick={() => display.setScaleMode(mode.id)}
                     >
-                      {mode.label}
+                      {en ? mode.labelEn : mode.label}
                     </button>
                   ))}
                   {display.scaleLabel && (
@@ -458,7 +492,7 @@ const PlayPage = () => {
               </div>
 
               {/* Gamepad virtual: sem ele o jogo é injogável no toque. */}
-              <div className="play-gamepad" aria-label="Controle virtual">
+              <div className="play-gamepad" aria-label={tx("Controle virtual", "Virtual gamepad")}>
                 {TOUCH_BUTTONS.map((b) => (
                   <button
                     key={b.button}
@@ -483,14 +517,14 @@ const PlayPage = () => {
 
         <aside className="play-sidebar">
           <section className="play-panel">
-            <h2>Carregar</h2>
+            <h2>{tx("Carregar", "Load")}</h2>
             <button
               type="button"
               className="play-primary"
               onClick={() => romInputRef.current?.click()}
               disabled={emu.status.kind === "unsupported"}
             >
-              Escolher arquivo…
+              {tx("Escolher arquivo…", "Choose file…")}
             </button>
             <input
               ref={romInputRef}
@@ -504,32 +538,44 @@ const PlayPage = () => {
               }}
             />
             <p className="play-panel-hint">
-              O arquivo fica guardado no navegador — na próxima visita ele
-              aparece em “Na sua biblioteca”.
+              {tx(
+                "O arquivo fica guardado no navegador — na próxima visita ele aparece em “Na sua biblioteca”.",
+                "The file is kept in the browser — next visit it shows up under “In your library”."
+              )}
             </p>
           </section>
 
           <section className="play-panel">
             <div className="play-panel-head">
-              <h2>Pasta roms/</h2>
+              <h2>{tx("Pasta roms/", "roms/ folder")}</h2>
               {/* Reler não faz sentido onde a pasta não existe (produção). */}
               {emu.localRoms !== null && (
                 <button
                   type="button"
                   className="play-refresh"
                   onClick={() => void emu.refreshLocalRoms()}
-                  title="Reler a pasta roms/"
+                  title={tx("Reler a pasta roms/", "Re-read the roms/ folder")}
                 >
-                  ↻ atualizar
+                  ↻ {tx("atualizar", "refresh")}
                 </button>
               )}
             </div>
             {emu.localRoms === null ? (
               <p className="play-empty-folder">
-                Disponível só rodando o projeto localmente. Aqui, use{" "}
-                <strong>Escolher arquivo…</strong> — a ROM fica guardada neste
-                navegador e reaparece em “Na sua biblioteca” nas próximas
-                visitas.
+                {en ? (
+                  <>
+                    Only available when running the project locally. Here, use{" "}
+                    <strong>Choose file…</strong> — the ROM is kept in this browser and
+                    shows up again under “In your library” on later visits.
+                  </>
+                ) : (
+                  <>
+                    Disponível só rodando o projeto localmente. Aqui, use{" "}
+                    <strong>Escolher arquivo…</strong> — a ROM fica guardada neste
+                    navegador e reaparece em “Na sua biblioteca” nas próximas
+                    visitas.
+                  </>
+                )}
               </p>
             ) : emu.localRoms.length > 0 ? (
               <ul className="play-rom-list">
@@ -550,19 +596,32 @@ const PlayPage = () => {
               </ul>
             ) : (
               <p className="play-empty-folder">
-                Vazia. Largue seus <code>.gb</code>, <code>.gbc</code> ou{" "}
-                <code>.gba</code> em <code>roms/</code> na raiz do projeto — em
-                subpastas também — e eles aparecem aqui, prontos para um clique.
+                {en ? (
+                  <>
+                    Empty. Drop your <code>.gb</code>, <code>.gbc</code> or{" "}
+                    <code>.gba</code> files into <code>roms/</code> at the project root — in
+                    subfolders too — and they show up here, one click away.
+                  </>
+                ) : (
+                  <>
+                    Vazia. Largue seus <code>.gb</code>, <code>.gbc</code> ou{" "}
+                    <code>.gba</code> em <code>roms/</code> na raiz do projeto — em
+                    subpastas também — e eles aparecem aqui, prontos para um clique.
+                  </>
+                )}
               </p>
             )}
             <p className="play-panel-hint">
-              Fora do git e fora do build: os arquivos ficam só na sua máquina.
+              {tx(
+                "Fora do git e fora do build: os arquivos ficam só na sua máquina.",
+                "Outside git and outside the build: the files stay on your machine only."
+              )}
             </p>
           </section>
 
           {emu.roms.length > 0 && (
             <section className="play-panel">
-              <h2>Na sua biblioteca</h2>
+              <h2>{tx("Na sua biblioteca", "In your library")}</h2>
               <ul className="play-rom-list">
                 {emu.roms.map((rom) => (
                   <li key={rom.fileName} className="play-rom-row">
@@ -597,18 +656,18 @@ const PlayPage = () => {
                             setRemoving(null);
                           }}
                         >
-                          remover
+                          {tx("remover", "remove")}
                         </button>
                         <button type="button" onClick={() => setRemoving(null)}>
-                          cancelar
+                          {tx("cancelar", "cancel")}
                         </button>
                       </span>
                     ) : (
                       <button
                         type="button"
                         className="play-rom-remove"
-                        title={`Remover ${rom.fileName} da biblioteca`}
-                        aria-label={`Remover ${rom.fileName} da biblioteca`}
+                        title={tx(`Remover ${rom.fileName} da biblioteca`, `Remove ${rom.fileName} from the library`)}
+                        aria-label={tx(`Remover ${rom.fileName} da biblioteca`, `Remove ${rom.fileName} from the library`)}
                         onClick={() => setRemoving(rom.fileName)}
                       >
                         ✕
@@ -618,8 +677,17 @@ const PlayPage = () => {
                 ))}
               </ul>
               <p className="play-panel-hint">
-                Remover libera espaço no navegador e <strong>mantém o save</strong>
-                : se a mesma ROM voltar, o progresso volta com ela.
+                {en ? (
+                  <>
+                    Removing frees space in the browser and <strong>keeps the save</strong>: if
+                    the same ROM comes back, the progress comes back with it.
+                  </>
+                ) : (
+                  <>
+                    Remover libera espaço no navegador e <strong>mantém o save</strong>
+                    : se a mesma ROM voltar, o progresso volta com ela.
+                  </>
+                )}
               </p>
             </section>
           )}
@@ -633,7 +701,7 @@ const PlayPage = () => {
               elas aparecem, dá para baixar de novo, e dá para apagar. */}
           {emu.screenshots.length > 0 && (
             <section className="play-panel">
-              <h2>Capturas</h2>
+              <h2>{tx("Capturas", "Screenshots")}</h2>
               <ul className="play-shot-list">
                 {emu.screenshots.map((shot) => (
                   <li key={shot.fileName} className="play-shot-row">
@@ -643,7 +711,7 @@ const PlayPage = () => {
                     />
                     <div className="play-shot-info">
                       <span className="play-shot-when">
-                        {shot.when.toLocaleString("pt-BR")}
+                        {shot.when.toLocaleString(localeOf(lang))}
                       </span>
                       {shot.size !== undefined && (
                         <span className="play-shot-size">
@@ -655,16 +723,19 @@ const PlayPage = () => {
                       <button
                         type="button"
                         onClick={() => emu.downloadScreenshot(shot.fileName)}
-                        title={`Baixar ${shot.fileName}`}
+                        title={tx(`Baixar ${shot.fileName}`, `Download ${shot.fileName}`)}
                       >
-                        baixar
+                        {tx("baixar", "download")}
                       </button>
                       <button
                         type="button"
                         className="play-shot-del"
                         onClick={() => void emu.deleteScreenshot(shot.fileName)}
-                        title={`Apagar ${shot.fileName}`}
-                        aria-label={`Apagar captura de ${shot.when.toLocaleString("pt-BR")}`}
+                        title={tx(`Apagar ${shot.fileName}`, `Delete ${shot.fileName}`)}
+                        aria-label={tx(
+                          `Apagar captura de ${shot.when.toLocaleString(localeOf(lang))}`,
+                          `Delete screenshot from ${shot.when.toLocaleString(localeOf(lang))}`
+                        )}
                       >
                         ✕
                       </button>
@@ -687,14 +758,20 @@ const PlayPage = () => {
                 disabled={!playing || !emu.autoState}
                 onClick={emu.loadAutoState}
               >
-                ⏱ Continuar de onde parou
+                ⏱ {tx("Continuar de onde parou", "Continue where you left off")}
               </button>
               <p className="play-panel-hint">
                 {!playing
-                  ? "Carregue um jogo para ver o ponto automático."
+                  ? tx("Carregue um jogo para ver o ponto automático.", "Load a game to see the auto save point.")
                   : emu.autoState
-                    ? `Ponto automático de ${formatBytes(emu.autoState.size)}, atualizado a cada 30 s.`
-                    : "Nenhum ponto automático ainda — o primeiro sai em até 30 s."}
+                    ? tx(
+                        `Ponto automático de ${formatBytes(emu.autoState.size)}, atualizado a cada 30 s.`,
+                        `Auto save point of ${formatBytes(emu.autoState.size)}, updated every 30 s.`
+                      )
+                    : tx(
+                        "Nenhum ponto automático ainda — o primeiro sai em até 30 s.",
+                        "No auto save point yet — the first one comes within 30 s."
+                      )}
                 {playing && (
                   <>
                     {" "}
@@ -703,7 +780,7 @@ const PlayPage = () => {
                       className="play-linkish"
                       onClick={() => void emu.captureAutoState()}
                     >
-                      capturar agora
+                      {tx("capturar agora", "capture now")}
                     </button>
                   </>
                 )}
@@ -721,13 +798,13 @@ const PlayPage = () => {
                     <img
                       className="play-slot-thumb"
                       src={info.thumbnail}
-                      alt={`Tela gravada no slot ${info.slot}`}
+                      alt={tx(`Tela gravada no slot ${info.slot}`, `Screen saved in slot ${info.slot}`)}
                     />
                   ) : (
                     <span className="play-slot-thumb is-empty" aria-hidden="true" />
                   )}
                   <span className="play-slot-state">
-                    {info.exists ? describeAge(info.modified, now) : "vazio"}
+                    {info.exists ? describeAge(info.modified, now) : tx("vazio", "empty")}
                   </span>
                   <button
                     type="button"
@@ -735,11 +812,11 @@ const PlayPage = () => {
                     onClick={() => void emu.saveState(info.slot)}
                     title={
                       info.exists
-                        ? `Sobrescrever o slot ${info.slot}`
-                        : `Gravar no slot ${info.slot}`
+                        ? tx(`Sobrescrever o slot ${info.slot}`, `Overwrite slot ${info.slot}`)
+                        : tx(`Gravar no slot ${info.slot}`, `Save to slot ${info.slot}`)
                     }
                   >
-                    {info.exists ? "regravar" : "gravar"}
+                    {info.exists ? tx("regravar", "overwrite") : tx("gravar", "save")}
                   </button>
                   <button
                     type="button"
@@ -747,19 +824,19 @@ const PlayPage = () => {
                     onClick={() => emu.loadState(info.slot)}
                     title={
                       info.exists
-                        ? `Carregar do slot ${info.slot}`
-                        : `Slot ${info.slot} está vazio`
+                        ? tx(`Carregar do slot ${info.slot}`, `Load from slot ${info.slot}`)
+                        : tx(`Slot ${info.slot} está vazio`, `Slot ${info.slot} is empty`)
                     }
                   >
-                    carregar
+                    {tx("carregar", "load")}
                   </button>
                   <button
                     type="button"
                     className="play-slot-clear"
                     disabled={!playing || !info.exists}
                     onClick={() => void emu.clearState(info.slot)}
-                    title={`Apagar o slot ${info.slot}`}
-                    aria-label={`Apagar o slot ${info.slot}`}
+                    title={tx(`Apagar o slot ${info.slot}`, `Clear slot ${info.slot}`)}
+                    aria-label={tx(`Apagar o slot ${info.slot}`, `Clear slot ${info.slot}`)}
                   >
                     ✕
                   </button>
@@ -767,8 +844,9 @@ const PlayPage = () => {
               ))}
             </div>
             <p className="play-panel-hint">
-              Os estados são por jogo: os seis slots acima são
-              {playing ? ` de ${currentRom}` : " do jogo que estiver carregado"}.
+              {en
+                ? `States are per game: the six slots above belong to ${playing ? currentRom : "whatever game is loaded"}.`
+                : `Os estados são por jogo: os seis slots acima são${playing ? ` de ${currentRom}` : " do jogo que estiver carregado"}.`}
             </p>
           </section>
 
@@ -780,14 +858,14 @@ const PlayPage = () => {
                 disabled={!playing}
                 onClick={() => currentRom && emu.exportSave(currentRom)}
               >
-                Exportar .sav
+                {tx("Exportar .sav", "Export .sav")}
               </button>
               <button
                 type="button"
                 onClick={() => saveInputRef.current?.click()}
                 disabled={emu.status.kind === "unsupported"}
               >
-                Importar…
+                {tx("Importar…", "Import…")}
               </button>
               <input
                 ref={saveInputRef}
@@ -809,13 +887,15 @@ const PlayPage = () => {
               </ul>
             )}
             <p className="play-panel-hint">
-              Saves e estados ficam no IndexedDB deste navegador. Exporte se
-              quiser levar para outra máquina.
+              {tx(
+                "Saves e estados ficam no IndexedDB deste navegador. Exporte se quiser levar para outra máquina.",
+                "Saves and states live in this browser's IndexedDB. Export them to take them to another machine."
+              )}
             </p>
           </section>
 
           <section className="play-panel">
-            <h2>Onde ficam seus saves</h2>
+            <h2>{tx("Onde ficam seus saves", "Where your saves live")}</h2>
             <ul className="play-storage">
               <li>
                 <span
@@ -826,11 +906,17 @@ const PlayPage = () => {
                   aria-hidden="true"
                 />
                 <div>
-                  <strong>Pasta {"saves/"} no disco</strong>
+                  <strong>{tx("Pasta saves/ no disco", "saves/ folder on disk")}</strong>
                   <p>
                     {emu.localSaves !== null
-                      ? "Backup automático a cada gravação do jogo. Esta é a cópia que não depende do navegador."
-                      : "Indisponível — só existe em dev e preview. Aqui vale só o IndexedDB; exporte o .sav para ter cópia."}
+                      ? tx(
+                          "Backup automático a cada gravação do jogo. Esta é a cópia que não depende do navegador.",
+                          "Automatic backup every time the game saves. This is the copy that doesn't depend on the browser."
+                        )
+                      : tx(
+                          "Indisponível — só existe em dev e preview. Aqui vale só o IndexedDB; exporte o .sav para ter cópia.",
+                          "Unavailable — it only exists in dev and preview. Here only IndexedDB counts; export the .sav to keep a copy."
+                        )}
                   </p>
                 </div>
               </li>
@@ -844,21 +930,24 @@ const PlayPage = () => {
                 />
                 <div>
                   <strong>
-                    IndexedDB do navegador
+                    {tx("IndexedDB do navegador", "Browser IndexedDB")}
                     {emu.storage
                       ? emu.storage.persistent
-                        ? " · persistente"
-                        : " · descartável"
+                        ? tx(" · persistente", " · persistent")
+                        : tx(" · descartável", " · evictable")
                       : ""}
                   </strong>
                   <p>
                     {emu.storage?.persistent
-                      ? "O navegador prometeu não descartar."
-                      : "Sobrevive a recarregar e a fechar o navegador, mas pode ser descartado sob pressão de disco, e “limpar dados do site” apaga."}
+                      ? tx("O navegador prometeu não descartar.", "The browser promised not to evict it.")
+                      : tx(
+                          "Sobrevive a recarregar e a fechar o navegador, mas pode ser descartado sob pressão de disco, e “limpar dados do site” apaga.",
+                          "It survives reloads and closing the browser, but it can be evicted under disk pressure, and “clear site data” deletes it."
+                        )}
                     {emu.storage?.usageBytes !== undefined && (
                       <>
                         {" "}
-                        Em uso: {formatBytes(emu.storage.usageBytes)} de{" "}
+                        {tx("Em uso:", "In use:")} {formatBytes(emu.storage.usageBytes)} {tx("de", "of")}{" "}
                         {formatBytes(emu.storage.quotaBytes)}.
                       </>
                     )}
@@ -877,7 +966,7 @@ const PlayPage = () => {
                     currentRom && void emu.backupToDisk(currentRom, { force: true })
                   }
                 >
-                  Copiar para {"saves/"} agora
+                  {tx("Copiar para saves/ agora", "Copy to saves/ now")}
                 </button>
                 {emu.localSaves.length > 0 && (
                   <ul className="play-disk-saves">
@@ -890,9 +979,9 @@ const PlayPage = () => {
                         <button
                           type="button"
                           onClick={() => void emu.restoreFromDisk(s.fileName)}
-                          title={`Restaurar ${s.fileName} para o emulador`}
+                          title={tx(`Restaurar ${s.fileName} para o emulador`, `Restore ${s.fileName} to the emulator`)}
                         >
-                          restaurar
+                          {tx("restaurar", "restore")}
                         </button>
                       </li>
                     ))}
@@ -903,7 +992,7 @@ const PlayPage = () => {
           </section>
 
           <section className="play-panel">
-            <h2>Áudio e vídeo</h2>
+            <h2>{tx("Áudio e vídeo", "Audio and video")}</h2>
             <div className="play-av">
               {AV_TOGGLES.map((t) => (
                 <label key={t.id} className="play-av-row" title={t.hint}>
@@ -923,23 +1012,24 @@ const PlayPage = () => {
 
           <section className="play-panel">
             <div className="play-panel-head">
-              <h2>Log do core</h2>
+              <h2>{tx("Log do core", "Core log")}</h2>
               {emu.log.length > 0 && (
                 <button
                   type="button"
                   className="play-refresh"
                   onClick={emu.clearLog}
-                  title="Limpar o log"
+                  title={tx("Limpar o log", "Clear the log")}
                 >
-                  limpar
+                  {tx("limpar", "clear")}
                 </button>
               )}
             </div>
             {emu.log.length === 0 ? (
               <p className="play-panel-hint">
-                Nada registrado ainda. O core escreve aqui quando encontra algo
-                fora do comum — é o primeiro lugar a olhar se um jogo se
-                comportar mal.
+                {tx(
+                  "Nada registrado ainda. O core escreve aqui quando encontra algo fora do comum — é o primeiro lugar a olhar se um jogo se comportar mal.",
+                  "Nothing logged yet. The core writes here when it runs into something unusual — the first place to look if a game misbehaves."
+                )}
               </p>
             ) : (
               <ol className="play-log">
@@ -957,20 +1047,20 @@ const PlayPage = () => {
 
           <section className="play-panel">
             <div className="play-panel-head">
-              <h2>Teclas</h2>
+              <h2>{tx("Teclas", "Keys")}</h2>
               <button
                 type="button"
                 className="play-refresh"
                 onClick={emu.resetKeyBindings}
-                title="Voltar ao mapa padrão"
+                title={tx("Voltar ao mapa padrão", "Back to the default mapping")}
               >
-                ↺ padrão
+                ↺ {tx("padrão", "default")}
               </button>
             </div>
             <dl className="play-keys">
               {GROUPS.map((group) => (
                 <div key={group} className="play-key-group">
-                  <dt>{GROUP_LABELS[group]}</dt>
+                  <dt>{en ? GROUP_LABELS_EN[group] : GROUP_LABELS[group]}</dt>
                   <dd>
                     {emu.bindings
                       .filter((b) => b.group === group)
@@ -987,7 +1077,7 @@ const PlayPage = () => {
                               capturing === b.button ? null : b.button
                             )
                           }
-                          title={`Clique e pressione a tecla nova para ${b.button}`}
+                          title={tx(`Clique e pressione a tecla nova para ${b.button}`, `Click and press the new key for ${b.button}`)}
                         >
                           <kbd>{capturing === b.button ? "…" : b.label}</kbd>
                           {b.button}
@@ -999,20 +1089,26 @@ const PlayPage = () => {
             </dl>
             <p className="play-panel-hint">
               {capturing
-                ? `Pressione a tecla para ${capturing} — Esc cancela.`
-                : "Clique numa tecla para trocá-la. Se a nova já pertencer a outra ação, as duas trocam."}
+                ? tx(`Pressione a tecla para ${capturing} — Esc cancela.`, `Press the key for ${capturing} — Esc cancels.`)
+                : tx(
+                    "Clique numa tecla para trocá-la. Se a nova já pertencer a outra ação, as duas trocam.",
+                    "Click a key to change it. If the new one already belongs to another action, the two swap."
+                  )}
             </p>
             <p className="play-panel-hint">
               {gamepadName
                 ? `🎮 ${gamepadName}`
-                : "Nenhum controle detectado — conecte um e aperte um botão."}
+                : tx(
+                    "Nenhum controle detectado — conecte um e aperte um botão.",
+                    "No gamepad detected — connect one and press a button."
+                  )}
             </p>
 
             {/* Atalhos ficam fora da lista remapeável: não são ações do
                 console, e remapeá-los é outra conversa. */}
             <dl className="play-keys play-shortcuts">
               <div className="play-key-group">
-                <dt>Atalhos</dt>
+                <dt>{tx("Atalhos", "Shortcuts")}</dt>
                 <dd>
                   {SHORTCUT_HELP.map((s) => (
                     <span key={s.keys} className="play-shortcut">
