@@ -122,10 +122,18 @@ const HomePage = () => {
       {featured.data && (
         <section className="home-featured">
           <div className="home-featured-copy">
+            <div className="home-featured-daily">
+              Pokémon do dia ·{" "}
+              {new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long" })}
+            </div>
             {featuredSpecies.data && (
               <div className="home-featured-genus">{tGenus(featuredGenus)}</div>
             )}
-            <h2>{featured.data.name}</h2>
+            <h2>
+              <Link to={`/pokemon/${featured.data.name}`} className="home-featured-link">
+                {featured.data.name}
+              </Link>
+            </h2>
             <div className="pokemon-type">
               {featured.data.types.map((t) => (
                 <span
