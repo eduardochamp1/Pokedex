@@ -2,6 +2,7 @@ import Card from "./Card";
 import Pagination from "./Pagination";
 import { CardSkeleton } from "./Skeleton";
 import type { Pokemon as PokemonT } from "../types/pokemon";
+import type { DexMark } from "../lib/playerDex";
 
 interface Props {
   pokemons: PokemonT[];
@@ -11,6 +12,8 @@ interface Props {
   totalPages: number;
   /** Total de resultados da selecao atual, quando ha filtro/busca ativos. */
   total?: number;
+  /** Selo da dex do save para cada carta, quando ha um jogo lido. */
+  dexMarkOf?: (id: number) => DexMark | undefined;
 }
 
 const Pokedex = ({
@@ -20,6 +23,7 @@ const Pokedex = ({
   setPage,
   totalPages,
   total,
+  dexMarkOf,
 }: Props) => {
   const onLeftClickHandler = () => {
     if (page > 0) setPage(page - 1);
@@ -54,6 +58,7 @@ const Pokedex = ({
               pokemon={pokemon}
               index={i}
               linkTo={`/pokemon/${pokemon.name}`}
+              dexMark={dexMarkOf?.(pokemon.id)}
             />
           ))}
         </div>

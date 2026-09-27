@@ -373,6 +373,35 @@ img { display: block; max-width: 100%; }
 }
 .card-badge-mythical { color: #ff8ec7; }
 
+/*
+ * Selo da dex do save: uma pokebola de 14px. Capturado e a bola cheia (o
+ * vermelho do PS em cima, o papel embaixo); so visto e o contorno vazio. A
+ * forma muda junto com a cor, entao le-se sem depender dela.
+ */
+.card-dexmark {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--paper-ink);
+  box-sizing: border-box;
+  filter: drop-shadow(0 1px 1px rgba(242, 231, 201, 0.9));
+}
+/* Divide o canto com o simbolo de raridade: vai para o lado dele. */
+.card-badge ~ .card-dexmark { left: 26px; }
+.card-dexmark-owned {
+  background:
+    radial-gradient(circle, var(--paper) 0 2px, var(--paper-ink) 2px 3px, transparent 3px),
+    linear-gradient(var(--paper-ps) 0 45%, var(--paper-ink) 45% 55%, var(--paper) 55%);
+}
+.card-dexmark-seen {
+  background: transparent;
+  border-style: dotted;
+}
+
 @property --shine-angle {
   syntax: "<angle>";
   inherits: false;
@@ -535,6 +564,43 @@ img { display: block; max-width: 100%; }
 }
 .home-sidebar .type-filter label {
   display: none;
+}
+
+/* ========= Seu jogo: a dex lida do save ========= */
+.player-dex {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.player-dex-jogo {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.player-dex-jogo strong { color: var(--text); }
+.player-dex-jogo a { color: var(--accent); }
+/* Duas camadas: vistos por baixo, capturados por cima — capturado ⊆ visto. */
+.player-dex-barra {
+  position: relative;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  overflow: hidden;
+}
+.player-dex-barra span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  min-width: 2px;
+}
+.player-dex-vistos { background: color-mix(in srgb, var(--accent) 35%, transparent); }
+.player-dex-capturados { background: var(--accent); }
+.player-dex-numeros {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 /* ========= Grid do Pokedex (container) =========

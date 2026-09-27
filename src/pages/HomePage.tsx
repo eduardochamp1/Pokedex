@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import Searchbar from "../components/Searchbar";
 import Pokedex from "../components/Pokedex";
 import TypeFilter from "../components/TypeFilter";
 import DexFilter from "../components/DexFilter";
 import RarityFilter from "../components/RarityFilter";
+import PlayerDexFilter from "../components/PlayerDexFilter";
 import CardHero from "../components/CardHero";
 import { CardSkeleton } from "../components/Skeleton";
 import { useDebounce } from "../hooks/useDebounce";
@@ -21,6 +22,7 @@ import {
 import { tGenus, tType } from "../data/i18n";
 import { pickLocalized } from "../lib/localize";
 import { sortNamesAlphabetically } from "../lib/filters";
+import { dexMarkOf, nationalsFor, usePlayerDex } from "../lib/playerDex";
 import {
   parseHomeParams,
   toSearchParams,
@@ -49,12 +51,28 @@ const HomePage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch]);
 
+  /**
+   * A dex do jogo lido do save em /jogar. Sem ela, `meu=` na URL e ignorado:
+   * um link compartilhado nao pode esvaziar a grade de quem nunca jogou.
+   */
+  const playerDex = usePlayerDex();
+  const mine = playerDex ? current.mine : undefined;
+  const mineNationals = useMemo(
+    () => (playerDex && mine ? nationalsFor(playerDex, mine) : undefined),
+    [playerDex, mine]
+  );
+  const markOf = useCallback(
+    (id: number) => dexMarkOf(playerDex, id),
+    [playerDex]
+  );
+
   const selection = usePokemonSelection({
     search: debouncedSearch,
     type: current.type,
     generation: current.generation,
     pokedex: current.pokedex,
     rarity: current.rarity,
+    nationals: mineNationals,
   });
 
   const orderedNames = useMemo(() => {
@@ -156,6 +174,16 @@ const HomePage = () => {
             value={current.rarity}
             onChange={(v) => update({ rarity: v })}
           />
+          {playerDex && (
+            <>
+              <h3>Seu jogo</h3>
+              <PlayerDexFilter
+                entry={playerDex}
+                value={mine}
+                onChange={(v) => update({ mine: v })}
+              />
+            </>
+          )}
           <h3>Ordenar</h3>
           <div className="type-filter">
             <label htmlFor="sort-select">Ordem:</label>
@@ -192,6 +220,7 @@ const HomePage = () => {
               setPage={(p) => update({ page: p })}
               totalPages={totalPages}
               total={total}
+              dexMarkOf={playerDex ? markOf : undefined}
             />
           )}
         </main>

@@ -39,6 +39,7 @@ import {
 } from "./capture";
 import { GBA_HEADER_BYTES, identifyRom, type RomId } from "./romId";
 import { parseGen3Save, type Gen3PartyMember } from "./saveParse/gen3";
+import { recordPlayerDex } from "../lib/playerDex";
 import { MGBA_CORE_SETTINGS } from "./mgbaDefaults";
 import { TURBO_MULTIPLIER } from "./shortcuts";
 import { useDiagnostics } from "./useDiagnostics";
@@ -1210,7 +1211,8 @@ export function useEmulator() {
 
   const refreshTeam = useCallback(() => {
     const core = coreRef.current;
-    if (!core || !getLoadedRom()) {
+    const rom = getLoadedRom();
+    if (!core || !rom) {
       setTeam(null);
       setTeamLido(false);
       return;
@@ -1221,8 +1223,11 @@ export function useEmulator() {
     } catch {
       bytes = null;
     }
-    setTeam(bytes ? (parseGen3Save(bytes)?.party ?? null) : null);
+    const save = bytes ? parseGen3Save(bytes) : null;
+    setTeam(save?.party ?? null);
     setTeamLido(true);
+    // A mesma leitura alimenta a Pokédex da Home, que não carrega o core.
+    if (save?.pokedex) recordPlayerDex(rom, save.playerName, save.pokedex);
   }, []);
 
   // O callback do core é registrado uma vez; a ref leva a versão atual até lá.
