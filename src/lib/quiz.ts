@@ -66,13 +66,13 @@ function lerTudo(): Record<string, number> {
   }
 }
 
-export function loadBest(gen: QuizGen): number {
+export function loadBest(gen: QuizGen | string): number {
   const v = lerTudo()[String(gen)];
   return typeof v === "number" && Number.isFinite(v) ? v : 0;
 }
 
 /** Grava só se for maior. Sem localStorage, o recorde vale só nesta visita. */
-export function saveBest(gen: QuizGen, streak: number): void {
+export function saveBest(gen: QuizGen | string, streak: number): void {
   const tudo = lerTudo();
   if (streak <= (tudo[String(gen)] ?? 0)) return;
   try {

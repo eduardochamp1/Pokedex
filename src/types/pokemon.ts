@@ -78,6 +78,8 @@ export interface Genus {
 
 export interface PokemonSpecies {
   name: string;
+  /** O nome em cada idioma — o quiz esconde todos no texto da Pokédex. */
+  names?: { name: string; language: { name: string } }[];
   evolution_chain: { url: string };
   varieties: PokemonVariety[];
   generation: { name: string; url: string };

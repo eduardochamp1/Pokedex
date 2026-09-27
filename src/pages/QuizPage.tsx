@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { usePokemonIndex } from "../hooks/usePokemon";
+import { usePokemonDetail, usePokemonIndex, usePokemonSpecies } from "../hooks/usePokemon";
 import { pixelSpriteUrl } from "../lib/sprites";
 import { pokemonLabel } from "../lib/pokemonLabel";
 import {
@@ -13,33 +13,105 @@ import {
   type QuizGen,
   type Round,
 } from "../lib/quiz";
+import {
+  DAILY_ROUNDS,
+  dailyRounds,
+  loadDaily,
+  parseQuizMode,
+  redactName,
+  saveDaily,
+  seededRandom,
+  shareText,
+  typeOptions,
+  type QuizMode,
+  type RoundMode,
+} from "../lib/quizModes";
+import { dayNumber } from "../lib/daily";
+import { pickLocalized } from "../lib/localize";
+import { tType } from "../data/i18n";
 import "../styles/quiz.css";
 import { useLang, tr } from "../i18n/lang";
 import { generationLabel } from "../i18n/common";
 
-/**
- * "Quem é esse Pokémon?" — a silhueta é o sprite local com o brilho zerado
- * por CSS; revelar é tirar o filtro. O recorte fica na URL (`?ger=3`).
- */
-const QuizPage = () => {
-  const [params, setParams] = useSearchParams();
-  const lang = useLang();
-  const t = (pt: string, en: string) => tr(lang, pt, en);
-  const gen = parseQuizGen(params.get("ger"));
-  const pool = useMemo(() => poolFor(gen), [gen]);
-
+/** Número nacional -> slug; a primeira entrada do índice é a espécie base. */
+function useNomes() {
   const { index } = usePokemonIndex();
-  /** Número nacional -> slug; a primeira entrada do índice é a espécie base. */
   const slugOf = useMemo(() => {
     const m = new Map<number, string>();
     for (const [name, id] of index ?? []) if (!m.has(id)) m.set(id, name);
     return m;
   }, [index]);
+  const nome = useCallback(
+    (id: number) => {
+      const slug = slugOf.get(id);
+      return slug ? pokemonLabel(slug) : `#${id}`;
+    },
+    [slugOf]
+  );
+  return { pronto: Boolean(index), slugOf, nome };
+}
+
+const ABAS: { mode: QuizMode; pt: string; en: string }[] = [
+  { mode: "silhueta", pt: "Silhueta", en: "Silhouette" },
+  { mode: "grito", pt: "Grito", en: "Cry" },
+  { mode: "descricao", pt: "Descrição", en: "Description" },
+  { mode: "tipo", pt: "Tipo", en: "Type" },
+  { mode: "diario", pt: "Desafio do dia", en: "Daily challenge" },
+];
+
+/**
+ * O quiz: "Quem é esse Pokémon?" em quatro modos, e o desafio do dia. Modo e
+ * recorte ficam na URL (`?modo=grito&ger=3`).
+ */
+const QuizPage = () => {
+  const [params, setParams] = useSearchParams();
+  const lang = useLang();
+  const t = (pt: string, en: string) => tr(lang, pt, en);
+  const mode = parseQuizMode(params.get("modo"));
+
+  const trocarModo = (m: QuizMode) => {
+    const p = new URLSearchParams(params);
+    if (m === "silhueta") p.delete("modo");
+    else p.set("modo", m);
+    setParams(p, { replace: true });
+  };
+
+  return (
+    <div className="quiz-shell">
+      <header className="quiz-header">
+        <h1>{mode === "diario" ? t("Desafio do dia", "Daily challenge") : t("Quem é esse Pokémon?", "Who's that Pokémon?")}</h1>
+      </header>
+      <nav className="quiz-modos" aria-label={t("Modos do quiz", "Quiz modes")}>
+        {ABAS.map((a) => (
+          <button
+            key={a.mode}
+            type="button"
+            aria-pressed={a.mode === mode}
+            onClick={() => trocarModo(a.mode)}
+          >
+            {lang === "en" ? a.en : a.pt}
+          </button>
+        ))}
+      </nav>
+      {mode === "diario" ? <DesafioDoDia /> : <Livre key={mode} mode={mode} />}
+    </div>
+  );
+};
+
+/** Rodadas sem fim num modo, com sequência e recorde. */
+const Livre = ({ mode }: { mode: RoundMode }) => {
+  const [params, setParams] = useSearchParams();
+  const lang = useLang();
+  const t = (pt: string, en: string) => tr(lang, pt, en);
+  const gen = parseQuizGen(params.get("ger"));
+  const pool = useMemo(() => poolFor(gen), [gen]);
+  // O recorde é por modo: acertar tipo e acertar silhueta são jogos diferentes.
+  const chave = mode === "silhueta" ? gen : `${mode}-${gen}`;
 
   const [round, setRound] = useState<Round>(() => makeRound(pool, Math.random));
-  const [escolha, setEscolha] = useState<number | null>(null);
+  const [respondida, setRespondida] = useState(false);
   const [sequencia, setSequencia] = useState(0);
-  const [recorde, setRecorde] = useState(() => loadBest(gen));
+  const [recorde, setRecorde] = useState(() => loadBest(chave));
   const [placar, setPlacar] = useState({ acertos: 0, total: 0 });
 
   const trocarRecorte = (g: QuizGen) => {
@@ -48,80 +120,45 @@ const QuizPage = () => {
     else p.set("ger", String(g));
     setParams(p, { replace: true });
     setRound(makeRound(poolFor(g), Math.random));
-    setEscolha(null);
+    setRespondida(false);
     setSequencia(0);
-    setRecorde(loadBest(g));
+    setRecorde(loadBest(mode === "silhueta" ? g : `${mode}-${g}`));
     setPlacar({ acertos: 0, total: 0 });
   };
 
-  const responder = useCallback(
-    (id: number) => {
-      if (escolha !== null) return;
-      setEscolha(id);
-      const acertou = id === round.answer;
-      setPlacar((p) => ({ acertos: p.acertos + (acertou ? 1 : 0), total: p.total + 1 }));
-      if (acertou) {
-        const nova = sequencia + 1;
-        setSequencia(nova);
-        if (nova > recorde) {
-          setRecorde(nova);
-          saveBest(gen, nova);
-        }
-      } else {
-        setSequencia(0);
+  const resolver = (acertou: boolean) => {
+    setRespondida(true);
+    setPlacar((p) => ({ acertos: p.acertos + (acertou ? 1 : 0), total: p.total + 1 }));
+    if (acertou) {
+      const nova = sequencia + 1;
+      setSequencia(nova);
+      if (nova > recorde) {
+        setRecorde(nova);
+        saveBest(chave, nova);
       }
-    },
-    [escolha, round.answer, sequencia, recorde, gen]
-  );
+    } else {
+      setSequencia(0);
+    }
+  };
 
   const proximo = useCallback(() => {
     setRound((r) => makeRound(pool, Math.random, r.answer));
-    setEscolha(null);
+    setRespondida(false);
   }, [pool]);
 
-  // 1–4 respondem; Enter ou espaço vão para a próxima depois de responder.
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLSelectElement || e.target instanceof HTMLInputElement) return;
-      const n = Number(e.key);
-      if (escolha === null && index && n >= 1 && n <= round.options.length) {
-        e.preventDefault();
-        responder(round.options[n - 1]);
-      } else if (escolha !== null && (e.key === "Enter" || e.key === " ")) {
-        e.preventDefault();
-        proximo();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [escolha, index, round.options, responder, proximo]);
-
-  const nome = (id: number) => {
-    const slug = slugOf.get(id);
-    return slug ? pokemonLabel(slug) : `#${id}`;
-  };
-  const revelado = escolha !== null;
-  const acertou = escolha === round.answer;
-
   return (
-    <div className="quiz-shell">
-      <header className="quiz-header">
-        <h1>{t("Quem é esse Pokémon?", "Who's that Pokémon?")}</h1>
-        <label className="quiz-recorte">
-          <span>{t("Gerações", "Generations")}</span>
-          <select
-            value={String(gen)}
-            onChange={(e) => trocarRecorte(parseQuizGen(e.target.value))}
-          >
-            <option value="all">{t("Todas", "All")}</option>
-            {GEN_RANGES.map((_, i) => (
-              <option key={i} value={i + 1}>
-                {generationLabel(i + 1, lang)}
-              </option>
-            ))}
-          </select>
-        </label>
-      </header>
+    <>
+      <label className="quiz-recorte">
+        <span>{t("Gerações", "Generations")}</span>
+        <select value={String(gen)} onChange={(e) => trocarRecorte(parseQuizGen(e.target.value))}>
+          <option value="all">{t("Todas", "All")}</option>
+          {GEN_RANGES.map((_, i) => (
+            <option key={i} value={i + 1}>
+              {generationLabel(i + 1, lang)}
+            </option>
+          ))}
+        </select>
+      </label>
 
       <dl className="quiz-placar">
         <div>
@@ -140,19 +177,172 @@ const QuizPage = () => {
         </div>
       </dl>
 
+      <Rodada key={round.answer} mode={mode} round={round} onResolve={resolver} />
+      {respondida && <Depois answer={round.answer} onNext={proximo} />}
+    </>
+  );
+};
+
+/** "Próximo" e o link para a ficha. Enter e espaço também avançam. */
+const Depois = ({ answer, onNext, label }: { answer: number; onNext: () => void; label?: string }) => {
+  const lang = useLang();
+  const t = (pt: string, en: string) => tr(lang, pt, en);
+  const { slugOf } = useNomes();
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLSelectElement || e.target instanceof HTMLInputElement) return;
+      if (e.key === "Enter" || e.key === " ") {
+        // O botão focado já trata o Enter; aqui é para quando o foco está fora.
+        if (e.target instanceof HTMLButtonElement) return;
+        e.preventDefault();
+        onNext();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onNext]);
+  return (
+    <div className="quiz-depois">
+      <button type="button" className="quiz-proximo" onClick={onNext} autoFocus>
+        {label ?? t("Próximo →", "Next →")}
+      </button>
+      {slugOf.get(answer) && <Link to={`/pokemon/${slugOf.get(answer)}`}>{t("Ver a ficha", "See the profile")}</Link>}
+    </div>
+  );
+};
+
+interface RodadaProps {
+  mode: RoundMode;
+  round: Round;
+  onResolve: (acertou: boolean) => void;
+}
+
+/** Uma pergunta: o palco do modo, as quatro alternativas e a revelação. */
+const Rodada = ({ mode, round, onResolve }: RodadaProps) => {
+  const lang = useLang();
+  const t = (pt: string, en: string) => tr(lang, pt, en);
+  const { pronto, nome } = useNomes();
+  const { data: poke } = usePokemonDetail(String(round.answer));
+  const { data: species } = usePokemonSpecies(mode === "descricao" ? poke?.species.url : undefined);
+  const [escolha, setEscolha] = useState<string | null>(null);
+  const audio = useRef<HTMLAudioElement>(null);
+
+  const tiposCertos = useMemo(
+    () => (poke ? [...poke.types].sort((a, b) => a.slot - b.slot).map((x) => x.type.name) : undefined),
+    [poke]
+  );
+  const opcoes: { key: string; label: ReactNode; certa: boolean }[] = useMemo(() => {
+    if (mode === "tipo") {
+      if (!tiposCertos) return [];
+      const certa = tiposCertos.join("/");
+      // Semente fixa por rodada: as alternativas não mudam a cada render.
+      return typeOptions(tiposCertos, seededRandom(round.answer)).map((combo) => ({
+        key: combo.join("/"),
+        certa: combo.join("/") === certa,
+        label: (
+          <span className="quiz-tipos">
+            {combo.map((ty) => (
+              <span key={ty} className="card-type-dot card-type-dot-lg" data-type={ty}>
+                {tType(ty)}
+              </span>
+            ))}
+          </span>
+        ),
+      }));
+    }
+    return round.options.map((id) => ({ key: String(id), certa: id === round.answer, label: nome(id) }));
+  }, [mode, tiposCertos, round, nome]);
+
+  // Sem os nomes, o botão mostraria "#25" — e o número entrega a resposta.
+  const podeResponder = mode === "tipo" ? opcoes.length > 0 : pronto;
+  const revelado = escolha !== null;
+  const acertou = opcoes.find((o) => o.key === escolha)?.certa ?? false;
+
+  const responder = useCallback(
+    (key: string) => {
+      if (escolha !== null) return;
+      setEscolha(key);
+      onResolve(opcoes.find((o) => o.key === key)?.certa ?? false);
+    },
+    [escolha, onResolve, opcoes]
+  );
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLSelectElement || e.target instanceof HTMLInputElement) return;
+      const n = Number(e.key);
+      if (escolha === null && podeResponder && n >= 1 && n <= opcoes.length) {
+        e.preventDefault();
+        responder(opcoes[n - 1].key);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [escolha, podeResponder, opcoes, responder]);
+
+  const grito = poke?.cries?.latest ?? poke?.cries?.legacy ?? null;
+  // O grito toca sozinho quando a rodada abre — se o navegador deixar.
+  useEffect(() => {
+    if (mode === "grito" && grito) audio.current?.play().catch(() => undefined);
+  }, [mode, grito]);
+
+  const texto = useMemo(() => {
+    if (mode !== "descricao" || !species) return "";
+    const bruto = pickLocalized(species.flavor_text_entries, (e) => e.flavor_text, lang);
+    return redactName(bruto, [species.name, ...(species.names ?? []).map((n) => n.name)]);
+  }, [mode, species, lang]);
+
+  const sprite = (silhueta: boolean) => (
+    <img
+      src={pixelSpriteUrl(round.answer)}
+      alt={revelado ? nome(round.answer) : silhueta ? t("Silhueta de um pokémon", "Silhouette of a Pokémon") : ""}
+      width={96}
+      height={96}
+      className={`quiz-sprite${silhueta ? "" : " quiz-sprite-visivel"}`}
+      draggable={false}
+    />
+  );
+
+  return (
+    <>
       <div className={`quiz-palco${revelado ? " is-revelado" : ""}`}>
-        <img
-          key={round.answer}
-          src={pixelSpriteUrl(round.answer)}
-          alt={revelado ? nome(round.answer) : t("Silhueta de um pokémon", "Silhouette of a Pokémon")}
-          width={96}
-          height={96}
-          className="quiz-sprite"
-          draggable={false}
-        />
+        {mode === "silhueta" && sprite(true)}
+        {mode === "grito" &&
+          (revelado ? (
+            sprite(false)
+          ) : (
+            <div className="quiz-grito">
+              <audio ref={audio} src={grito ?? undefined} preload="auto" />
+              <button type="button" onClick={() => audio.current?.play().catch(() => undefined)} disabled={!grito}>
+                ▶ {grito ? t("Ouvir o grito", "Play the cry") : t("Carregando…", "Loading…")}
+              </button>
+            </div>
+          ))}
+        {mode === "descricao" &&
+          (revelado ? (
+            sprite(false)
+          ) : (
+            <blockquote className="quiz-descricao">{texto || t("Carregando…", "Loading…")}</blockquote>
+          ))}
+        {mode === "tipo" && (
+          <>
+            {sprite(false)}
+            <p className="quiz-pergunta">
+              {t("Qual é o tipo de", "What type is")} <strong>{nome(round.answer)}</strong>?
+            </p>
+          </>
+        )}
         <p className="quiz-resultado" role="status" aria-live="polite">
           {revelado &&
-            (acertou ? (
+            (mode === "tipo" ? (
+              acertou ? (
+                t("Isso!", "Right!")
+              ) : (
+                <>
+                  {t("Era", "It was")} <strong>{tiposCertos?.map((ty) => tType(ty)).join(" / ")}</strong>.
+                </>
+              )
+            ) : acertou ? (
               <>
                 {t("É o", "It's")} <strong>{nome(round.answer)}</strong>!
               </>
@@ -165,39 +355,103 @@ const QuizPage = () => {
       </div>
 
       <div className="quiz-opcoes">
-        {round.options.map((id, i) => {
-          const classe =
-            revelado && id === round.answer
-              ? " is-certa"
-              : revelado && id === escolha
-                ? " is-errada"
-                : "";
-          return (
-            <button
-              key={id}
-              type="button"
-              className={`quiz-opcao${classe}`}
-              onClick={() => responder(id)}
-              // Sem o índice, o botão mostraria "#25" — e o número entrega a resposta.
-              disabled={revelado || !index}
-            >
-              <kbd>{i + 1}</kbd> {index ? nome(id) : "…"}
-            </button>
-          );
-        })}
+        {opcoes.length === 0
+          ? [0, 1, 2, 3].map((i) => (
+              <button key={i} type="button" className="quiz-opcao" disabled>
+                <kbd>{i + 1}</kbd> …
+              </button>
+            ))
+          : opcoes.map((o, i) => {
+              const classe = revelado && o.certa ? " is-certa" : revelado && o.key === escolha ? " is-errada" : "";
+              return (
+                <button
+                  key={o.key}
+                  type="button"
+                  className={`quiz-opcao${classe}`}
+                  onClick={() => responder(o.key)}
+                  disabled={revelado || !podeResponder}
+                >
+                  <kbd>{i + 1}</kbd> {podeResponder ? o.label : "…"}
+                </button>
+              );
+            })}
       </div>
+    </>
+  );
+};
 
-      {revelado && (
-        <div className="quiz-depois">
-          <button type="button" className="quiz-proximo" onClick={proximo} autoFocus>
-            {t("Próximo →", "Next →")}
-          </button>
-          {slugOf.get(round.answer) && (
-            <Link to={`/pokemon/${slugOf.get(round.answer)}`}>{t("Ver a ficha", "See the profile")}</Link>
-          )}
-        </div>
+/** Cinco rodadas, iguais para todo mundo hoje; uma tentativa por dia. */
+const DesafioDoDia = () => {
+  const lang = useLang();
+  const t = (pt: string, en: string) => tr(lang, pt, en);
+  const dia = useMemo(() => dayNumber(new Date()), []);
+  const rodadas = useMemo(() => dailyRounds(dia), [dia]);
+  const [resultados, setResultados] = useState<boolean[]>(() => loadDaily(dia) ?? []);
+  const [respondida, setRespondida] = useState(false);
+  const [copiado, setCopiado] = useState(false);
+
+  const i = respondida ? resultados.length - 1 : resultados.length;
+  const acabou = !respondida && resultados.length >= DAILY_ROUNDS;
+
+  const resolver = (acertou: boolean) => {
+    const novos = [...resultados, acertou];
+    setResultados(novos);
+    saveDaily(dia, novos);
+    setRespondida(true);
+  };
+
+  if (acabou) {
+    const texto = shareText(dia, resultados, lang);
+    return (
+      <section className="quiz-fim" aria-labelledby="quiz-fim-titulo">
+        <h2 id="quiz-fim-titulo">
+          {resultados.filter(Boolean).length}/{DAILY_ROUNDS}
+        </h2>
+        <p className="quiz-quadrados" aria-label={t("Acertos e erros, em ordem", "Hits and misses, in order")}>
+          {resultados.map((r, k) => (
+            <span key={k} role="img" aria-label={r ? t("acerto", "hit") : t("erro", "miss")}>
+              {r ? "🟩" : "🟥"}
+            </span>
+          ))}
+        </p>
+        <pre className="quiz-compartilhar">{texto}</pre>
+        <button
+          type="button"
+          className="quiz-proximo"
+          onClick={() => {
+            navigator.clipboard
+              ?.writeText(texto)
+              .then(() => setCopiado(true))
+              .catch(() => setCopiado(false));
+          }}
+        >
+          {copiado ? t("Copiado ✓", "Copied ✓") : t("Copiar resultado", "Copy result")}
+        </button>
+        <p className="quiz-resultado">{t("Um desafio novo amanhã.", "A new challenge tomorrow.")}</p>
+      </section>
+    );
+  }
+
+  const atual = rodadas[i];
+  const nomeDoModo = ABAS.find((a) => a.mode === atual.mode);
+  return (
+    <>
+      <p className="quiz-progresso">
+        {t("Rodada", "Round")} {i + 1}/{DAILY_ROUNDS} · {lang === "en" ? nomeDoModo?.en : nomeDoModo?.pt}
+        <span aria-hidden="true">
+          {" "}
+          {resultados.map((r) => (r ? "🟩" : "🟥")).join("")}
+        </span>
+      </p>
+      <Rodada key={i} mode={atual.mode} round={atual.round} onResolve={resolver} />
+      {respondida && (
+        <Depois
+          answer={atual.round.answer}
+          onNext={() => setRespondida(false)}
+          label={i + 1 >= DAILY_ROUNDS ? t("Ver resultado →", "See result →") : undefined}
+        />
       )}
-    </div>
+    </>
   );
 };
 

@@ -59,7 +59,15 @@ Uma Pokédex web completa em **React + TypeScript + Vite**, consumindo a [PokéA
 ### Quiz (`/quiz`)
 - **Quem é esse Pokémon?** — a silhueta é o sprite local com `brightness(0)`;
   quatro alternativas do mesmo recorte de geração (`?ger=3`)
-- Atalhos **1–4** e **Enter**; sequência e recorde por recorte no `localStorage`
+- **Outros modos** (`?modo=`) — **grito** (toca o cry da PokéAPI), **descrição**
+  (texto da Pokédex com o nome escondido em todos os idiomas) e **tipo**
+  (mostra o pokémon; quatro combinações de tipo para escolher)
+- **Desafio do dia** (`?modo=diario`) — cinco rodadas passando pelos quatro
+  modos, iguais para todo mundo no mesmo dia sem servidor (sorteio mulberry32
+  com o número do dia como semente), uma tentativa por dia e o resultado em
+  quadrados para copiar
+- Atalhos **1–4** e **Enter**; sequência e recorde por recorte e modo no
+  `localStorage`
 - As alternativas esperam o índice de nomes: mostrar "#25" antes entregaria a
   resposta
 
