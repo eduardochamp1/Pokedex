@@ -394,6 +394,21 @@ export function useMoveDetail(moveName: string | undefined) {
   });
 }
 
+/** Vários golpes de uma vez, com a chave de cache de `useMoveDetail`. */
+export function useMoveDetails(moveNames: string[]): Record<string, MoveDetail | null | undefined> {
+  const results = useQueries({
+    queries: moveNames.map((moveName) => ({
+      queryKey: ["move-detail", moveName],
+      queryFn: ({ signal }: { signal: AbortSignal }) =>
+        fetchJsonPublic<MoveDetail>(`https://pokeapi.co/api/v2/move/${moveName}`, signal),
+      staleTime: HOUR,
+    })),
+  });
+  const out: Record<string, MoveDetail | null | undefined> = {};
+  moveNames.forEach((m, i) => (out[m] = results[i]?.data));
+  return out;
+}
+
 export interface EvolutionStep {
   name: string;
   /** Condicao para chegar NESTE estagio; vazio no primeiro. */

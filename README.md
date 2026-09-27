@@ -232,6 +232,15 @@ Calculadora de dano de Gen 3, seguindo a decompilação (pokeemerald:
 - **Resultado** — faixa de dano, % do HP, nocaute garantido ou com chance em
   N golpes, e as 16 rolagens
 
+### Ginásios (`/ginasios`)
+Os oito líderes do Emerald e do FireRed/LeafGreen, com os times gerados de
+`trainer_parties.h` das decompilações (a primeira luta de cada um): nível,
+IV (convertido de 0–255 para 0–31; em FR/LG é 0), item, golpes, e tipos e
+poderes de Gen 3. Contra cada pokémon do líder, cada membro do seu time do
+save mostra o melhor golpe que tem e o pior que vai receber; a página
+sugere quem levar, abre no próximo ginásio sem insígnia e marca as ganhas.
+Ruby/Sapphire têm times um pouco diferentes e não estão incluídos.
+
 ### Treinador (`/treinador`)
 A ficha do treinador e a linha do tempo da partida, lidas do save de
 **Emerald**, **FireRed/LeafGreen** ou **Ruby/Sapphire** em `/jogar` e

@@ -1,0 +1,43 @@
+/* ========= /ginasios: os oito líderes contra o seu time ========= */
+.trainer-header select {
+  font: inherit;
+  color: var(--text);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+}
+.gyms { list-style: none; display: grid; gap: 10px; }
+.gym { border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-1); }
+.gym-proximo { border-color: var(--accent); }
+.gym summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+}
+.gym summary .trainer-sub { display: inline; }
+.gym-ganho {
+  font-size: 0.72rem;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-pill);
+  padding: 1px 8px;
+}
+.gym-corpo { padding: 0 14px 14px; display: grid; gap: 10px; }
+.gym-tabela-rolagem { overflow-x: auto; }
+.gym-tabela { border-collapse: collapse; font-size: 0.8rem; min-width: 100%; }
+.gym-tabela th,
+.gym-tabela td { padding: 6px 8px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+.gym-tabela thead th { white-space: nowrap; color: var(--text-muted); font-weight: 600; }
+.gym-tabela thead th.gym-destaque { color: var(--accent); }
+.gym-tabela tbody th { font-weight: 400; min-width: 260px; }
+.gym-tabela td span { display: block; white-space: nowrap; }
+.gym-mon { display: flex; gap: 10px; align-items: flex-start; }
+.gym-mon p { margin: 0 0 4px; }
+.gym-tipos { display: flex; gap: 4px; }
+.gym-golpe { display: inline !important; color: var(--text-muted); }
+.gym-bom { color: var(--t-grass); font-weight: 700; }
+.gym-ruim { color: var(--t-fire); font-weight: 700; }
