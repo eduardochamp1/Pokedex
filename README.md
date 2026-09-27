@@ -14,6 +14,8 @@ Uma Pokédex web completa em **React + TypeScript + Vite**, consumindo a [PokéA
 - **Filtro por raridade** (lendários, míticos, bebês, iniciais)
 - **Cross-filter** — busca + tipo + geração + raridade se combinam por interseção, com o total de resultados visível e paginação real
 - **Favoritos persistentes** no `localStorage` com contador no navbar
+- **Pokémon do dia** no topo — o mesmo para todo mundo no mesmo dia, sem
+  servidor: `(dia × 389 + 25) mod 1025` passa pelas 1025 espécies antes de repetir
 - **Seu jogo** — com um save de Gen 3 lido em `/jogar`, a sidebar mostra o
   progresso da dex do jogo (capturados e vistos de 386) e filtra por
   Capturados / Vistos, não capturados / Não vistos (`?meu=`). As cartas ganham
@@ -26,6 +28,8 @@ Uma Pokédex web completa em **React + TypeScript + Vite**, consumindo a [PokéA
 - **Lore** — texto oficial da Pokédex (PT-BR quando disponível, com fallback em inglês)
 - **Badge de raridade** — Lendário 👑, Mítico ✨, Bebê 🍼
 - **Evoluções** — chain completa com cards clicáveis
+- **Habilidades clicáveis** — cada uma leva a `/habilidade/:slug`, com o efeito,
+  a geração e todos os pokémon que a têm, comum e oculta separadas
 - **Formas alternativas** — Mega X/Y, Gigantamax, Origin, Regional, Therian, Ultra, etc.
 - **Link para o mapa** — resolve a região de origem pela lista de emblemáticos ou pela geração da espécie
 - **Onde encontrar** — rotas, método, nível e chance jogo a jogo, de
@@ -47,6 +51,13 @@ Uma Pokédex web completa em **React + TypeScript + Vite**, consumindo a [PokéA
   perigo marcadas (dois ou mais fracos, e mais fracos do que quem resiste)
 - **Ataque** — que tipos o time acerta 2×, contando os tipos de cada membro
 - Mesma matriz 18×18 do Comparar, sem request
+
+### Quiz (`/quiz`)
+- **Quem é esse Pokémon?** — a silhueta é o sprite local com `brightness(0)`;
+  quatro alternativas do mesmo recorte de geração (`?ger=3`)
+- Atalhos **1–4** e **Enter**; sequência e recorde por recorte no `localStorage`
+- As alternativas esperam o índice de nomes: mostrar "#25" antes entregaria a
+  resposta
 
 ### Favoritos (`/favoritos`)
 - Grid reaproveita o cache do detail
