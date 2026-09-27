@@ -280,6 +280,10 @@ leem time, Pokédex, PC e tempo de jogo, sem dinheiro nem insígnias.
   jogo foi salvo
 - **Insígnias** de Hoenn ou de Kanto conforme o jogo, **cidades de Hoenn**
   (só Emerald) e o time
+- **Imagem do cartão** — o cartão como PNG de 800×420 desenhado num
+  `<canvas>` (nome, ID, tempo, dinheiro, dex, insígnias e o time com os
+  sprites locais), com prévia, "Baixar PNG" e "Compartilhar" onde o
+  navegador compartilha arquivos
 - **Conquistas** — dex (10 a 200), insígnias, Hoenn inteira, time cheio,
   nível 50 e 100, evolução, shiny, caixa cheia, 10 horas e ₽100.000, com o
   quanto falta. Todas saem da ficha, sem nada gravado à parte; a que depende

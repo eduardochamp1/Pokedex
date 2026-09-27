@@ -13,6 +13,7 @@ import { usePokemonIndex } from "../hooks/usePokemon";
 import PokemonMini from "../components/PokemonMini";
 import PcBoxes from "../components/PcBoxes";
 import Achievements from "../components/Achievements";
+import TrainerCardShare from "../components/TrainerCardShare";
 import { pokemonLabel } from "../lib/pokemonLabel";
 import { TOTAL_DA_DEX_GEN3 } from "../lib/playerDex";
 import "../styles/trainer.css";
@@ -125,6 +126,7 @@ const TrainerPage = () => {
           )}
         </dl>
       </section>
+      <TrainerCardShare entry={entry} />
 
       {game === "rs" && (
         <p className="trainer-sub">

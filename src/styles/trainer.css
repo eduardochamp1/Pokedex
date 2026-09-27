@@ -179,3 +179,21 @@
   .trainer-shell { padding: 20px 16px 48px; }
   .trainer-evento { grid-template-columns: 1fr; gap: 2px; }
 }
+
+/* Imagem do cartão para compartilhar */
+.trainer-compartilhar { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin-top: -12px; }
+.trainer-compartilhar button,
+.trainer-compartilhar-previa a {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--accent);
+  background: var(--surface-1);
+  color: var(--text);
+  cursor: pointer;
+  text-decoration: none;
+}
+.trainer-compartilhar-previa { margin: 0; display: grid; gap: 8px; }
+.trainer-compartilhar-previa img { max-width: 100%; height: auto; border-radius: var(--radius-sm); box-shadow: var(--shadow-hero); }
+.trainer-compartilhar-previa figcaption { display: flex; gap: 8px; }
