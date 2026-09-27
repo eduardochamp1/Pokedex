@@ -1,5 +1,6 @@
 import { POKEMON_TYPES, REGIONAL_DEXES } from "../hooks/usePokemon";
 import { RARITIES, type RarityId } from "../data/rarity";
+import { parseDexFilter, type DexFilter } from "./playerDex";
 
 export const SORTS = [
   { id: "id", label: "Número" },
@@ -14,6 +15,8 @@ export interface HomeParams {
   generation: number | undefined;
   pokedex: string | undefined;
   rarity: RarityId | undefined;
+  /** Recorte pela dex do jogo lido do save. */
+  mine: DexFilter | undefined;
   sort: SortId;
   page: number;
 }
@@ -24,6 +27,7 @@ const DEFAULTS: HomeParams = {
   generation: undefined,
   pokedex: undefined,
   rarity: undefined,
+  mine: undefined,
   sort: "id",
   page: 0,
 };
@@ -65,6 +69,7 @@ export function parseHomeParams(params: URLSearchParams): HomeParams {
     generation,
     pokedex,
     rarity: validRarity,
+    mine: parseDexFilter(params.get("meu")),
     sort,
     page,
   };
@@ -78,6 +83,7 @@ export function toSearchParams(p: HomeParams): URLSearchParams {
   if (p.generation) out.set("ger", String(p.generation));
   if (p.pokedex) out.set("dex", p.pokedex);
   if (p.rarity) out.set("rar", p.rarity);
+  if (p.mine) out.set("meu", p.mine);
   if (p.sort !== DEFAULTS.sort) out.set("ord", p.sort);
   if (p.page > 0) out.set("p", String(p.page + 1));
   return out;

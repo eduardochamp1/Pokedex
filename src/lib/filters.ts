@@ -34,6 +34,19 @@ export function intersectNames(sources: string[][]): string[] {
   return [...new Set(first)].filter((name) => sets.every((s) => s.has(name)));
 }
 
+/**
+ * Ids da Pokedex -> nomes do indice, na ordem dos ids. Serve para quem so tem
+ * numeros nacionais, como a dex lida do save. Id desconhecido fica de fora.
+ */
+export function namesForIds(ids: number[], index: Map<string, number>): string[] {
+  const nomePorId = new Map<number, string>();
+  for (const [name, id] of index) if (!nomePorId.has(id)) nomePorId.set(id, name);
+  return ids.flatMap((id) => {
+    const name = nomePorId.get(id);
+    return name === undefined ? [] : [name];
+  });
+}
+
 /** Ordena nomes pelo id da Pokedex; desconhecidos vao para o fim, por nome. */
 export function sortNamesById(
   names: string[],

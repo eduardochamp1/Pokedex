@@ -3,6 +3,7 @@ import {
   buildNameIndex,
   extractIdFromUrl,
   intersectNames,
+  namesForIds,
   pageOf,
   searchNames,
   sortNamesAlphabetically,
@@ -172,5 +173,21 @@ describe("sortNamesAlphabetically", () => {
     const input = ["b", "a"];
     sortNamesAlphabetically(input);
     expect(input).toEqual(["b", "a"]);
+  });
+});
+
+describe("namesForIds", () => {
+  const index = buildNameIndex(RESULTS);
+
+  it("traduz ids para nomes, na ordem dos ids", () => {
+    expect(namesForIds([25, 1, 6], index)).toEqual(["pikachu", "bulbasaur", "charizard"]);
+  });
+
+  it("id que o índice não conhece fica de fora", () => {
+    expect(namesForIds([1, 9999], index)).toEqual(["bulbasaur"]);
+  });
+
+  it("lista vazia dá lista vazia", () => {
+    expect(namesForIds([], index)).toEqual([]);
   });
 });

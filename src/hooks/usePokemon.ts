@@ -14,6 +14,7 @@ import {
 import {
   buildNameIndex,
   intersectNames,
+  namesForIds,
   pageOf,
   searchNames,
   sortNamesById,
@@ -214,6 +215,11 @@ export interface SelectionCriteria {
   /** Dex regional: o que aparece na regiao, nao o que estreou nela. */
   pokedex?: string;
   rarity?: RarityId;
+  /**
+   * Números nacionais que a seleção pode conter — a dex do jogo lido do save.
+   * `undefined` = não participa; `[]` participa e zera o resultado.
+   */
+  nationals?: number[];
 }
 
 export interface Selection {
@@ -228,7 +234,7 @@ export interface Selection {
  * id. Cada criterio custa no maximo um request; a interseccao e local.
  */
 export function usePokemonSelection(criteria: SelectionCriteria): Selection {
-  const { search, type, generation, pokedex, rarity } = criteria;
+  const { search, type, generation, pokedex, rarity, nationals } = criteria;
   const { index, isLoading: indexLoading, isError: indexError } = usePokemonIndex();
   const typeQuery = useTypeNames(type);
   const genQuery = useGenerationNames(generation);
@@ -240,7 +246,9 @@ export function usePokemonSelection(criteria: SelectionCriteria): Selection {
   }, [rarity]);
 
   const searchQuery = search?.trim() ? search.trim() : undefined;
-  const hasCriteria = Boolean(searchQuery || type || generation || pokedex || rarity);
+  const hasCriteria = Boolean(
+    searchQuery || type || generation || pokedex || rarity || nationals
+  );
 
   const names = useMemo(() => {
     if (!hasCriteria || !index) return null;
@@ -251,6 +259,7 @@ export function usePokemonSelection(criteria: SelectionCriteria): Selection {
     if (generation) sources.push(genQuery.data ?? []);
     if (pokedex) sources.push(dexQuery.data ?? []);
     if (rarityNames) sources.push(rarityNames);
+    if (nationals) sources.push(namesForIds(nationals, index));
 
     return sortNamesById(intersectNames(sources), index);
   }, [
@@ -261,6 +270,7 @@ export function usePokemonSelection(criteria: SelectionCriteria): Selection {
     generation,
     pokedex,
     rarityNames,
+    nationals,
     typeQuery.data,
     genQuery.data,
     dexQuery.data,
