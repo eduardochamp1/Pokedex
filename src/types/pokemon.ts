@@ -126,6 +126,7 @@ export interface EvolutionDetail {
   item: { name: string; url: string } | null;
   held_item: { name: string; url: string } | null;
   known_move: { name: string; url: string } | null;
+  known_move_type?: { name: string; url: string } | null;
   location: { name: string; url: string } | null;
   min_happiness: number | null;
   min_affection: number | null;

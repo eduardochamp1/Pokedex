@@ -1,5 +1,6 @@
 import type { EvolutionDetail } from "../types/pokemon";
 import { getLang, type Lang } from "../i18n/lang";
+import { tType } from "../data/i18n";
 
 /** "fire-stone" -> "Fire Stone" */
 function humanize(slug: string): string {
@@ -37,7 +38,9 @@ export function evolutionConditionText(
     partes.push(
       detail.held_item
         ? t(`troca segurando ${humanize(detail.held_item.name)}`, `trade holding ${humanize(detail.held_item.name)}`)
-        : t("troca", "trade")
+        : detail.trade_species
+          ? t(`troca por ${humanize(detail.trade_species.name)}`, `trade for ${humanize(detail.trade_species.name)}`)
+          : t("troca", "trade")
     );
   } else {
     if (detail.min_level !== null) partes.push(t(`nível ${detail.min_level}`, `level ${detail.min_level}`));
@@ -53,8 +56,11 @@ export function evolutionConditionText(
   }
 
   // known_move e hora do dia valem para qualquer gatilho.
-  if (detail.known_move) {
-    const texto = t(`sabendo ${humanize(detail.known_move.name)}`, `knowing ${humanize(detail.known_move.name)}`);
+  const tipoDoGolpe = detail.known_move_type?.name;
+  if (detail.known_move || tipoDoGolpe) {
+    const texto = detail.known_move
+      ? t(`sabendo ${humanize(detail.known_move.name)}`, `knowing ${humanize(detail.known_move.name)}`)
+      : t(`sabendo um golpe do tipo ${tType(tipoDoGolpe, lang)}`, `knowing a ${tType(tipoDoGolpe, lang)}-type move`);
     if (partes.length > 0) return `${partes.join(", ")} ${texto}`;
     partes.push(texto);
   }

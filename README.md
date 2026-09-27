@@ -240,6 +240,14 @@ Calculadora de dano de Gen 3, seguindo a decompilação (pokeemerald:
 - **Resultado** — faixa de dano, % do HP, nocaute garantido ou com chance em
   N golpes, e as 16 rolagens
 
+### Evoluções (`/evolucoes`)
+As árvores de evolução de todas as espécies, com a condição em cada seta.
+Filtro por método (nível, pedra/item, troca, amizade, item segurado, golpe,
+lugar, hora do dia, outros), geração, nome e só as que se ramificam, na URL
+(`?metodo=trade&ger=1`). As 540 cadeias vêm de um arquivo gerado da
+PokéAPI (`src/data/evolutionChains.ts`, 52 KB) — seriam 540 requests por
+visita —, carregado só com a página.
+
 ### Ginásios (`/ginasios`)
 Os oito líderes do Emerald e do FireRed/LeafGreen, com os times gerados de
 `trainer_parties.h` das decompilações (a primeira luta de cada um): nível,

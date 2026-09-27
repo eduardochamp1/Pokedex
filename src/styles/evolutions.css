@@ -1,0 +1,58 @@
+/* ========= /evolucoes: todas as árvores ========= */
+.evo-filtros { display: grid; gap: 10px; }
+.evo-metodos { display: flex; flex-wrap: wrap; gap: 6px; }
+.evo-metodos button {
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface-1);
+  color: var(--text);
+  cursor: pointer;
+}
+.evo-metodos button[aria-checked="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.evo-metodos button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.evo-linha { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; font-size: 0.85rem; }
+.evo-linha select,
+.evo-busca input {
+  font: inherit;
+  color: var(--text);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+}
+.evo-busca { flex: 1 1 220px; }
+.evo-busca input { width: 100%; }
+.evo-lista { list-style: none; display: grid; gap: 10px; }
+.evo-arvore {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  overflow-x: auto;
+}
+.evo-no { display: flex; align-items: center; gap: 6px; }
+.evo-filhos { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.evo-filhos > li { display: flex; align-items: center; gap: 6px; }
+.evo-seta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 90px;
+  max-width: 160px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+.evo-seta > span[aria-hidden] { font-size: 1.1rem; color: var(--accent); }
+.evo-mais {
+  justify-self: center;
+  font: inherit;
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--accent);
+  background: var(--surface-1);
+  color: var(--text);
+  cursor: pointer;
+}
