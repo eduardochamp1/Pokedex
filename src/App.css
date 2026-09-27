@@ -769,6 +769,7 @@ img { display: block; max-width: 100%; }
     "evo     hero stats"
     /* Golpes e sprites por geração ocupam a largura toda: são listas longas,
        e espremê-las numa coluna de 240 px não ajudaria ninguém. */
+    "encounters encounters capture"
     "scrubber scrubber scrubber"
     "moves    moves    moves";
   gap: 20px;
@@ -784,6 +785,8 @@ img { display: block; max-width: 100%; }
 .detail-panel-abilities { grid-area: abilities; }
 .detail-panel-stats     { grid-area: stats; }
 .detail-panel-scrubber  { grid-area: scrubber; }
+.detail-panel-encounters { grid-area: encounters; }
+.detail-panel-capture   { grid-area: capture; }
 .detail-panel-moves     { grid-area: moves; }
 .detail-hero-slot {
   grid-area: hero;
@@ -988,6 +991,8 @@ img { display: block; max-width: 100%; }
       "meta      defense"
       "abilities abilities"
       "stats     stats"
+      "encounters encounters"
+      "capture   capture"
       "scrubber  scrubber"
       "moves     moves";
   }
@@ -995,7 +1000,7 @@ img { display: block; max-width: 100%; }
 @media (max-width: 640px) {
   .detail-layout {
     grid-template-columns: 1fr;
-    grid-template-areas: "hero" "sprites" "forms" "evo" "lore" "meta" "defense" "abilities" "stats" "scrubber" "moves";
+    grid-template-areas: "hero" "sprites" "forms" "evo" "lore" "meta" "defense" "abilities" "stats" "encounters" "capture" "scrubber" "moves";
   }
 }
 

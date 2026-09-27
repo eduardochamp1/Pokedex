@@ -17,6 +17,9 @@ import TypeDefense from "../components/TypeDefense";
 import AbilityList from "../components/AbilityList";
 import MoveList from "../components/MoveList";
 import CryButton from "../components/CryButton";
+import EncounterPanel from "../components/EncounterPanel";
+import CapturePanel from "../components/CapturePanel";
+import "../styles/detailExtras.css";
 import { DetailSkeleton } from "../components/Skeleton";
 
 const STAT_LABELS: Record<string, string> = {
@@ -159,6 +162,23 @@ const DetailPage = () => {
           <h3>Golpes</h3>
           <MoveList moves={pokemon.moves ?? []} />
         </aside>
+
+        <aside className="detail-panel detail-panel-encounters">
+          <h3>Onde encontrar</h3>
+          <EncounterPanel pokemonId={pokemon.id} />
+        </aside>
+
+        {species.data && (
+          <aside className="detail-panel detail-panel-capture">
+            <h3>Chance de captura</h3>
+            <CapturePanel
+              national={pokemon.id}
+              captureRate={species.data.capture_rate}
+              baseHp={pokemon.stats.find((s) => s.stat.name === "hp")?.base_stat ?? 1}
+              types={pokemon.types.map((t) => t.type.name)}
+            />
+          </aside>
+        )}
 
         <aside className="detail-panel detail-panel-scrubber">
           <h3>Sprite através das gerações</h3>

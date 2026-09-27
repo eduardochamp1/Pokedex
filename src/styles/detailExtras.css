@@ -1,0 +1,82 @@
+/* ========= Ficha: onde encontrar e chance de captura =========
+   As áreas do grid ficam em App.css, junto com as outras; aqui só o miolo. */
+
+.encounters-jogo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-bottom: 10px;
+}
+.encounters-jogo label { color: var(--text-muted); font-size: 0.82rem; }
+.encounters-jogo select,
+.capture-campos select,
+.capture-campos input[type="number"] {
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text);
+}
+.encounters-mapa { color: var(--accent); font-size: 0.82rem; }
+
+.encounters-tabela,
+.capture-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+.encounters-tabela th,
+.encounters-tabela td,
+.capture-tabela th,
+.capture-tabela td {
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+.encounters-tabela thead th,
+.capture-tabela thead th { color: var(--text-muted); font-weight: 400; }
+.encounters-tabela th[scope="row"],
+.capture-tabela th[scope="row"] { font-weight: 600; }
+.encounters-cond { color: var(--text-muted); font-weight: 400; font-size: 0.78rem; }
+
+.capture-campos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin: 10px 0 12px;
+}
+.capture-campos label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.capture-campos input[type="number"] { width: 5.5em; }
+.capture-hp { flex: 1 1 180px; font-variant-numeric: tabular-nums; }
+.capture-hp input[type="range"] { accent-color: var(--accent); }
+.capture-campos .capture-check {
+  flex-direction: row;
+  align-items: center;
+  align-self: flex-end;
+  gap: 6px;
+  color: var(--text);
+}
+.capture-nota {
+  display: block;
+  font-weight: 400;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+.capture-tabela td { position: relative; }
+/* A barra fica atrás do número: a chance se lê de relance e o valor continua exato. */
+.capture-barra {
+  position: absolute;
+  inset: 4px auto 4px 0;
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+  border-radius: 3px;
+}
+.capture-valor { position: relative; }
+.capture-rodape { margin-top: 8px; font-size: 0.75rem; }
