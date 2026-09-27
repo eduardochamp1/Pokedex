@@ -33,6 +33,14 @@ const Navbar = () => {
           Comparar
         </NavLink>
         <NavLink
+          to="/time"
+          className={({ isActive }) =>
+            "nav-link" + (isActive ? " nav-link-active" : "")
+          }
+        >
+          Time
+        </NavLink>
+        <NavLink
           to="/mapa"
           className={({ isActive }) =>
             "nav-link" + (isActive ? " nav-link-active" : "")

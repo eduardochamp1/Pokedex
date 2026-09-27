@@ -19,6 +19,7 @@ const MapPage = lazy(() => import("./pages/MapPage"));
 const PlayPage = lazy(() => import("./pages/PlayPage"));
 const SizesPage = lazy(() => import("./pages/SizesPage"));
 const TrainerPage = lazy(() => import("./pages/TrainerPage"));
+const TeamBuilderPage = lazy(() => import("./pages/TeamBuilderPage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 
 function App() {
@@ -51,6 +52,7 @@ function App() {
             <Route path="/jogar" element={<PlayPage />} />
             <Route path="/tamanhos" element={<SizesPage />} />
             <Route path="/treinador" element={<TrainerPage />} />
+            <Route path="/time" element={<TeamBuilderPage />} />
             <Route path="/pokemon/:nameOrId" element={<DetailPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

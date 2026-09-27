@@ -1,0 +1,169 @@
+/* ========= /time: montador de time e análise de tipo ========= */
+.team-shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.team-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+}
+.team-header h1 {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.team-count { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.team-shell h2 {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  margin-bottom: 8px;
+}
+.team-nota,
+.team-vazio,
+.team-aviso { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 10px; }
+.team-ok { color: var(--text); font-size: 0.9rem; }
+
+.team-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.team-add input {
+  flex: 1 1 220px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text);
+}
+.team-add input:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+}
+.team-add button {
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 700;
+  cursor: pointer;
+}
+.team-add button:disabled { opacity: 0.45; cursor: not-allowed; }
+.team-add .team-secundario {
+  background: transparent;
+  color: var(--accent);
+}
+
+.team-slots {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+.team-slots li { position: relative; }
+.team-slot-vazio {
+  height: 100%;
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-card);
+  border: 2px dashed var(--border-strong);
+  color: var(--text-muted);
+}
+.team-remover {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  z-index: 3;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--border-strong);
+  background: var(--surface-1);
+  color: var(--text);
+  cursor: pointer;
+  line-height: 1;
+}
+.team-remover:hover,
+.team-remover:focus-visible { border-color: var(--fav); color: var(--fav); }
+
+.team-resumo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+.team-resumo > div {
+  background: var(--surface-1);
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius-card);
+  padding: 14px 16px;
+}
+.team-tipos { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* A tabela rola sozinha no celular; a página não. */
+.team-tabela-wrap { overflow-x: auto; }
+.team-tabela {
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.82rem;
+  min-width: 100%;
+}
+.team-tabela th,
+.team-tabela td {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+  white-space: nowrap;
+}
+.team-tabela thead th { color: var(--text-muted); font-weight: 400; text-transform: capitalize; }
+.team-tabela th[scope="row"] { text-align: left; }
+.team-tabela td.is-weak { color: var(--fav); font-weight: 700; }
+.team-tabela td.is-resist { color: var(--accent); }
+.team-tabela td.is-immune { color: var(--text-dim); }
+.team-tabela tr.is-danger { background: color-mix(in srgb, var(--fav) 12%, transparent); }
+.team-tabela tr.is-danger th[scope="row"]::after { content: " ⚠"; color: var(--fav); }
+
+.team-ataque {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 6px;
+}
+.team-ataque li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+.team-ataque li.is-gap { border-style: dashed; opacity: 0.7; }
+.team-ataque-quem {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-transform: capitalize;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .team-shell { padding: 20px 16px 48px; }
+}
