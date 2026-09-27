@@ -204,15 +204,16 @@ const LorePage = () => {
         ))}
       </aside>
 
-      <main className="lore-main">
+      <div className="lore-main">
         <h2 className="lore-tab-title">{tx(...TAB_LABELS[tab])}</h2>
         {tab === "timeline" && (
           <>
             <div className="lore-filters">
-              <div className="lore-era-chips" role="tablist" aria-label={tx("Filtrar por era", "Filter by era")}>
+              <div className="lore-era-chips" role="group" aria-label={tx("Filtrar por era", "Filter by era")}>
                 <button
                   type="button"
                   className={"lore-era-chip" + (eraFilter === undefined ? " active" : "")}
+                  aria-pressed={eraFilter === undefined}
                   onClick={() => setEraFilter(undefined)}
                 >
                   {tx("Todas", "All")}
@@ -222,6 +223,7 @@ const LorePage = () => {
                     key={era}
                     type="button"
                     className={"lore-era-chip" + (eraFilter === i ? " active" : "")}
+                    aria-pressed={eraFilter === i}
                     onClick={() => setEraFilter(i)}
                   >
                     {era}
@@ -1044,7 +1046,7 @@ const LorePage = () => {
             ))}
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 };

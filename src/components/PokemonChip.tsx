@@ -24,7 +24,9 @@ const PokemonChip = ({ name, id, onFilter }: Props) => {
         {sprite ? (
           <img
             src={sprite}
-            alt={rotulo}
+            // O nome está logo ao lado, em texto: repetir no alt faz o leitor
+            // de tela dizer o nome duas vezes.
+            alt=""
             loading="lazy"
             decoding="async"
             width={48}
@@ -32,7 +34,7 @@ const PokemonChip = ({ name, id, onFilter }: Props) => {
             onError={() => setBroken(true)}
           />
         ) : (
-          <span className="lore-chip-placeholder">?</span>
+          <span className="lore-chip-placeholder" aria-hidden="true">?</span>
         )}
         <span>{rotulo}</span>
       </Link>

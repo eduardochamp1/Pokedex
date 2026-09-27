@@ -11,7 +11,9 @@
   /* Texto */
   --text: #f2f2f5;
   --text-muted: #a2a9b8;
-  --text-dim: #6b7285;
+  /* 4,5:1 sobre bg, surface-1 e surface-3 (era #6b7285, 3,7:1: texto
+     pequeno de legenda e rótulo reprovava em contraste). */
+  --text-dim: #838a9d;
 
   /* Acentos — fosforo do Game Boy e o unico acento de sistema (foco,
      selecao, progresso, cursor). O vermelho fica reservado a acao e a

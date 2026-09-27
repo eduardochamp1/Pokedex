@@ -79,7 +79,9 @@
   font-size: 1.15rem;
   font-variant-numeric: tabular-nums;
 }
-.trainer-card-dados a { color: var(--paper-ps); }
+/* Sublinhado: o vermelho sozinho dá 2,5:1 contra o texto em volta, pouco
+   para distinguir link só pela cor. */
+.trainer-card-dados a { color: var(--paper-ps); text-decoration: underline; }
 .trainer-card .trainer-de { color: var(--paper-ink-soft); }
 
 .trainer-grade {

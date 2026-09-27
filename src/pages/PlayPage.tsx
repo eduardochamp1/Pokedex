@@ -9,6 +9,8 @@ import {
   type KeyBinding,
 } from "../emulator/keyBindings";
 import { sdlKeyFromEvent } from "../emulator/keyNames";
+import { padLabel } from "../emulator/announce";
+import PlayAnnouncer from "../components/PlayAnnouncer";
 import { SHORTCUT_HELP, isTypingTarget, shortcutFor } from "../emulator/shortcuts";
 import {
   AV_TOGGLES,
@@ -302,8 +304,11 @@ const PlayPage = () => {
         </section>
       )}
 
+      <PlayAnnouncer status={emu.status} notice={emu.notice} />
+      {/* Sem role: quem anuncia o aviso é o PlayAnnouncer, que está sempre
+          montado — este div nasce já com o texto e seria anunciado duas vezes. */}
       {emu.notice && (
-        <div className="play-notice" role="status">
+        <div className="play-notice">
           {emu.notice}
           <button type="button" onClick={emu.dismissNotice} aria-label={tx("Fechar", "Close")}>
             ✕
@@ -312,7 +317,7 @@ const PlayPage = () => {
       )}
 
       <div className="play-layout">
-        <main className="play-stage">
+        <div className="play-stage">
           {/* Carcaca: lente, LEDs e grelha em volta da tela. E moldura —
               nada aqui recebe foco nem cobre o canvas. */}
           <div className="play-deck" aria-hidden="true">
@@ -498,7 +503,7 @@ const PlayPage = () => {
                     key={b.button}
                     type="button"
                     className={"play-pad play-pad-" + b.area}
-                    aria-label={b.button}
+                    aria-label={padLabel(b.button, lang)}
                     onPointerDown={(e) => {
                       e.preventDefault();
                       emu.pressButton(b.button);
@@ -513,7 +518,7 @@ const PlayPage = () => {
               </div>
             </>
           )}
-        </main>
+        </div>
 
         <aside className="play-sidebar">
           <section className="play-panel">
@@ -1032,7 +1037,8 @@ const PlayPage = () => {
                 )}
               </p>
             ) : (
-              <ol className="play-log">
+              // Rolável: sem foco, quem usa só teclado não consegue rolar.
+              <ol className="play-log" tabIndex={0} aria-label={tx("Log do core", "Core log")}>
                 {emu.log.map((line, i) => (
                   <li
                     key={`${i}-${line.message}`}

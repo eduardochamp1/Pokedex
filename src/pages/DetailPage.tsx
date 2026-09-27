@@ -23,6 +23,7 @@ import "../styles/detailExtras.css";
 import { DetailSkeleton } from "../components/Skeleton";
 import { useLang, tr } from "../i18n/lang";
 import { statLabel } from "../i18n/common";
+import { pokemonLabel } from "../lib/pokemonLabel";
 
 const DetailPage = () => {
   const { nameOrId } = useParams<{ nameOrId: string }>();
@@ -76,6 +77,9 @@ const DetailPage = () => {
 
   return (
     <div className="detail-shell" data-primary-type={pokemon.types[0]?.type.name}>
+      {/* O nome já aparece na carta, mas como texto de carta; o título da
+          página para leitor de tela é este. */}
+      <h1 className="visually-hidden">{pokemonLabel(pokemon.name)}</h1>
       <button
         type="button"
         className="detail-close"
@@ -86,10 +90,10 @@ const DetailPage = () => {
       </button>
 
       <div className="detail-layout">
-        <aside className="detail-panel detail-panel-sprites">
-          <h3>Sprites</h3>
+        <section className="detail-panel detail-panel-sprites">
+          <h2>Sprites</h2>
           <SpriteViewer pokemon={pokemon} onSelect={setSpriteOverride} />
-        </aside>
+        </section>
 
         <div className="detail-hero-slot">
           <CardHero
@@ -110,17 +114,17 @@ const DetailPage = () => {
         </div>
 
         {species.data && species.data.varieties.length > 1 && (
-          <aside className="detail-panel detail-panel-forms">
-            <h3>{t("Formas", "Forms")}</h3>
+          <section className="detail-panel detail-panel-forms">
+            <h2>{t("Formas", "Forms")}</h2>
             <VarietySwitcher
               varieties={species.data.varieties}
               currentName={pokemon.name}
             />
-          </aside>
+          </section>
         )}
 
-        <aside className="detail-panel detail-panel-evo">
-          <h3>{t("Evoluções", "Evolutions")}</h3>
+        <section className="detail-panel detail-panel-evo">
+          <h2>{t("Evoluções", "Evolutions")}</h2>
           {evolution.isLoading ? (
             <p className="detail-muted">{t("Carregando…", "Loading…")}</p>
           ) : (
@@ -129,59 +133,59 @@ const DetailPage = () => {
               currentName={pokemon.name}
             />
           )}
-        </aside>
+        </section>
 
         {species.data && (
-          <aside className="detail-panel detail-panel-lore">
-            <h3>{t("Sobre", "About")}</h3>
+          <section className="detail-panel detail-panel-lore">
+            <h2>{t("Sobre", "About")}</h2>
             <PokemonLore species={species.data} />
-          </aside>
+          </section>
         )}
 
-        <aside className="detail-panel detail-panel-meta">
-          <h3>{t("Ficha", "Profile")}</h3>
+        <section className="detail-panel detail-panel-meta">
+          <h2>{t("Ficha", "Profile")}</h2>
           <PokemonMeta pokemon={pokemon} species={species.data} />
-        </aside>
+        </section>
 
-        <aside className="detail-panel detail-panel-defense">
-          <h3>{t("Defesas", "Defenses")}</h3>
+        <section className="detail-panel detail-panel-defense">
+          <h2>{t("Defesas", "Defenses")}</h2>
           <TypeDefense types={pokemon.types.map((t) => t.type.name)} />
-        </aside>
+        </section>
 
-        <aside className="detail-panel detail-panel-abilities">
-          <h3>{t("Habilidades", "Abilities")}</h3>
+        <section className="detail-panel detail-panel-abilities">
+          <h2>{t("Habilidades", "Abilities")}</h2>
           <AbilityList abilities={pokemon.abilities} />
-        </aside>
+        </section>
 
-        <aside className="detail-panel detail-panel-moves">
-          <h3>{t("Golpes", "Moves")}</h3>
+        <section className="detail-panel detail-panel-moves">
+          <h2>{t("Golpes", "Moves")}</h2>
           <MoveList moves={pokemon.moves ?? []} />
-        </aside>
+        </section>
 
-        <aside className="detail-panel detail-panel-encounters">
-          <h3>{t("Onde encontrar", "Where to find")}</h3>
+        <section className="detail-panel detail-panel-encounters">
+          <h2>{t("Onde encontrar", "Where to find")}</h2>
           <EncounterPanel pokemonId={pokemon.id} />
-        </aside>
+        </section>
 
         {species.data && (
-          <aside className="detail-panel detail-panel-capture">
-            <h3>{t("Chance de captura", "Catch chance")}</h3>
+          <section className="detail-panel detail-panel-capture">
+            <h2>{t("Chance de captura", "Catch chance")}</h2>
             <CapturePanel
               national={pokemon.id}
               captureRate={species.data.capture_rate}
               baseHp={pokemon.stats.find((s) => s.stat.name === "hp")?.base_stat ?? 1}
               types={pokemon.types.map((t) => t.type.name)}
             />
-          </aside>
+          </section>
         )}
 
-        <aside className="detail-panel detail-panel-scrubber">
-          <h3>{t("Sprite através das gerações", "Sprite across generations")}</h3>
+        <section className="detail-panel detail-panel-scrubber">
+          <h2>{t("Sprite através das gerações", "Sprite across generations")}</h2>
           <SpriteScrubber pokemon={pokemon} />
-        </aside>
+        </section>
 
-        <aside className="detail-panel detail-panel-stats">
-          <h3>{t("Status base", "Base stats")}</h3>
+        <section className="detail-panel detail-panel-stats">
+          <h2>{t("Status base", "Base stats")}</h2>
           <ul className="detail-stats">
             {pokemon.stats.map((s) => (
               <li key={s.stat.name}>
@@ -205,7 +209,7 @@ const DetailPage = () => {
               <span>{total}</span>
             </li>
           </ul>
-        </aside>
+        </section>
       </div>
     </div>
   );

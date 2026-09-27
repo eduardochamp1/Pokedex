@@ -213,7 +213,7 @@ const HomePage = () => {
             </select>
           </div>
         </aside>
-        <main>
+        <div>
           {isError ? (
             <div className="not-found-text">
               {t(
@@ -236,7 +236,7 @@ const HomePage = () => {
               dexMarkOf={playerDex ? markOf : undefined}
             />
           )}
-        </main>
+        </div>
       </div>
     </>
   );

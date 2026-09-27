@@ -73,7 +73,7 @@ const SizesPage = () => {
 
   return (
     <div className="sizes-page">
-      <h2>{t("Comparador de tamanho", "Size comparison")}</h2>
+      <h1 className="sizes-titulo">{t("Comparador de tamanho", "Size comparison")}</h1>
       {cart.length === 0 ? (
         <div className="sizes-empty">
           <p>{t("Escolha uma comparação pra começar:", "Pick a comparison to start:")}</p>

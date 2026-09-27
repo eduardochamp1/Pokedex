@@ -191,13 +191,26 @@ img { display: block; max-width: 100%; }
   padding: 3px 10px;
   border-radius: var(--radius-pill);
   font-size: 0.7rem;
-  color: white;
+  color: var(--type-ink);
+  /* A pílula tem a cor do tipo mesmo sem a classe base: o texto escuro
+     precisa dela, e antes os chips avulsos eram texto branco solto. */
+  background: var(--type-fill, var(--surface-3));
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   height: auto;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
+/* Texto sobre a cor do tipo. Branco passava 4,5:1 só em cinco das dezoito
+   (Elétrico dava 1,5:1); escuro nas treze claras e branco nas cinco escuras
+   dá 5,6:1 ou mais em todas. A paleta dos tipos não muda. */
+.card-type-dot,
+.card-type-dot-lg,
+.move-chip { --type-ink: #15171f; }
+[data-type="fighting"],
+[data-type="poison"],
+[data-type="ghost"],
+[data-type="dragon"],
+[data-type="dark"] { --type-ink: #ffffff; }
 .card-type-dot[data-type="normal"], .card-type-dot-lg[data-type="normal"], .move-chip[data-type="normal"] { --type-fill: var(--t-normal); }
 .card-type-dot[data-type="fire"], .card-type-dot-lg[data-type="fire"], .move-chip[data-type="fire"] { --type-fill: var(--t-fire); }
 .card-type-dot[data-type="water"], .card-type-dot-lg[data-type="water"], .move-chip[data-type="water"] { --type-fill: var(--t-water); }
@@ -575,8 +588,16 @@ img { display: block; max-width: 100%; }
 .home-sidebar .type-filter {
   display: contents;
 }
+/* Escondido só da vista: com display:none o <select> perdia o nome para
+   leitor de tela — o rótulo é o único nome que ele tem. */
 .home-sidebar .type-filter label {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 /* ========= Seu jogo: a dex lida do save ========= */
@@ -837,7 +858,7 @@ img { display: block; max-width: 100%; }
   padding: 16px;
   min-width: 0;
 }
-.detail-panel h3 {
+.detail-panel h2 {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -853,7 +874,7 @@ img { display: block; max-width: 100%; }
 }
 /* O cursor marca o titulo da janela, como no menu do jogo. */
 .home-sidebar h3::before,
-.detail-panel h3::before {
+.detail-panel h2::before {
   content: "▸";
   color: var(--accent);
 }
@@ -1795,7 +1816,9 @@ img { display: block; max-width: 100%; }
   font-family: var(--font-display);
   font-size: 1.05rem;
   font-weight: 500;
-  color: var(--item-accent);
+  /* A cor da categoria clareada: pura, o vermelho e o roxo davam 3:1 no
+     fundo escuro; com 40% de branco ficam acima de 5,8:1 e no mesmo matiz. */
+  color: color-mix(in srgb, var(--item-accent) 60%, white);
   margin-bottom: 6px;
 }
 .item-body p {
@@ -3500,7 +3523,8 @@ img { display: block; max-width: 100%; }
   margin: 24px auto;
   padding: 0 16px;
 }
-.sizes-page h2 { margin-bottom: 16px; }
+.sizes-page h2,
+.sizes-page .sizes-titulo { margin-bottom: 16px; }
 .sizes-empty {
   padding: 24px;
   background: var(--surface-1);
@@ -3668,7 +3692,7 @@ img { display: block; max-width: 100%; }
   color: var(--text);
   font-size: 0.74rem;
 }
-.move-group h4 {
+.move-group h3 {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -3748,7 +3772,7 @@ img { display: block; max-width: 100%; }
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #11131a;
+  color: var(--type-ink);
   background: var(--type-fill, var(--surface-3));
 }
 .move-toggle {

@@ -53,7 +53,8 @@ const SpriteViewer = ({ pokemon, onSelect }: Props) => {
             <img
               src={sources[m]}
               crossOrigin="anonymous"
-              alt={t(...MODE_LABELS[m])}
+              // O rótulo está no <span> logo abaixo: o alt repetiria.
+              alt=""
               loading="lazy"
               decoding="async"
               width={64}

@@ -368,6 +368,22 @@ A busca da sidebar filtra as 13 abas simultaneamente. Todo verbete cita sua font
 
 ---
 
+### Acessibilidade
+Auditado com axe-core (WCAG 2.1 A/AA e boas práticas) em todas as rotas e
+abas da Lore, sem violações:
+
+- **Um `<main>` por página** (o contêiner do App, destino do "Pular para o
+  conteúdo"); os painéis da ficha são `<section>` com `<h2>`, sob um `<h1>`
+- **Contraste** — texto dos chips de tipo escuro nas 13 cores claras e branco
+  nas 5 escuras (5,6:1 ou mais em todas, sem mudar a paleta); `--text-dim`
+  subiu para 4,5:1; títulos de item da Lore clareados no mesmo matiz
+- **Nomes acessíveis** — os filtros da Home tinham o rótulo em `display:none`;
+  imagens ao lado do próprio nome em texto têm `alt=""`
+- **Jogar** — uma região viva sempre montada anuncia carregar, pausar,
+  continuar e fechar o jogo e os avisos; o log do core rola pelo teclado; o
+  direcional do controle virtual tem nome no idioma da página. O Tab não fica
+  preso no jogo
+
 ## 🛠️ Stack
 
 - **[React 18](https://react.dev)** com hooks

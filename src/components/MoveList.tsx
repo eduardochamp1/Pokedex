@@ -156,10 +156,10 @@ const MoveList = ({ moves }: Props) => {
 
       {groups.map((group) => (
         <section key={group.method} className="move-group">
-          <h4>
+          <h3>
             {lang === "en" ? group.labelEn : group.label}
             <span className="move-count">{group.moves.length}</span>
-          </h4>
+          </h3>
           <ul className="move-list">
             {group.moves.map((m) => (
               <MoveRow key={`${m.name}-${m.method}`} move={m} />

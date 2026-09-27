@@ -54,9 +54,9 @@ function App() {
       <Navbar />
       <CommandLauncher />
       <OfflineBanner />
-      {/* tabIndex -1 para o link acima conseguir mover o foco para cá; o
-          leitor de tela anuncia a região ao chegar. */}
-      <div id="conteudo" tabIndex={-1}>
+      {/* O único <main> do site: é o landmark que leitor de tela procura, e
+          o destino do link acima (tabIndex -1 para ele poder receber o foco). */}
+      <main id="conteudo" tabIndex={-1}>
       <ErrorBoundary>
         <Suspense fallback={<RouteFallback />}>
           <Routes>
@@ -82,7 +82,7 @@ function App() {
           </Routes>
         </Suspense>
       </ErrorBoundary>
-      </div>
+      </main>
       <ComparatorButton />
     </FavoriteProvider>
   );
