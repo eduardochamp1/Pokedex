@@ -74,7 +74,8 @@ const TrainerPage = () => {
       <header className="trainer-header">
         <h1>{tx("Treinador", "Trainer")}</h1>
         <span className="trainer-rom">
-          <Link to="/jogar">{entry.rom.replace(/\.[^.]+$/, "")}</Link> · {gameLabel(game)}
+          <Link to="/jogar">{entry.rom.replace(/\.[^.]+$/, "")}</Link> · {gameLabel(game)} ·{" "}
+          <Link to="/treinador/comparar">{tx("comparar saves", "compare saves")}</Link>
         </span>
       </header>
 

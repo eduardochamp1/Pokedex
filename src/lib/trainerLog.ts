@@ -186,11 +186,13 @@ function load(): Record<string, TrainerEntry> {
 
 let entradas: Record<string, TrainerEntry> = {};
 let latest: TrainerEntry | null = null;
+let todas: TrainerEntry[] = [];
 const listeners = new Set<() => void>();
 
 function atualizar() {
   latest = null;
   for (const e of Object.values(entradas)) if (!latest || e.updatedAt > latest.updatedAt) latest = e;
+  todas = Object.values(entradas).sort((a, b) => b.updatedAt - a.updatedAt);
   listeners.forEach((l) => l());
 }
 
@@ -202,13 +204,36 @@ export function reloadTrainerLog(): void {
 reloadTrainerLog();
 
 /**
+ * A ficha de um save, sem histórico. É o que `recordTrainerSave` grava e o
+ * que o comparador monta de um `.sav` avulso, que não entra no registro.
+ */
+export function entryFromSave(rom: string, save: Gen3Save, now: number = Date.now()): TrainerEntry | null {
+  const snap = snapshotOf(save, now);
+  if (!snap || !save.trainer) return null;
+  return {
+    rom,
+    game: save.game,
+    updatedAt: now,
+    playerName: save.playerName,
+    trainer: save.trainer,
+    party: snap.party,
+    boxes: (save.boxes?.boxes ?? []).map((c) => ({ name: c.name, pokemon: c.pokemon })),
+    owned: snap.owned,
+    seen: [...(save.pokedex?.seen ?? [])],
+    last: snap,
+    events: [],
+  };
+}
+
+/**
  * Registra um save lido. Save sem ficha de treinador (sem chave de
  * segurança lida) não entra: sem tempo de jogo não há como ordenar a linha do
  * tempo.
  */
 export function recordTrainerSave(rom: string, save: Gen3Save, now: number = Date.now()): void {
-  const snap = snapshotOf(save, now);
-  if (!snap || !save.trainer) return;
+  const nova = entryFromSave(rom, save, now);
+  if (!nova) return;
+  const snap = nova.last;
 
   const anterior = entradas[rom];
   let novos: TrainerEvent[];
@@ -225,19 +250,7 @@ export function recordTrainerSave(rom: string, save: Gen3Save, now: number = Dat
     comparar = true;
   }
 
-  const entry: TrainerEntry = {
-    rom,
-    game: save.game,
-    updatedAt: now,
-    playerName: save.playerName,
-    trainer: save.trainer,
-    party: snap.party,
-    boxes: (save.boxes?.boxes ?? []).map((c) => ({ name: c.name, pokemon: c.pokemon })),
-    owned: snap.owned,
-    seen: [...(save.pokedex?.seen ?? [])],
-    last: snap,
-    events: [...(anterior?.events ?? []), ...novos].slice(-MAX_EVENTS),
-  };
+  const entry: TrainerEntry = { ...nova, events: [...(anterior?.events ?? []), ...novos].slice(-MAX_EVENTS) };
   // Conquista destravada vira evento — mas não na primeira leitura (despejaria
   // tudo o que já estava feito) nem ao voltar para um save antigo.
   if (anterior && comparar) {
@@ -268,6 +281,15 @@ function subscribe(l: () => void) {
     listeners.delete(l);
     window.removeEventListener("storage", onStorage);
   };
+}
+
+/** Todas as fichas, a mais recente primeiro. A referência só muda quando alguma muda. */
+export function allTrainerEntries(): TrainerEntry[] {
+  return todas;
+}
+
+export function useTrainerEntries(): TrainerEntry[] {
+  return useSyncExternalStore(subscribe, allTrainerEntries, () => todas);
 }
 
 export function useTrainerEntry(): TrainerEntry | null {

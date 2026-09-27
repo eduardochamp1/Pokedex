@@ -24,6 +24,7 @@ const PAGINAS: { to: string; pt: string; en: string; keywords: string[] }[] = [
   { to: "/mapa", pt: "Mapa", en: "Map", keywords: ["regioes", "mundo", "regions", "world"] },
   { to: "/jogar", pt: "Jogar", en: "Play", keywords: ["emulador", "gba", "rom", "emulator"] },
   { to: "/treinador", pt: "Treinador", en: "Trainer", keywords: ["ficha", "linha do tempo", "save", "card", "timeline"] },
+  { to: "/treinador/comparar", pt: "Comparar saves", en: "Compare saves", keywords: ["save", "sav", "troca", "trade", "amigo", "friend"] },
   { to: "/lore", pt: "Lore", en: "Lore", keywords: ["historia", "universo", "history", "universe"] },
   { to: "/quiz", pt: "Quiz", en: "Quiz", keywords: ["quem e esse pokemon", "silhueta", "jogo", "whos that pokemon", "silhouette"] },
   { to: "/tamanhos", pt: "Tamanhos", en: "Sizes", keywords: ["altura", "escala", "height", "scale"] },

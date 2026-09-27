@@ -235,6 +235,10 @@ leem time, Pokédex, PC e tempo de jogo, sem dinheiro nem insígnias.
   quanto falta. Todas saem da ficha, sem nada gravado à parte; a que depende
   do que o jogo não registra não aparece. A que destrava entre dois saves
   entra na linha do tempo
+- **Comparar saves** (`/treinador/comparar`) — dois saves lado a lado: as
+  fichas já lidas em `/jogar` ou um `.sav` escolhido na hora (lido no
+  navegador, fora do registro). Números com quem está à frente, os dois
+  times e a diferença de Pokédex — o que só um lado capturou
 - **PC** — as 14 caixas com busca por apelido, espécie ou número, filtro por
   caixa e shiny, ordem por caixa, dex ou nível, e a ficha de cada pokémon
   (natureza, IVs, EVs, golpes, status). A caixa não guarda nível nem status:

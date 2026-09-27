@@ -1,0 +1,45 @@
+/* ========= /treinador/comparar: dois saves lado a lado ========= */
+.savecmp-lados {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+.savecmp-lado {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+.savecmp-lado legend {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--accent);
+  padding: 0 4px;
+}
+.savecmp-lado select {
+  font: inherit;
+  color: var(--text);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+  max-width: 100%;
+}
+.savecmp-arquivo { display: flex; flex-direction: column; gap: 4px; width: 100%; color: var(--text-muted); }
+.savecmp-arquivo input { font: inherit; max-width: 100%; }
+.savecmp-erro { color: var(--fav); width: 100%; }
+.savecmp-tabela { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.savecmp-tabela th,
+.savecmp-tabela td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.savecmp-tabela tbody th { font-weight: 400; color: var(--text-muted); }
+.savecmp-tabela td { font-variant-numeric: tabular-nums; }
+.savecmp-tabela td.frente { color: var(--accent); font-weight: 700; }
+.savecmp-tabela td.frente::after { content: " ▲"; font-size: 0.7em; }
