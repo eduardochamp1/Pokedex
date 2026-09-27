@@ -1,13 +1,9 @@
 import { useCallback, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import "../styles/lore.css";
-import { LORE_EVENTS, ERAS } from "../data/lore";
+import { LORE_EVENTS } from "../data/lore";
 import { REGIONS } from "../data/regions";
-import {
-  HUMAN_CATEGORY_LABELS,
-  HUMAN_CATEGORY_ORDER,
-  HUMAN_LEGENDS,
-} from "../data/humans";
+import { HUMAN_CATEGORY_ORDER, HUMAN_LEGENDS } from "../data/humans";
 import { genealogyNames } from "../data/genealogy";
 import { GAME_GENERATIONS } from "../data/generations";
 import { VILLAIN_TEAMS } from "../data/villains";
@@ -17,12 +13,10 @@ import { MYTHS } from "../data/myths";
 import { CIVILIZATIONS } from "../data/civilizations";
 import { BREEDING } from "../data/breeding";
 import { ITEMS } from "../data/items";
-import {
-  LANDMARKS,
-  LANDMARK_KIND_LABELS,
-  type LandmarkKind,
-} from "../data/landmarks";
+import { LANDMARKS, type LandmarkKind } from "../data/landmarks";
 import { usePokemonIndex } from "../hooks/usePokemon";
+import { useLore } from "../i18n/lore";
+import { useLang, tr } from "../i18n/lang";
 import GenealogyTree from "../components/GenealogyTree";
 import PokemonChip from "../components/PokemonChip";
 import WikiSource from "../components/WikiSource";
@@ -46,20 +40,20 @@ import {
 
 type Tab = LoreTab;
 
-const TAB_LABELS: Record<Tab, string> = {
-  timeline: "Cronologia",
-  genealogy: "Genealogia",
-  generations: "Gerações",
-  regions: "Regiões",
-  humans: "Humanos",
-  villains: "Vilões",
-  dimensions: "Dimensões",
-  battles: "Batalhas",
-  myths: "Mitos",
-  civilizations: "Civilizações",
-  breeding: "Ovos",
-  items: "Itens",
-  landmarks: "Locais",
+const TAB_LABELS: Record<Tab, [string, string]> = {
+  timeline: ["Cronologia", "Timeline"],
+  genealogy: ["Genealogia", "Genealogy"],
+  generations: ["Gerações", "Generations"],
+  regions: ["Regiões", "Regions"],
+  humans: ["Humanos", "Humans"],
+  villains: ["Vilões", "Villains"],
+  dimensions: ["Dimensões", "Dimensions"],
+  battles: ["Batalhas", "Battles"],
+  myths: ["Mitos", "Myths"],
+  civilizations: ["Civilizações", "Civilizations"],
+  breeding: ["Ovos", "Eggs"],
+  items: ["Itens", "Items"],
+  landmarks: ["Locais", "Places"],
 };
 
 
@@ -82,6 +76,11 @@ const allPokemonNames = Array.from(
 );
 
 const LorePage = () => {
+  // A lore no idioma do site; o inglês vem de data/en.
+  const lore = useLore();
+  const lang = useLang();
+  // `t` já é a aba no laço da barra lateral; a tradução se chama `tx`.
+  const tx = (pt: string, en: string) => tr(lang, pt, en);
   /**
    * A aba mora na URL, nao em useState.
    *
@@ -93,7 +92,8 @@ const LorePage = () => {
   const [params, setParams] = useSearchParams();
   const tab = parseLoreTab(params);
   const setTab = (nova: Tab) => setParams(serializeLoreTab(nova));
-  const [eraFilter, setEraFilter] = useState<string | undefined>(undefined);
+  // A posição da era, não o texto: o texto muda com o idioma, a posição não.
+  const [eraFilter, setEraFilter] = useState<number | undefined>(undefined);
   const [pokemonFilter, setPokemonFilter] = useState<string | undefined>(undefined);
 
   // Um unico request (nome -> id) alimenta os sprites de todos os chips.
@@ -111,56 +111,56 @@ const LorePage = () => {
   );
 
   const visibleEvents = useMemo(() => {
-    return LORE_EVENTS.filter((e) => {
-      if (eraFilter && e.era !== eraFilter) return false;
+    return lore.events.filter((e) => {
+      if (eraFilter !== undefined && e.era !== lore.eras[eraFilter]) return false;
       if (!matchesPokemonFilter(e.pokemons)) return false;
       return true;
     });
-  }, [eraFilter, matchesPokemonFilter]);
+  }, [lore, eraFilter, matchesPokemonFilter]);
 
   const visibleRegions = useMemo(
-    () => REGIONS.filter((r) => matchesPokemonFilter(r.signature)),
-    [matchesPokemonFilter]
+    () => lore.regions.filter((r) => matchesPokemonFilter(r.signature)),
+    [lore, matchesPokemonFilter]
   );
   const visibleHumans = useMemo(
-    () => HUMAN_LEGENDS.filter((h) => matchesPokemonFilter(h.pokemons)),
-    [matchesPokemonFilter]
+    () => lore.humans.filter((h) => matchesPokemonFilter(h.pokemons)),
+    [lore, matchesPokemonFilter]
   );
   const visibleVillains = useMemo(
-    () => VILLAIN_TEAMS.filter((v) => matchesPokemonFilter(v.signature)),
-    [matchesPokemonFilter]
+    () => lore.villains.filter((v) => matchesPokemonFilter(v.signature)),
+    [lore, matchesPokemonFilter]
   );
   const visibleDimensions = useMemo(
-    () => DIMENSIONS.filter((d) => matchesPokemonFilter(d.inhabitants)),
-    [matchesPokemonFilter]
+    () => lore.dimensions.filter((d) => matchesPokemonFilter(d.inhabitants)),
+    [lore, matchesPokemonFilter]
   );
   const visibleGenerations = useMemo(
-    () => GAME_GENERATIONS.filter((g) => matchesPokemonFilter(g.signature)),
-    [matchesPokemonFilter]
+    () => lore.generations.filter((g) => matchesPokemonFilter(g.signature)),
+    [lore, matchesPokemonFilter]
   );
   const visibleBattles = useMemo(
-    () => BATTLES.filter((b) => matchesPokemonFilter(b.pokemons)),
-    [matchesPokemonFilter]
+    () => lore.battles.filter((b) => matchesPokemonFilter(b.pokemons)),
+    [lore, matchesPokemonFilter]
   );
   const visibleMyths = useMemo(
-    () => MYTHS.filter((m) => matchesPokemonFilter(m.pokemons)),
-    [matchesPokemonFilter]
+    () => lore.myths.filter((m) => matchesPokemonFilter(m.pokemons)),
+    [lore, matchesPokemonFilter]
   );
   const visibleCivilizations = useMemo(
-    () => CIVILIZATIONS.filter((c) => matchesPokemonFilter(c.pokemons)),
-    [matchesPokemonFilter]
+    () => lore.civilizations.filter((c) => matchesPokemonFilter(c.pokemons)),
+    [lore, matchesPokemonFilter]
   );
   const visibleBreeding = useMemo(
-    () => BREEDING.filter((b) => matchesPokemonFilter(b.pokemons)),
-    [matchesPokemonFilter]
+    () => lore.breeding.filter((b) => matchesPokemonFilter(b.pokemons)),
+    [lore, matchesPokemonFilter]
   );
   const visibleItems = useMemo(
-    () => ITEMS.filter((i) => matchesPokemonFilter(i.pokemons)),
-    [matchesPokemonFilter]
+    () => lore.items.filter((i) => matchesPokemonFilter(i.pokemons)),
+    [lore, matchesPokemonFilter]
   );
   const visibleLandmarks = useMemo(
-    () => LANDMARKS.filter((l) => matchesPokemonFilter(l.pokemons)),
-    [matchesPokemonFilter]
+    () => lore.landmarks.filter((l) => matchesPokemonFilter(l.pokemons)),
+    [lore, matchesPokemonFilter]
   );
 
   const clearFilters = () => {
@@ -175,7 +175,7 @@ const LorePage = () => {
   return (
     <div className="lore-shell">
       <aside className="lore-sidebar">
-        <h1 className="lore-sidebar-title">Universo Pokémon</h1>
+        <h1 className="lore-sidebar-title">{tx("Universo Pokémon", "Pokémon universe")}</h1>
 
         <div className="lore-search">
           <input
@@ -183,8 +183,8 @@ const LorePage = () => {
             list="lore-pokemon-names"
             value={pokemonFilter ?? ""}
             onChange={(e) => setPokemonFilter(e.target.value || undefined)}
-            placeholder="Buscar pokémon…"
-            aria-label="Buscar pokémon na lore"
+            placeholder={tx("Buscar pokémon…", "Search Pokémon…")}
+            aria-label={tx("Buscar pokémon na lore", "Search Pokémon in the lore")}
           />
           <datalist id="lore-pokemon-names">
             {allPokemonNames.map((n) => (
@@ -199,30 +199,30 @@ const LorePage = () => {
             className={"lore-sidebar-btn" + (tab === t ? " active" : "")}
             onClick={() => setTab(t)}
           >
-            {TAB_LABELS[t]}
+            {tx(...TAB_LABELS[t])}
           </button>
         ))}
       </aside>
 
       <main className="lore-main">
-        <h2 className="lore-tab-title">{TAB_LABELS[tab]}</h2>
+        <h2 className="lore-tab-title">{tx(...TAB_LABELS[tab])}</h2>
         {tab === "timeline" && (
           <>
             <div className="lore-filters">
-              <div className="lore-era-chips" role="tablist" aria-label="Filtrar por era">
+              <div className="lore-era-chips" role="tablist" aria-label={tx("Filtrar por era", "Filter by era")}>
                 <button
                   type="button"
-                  className={"lore-era-chip" + (!eraFilter ? " active" : "")}
+                  className={"lore-era-chip" + (eraFilter === undefined ? " active" : "")}
                   onClick={() => setEraFilter(undefined)}
                 >
-                  Todas
+                  {tx("Todas", "All")}
                 </button>
-                {ERAS.map((era) => (
+                {lore.eras.map((era, i) => (
                   <button
                     key={era}
                     type="button"
-                    className={"lore-era-chip" + (eraFilter === era ? " active" : "")}
-                    onClick={() => setEraFilter(era)}
+                    className={"lore-era-chip" + (eraFilter === i ? " active" : "")}
+                    onClick={() => setEraFilter(i)}
                   >
                     {era}
                   </button>
@@ -230,15 +230,15 @@ const LorePage = () => {
               </div>
               {pokemonFilter && (
                 <div className="lore-active-filter">
-                  Filtrando eventos de <b>{pokemonFilter}</b>
+                  {tx("Filtrando eventos de", "Showing events for")} <b>{pokemonFilter}</b>
                   <button onClick={clearFilters} className="lore-clear-btn">
-                    limpar ✕
+                    {tx("limpar ✕", "clear ✕")}
                   </button>
                 </div>
               )}
             </div>
 
-            {ERAS.filter((era) => visibleEvents.some((e) => e.era === era)).map((era) => {
+            {lore.eras.filter((era) => visibleEvents.some((e) => e.era === era)).map((era) => {
               const daEra = visibleEvents.filter((e) => e.era === era);
               return (
               <section key={era} className="lore-era-section">
@@ -247,7 +247,8 @@ const LorePage = () => {
                 <h3 className="lore-era-head">
                   {era}
                   <span className="lore-era-count">
-                    {daEra.length} {daEra.length === 1 ? "evento" : "eventos"}
+                    {daEra.length}{" "}
+                    {daEra.length === 1 ? tx("evento", "event") : tx("eventos", "events")}
                   </span>
                 </h3>
                 <ol className="lore-timeline-editorial">
@@ -278,9 +279,9 @@ const LorePage = () => {
 
             {visibleEvents.length === 0 && (
               <div className="lore-empty">
-                Nenhum evento encontrado com esses filtros.
+                {tx("Nenhum evento encontrado com esses filtros.", "No events match these filters.")}
                 <button onClick={clearFilters} className="lore-clear-btn">
-                  limpar filtros
+                  {tx("limpar filtros", "clear filters")}
                 </button>
               </div>
             )}
@@ -290,8 +291,10 @@ const LorePage = () => {
         {tab === "genealogy" && (
           <div className="genealogy-container">
             <p className="genealogy-intro">
-              A árvore de criação — quem gerou ou moldou quem, segundo a mitologia
-              do universo pokémon.
+              {tx(
+                "A árvore de criação — quem gerou ou moldou quem, segundo a mitologia do universo pokémon.",
+                "The tree of creation — who begot or shaped whom, according to the mythology of the Pokémon universe."
+              )}
             </p>
             <GenealogyTree idOf={idOf} />
           </div>
@@ -326,7 +329,9 @@ const LorePage = () => {
                     <div className="gen-slide-title">
                       <h3 className="gen-slide-region">
                         {g.region}
-                        <span className="visually-hidden">, geração {g.roman}</span>
+                        <span className="visually-hidden">
+                          , {tx("geração", "generation")} {g.roman}
+                        </span>
                       </h3>
                       <span className="gen-slide-year">{g.year}</span>
                     </div>
@@ -341,7 +346,7 @@ const LorePage = () => {
                           key={game}
                           to="/jogar"
                           className="gen-game-badge gen-game-badge-jogavel"
-                          title={`${game} roda no emulador desta aba`}
+                          title={tx(`${game} roda no emulador desta aba`, `${game} runs in this site's emulator`)}
                         >
                           {game}
                         </Link>
@@ -369,7 +374,7 @@ const LorePage = () => {
                       />
                     </span>
                     <span className="gen-growth-label">
-                      <strong>{g.newPokemons}</strong> novos · a dex chega a{" "}
+                      <strong>{g.newPokemons}</strong> {tx("novos · a dex chega a", "new · the dex reaches")}{" "}
                       {g.totalAfter}
                     </span>
                   </div>
@@ -391,9 +396,9 @@ const LorePage = () => {
 
         {tab === "regions" && visibleRegions.length === 0 && (
           <div className="lore-empty">
-            Nenhuma região com <b>{pokemonFilter}</b>.
+            {tx("Nenhuma região com", "No region with")} <b>{pokemonFilter}</b>.
             <button onClick={clearFilters} className="lore-clear-btn">
-              limpar busca
+              {tx("limpar busca", "clear search")}
             </button>
           </div>
         )}
@@ -439,7 +444,7 @@ const LorePage = () => {
                     )}
                     {region.cities && region.cities.length > 0 && (
                       <>
-                        <dt>Cidades</dt>
+                        <dt>{tx("Cidades", "Cities")}</dt>
                         <dd className="region-cities">{region.cities.join(" · ")}</dd>
                       </>
                     )}
@@ -447,7 +452,7 @@ const LorePage = () => {
 
                   {region.gymLeaders && region.gymLeaders.length > 0 && (
                     <div className="region-gyms">
-                      <div className="region-gyms-label">Líderes de Ginásio</div>
+                      <div className="region-gyms-label">{tx("Líderes de Ginásio", "Gym Leaders")}</div>
                       <ul>
                         {region.gymLeaders.map((g) => (
                           <li key={g.name}>
@@ -488,7 +493,7 @@ const LorePage = () => {
               );
               if (grupos.length < 2) return null;
               return (
-                <nav className="human-index" aria-label="Ir para um grupo">
+                <nav className="human-index" aria-label={tx("Ir para um grupo", "Jump to a group")}>
                   {grupos.map((c) => (
                     <button
                       key={c}
@@ -500,7 +505,7 @@ const LorePage = () => {
                           ?.scrollIntoView({ block: "start" })
                       }
                     >
-                      {HUMAN_CATEGORY_LABELS[c]}
+                      {lore.humanCategoryLabels[c]}
                       <span className="human-index-count">
                         {visibleHumans.filter((h) => h.category === c).length}
                       </span>
@@ -517,10 +522,11 @@ const LorePage = () => {
                 <section key={cat} id={"humanos-" + cat} className="human-section">
                   <header className="human-section-head">
                     <h3 className="human-section-name">
-                      {HUMAN_CATEGORY_LABELS[cat]}
+                      {lore.humanCategoryLabels[cat]}
                     </h3>
                     <p className="human-section-count">
-                      {doGrupo.length} {doGrupo.length === 1 ? "verbete" : "verbetes"}
+                      {doGrupo.length}{" "}
+                      {doGrupo.length === 1 ? tx("verbete", "entry") : tx("verbetes", "entries")}
                     </p>
                   </header>
                   <div className="editorial-grid">
@@ -579,9 +585,9 @@ const LorePage = () => {
             })}
             {visibleHumans.length === 0 && (
               <div className="lore-empty">
-                Nenhum humano com <b>{pokemonFilter}</b>.
+                {tx("Nenhum humano com", "No human with")} <b>{pokemonFilter}</b>.
                 <button onClick={clearFilters} className="lore-clear-btn">
-                  limpar busca
+                  {tx("limpar busca", "clear search")}
                 </button>
               </div>
             )}
@@ -615,13 +621,13 @@ const LorePage = () => {
                 </div>
                 <h3>{v.name}</h3>
                 <p className="subtitle">
-                  {v.region} · líder: {v.leader}
+                  {v.region} · {tx("líder", "leader")}: {v.leader}
                 </p>
                 <p>
-                  <strong>Motivação:</strong> {v.motivation}
+                  <strong>{tx("Motivação", "Motivation")}:</strong> {v.motivation}
                 </p>
                 <p>
-                  <strong>Desfecho:</strong> {v.fate}
+                  <strong>{tx("Desfecho", "Fate")}:</strong> {v.fate}
                 </p>
                 <WikiSource wiki={v.wiki} />
                 <div className="lore-chips">
@@ -663,7 +669,7 @@ const LorePage = () => {
                 </p>
                 <p className="battle-summary">{b.summary}</p>
                 <p className="battle-outcome">
-                  <strong>Resultado:</strong> {b.outcome}
+                  <strong>{tx("Resultado", "Outcome")}:</strong> {b.outcome}
                 </p>
                 <WikiSource wiki={b.wiki} />
                 <div className="lore-chips">
@@ -680,9 +686,9 @@ const LorePage = () => {
             ))}
             {visibleBattles.length === 0 && (
               <div className="lore-empty">
-                Nenhuma batalha registrada com <b>{pokemonFilter}</b>.
+                {tx("Nenhuma batalha registrada com", "No recorded battle with")} <b>{pokemonFilter}</b>.
                 <button onClick={clearFilters} className="lore-clear-btn">
-                  limpar busca
+                  {tx("limpar busca", "clear search")}
                 </button>
               </div>
             )}
@@ -695,11 +701,11 @@ const LorePage = () => {
               const items = visibleItems.filter((i) => i.category === cat);
               if (items.length === 0) return null;
               const catLabel =
-                cat === "pokebola" ? "Pokébolas lendárias" :
-                cat === "sagrado" ? "Itens sagrados" :
-                cat === "chave" ? "Itens-chave (transformações)" :
-                cat === "cristal" ? "Cristais e pedras" :
-                "Livros e diários";
+                cat === "pokebola" ? tx("Pokébolas lendárias", "Legendary Poké Balls") :
+                cat === "sagrado" ? tx("Itens sagrados", "Sacred items") :
+                cat === "chave" ? tx("Itens-chave (transformações)", "Key items (transformations)") :
+                cat === "cristal" ? tx("Cristais e pedras", "Crystals and stones") :
+                tx("Livros e diários", "Books and journals");
               return (
                 <section key={cat} className="items-section">
                   <h3 className="items-cat-label">{catLabel}</h3>
@@ -742,9 +748,9 @@ const LorePage = () => {
             })}
             {visibleItems.length === 0 && (
               <div className="lore-empty">
-                Nenhum item com <b>{pokemonFilter}</b>.
+                {tx("Nenhum item com", "No item with")} <b>{pokemonFilter}</b>.
                 <button onClick={clearFilters} className="lore-clear-btn">
-                  limpar busca
+                  {tx("limpar busca", "clear search")}
                 </button>
               </div>
             )}
@@ -757,8 +763,8 @@ const LorePage = () => {
               const items = visibleBreeding.filter((b) => b.category === cat);
               if (items.length === 0) return null;
               const catLabel =
-                cat === "grupo" ? "Grupos de Ovos" :
-                cat === "regra" ? "Regras" : "Casos especiais";
+                cat === "grupo" ? tx("Grupos de Ovos", "Egg Groups") :
+                cat === "regra" ? tx("Regras", "Rules") : tx("Casos especiais", "Special cases");
               return (
                 <section key={cat} className="breeding-section">
                   <h3 className="breeding-cat-label">{catLabel}</h3>
@@ -790,9 +796,9 @@ const LorePage = () => {
             })}
             {visibleBreeding.length === 0 && (
               <div className="lore-empty">
-                Nenhum grupo/regra com <b>{pokemonFilter}</b>.
+                {tx("Nenhum grupo/regra com", "No group/rule with")} <b>{pokemonFilter}</b>.
                 <button onClick={clearFilters} className="lore-clear-btn">
-                  limpar busca
+                  {tx("limpar busca", "clear search")}
                 </button>
               </div>
             )}
@@ -824,9 +830,9 @@ const LorePage = () => {
                   </div>
                 </header>
                 <dl className="civ-meta">
-                  <dt>Descoberta</dt>
+                  <dt>{tx("Descoberta", "Discovery")}</dt>
                   <dd>{c.discovery}</dd>
-                  <dt>Propósito</dt>
+                  <dt>{tx("Propósito", "Purpose")}</dt>
                   <dd>{c.purpose}</dd>
                 </dl>
                 <WikiSource wiki={c.wiki} />
@@ -845,9 +851,9 @@ const LorePage = () => {
             })}
             {visibleCivilizations.length === 0 && (
               <div className="lore-empty">
-                Nenhuma civilização com <b>{pokemonFilter}</b>.
+                {tx("Nenhuma civilização com", "No civilization with")} <b>{pokemonFilter}</b>.
                 <button onClick={clearFilters} className="lore-clear-btn">
-                  limpar busca
+                  {tx("limpar busca", "clear search")}
                 </button>
               </div>
             )}
@@ -896,9 +902,9 @@ const LorePage = () => {
             })}
             {visibleMyths.length === 0 && (
               <div className="lore-empty">
-                Nenhum mito com <b>{pokemonFilter}</b>.
+                {tx("Nenhum mito com", "No myth with")} <b>{pokemonFilter}</b>.
                 <button onClick={clearFilters} className="lore-clear-btn">
-                  limpar busca
+                  {tx("limpar busca", "clear search")}
                 </button>
               </div>
             )}
@@ -908,12 +914,12 @@ const LorePage = () => {
         {tab === "landmarks" && (
           <div className="landmark-grid">
             {(() => {
-              const comLocais = REGIONS.filter((r) =>
+              const comLocais = lore.regions.filter((r) =>
                 visibleLandmarks.some((l) => l.regionId === r.id)
               );
               if (comLocais.length < 2) return null;
               return (
-                <nav className="landmark-index" aria-label="Ir para uma região">
+                <nav className="landmark-index" aria-label={tx("Ir para uma região", "Jump to a region")}>
                   {comLocais.map((r) => (
                     <button
                       key={r.id}
@@ -937,7 +943,7 @@ const LorePage = () => {
                 </nav>
               );
             })()}
-            {REGIONS.filter((r) =>
+            {lore.regions.filter((r) =>
               visibleLandmarks.some((l) => l.regionId === r.id)
             ).map((region) => {
               const shape = REGION_SHAPES.find((sh) => sh.id === region.id);
@@ -955,7 +961,8 @@ const LorePage = () => {
                     <div>
                       <h3 className="landmark-region-name">{region.name}</h3>
                       <p className="landmark-region-count">
-                        {marks.length} {marks.length === 1 ? "local" : "locais"}
+                        {marks.length}{" "}
+                        {marks.length === 1 ? tx("local", "place") : tx("locais", "places")}
                       </p>
                     </div>
                   </header>
@@ -966,7 +973,7 @@ const LorePage = () => {
                           <span
                             className={"landmark-kind landmark-kind-" + l.kind}
                           >
-                            {LANDMARK_KIND_LABELS[l.kind as LandmarkKind]}
+                            {lore.landmarkKindLabels[l.kind as LandmarkKind]}
                           </span>
                           <h4 className="landmark-name">{l.name}</h4>
                         </div>
@@ -990,9 +997,9 @@ const LorePage = () => {
             })}
             {visibleLandmarks.length === 0 && (
               <div className="lore-empty">
-                Nenhum local com <b>{pokemonFilter}</b>.
+                {tx("Nenhum local com", "No place with")} <b>{pokemonFilter}</b>.
                 <button onClick={clearFilters} className="lore-clear-btn">
-                  limpar busca
+                  {tx("limpar busca", "clear search")}
                 </button>
               </div>
             )}
@@ -1015,9 +1022,11 @@ const LorePage = () => {
                   />
                 </div>
                 <h3>{d.name}</h3>
-                <p className="subtitle">Regente: {d.ruler}</p>
+                <p className="subtitle">
+                  {tx("Regente", "Ruler")}: {d.ruler}
+                </p>
                 <p>
-                  <strong>Acesso:</strong> {d.access}
+                  <strong>{tx("Acesso", "Access")}:</strong> {d.access}
                 </p>
                 <p>{d.description}</p>
                 <WikiSource wiki={d.wiki} />

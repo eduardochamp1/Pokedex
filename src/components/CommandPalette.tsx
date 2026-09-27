@@ -6,16 +6,7 @@ import { fetchJsonPublic } from "../api";
 import { pokemonLabel } from "../lib/pokemonLabel";
 import { pixelSpriteUrl } from "../lib/sprites";
 import { searchCommands, type CommandItem, type CommandKind } from "../lib/commandSearch";
-import { REGIONS } from "../data/regions";
-import { MYTHS } from "../data/myths";
-import { VILLAIN_TEAMS } from "../data/villains";
-import { HUMAN_LEGENDS } from "../data/humans";
-import { CIVILIZATIONS } from "../data/civilizations";
-import { BATTLES } from "../data/battles";
-import { DIMENSIONS } from "../data/dimensions";
-import { ITEMS } from "../data/items";
-import { LANDMARKS } from "../data/landmarks";
-import { LORE_EVENTS } from "../data/lore";
+import { loreFor } from "../i18n/lore";
 import "../styles/commandPalette.css";
 import { useLang, tr, type Lang } from "../i18n/lang";
 import { generationLabel } from "../i18n/common";
@@ -53,6 +44,18 @@ const loreDe = (aba: string, rotulo: string, nomes: { label: string }[]): Comman
 /** Tudo da lore que tem nome, apontando para a aba onde ele está. */
 const lore = (lang: Lang): CommandItem[] => {
   const t = (pt: string, en: string) => tr(lang, pt, en);
+  // Os títulos no idioma do site.
+  const {
+    events: LORE_EVENTS,
+    myths: MYTHS,
+    villains: VILLAIN_TEAMS,
+    humans: HUMAN_LEGENDS,
+    civilizations: CIVILIZATIONS,
+    battles: BATTLES,
+    dimensions: DIMENSIONS,
+    items: ITEMS,
+    landmarks: LANDMARKS,
+  } = loreFor(lang);
   return [
     ...loreDe("timeline", t("Cronologia", "Timeline"), LORE_EVENTS.map((e) => ({ label: e.title }))),
     ...loreDe("myths", t("Mitos", "Myths"), MYTHS.map((m) => ({ label: m.title }))),
@@ -67,7 +70,7 @@ const lore = (lang: Lang): CommandItem[] => {
 };
 
 const regioes = (lang: Lang): CommandItem[] =>
-  REGIONS.map((r) => ({
+  loreFor(lang).regions.map((r) => ({
     kind: "region",
     label: r.name,
     to: `/mapa?region=${r.id}`,

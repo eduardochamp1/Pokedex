@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { REGION_SHAPES } from "../data/regionMap";
-import { REGIONS } from "../data/regions";
+import { useLore } from "../i18n/lore";
+import { useT } from "../i18n/lang";
 import { roughenPath } from "../lib/roughenPath";
 
 interface Props {
@@ -22,6 +23,8 @@ const LAND = "translate(-24, 22) scale(0.97)";
 const SEAM = "M 275,245 C 272,262 276,282 288,300 C 296,314 300,330 298,344";
 
 const WorldMap = ({ onSelect, selectedId }: Props) => {
+  const { regions: REGIONS } = useLore();
+  const t = useT();
   const [hoverId, setHoverId] = useState<string | undefined>(undefined);
   const [tip, setTip] = useState<
     { x: number; y: number; flipX: boolean; flipY: boolean } | undefined
@@ -59,7 +62,10 @@ const WorldMap = ({ onSelect, selectedId }: Props) => {
         preserveAspectRatio="xMidYMid meet"
         className="worldmap-svg"
         role="img"
-        aria-label="Mapa do mundo Pokémon em papel: nove regiões distribuídas em três continentes"
+        aria-label={t(
+          "Mapa do mundo Pokémon em papel: nove regiões distribuídas em três continentes",
+          "Paper map of the Pokémon world: nine regions spread across three continents"
+        )}
       >
         <defs>
           {/* Papel: o mar é a própria folha, riscada de linha d'água. */}
@@ -99,8 +105,8 @@ const WorldMap = ({ onSelect, selectedId }: Props) => {
           fillOpacity="0.3"
           textAnchor="middle"
         >
-          <text x="444" y="152">MAR TRANQUILO</text>
-          <text x="706" y="556">MAR DO SUL</text>
+          <text x="444" y="152">{t("MAR TRANQUILO", "CALM SEA")}</text>
+          <text x="706" y="556">{t("MAR DO SUL", "SOUTHERN SEA")}</text>
         </g>
 
         <g transform={LAND}>
@@ -176,8 +182,10 @@ const WorldMap = ({ onSelect, selectedId }: Props) => {
         <g className="worldmap-cartouche" transform="translate(34, 24)">
           <rect x="0" y="0" width="250" height="62" fill="#f6eed6" stroke="#b8892b" strokeWidth="2" rx="4" />
           <rect x="5" y="5" width="240" height="52" fill="none" stroke="#6b4e2e" strokeOpacity="0.6" strokeWidth="0.8" rx="2" />
-          <text x="16" y="28" className="worldmap-cartouche-title">MAPA DO MUNDO</text>
-          <text x="16" y="47" className="worldmap-cartouche-sub">NOVE REGIOES &#183; NOVE GERACOES</text>
+          <text x="16" y="28" className="worldmap-cartouche-title">{t("MAPA DO MUNDO", "WORLD MAP")}</text>
+          <text x="16" y="47" className="worldmap-cartouche-sub">
+            {t("NOVE REGIOES · NOVE GERACOES", "NINE REGIONS · NINE GENERATIONS")}
+          </text>
         </g>
 
         <g className="worldmap-compass" transform="translate(928, 56)">
@@ -239,7 +247,7 @@ const WorldMap = ({ onSelect, selectedId }: Props) => {
         >
           <div className="worldmap-tooltip-name">{hovered.name}</div>
           <div className="worldmap-tooltip-info">{hovered.inspiration}</div>
-          <div className="worldmap-tooltip-hint">Clique para explorar</div>
+          <div className="worldmap-tooltip-hint">{t("Clique para explorar", "Click to explore")}</div>
         </div>
       )}
     </div>

@@ -1,4 +1,5 @@
 import { bulbapediaUrl } from "../lib/wiki";
+import { useT } from "../i18n/lang";
 
 interface Props {
   /** Titulo da pagina na Bulbapedia. Sem ele, nada e renderizado. */
@@ -12,6 +13,7 @@ interface Props {
  * o link e so a referencia.
  */
 const WikiSource = ({ wiki, label = "Bulbapedia" }: Props) => {
+  const t = useT();
   if (!wiki) return null;
   return (
     <a
@@ -19,12 +21,12 @@ const WikiSource = ({ wiki, label = "Bulbapedia" }: Props) => {
       href={bulbapediaUrl(wiki)}
       target="_blank"
       rel="noreferrer noopener"
-      title={`Ler "${wiki}" na Bulbapedia (abre em nova aba)`}
+      title={t(`Ler "${wiki}" na Bulbapedia (abre em nova aba)`, `Read "${wiki}" on Bulbapedia (opens in a new tab)`)}
     >
       <span className="wiki-source-icon" aria-hidden="true">
         ↗
       </span>
-      fonte: {label}
+      {t("fonte", "source")}: {label}
     </a>
   );
 };

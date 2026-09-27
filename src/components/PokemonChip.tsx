@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { pixelSpriteUrl } from "../lib/sprites";
 import { pokemonLabel } from "../lib/pokemonLabel";
+import { useT } from "../i18n/lang";
 
 interface Props {
   name: string;
@@ -12,6 +13,7 @@ interface Props {
 
 const PokemonChip = ({ name, id, onFilter }: Props) => {
   const [broken, setBroken] = useState(false);
+  const t = useT();
   const sprite = broken ? "" : pixelSpriteUrl(id);
   // O slug vai para a rota e para o sprite; o rotulo, para os olhos.
   const rotulo = pokemonLabel(name);
@@ -39,8 +41,8 @@ const PokemonChip = ({ name, id, onFilter }: Props) => {
           type="button"
           className="lore-chip-filter"
           onClick={onFilter}
-          title={`Ver todos os registros com ${rotulo}`}
-          aria-label={`Filtrar por ${rotulo}`}
+          title={t(`Ver todos os registros com ${rotulo}`, `See every entry with ${rotulo}`)}
+          aria-label={t(`Filtrar por ${rotulo}`, `Filter by ${rotulo}`)}
         >
           ⚲
         </button>

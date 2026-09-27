@@ -1,9 +1,6 @@
 import { Link } from "react-router-dom";
-import {
-  GENEALOGY_BRANCHES,
-  GENEALOGY_ROOT,
-  type GenealogyNode,
-} from "../data/genealogy";
+import type { GenealogyNode } from "../data/genealogy";
+import { useLore } from "../i18n/lore";
 import { pixelSpriteUrl } from "../lib/sprites";
 
 interface Props {
@@ -82,6 +79,8 @@ const Member = ({ node, idOf }: { node: GenealogyNode; idOf: IdOf }) => {
  * nunca passa por cima de texto.
  */
 const GenealogyTree = ({ idOf }: Props) => {
+  // A árvore no idioma do site: papéis e notas vêm de data/en em inglês.
+  const { genealogyRoot: GENEALOGY_ROOT, genealogyBranches: GENEALOGY_BRANCHES } = useLore();
   const rootSprite = pixelSpriteUrl(idOf(GENEALOGY_ROOT.name));
   return (
     <div className="genealogy">

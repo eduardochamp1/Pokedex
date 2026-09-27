@@ -1,53 +1,54 @@
 import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import WorldMap from "../components/WorldMap";
-import { REGIONS } from "../data/regions";
 import { REGION_SHAPES } from "../data/regionMap";
-import { LORE_EVENTS } from "../data/lore";
-import { HUMAN_LEGENDS } from "../data/humans";
-import { VILLAIN_TEAMS } from "../data/villains";
-import { LANDMARKS, LANDMARK_KIND_LABELS } from "../data/landmarks";
+import { useLore } from "../i18n/lore";
+import { useLang, tr } from "../i18n/lang";
+import { generationLabel } from "../i18n/common";
 import { usePokemonIndex } from "../hooks/usePokemon";
 import PokemonChip from "../components/PokemonChip";
 import WikiSource from "../components/WikiSource";
 
 const MapPage = () => {
   const [params, setParams] = useSearchParams();
+  const lore = useLore();
+  const lang = useLang();
+  const t = (pt: string, en: string) => tr(lang, pt, en);
   const selectedId = params.get("region") ?? undefined;
   const setSelectedId = (id: string | undefined) => {
     if (id) setParams({ region: id });
     else setParams({});
   };
 
-  const region = REGIONS.find((r) => r.id === selectedId);
+  const region = lore.regions.find((r) => r.id === selectedId);
   const shape = REGION_SHAPES.find((s) => s.id === selectedId);
 
   const relatedEvents = useMemo(() => {
     if (!region) return [];
     const sig = new Set(region.signature);
-    return LORE_EVENTS.filter((e) => e.pokemons.some((p) => sig.has(p)));
-  }, [region]);
+    return lore.events.filter((e) => e.pokemons.some((p) => sig.has(p)));
+  }, [lore, region]);
 
   const relatedHumans = useMemo(() => {
     if (!region) return [];
-    return HUMAN_LEGENDS.filter((h) =>
+    return lore.humans.filter((h) =>
       h.region.toLowerCase().includes(region.name.toLowerCase())
     );
-  }, [region]);
+  }, [lore, region]);
 
   const relatedVillains = useMemo(() => {
     if (!region) return [];
-    return VILLAIN_TEAMS.filter((v) =>
+    return lore.villains.filter((v) =>
       v.region.toLowerCase().includes(region.name.toLowerCase())
     );
-  }, [region]);
+  }, [lore, region]);
 
   // Um request para o indice nome -> id; os sprites dos chips saem dele.
   const { idOf } = usePokemonIndex();
 
   const landmarks = useMemo(
-    () => (region ? LANDMARKS.filter((l) => l.regionId === region.id) : []),
-    [region]
+    () => (region ? lore.landmarks.filter((l) => l.regionId === region.id) : []),
+    [lore, region]
   );
 
   const unknownRegion = Boolean(selectedId) && !region;
@@ -55,17 +56,19 @@ const MapPage = () => {
   return (
     <div className="mappage-container">
       <header className="mappage-header">
-        <h1>Mapa do Mundo Pokémon</h1>
+        <h1>{t("Mapa do Mundo Pokémon", "Map of the Pokémon world")}</h1>
         <p className="mappage-intro">
-          Passe o mouse sobre uma região para ver detalhes; clique para explorar
-          sua lore, pokémons lendários, humanos e vilões.
+          {t(
+            "Passe o mouse sobre uma região para ver detalhes; clique para explorar sua lore, pokémons lendários, humanos e vilões.",
+            "Hover over a region to see details; click to explore its lore, legendary Pokémon, humans and villains."
+          )}
         </p>
       </header>
 
       {unknownRegion && (
         <p className="mappage-notice" role="status">
-          Não encontramos a região <b>{selectedId}</b>. Escolha uma no mapa
-          abaixo.
+          {t("Não encontramos a região", "We couldn't find the region")} <b>{selectedId}</b>.{" "}
+          {t("Escolha uma no mapa abaixo.", "Pick one on the map below.")}
         </p>
       )}
 
@@ -89,13 +92,13 @@ const MapPage = () => {
               <span className="mappage-dossier-stamp">DOSSIER</span>
               <h2 className="mappage-detail-name">{region.name}</h2>
               <p className="mappage-detail-sub">
-                Geração {region.generation} · {region.inspiration}
+                {generationLabel(region.generation, lang)} · {region.inspiration}
               </p>
               <button
                 type="button"
                 className="mappage-close"
                 onClick={() => setSelectedId(undefined)}
-                aria-label="Fechar detalhes"
+                aria-label={t("Fechar detalhes", "Close details")}
               >
                 ✕
               </button>
@@ -106,7 +109,7 @@ const MapPage = () => {
           <WikiSource wiki={region.wiki} />
 
           <section className="mappage-block">
-            <h3>Pokémons emblemáticos</h3>
+            <h3>{t("Pokémons emblemáticos", "Signature Pokémon")}</h3>
             <div className="mappage-chips">
               {region.signature.map((name) => (
                 <PokemonChip key={name} name={name} id={idOf(name)} />
@@ -116,12 +119,12 @@ const MapPage = () => {
 
           {landmarks.length > 0 && (
             <section className="mappage-block">
-              <h3>Ilhas e locais notáveis</h3>
+              <h3>{t("Ilhas e locais notáveis", "Islands and notable places")}</h3>
               <ul className="mappage-landmarks">
                 {landmarks.map((l) => (
                   <li key={l.id}>
                     <span className={"landmark-kind landmark-kind-" + l.kind}>
-                      {LANDMARK_KIND_LABELS[l.kind]}
+                      {lore.landmarkKindLabels[l.kind]}
                     </span>
                     <div className="mappage-landmark-body">
                       <strong>{l.name}</strong> — {l.summary}
@@ -135,7 +138,7 @@ const MapPage = () => {
 
           {relatedEvents.length > 0 && (
             <section className="mappage-block">
-              <h3>Eventos da mitologia local</h3>
+              <h3>{t("Eventos da mitologia local", "Local mythology events")}</h3>
               <ul className="mappage-events">
                 {relatedEvents.slice(0, 4).map((e) => (
                   <li key={e.title}>
@@ -145,7 +148,8 @@ const MapPage = () => {
               </ul>
               {relatedEvents.length > 4 && (
                 <Link to="/lore" className="mappage-link">
-                  Ver todos ({relatedEvents.length}) na cronologia →
+                  {t("Ver todos", "See all")} ({relatedEvents.length}){" "}
+                  {t("na cronologia →", "in the timeline →")}
                 </Link>
               )}
             </section>
@@ -153,7 +157,7 @@ const MapPage = () => {
 
           {relatedHumans.length > 0 && (
             <section className="mappage-block">
-              <h3>Figuras humanas</h3>
+              <h3>{t("Figuras humanas", "Human figures")}</h3>
               <ul className="mappage-list">
                 {relatedHumans.map((h) => (
                   <li key={h.name}>
@@ -166,11 +170,11 @@ const MapPage = () => {
 
           {relatedVillains.length > 0 && (
             <section className="mappage-block">
-              <h3>Organizações antagonistas</h3>
+              <h3>{t("Organizações antagonistas", "Antagonist organizations")}</h3>
               <ul className="mappage-list">
                 {relatedVillains.map((v) => (
                   <li key={v.id}>
-                    <strong>{v.name}</strong> (líder: {v.leader}) — {v.motivation}
+                    <strong>{v.name}</strong> ({t("líder", "leader")}: {v.leader}) — {v.motivation}
                   </li>
                 ))}
               </ul>
@@ -179,7 +183,7 @@ const MapPage = () => {
 
           <div className="mappage-actions">
             <Link to="/lore" className="mappage-cta">
-              Explorar a lore completa →
+              {t("Explorar a lore completa →", "Explore the full lore →")}
             </Link>
           </div>
         </section>
