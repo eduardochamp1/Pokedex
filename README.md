@@ -188,6 +188,25 @@ Consequência: todo recurso cross-origin da página precisa ser CORS/CORP. Os
 sprites já são locais; o artwork da PokéAPI e a folha do Google Fonts levam
 `crossorigin="anonymous"`.
 
+### Treinador (`/treinador`)
+A ficha do treinador e a linha do tempo da partida, lidas do save de
+**Emerald** em `/jogar` e guardadas no `localStorage` — a página não carrega
+o emulador.
+
+- **Cartão** — nome, ID, tempo de jogo, dinheiro, Pokédex, insígnias e onde o
+  jogo foi salvo
+- **Insígnias e cidades de Hoenn**, time e as **14 caixas do PC**
+- **Linha do tempo** — `saves/` guarda um backup sobrescrito, sem histórico.
+  Então a cada leitura do save o site compara com o anterior e registra o que
+  mudou: capturas, insígnias, cidades, níveis e evoluções (pelo PV, que não
+  muda ao evoluir). Carregar um save antigo vira um evento, não uma "perda".
+  O que aconteceu antes do primeiro registro não tem como ser recuperado
+- **Medido, não assumido** — TID/SID bateram com o OT do Mudkip do save; o
+  dinheiro só dá 3300 depois do XOR pela chave de segurança; as flags em volta
+  das insígnias (tem Pokédex, visitou Littleroot e Oldale) batem com o começo
+  do jogo. A ordem das insígnias é a da decompilação: no save medido nenhuma
+  estava ganha. Ruby/Sapphire e FR/LG ficam de fora — o layout deles é outro
+
 ### Lore do universo (`/lore`)
 Página com **13 abas** cobrindo a mitologia oficial:
 
