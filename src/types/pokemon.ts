@@ -22,6 +22,19 @@ export interface PokemonAbility {
   ability: { name: string; url: string };
 }
 
+/**
+ * Como os slots eram **antes** de `generation`. `ability: null` = o slot não
+ * existia (ex.: habilidade oculta antes da Gen V).
+ */
+export interface PastAbilities {
+  generation: { name: string; url: string };
+  abilities: {
+    is_hidden: boolean;
+    slot: number;
+    ability: { name: string; url: string } | null;
+  }[];
+}
+
 export interface ShowdownSprites {
   front_default: string | null;
   front_shiny: string | null;
@@ -168,6 +181,8 @@ export interface Pokemon {
   types: PokemonType[];
   stats: PokemonStat[];
   abilities: PokemonAbility[];
+  /** Vem na mesma resposta; usado para saber a habilidade de Gen 3. */
+  past_abilities?: PastAbilities[];
   height: number;
   weight: number;
   species: { name: string; url: string };

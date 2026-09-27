@@ -1,4 +1,5 @@
 import Card from "./Card";
+import TeamMemberSheet from "./TeamMemberSheet";
 import { usePokemonsByNames } from "../hooks/usePokemon";
 import type { Gen3PartyMember } from "../emulator/saveParse/gen3";
 
@@ -77,6 +78,7 @@ const PlayTeam = ({ team, lido }: Props) => {
                 <span className="play-team-apelido">{membro.nickname}</span>
                 <span className="play-team-nivel">nível {membro.level}</span>
               </div>
+              <TeamMemberSheet membro={membro} pokemon={pokemon} />
             </li>
           );
         })}
