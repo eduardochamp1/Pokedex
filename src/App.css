@@ -477,6 +477,19 @@ img { display: block; max-width: 100%; }
   text-transform: uppercase;
   margin-bottom: 14px;
 }
+.home-featured-copy .home-featured-daily {
+  display: inline-block;
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  color: var(--accent-ink);
+  background: var(--accent);
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 12px;
+}
+.home-featured-link { color: inherit; text-decoration: none; }
+.home-featured-link:hover,
+.home-featured-link:focus-visible { text-decoration: underline; text-decoration-color: var(--accent); }
 .home-featured-copy .pokemon-type {
   display: flex;
   gap: 6px;
@@ -3222,6 +3235,10 @@ img { display: block; max-width: 100%; }
   align-items: center;
   gap: 8px;
 }
+/* O nome leva para /habilidade/:slug, com todos que a têm. */
+.ability-head a { color: inherit; text-decoration: none; }
+.ability-head a:hover,
+.ability-head a:focus-visible { text-decoration: underline; text-decoration-color: var(--accent); }
 .ability-head strong {
   font-size: 0.85rem;
 }

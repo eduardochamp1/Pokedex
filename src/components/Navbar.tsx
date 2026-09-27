@@ -74,6 +74,14 @@ const Navbar = () => {
           Lore
         </NavLink>
         <NavLink
+          to="/quiz"
+          className={({ isActive }) =>
+            "nav-link" + (isActive ? " nav-link-active" : "")
+          }
+        >
+          Quiz
+        </NavLink>
+        <NavLink
           to="/tamanhos"
           className={({ isActive }) =>
             "nav-link" + (isActive ? " nav-link-active" : "")

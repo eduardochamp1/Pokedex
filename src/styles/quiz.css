@@ -1,0 +1,144 @@
+/* ========= /quiz: Quem é esse Pokémon? ========= */
+.quiz-shell {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.quiz-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+}
+.quiz-header h1 {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.quiz-recorte {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+.quiz-recorte select {
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.quiz-placar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 0;
+}
+.quiz-placar div {
+  background: var(--surface-1);
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  text-align: center;
+}
+.quiz-placar dt { font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+.quiz-placar dd { margin: 2px 0 0; font-family: var(--font-display); font-size: 1.4rem; font-variant-numeric: tabular-nums; }
+
+/* O palco: raios atrás, como no desenho; a silhueta é o sprite sem brilho. */
+.quiz-palco {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 12px 16px;
+  border-radius: var(--radius-card);
+  border: 2px solid var(--border-strong);
+  background:
+    repeating-conic-gradient(
+      from 0deg,
+      color-mix(in srgb, var(--accent-alt) 22%, transparent) 0deg 10deg,
+      transparent 10deg 20deg
+    ),
+    var(--surface-1);
+}
+.quiz-sprite {
+  width: 288px;
+  height: 288px;
+  max-width: 70vw;
+  max-height: 70vw;
+  image-rendering: pixelated;
+  filter: brightness(0);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.quiz-palco.is-revelado .quiz-sprite {
+  filter: none;
+  transition: filter var(--dur-fast, 0.2s) ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .quiz-palco.is-revelado .quiz-sprite { transition: none; }
+}
+.quiz-resultado { min-height: 1.5em; font-size: 1.05rem; }
+
+.quiz-opcoes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.quiz-opcao {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border-strong);
+  background: var(--surface-1);
+  color: var(--text);
+  font-size: 0.95rem;
+  text-align: left;
+  cursor: pointer;
+}
+.quiz-opcao:hover:not(:disabled),
+.quiz-opcao:focus-visible { border-color: var(--accent); }
+.quiz-opcao:disabled { cursor: default; opacity: 0.6; }
+.quiz-opcao kbd {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  padding: 3px 5px;
+  border-radius: 3px;
+  background: var(--surface-3);
+  color: var(--text-muted);
+}
+/* Certa e errada mudam a borda e ganham ✓/✗ — não dependem só da cor. */
+.quiz-opcao.is-certa { opacity: 1; border-color: var(--accent); }
+.quiz-opcao.is-certa::after { content: "✓"; margin-left: auto; color: var(--accent); }
+.quiz-opcao.is-errada { opacity: 1; border-color: var(--fav); }
+.quiz-opcao.is-errada::after { content: "✗"; margin-left: auto; color: var(--fav); }
+
+.quiz-depois {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.quiz-depois a { color: var(--accent); }
+.quiz-proximo {
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  .quiz-shell { padding: 20px 16px 48px; }
+  .quiz-opcoes { grid-template-columns: 1fr; }
+}
