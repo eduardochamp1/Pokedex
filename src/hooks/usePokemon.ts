@@ -22,6 +22,7 @@ import {
 } from "../lib/filters";
 import { RARITIES, type RarityId } from "../data/rarity";
 import { evolutionConditionText } from "../lib/evolution";
+import type { EncounterArea } from "../lib/encounters";
 import type {
   EvolutionChain,
   EvolutionNode,
@@ -342,6 +343,23 @@ export function usePokemonSpecies(speciesUrl: string | undefined) {
  * os 109 golpes do Pikachu de uma vez, para mostrar poder e precisão que quase
  * ninguém vai ler todos, seria pagar caro por nada.
  */
+/**
+ * Onde encontrar: uma lista por área e jogo. Vem vazia para inicial, lendário
+ * de evento e evolução — a PokéAPI só lista encontro selvagem, troca e presente.
+ */
+export function useEncounters(id: number | undefined) {
+  return useQuery<EncounterArea[] | null>({
+    queryKey: ["encounters", id],
+    queryFn: ({ signal }) =>
+      fetchJsonPublic<EncounterArea[]>(
+        `https://pokeapi.co/api/v2/pokemon/${id}/encounters`,
+        signal
+      ),
+    enabled: id !== undefined,
+    staleTime: HOUR,
+  });
+}
+
 export function useMoveDetail(moveName: string | undefined) {
   return useQuery<MoveDetail | null>({
     queryKey: ["move-detail", moveName],
