@@ -8,7 +8,7 @@ import {
   MAX_EVENTS,
   type Snapshot,
 } from "./trainerLog";
-import type { Gen3Save, Gen3PartyMember } from "../emulator/saveParse/gen3";
+import type { Gen3Save, Gen3PartyMember, Gen3BoxMon } from "../emulator/saveParse/gen3";
 
 const memory: Record<string, string> = {};
 beforeEach(() => {
@@ -36,6 +36,7 @@ function membro(national: number, level: number, pv: number, nickname = "X"): Ge
     evs: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
     moves: [],
     friendship: 0,
+    experience: 0,
     stats: { hp: 1, maxHp: 1, atk: 1, def: 1, spa: 1, spd: 1, spe: 1 },
     shiny: false,
     abilitySlot: 0,
@@ -74,6 +75,28 @@ function save(over: Partial<{
 }
 
 const snap = (o?: Parameters<typeof save>[0]) => snapshotOf(save(o), 1000) as Snapshot;
+
+describe("PC", () => {
+  it("guarda a ficha inteira de cada pokémon da caixa", () => {
+    const m = membro(252, 5, 0xabc, "TREECKO");
+    const naCaixa: Gen3BoxMon = {
+      slot: 7,
+      national: m.national,
+      nickname: m.nickname,
+      nature: 3,
+      ivs: { ...m.ivs, hp: 31 },
+      evs: m.evs,
+      moves: [{ id: 1, pp: 35 }],
+      friendship: 70,
+      experience: 135,
+      shiny: true,
+      abilitySlot: 1,
+      personality: m.personality,
+    };
+    recordTrainerSave("e.gba", { ...save(), boxes: { current: 0, boxes: [{ name: "BOX1", pokemon: [naCaixa] }] } }, 1000);
+    expect(latestTrainerEntry()?.boxes[0].pokemon[0]).toEqual(naCaixa);
+  });
+});
 
 describe("FireRed/LeafGreen", () => {
   /** O save medido: LG, Bulbasaur nv 5, sem cidades nem mapa (só Emerald tem). */

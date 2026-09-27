@@ -10,10 +10,13 @@ interface Props {
   sub?: string;
   /** Slug da PokéAPI; com ele o mini vira link para a ficha. */
   slug?: string;
+  /** Em vez de link, um botão que seleciona (o PC abre a ficha embaixo). */
+  onSelect?: () => void;
+  selected?: boolean;
 }
 
 /** Sprite pequeno com legenda. Usado no treinador e na página de habilidade. */
-const PokemonMini = ({ id, label, sub, slug }: Props) => {
+const PokemonMini = ({ id, label, sub, slug, onSelect, selected }: Props) => {
   const [broken, setBroken] = useState(false);
   const conteudo = (
     <>
@@ -35,6 +38,13 @@ const PokemonMini = ({ id, label, sub, slug }: Props) => {
       {sub && <span className="poke-mini-sub">{sub}</span>}
     </>
   );
+  if (onSelect) {
+    return (
+      <button type="button" className="poke-mini" aria-pressed={selected} onClick={onSelect}>
+        {conteudo}
+      </button>
+    );
+  }
   return slug ? (
     <Link to={`/pokemon/${slug}`} className="poke-mini">
       {conteudo}

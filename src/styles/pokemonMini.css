@@ -12,7 +12,14 @@
   text-decoration: none;
 }
 a.poke-mini:hover,
-a.poke-mini:focus-visible { border-color: var(--accent); }
+a.poke-mini:focus-visible,
+button.poke-mini:hover,
+button.poke-mini:focus-visible { border-color: var(--accent); }
+button.poke-mini { font: inherit; cursor: pointer; }
+button.poke-mini[aria-pressed="true"] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent);
+}
 .poke-mini img { image-rendering: pixelated; }
 .poke-mini-vazio {
   width: 48px;

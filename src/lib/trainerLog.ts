@@ -13,6 +13,7 @@
  */
 import { useSyncExternalStore } from "react";
 import type { Gen3Game, Gen3Save, Gen3Trainer } from "../emulator/saveParse/gen3";
+import type { StoredBox } from "./pcBoxes";
 
 export interface SnapshotMon {
   personality: number;
@@ -59,7 +60,7 @@ export interface TrainerEntry {
   playerName: string;
   trainer: Gen3Trainer;
   party: SnapshotMon[];
-  boxes: { name: string; pokemon: { national: number; nickname: string }[] }[];
+  boxes: StoredBox[];
   owned: number[];
   seen: number[];
   last: Snapshot;
@@ -224,10 +225,7 @@ export function recordTrainerSave(rom: string, save: Gen3Save, now: number = Dat
     playerName: save.playerName,
     trainer: save.trainer,
     party: snap.party,
-    boxes: (save.boxes?.boxes ?? []).map((c) => ({
-      name: c.name,
-      pokemon: c.pokemon.map((p) => ({ national: p.national, nickname: p.nickname })),
-    })),
+    boxes: (save.boxes?.boxes ?? []).map((c) => ({ name: c.name, pokemon: c.pokemon })),
     owned: snap.owned,
     seen: [...(save.pokedex?.seen ?? [])],
     last: snap,

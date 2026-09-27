@@ -210,10 +210,13 @@ const OFF_STATUS = [0x58, 0x5a, 0x5c, 0x5e, 0x60, 0x62];
 
 /**
  * Dentro das subestruturas decifradas. Medido no mesmo Mudkip: amizade 87;
+ * experiência 364 — entre as 314 do nível 8 e as 419 do 9 na curva dele (e
+ * o Bulbasaur nv 5 do LeafGreen, 135, exatamente o piso do nível 5);
  * golpes 33, 45, 189 (Tackle, Growl, Mud-Slap) com PP 35, 40, 10; EVs e IVs na
  * ordem hp, atq, def, vel, atq esp, def esp — 5 bits por IV, e o bit 31 da
  * palavra é o slot de habilidade.
  */
+const OFF_G_EXPERIENCIA = 4;
 const OFF_G_AMIZADE = 9;
 const OFF_A_PP = 8;
 const OFF_M_IVS = 4;
@@ -254,14 +257,14 @@ for (let i = 0; i < 26; i++) {
 }
 const TERMINADOR = 0xff;
 
-export interface Gen3PartyMember {
-  /** Posição no time, de 0 a 5. */
+/** O que time e caixa guardam igual: os 80 bytes do registro. */
+export interface Gen3BoxMon {
+  /** Posição no time (0..5) ou na caixa (0..29). */
   slot: number;
   /** Número na dex nacional. */
   national: number;
   /** Apelido como está gravado — costuma ser o nome da espécie em maiúsculas. */
   nickname: string;
-  level: number;
   /** 0..24, `PV % 25`. O nome e o efeito ficam em `lib/gen3Stats`. */
   nature: number;
   ivs: Gen3StatSpread;
@@ -269,13 +272,20 @@ export interface Gen3PartyMember {
   /** Só os slots ocupados. `id` é o número do golpe, igual ao da PokéAPI. */
   moves: { id: number; pp: number }[];
   friendship: number;
-  /** Os status como o jogo calculou e gravou — o registro de time os guarda. */
-  stats: Gen3StatSpread & { maxHp: number };
+  /** A caixa não guarda nível: ele sai daqui, pela curva da espécie (`lib/gen3Level`). */
+  experience: number;
   shiny: boolean;
   /** Qual das (até) duas habilidades comuns da espécie. */
   abilitySlot: 0 | 1;
   /** O PV não muda ao evoluir: é o que identifica o mesmo pokémon entre saves. */
   personality: number;
+}
+
+/** No time, os 20 bytes a mais: nível e status já calculados. */
+export interface Gen3PartyMember extends Gen3BoxMon {
+  level: number;
+  /** Os status como o jogo calculou e gravou — o registro de time os guarda. */
+  stats: Gen3StatSpread & { maxHp: number };
 }
 
 export interface Gen3Trainer {
@@ -291,13 +301,6 @@ export interface Gen3Trainer {
   visitedTowns: number[] | null;
   /** Grupo e número do mapa onde o jogo foi salvo. Só Emerald. */
   location: { group: number; num: number } | null;
-}
-
-export interface Gen3BoxMon {
-  slot: number;
-  national: number;
-  nickname: string;
-  personality: number;
 }
 
 export interface Gen3Storage {
@@ -496,6 +499,43 @@ function lerTreinador(
   };
 }
 
+/** Natureza, IVs, EVs, golpes e o resto do miolo decifrado. */
+function lerFicha(r: Registro, slot: number): Gen3BoxMon {
+  const { pv, otid, claro, ordem } = r;
+  const G = ordem.indexOf("G") * 12;
+  const A = ordem.indexOf("A") * 12;
+  const E = ordem.indexOf("E") * 12;
+  const M = ordem.indexOf("M") * 12;
+
+  const moves: { id: number; pp: number }[] = [];
+  for (let i = 0; i < 4; i++) {
+    const id = claro.getUint16(A + i * 2, true);
+    if (id !== 0) moves.push({ id, pp: claro.getUint8(A + OFF_A_PP + i) });
+  }
+
+  const palavraIv = claro.getUint32(M + OFF_M_IVS, true);
+  const iv = (i: number) => (palavraIv >>> (i * 5)) & 31;
+  const ev = (i: number) => claro.getUint8(E + i);
+  const tid = otid & 0xffff;
+  const sid = otid >>> 16;
+
+  return {
+    slot,
+    national: r.national,
+    nickname: r.nickname,
+    nature: pv % 25,
+    // A ordem do jogo põe a velocidade antes dos especiais.
+    ivs: { hp: iv(0), atk: iv(1), def: iv(2), spe: iv(3), spa: iv(4), spd: iv(5) },
+    evs: { hp: ev(0), atk: ev(1), def: ev(2), spe: ev(3), spa: ev(4), spd: ev(5) },
+    moves,
+    friendship: claro.getUint8(G + OFF_G_AMIZADE),
+    experience: claro.getUint32(G + OFF_G_EXPERIENCIA, true),
+    shiny: (tid ^ sid ^ (pv >>> 16) ^ (pv & 0xffff)) < 8,
+    abilitySlot: (palavraIv >>> 31) as 0 | 1,
+    personality: pv,
+  };
+}
+
 function lerCaixas(pc: Uint8Array): Gen3Storage {
   const v = new DataView(pc.buffer, pc.byteOffset, pc.byteLength);
   const boxes: Gen3Storage["boxes"] = [];
@@ -504,7 +544,7 @@ function lerCaixas(pc: Uint8Array): Gen3Storage {
     for (let slot = 0; slot < POR_CAIXA; slot++) {
       const off = OFF_PRIMEIRA_CAIXA + (c * POR_CAIXA + slot) * TAMANHO_NA_CAIXA;
       const r = decifrarRegistro(pc, off);
-      if (r) pokemon.push({ slot, national: r.national, nickname: r.nickname, personality: r.pv });
+      if (r) pokemon.push(lerFicha(r, slot));
     }
     const nome = OFF_NOMES_DAS_CAIXAS + c * TAMANHO_DO_NOME_DA_CAIXA;
     boxes.push({ name: lerTexto(pc, nome, TAMANHO_DO_NOME_DA_CAIXA), pokemon });
@@ -558,38 +598,10 @@ export function parseGen3Save(bytes: Uint8Array): Gen3Save | null {
     if (off + TAMANHO_DO_REGISTRO > sb1.length) break;
     const r = decifrarRegistro(sb1, off);
     if (!r) continue;
-    const { pv, otid, claro, ordem } = r;
-
-    const G = ordem.indexOf("G") * 12;
-    const A = ordem.indexOf("A") * 12;
-    const E = ordem.indexOf("E") * 12;
-    const M = ordem.indexOf("M") * 12;
-
-    const moves: { id: number; pp: number }[] = [];
-    for (let i = 0; i < 4; i++) {
-      const id = claro.getUint16(A + i * 2, true);
-      if (id !== 0) moves.push({ id, pp: claro.getUint8(A + OFF_A_PP + i) });
-    }
-
-    const palavraIv = claro.getUint32(M + OFF_M_IVS, true);
-    const iv = (i: number) => (palavraIv >>> (i * 5)) & 31;
-    const ev = (i: number) => claro.getUint8(E + i);
     const status = OFF_STATUS.map((o) => vb1.getUint16(off + o, true));
-
-    const tid = otid & 0xffff;
-    const sid = otid >>> 16;
-
     party.push({
-      slot,
-      national: r.national,
-      nickname: r.nickname,
+      ...lerFicha(r, slot),
       level: sb1[off + OFF_NIVEL] ?? 0,
-      nature: pv % 25,
-      // A ordem do jogo põe a velocidade antes dos especiais.
-      ivs: { hp: iv(0), atk: iv(1), def: iv(2), spe: iv(3), spa: iv(4), spd: iv(5) },
-      evs: { hp: ev(0), atk: ev(1), def: ev(2), spe: ev(3), spa: ev(4), spd: ev(5) },
-      moves,
-      friendship: claro.getUint8(G + OFF_G_AMIZADE),
       stats: {
         hp: vb1.getUint16(off + OFF_HP_ATUAL, true),
         maxHp: status[0],
@@ -599,9 +611,6 @@ export function parseGen3Save(bytes: Uint8Array): Gen3Save | null {
         spa: status[4],
         spd: status[5],
       },
-      shiny: (tid ^ sid ^ (pv >>> 16) ^ (pv & 0xffff)) < 8,
-      abilitySlot: (palavraIv >>> 31) as 0 | 1,
-      personality: pv,
     });
   }
 

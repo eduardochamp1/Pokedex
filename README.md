@@ -229,7 +229,12 @@ leem time, Pokédex, PC e tempo de jogo, sem dinheiro nem insígnias.
 - **Cartão** — nome, ID, tempo de jogo, dinheiro, Pokédex, insígnias e onde o
   jogo foi salvo
 - **Insígnias** de Hoenn ou de Kanto conforme o jogo, **cidades de Hoenn**
-  (só Emerald), time e as **14 caixas do PC**
+  (só Emerald) e o time
+- **PC** — as 14 caixas com busca por apelido, espécie ou número, filtro por
+  caixa e shiny, ordem por caixa, dex ou nível, e a ficha de cada pokémon
+  (natureza, IVs, EVs, golpes, status). A caixa não guarda nível nem status:
+  o nível sai da experiência pela curva de crescimento da espécie (tabela das
+  386 gerada da PokéAPI), e os status da fórmula de Gen 3
 - **Linha do tempo** — `saves/` guarda um backup sobrescrito, sem histórico.
   Então a cada leitura do save o site compara com o anterior e registra o que
   mudou: capturas, insígnias, cidades, níveis e evoluções (pelo PV, que não

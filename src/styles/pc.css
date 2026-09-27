@@ -1,0 +1,46 @@
+/* ========= PC do treinador: busca, filtros e ficha ========= */
+.pc-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+}
+.pc-filtros select,
+.pc-filtros input[type="search"] {
+  font: inherit;
+  color: var(--text);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+}
+.pc-busca { flex: 1 1 200px; }
+.pc-busca input { width: 100%; }
+.pc-detalhe {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+}
+.pc-detalhe-topo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.pc-detalhe-topo > div { flex: 1; }
+.pc-fechar {
+  font: inherit;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+}
+.pc-fechar:hover,
+.pc-fechar:focus-visible { color: var(--text); border-color: var(--accent); }

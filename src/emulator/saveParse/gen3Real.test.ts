@@ -1,6 +1,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { describe, it, expect } from "vitest";
 import { parseGen3Save } from "./gen3";
+import { growthRateOf, levelFromExp } from "../../lib/gen3Level";
 
 /**
  * Valida o parser contra um `.sav` de verdade, quando alguém aponta um.
@@ -42,6 +43,15 @@ describe.runIf(CAMINHO)("parser contra um save real", () => {
     expect(dex, "a dex não passou na sanidade").not.toBeNull();
     const capturados = new Set(dex?.owned);
     for (const p of save?.party ?? []) expect(capturados.has(p.national)).toBe(true);
+
+    // O nível que o time grava tem que bater com o que a experiência dá pela
+    // curva da espécie — é o que o PC usa, já que a caixa não guarda nível.
+    for (const p of save?.party ?? []) {
+      const curva = growthRateOf(p.national);
+      expect(curva).toBeDefined();
+      if (curva) expect(levelFromExp(curva, p.experience)).toBe(p.level);
+      console.log(`#${p.national} nv${p.level} exp ${p.experience}`);
+    }
 
     const t = save?.trainer;
     if (t) {

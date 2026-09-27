@@ -51,6 +51,7 @@ interface Membro {
   evs?: number[];
   golpes?: { id: number; pp: number }[];
   amizade?: number;
+  experiencia?: number;
   habilidade?: 0 | 1;
   /** hp atual, hp máximo, atq, def, vel, atq esp, def esp — fora da cifra. */
   status?: number[];
@@ -82,6 +83,7 @@ function escreverRegistro(destino: Uint8Array, off: number, m: Membro, doTime: b
   const E = ordem.indexOf("E") * 12;
   const M = ordem.indexOf("M") * 12;
   claro.setUint16(G, m.indice, true);
+  claro.setUint32(G + 4, m.experiencia ?? 0, true);
   claro.setUint8(G + 9, m.amizade ?? 0);
   (m.golpes ?? []).forEach((g, i) => {
     claro.setUint16(A + i * 2, g.id, true);
@@ -582,6 +584,54 @@ describe("parseGen3Save", () => {
   });
 
   /** A última caixa cai na seção 13, depois da fronteira entre seções. */
+  /**
+   * A caixa guarda o mesmo miolo cifrado do time — natureza, IVs, EVs, golpes,
+   * amizade —, só sem nível e status. O nível sai da experiência.
+   */
+  it("pokémon na caixa vem com a ficha inteira e a experiência", () => {
+    const pv = 0x25b7b8b0;
+    const pc = parseGen3Save(
+      montarSave({
+        nome: "ZE",
+        time: [MUDKIP],
+        caixas: {
+          pokemon: [
+            {
+              caixa: 2,
+              slot: 4,
+              membro: {
+                indice: 277,
+                apelido: "TREECKO",
+                nivel: 0,
+                pv,
+                ivs: [31, 2, 3, 4, 5, 6],
+                evs: [10, 0, 0, 252, 0, 0],
+                golpes: [{ id: 1, pp: 35 }, { id: 43, pp: 30 }],
+                amizade: 70,
+                experiencia: 1_000,
+                habilidade: 1,
+              },
+            },
+          ],
+        },
+      })
+    )?.boxes;
+    expect(pc?.boxes[2].pokemon[0]).toEqual({
+      slot: 4,
+      national: 252,
+      nickname: "TREECKO",
+      personality: pv,
+      nature: pv % 25,
+      ivs: { hp: 31, atk: 2, def: 3, spe: 4, spa: 5, spd: 6 },
+      evs: { hp: 10, atk: 0, def: 0, spe: 252, spa: 0, spd: 0 },
+      moves: [{ id: 1, pp: 35 }, { id: 43, pp: 30 }],
+      friendship: 70,
+      experience: 1_000,
+      shiny: false,
+      abilitySlot: 1,
+    });
+  });
+
   it("lê pokémon nas caixas, inclusive na última", () => {
     const pc = parseGen3Save(
       montarSave({
@@ -600,11 +650,11 @@ describe("parseGen3Save", () => {
     )?.boxes;
     expect(pc?.current).toBe(13);
     expect(pc?.boxes[0].name).toBe("TIME B");
-    expect(pc?.boxes[0].pokemon).toEqual([
+    expect(pc?.boxes[0].pokemon).toMatchObject([
       { slot: 0, national: 252, nickname: "TREECKO", personality: 0x25b7b8b0 },
       { slot: 29, national: 1, nickname: "BULBA", personality: 7 },
     ]);
-    expect(pc?.boxes[13].pokemon).toEqual([
+    expect(pc?.boxes[13].pokemon).toMatchObject([
       { slot: 29, national: 358, nickname: "CHIMECHO", personality: 0x25b7b8b0 },
     ]);
   });

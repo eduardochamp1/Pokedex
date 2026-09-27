@@ -11,6 +11,7 @@ import { HOENN_TOWNS, hoennLocationName } from "../data/hoenn";
 import { badgesOf, gameLabel, regionOfGame } from "../lib/gen3Game";
 import { usePokemonIndex } from "../hooks/usePokemon";
 import PokemonMini from "../components/PokemonMini";
+import PcBoxes from "../components/PcBoxes";
 import { pokemonLabel } from "../lib/pokemonLabel";
 import { TOTAL_DA_DEX_GEN3 } from "../lib/playerDex";
 import "../styles/trainer.css";
@@ -41,6 +42,7 @@ const TrainerPage = () => {
     },
     [slugOf]
   );
+  const slugDe = useCallback((n: number) => slugOf.get(n), [slugOf]);
 
   if (!entry) {
     return (
@@ -64,7 +66,6 @@ const TrainerPage = () => {
   const segundos = t.playTime.hours * 3600 + t.playTime.minutes * 60 + t.playTime.seconds;
   const insignias = t.badges?.filter(Boolean).length;
   const lugar = t.location ? hoennLocationName(t.location.group, t.location.num) : undefined;
-  const noPc = entry.boxes.reduce((n, c) => n + c.pokemon.length, 0);
   const eventos = [...entry.events].reverse();
 
   return (
@@ -203,34 +204,7 @@ const TrainerPage = () => {
         </div>
       </section>
 
-      <section>
-        <h2>
-          PC <span className="trainer-de">{noPc} pokémon</span>
-        </h2>
-        {noPc === 0 ? (
-          <p className="trainer-sub">{tx("As 14 caixas estão vazias.", "All 14 boxes are empty.")}</p>
-        ) : (
-          entry.boxes.map((c, i) =>
-            c.pokemon.length === 0 ? null : (
-              <div key={i} className="trainer-caixa">
-                <h3>
-                  {c.name} <span className="trainer-de">{c.pokemon.length}/30</span>
-                </h3>
-                <div className="trainer-minis">
-                  {c.pokemon.map((p, j) => (
-                    <PokemonMini
-                      key={j}
-                      id={p.national}
-                      label={p.nickname}
-                      slug={slugOf.get(p.national)}
-                    />
-                  ))}
-                </div>
-              </div>
-            )
-          )
-        )}
-      </section>
+      <PcBoxes boxes={entry.boxes} nameOf={nameOf} slugOf={slugDe} />
 
       <section>
         <h2>{tx("Linha do tempo", "Timeline")}</h2>

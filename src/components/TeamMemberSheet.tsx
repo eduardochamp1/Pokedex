@@ -11,6 +11,8 @@ interface Props {
   membro: Gen3PartyMember;
   /** Da PokéAPI, para nomear habilidade e golpes. Sem ele, a ficha sai com números. */
   pokemon?: Pokemon;
+  /** O PC abre a ficha já aberta: ela é o motivo do clique. */
+  defaultOpen?: boolean;
 }
 
 /** Chave de gen3Stats -> slug da PokéAPI, que é o que statLabel conhece. */
@@ -36,7 +38,7 @@ const AMIZADE_MAX = 255;
  * É um `<details>` fechado por padrão. A carta continua sendo o rosto do time,
  * e a ficha é para quem quer abrir.
  */
-const TeamMemberSheet = ({ membro, pokemon }: Props) => {
+const TeamMemberSheet = ({ membro, pokemon, defaultOpen }: Props) => {
   const lang = useLang();
   const t = (pt: string, en: string) => tr(lang, pt, en);
   const rotulo = (k: StatKey) => statLabel(SLUG[k], lang);
@@ -45,7 +47,7 @@ const TeamMemberSheet = ({ membro, pokemon }: Props) => {
   const totalEvs = LINHAS.reduce((s, l) => s + membro.evs[l.key], 0);
 
   return (
-    <details className="team-sheet">
+    <details className="team-sheet" open={defaultOpen}>
       <summary>{t("Ficha", "Details")}</summary>
 
       <dl className="team-sheet-fatos">
