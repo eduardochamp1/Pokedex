@@ -186,6 +186,8 @@ export interface Pokemon {
   name: string;
   sprites: PokemonSprites;
   types: PokemonType[];
+  /** Tipos **até** aquela geração, inclusive (Clefairy era Normal até a Gen 5). */
+  past_types?: { generation: { name: string; url: string }; types: PokemonType[] }[];
   stats: PokemonStat[];
   abilities: PokemonAbility[];
   /** Vem na mesma resposta; usado para saber a habilidade de Gen 3. */
@@ -212,6 +214,12 @@ export interface MoveDetail {
   priority: number;
   type: { name: string; url: string };
   damage_class: { name: string; url: string };
+  /** Valores que valiam **antes** de cada grupo de versões. */
+  past_values?: {
+    power: number | null;
+    type: { name: string; url: string } | null;
+    version_group: { name: string; url: string };
+  }[];
   flavor_text_entries: {
     flavor_text: string;
     language: { name: string };

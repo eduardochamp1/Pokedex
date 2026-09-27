@@ -92,6 +92,14 @@ describe("conquistas na linha do tempo", () => {
   });
 });
 
+describe("time completo", () => {
+  it("a ficha guarda o time com os status que o jogo gravou", () => {
+    const s = save();
+    recordTrainerSave("e.gba", s, 1000);
+    expect(latestTrainerEntry()?.team).toEqual(s.party);
+  });
+});
+
 describe("PC", () => {
   it("guarda a ficha inteira de cada pokémon da caixa", () => {
     const m = membro(252, 5, 0xabc, "TREECKO");

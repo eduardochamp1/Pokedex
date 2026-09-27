@@ -12,7 +12,7 @@
  * de forma errada descartada na leitura.
  */
 import { useSyncExternalStore } from "react";
-import type { Gen3Game, Gen3Save, Gen3Trainer } from "../emulator/saveParse/gen3";
+import type { Gen3Game, Gen3PartyMember, Gen3Save, Gen3Trainer } from "../emulator/saveParse/gen3";
 import type { StoredBox } from "./pcBoxes";
 import { newlyDone } from "./achievements";
 
@@ -64,6 +64,8 @@ export interface TrainerEntry {
   playerName: string;
   trainer: Gen3Trainer;
   party: SnapshotMon[];
+  /** O time inteiro, com os status gravados. Ausente nas fichas anteriores à calculadora. */
+  team?: Gen3PartyMember[];
   boxes: StoredBox[];
   owned: number[];
   seen: number[];
@@ -217,6 +219,7 @@ export function entryFromSave(rom: string, save: Gen3Save, now: number = Date.no
     playerName: save.playerName,
     trainer: save.trainer,
     party: snap.party,
+    team: save.party,
     boxes: (save.boxes?.boxes ?? []).map((c) => ({ name: c.name, pokemon: c.pokemon })),
     owned: snap.owned,
     seen: [...(save.pokedex?.seen ?? [])],

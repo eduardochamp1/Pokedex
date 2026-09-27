@@ -1,0 +1,54 @@
+/* ========= /dano: calculadora de dano de Gen 3 ========= */
+.dano-lados {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+}
+.dano-lado,
+.dano-opcoes {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 0.85rem;
+  min-width: 0;
+}
+.dano-opcoes { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px 18px; }
+.dano-lado legend,
+.dano-opcoes legend {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--accent);
+  padding: 0 4px;
+}
+.dano-lado select,
+.dano-lado input[type="number"],
+.dano-lado input:not([type]),
+.dano-opcoes select {
+  font: inherit;
+  color: var(--text);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+  max-width: 100%;
+}
+.dano-lado input[type="number"] { width: 5em; }
+.dano-fonte { display: flex; flex-wrap: wrap; gap: 12px; }
+.dano-livre { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.dano-resumo { display: flex; gap: 12px; align-items: flex-start; }
+.dano-resumo p { margin: 0 0 4px; display: flex; flex-wrap: wrap; gap: 6px; }
+.dano-resultado {
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dano-numero strong { font-family: var(--font-display); font-size: 2rem; }
+.dano-fatos { list-style: none; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.85rem; color: var(--text-muted); }
+.dano-rolagens summary { cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.dano-rolagens p { font-variant-numeric: tabular-nums; font-size: 0.85rem; }

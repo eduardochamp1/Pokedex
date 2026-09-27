@@ -213,6 +213,21 @@ Consequência: todo recurso cross-origin da página precisa ser CORS/CORP. Os
 sprites já são locais; o artwork da PokéAPI e a folha do Google Fonts levam
 `crossorigin="anonymous"`.
 
+### Dano (`/dano`)
+Calculadora de dano de Gen 3, seguindo a decompilação (pokeemerald:
+`CalculateBaseDamage`, `Cmd_damagecalc`, `Cmd_typecalc` e
+`ApplyRandomDmgMultiplier`), em inteiros e na ordem do jogo.
+
+- **Seu time com os status gravados no save**, ou qualquer espécie num nível
+  (IV 31, sem EVs, natureza neutra — e a tela diz que é suposição)
+- **Regras da época** — físico/especial pelo tipo do golpe; Aço resiste a
+  Fantasma e Sombrio; sem Fada (Clefairy volta a Normal por `past_types`);
+  poder e tipo dos golpes de Gen 3 por `past_values` (Tackle 35, Outrage 90)
+- **Crítico, queimadura e clima**, e as habilidades que não dependem do
+  estado da batalha: Huge Power, Pure Power, Thick Fat, Levitate
+- **Resultado** — faixa de dano, % do HP, nocaute garantido ou com chance em
+  N golpes, e as 16 rolagens
+
 ### Treinador (`/treinador`)
 A ficha do treinador e a linha do tempo da partida, lidas do save de
 **Emerald**, **FireRed/LeafGreen** ou **Ruby/Sapphire** em `/jogar` e

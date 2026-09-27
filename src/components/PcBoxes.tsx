@@ -10,8 +10,7 @@ import {
   type PcSort,
   type StoredBox,
 } from "../lib/pcBoxes";
-import type { StatSpread } from "../lib/gen3Stats";
-import type { Pokemon } from "../types/pokemon";
+import { baseStatsOf } from "../lib/damageSides";
 import { useLang, tr } from "../i18n/lang";
 import "../styles/pc.css";
 
@@ -22,25 +21,6 @@ interface Props {
 }
 
 const POR_CAIXA = 30;
-
-/** Slug da PokéAPI -> chave de gen3Stats. */
-const STAT: Record<string, keyof StatSpread> = {
-  hp: "hp",
-  attack: "atk",
-  defense: "def",
-  "special-attack": "spa",
-  "special-defense": "spd",
-  speed: "spe",
-};
-
-function baseStats(p: Pokemon): StatSpread | undefined {
-  const out: Partial<StatSpread> = {};
-  for (const s of p.stats) {
-    const k = STAT[s.stat.name];
-    if (k) out[k] = s.base_stat;
-  }
-  return Object.keys(out).length === 6 ? (out as StatSpread) : undefined;
-}
 
 const chave = (e: PcEntry) => `${e.box}-${e.mon.slot ?? e.mon.nickname}-${e.mon.personality ?? ""}`;
 
@@ -186,7 +166,7 @@ const PcMonDetail = ({ entry, boxName, slug, nameOf, onClose }: DetailProps) => 
   const t = (pt: string, en: string) => tr(lang, pt, en);
   const { data: pokemon } = usePokemonDetail(slug);
   const { mon, level } = entry;
-  const base = pokemon ? baseStats(pokemon) : undefined;
+  const base = pokemon ? baseStatsOf(pokemon) : undefined;
   const membro = isFullBoxMon(mon) && level !== null && base ? boxMonAsMember(mon, level, base) : undefined;
 
   return (
