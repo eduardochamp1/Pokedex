@@ -1,4 +1,5 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { useT } from "../i18n/lang";
 
 function subscribeOnline(cb: () => void) {
   window.addEventListener("online", cb);
@@ -19,11 +20,14 @@ export const OfflineBanner = () => {
     () => navigator.onLine,
     () => true
   );
+  const t = useT();
   if (online) return null;
   return (
     <div className="offline-banner" role="status">
-      Sem conexão — o que você já abriu continua funcionando. O que for novo da
-      PokéAPI espera a rede voltar.
+      {t(
+        "Sem conexão — o que você já abriu continua funcionando. O que for novo da PokéAPI espera a rede voltar.",
+        "Offline — what you already opened keeps working. Anything new from the PokéAPI waits for the network."
+      )}
     </div>
   );
 };
@@ -55,6 +59,7 @@ if (typeof window !== "undefined") {
 /** Só aparece onde o navegador oferece instalar (Chrome, Edge, Android). */
 export const InstallButton = () => {
   const [, forcar] = useState(0);
+  const t = useT();
   useEffect(() => {
     const l = () => forcar((n) => n + 1);
     ouvintes.add(l);
@@ -77,9 +82,9 @@ export const InstallButton = () => {
         adiado = null;
         ouvintes.forEach((l) => l());
       }}
-      title="Instalar a Pokédex como app"
+      title={t("Instalar a Pokédex como app", "Install the Pokédex as an app")}
     >
-      Instalar
+      {t("Instalar", "Install")}
     </button>
   );
 };

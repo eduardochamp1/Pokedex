@@ -13,6 +13,7 @@ import PokemonMini from "../components/PokemonMini";
 import { pokemonLabel } from "../lib/pokemonLabel";
 import { TOTAL_DA_DEX_GEN3 } from "../lib/playerDex";
 import "../styles/trainer.css";
+import { localeOf, useLang, tr } from "../i18n/lang";
 
 /**
  * A ficha do treinador e a linha do tempo da partida, lidas do save de
@@ -21,6 +22,9 @@ import "../styles/trainer.css";
  */
 const TrainerPage = () => {
   const entry = useTrainerEntry();
+  const lang = useLang();
+  // `t` aqui é o treinador; a tradução se chama `tx`.
+  const tx = (pt: string, en: string) => tr(lang, pt, en);
   const { index } = usePokemonIndex();
 
   /** Número nacional -> slug da PokéAPI, para link e nome. */
@@ -41,12 +45,13 @@ const TrainerPage = () => {
     return (
       <div className="trainer-shell">
         <header className="trainer-header">
-          <h1>Treinador</h1>
+          <h1>{tx("Treinador", "Trainer")}</h1>
         </header>
         <p className="trainer-vazio">
-          Ainda não há ficha. Ela nasce do save de um jogo de{" "}
-          <strong>Pokémon Emerald</strong> aberto em <Link to="/jogar">Jogar</Link> — o
-          único que foi medido até aqui.
+          {tx("Ainda não há ficha. Ela nasce do save de um jogo de", "No card yet. It comes from the save of a")}{" "}
+          <strong>Pokémon Emerald</strong>{" "}
+          {tx("aberto em", "game opened in")} <Link to="/jogar">{tx("Jogar", "Play")}</Link> —{" "}
+          {tx("o único que foi medido até aqui.", "the only one measured so far.")}
         </p>
       </div>
     );
@@ -62,18 +67,18 @@ const TrainerPage = () => {
   return (
     <div className="trainer-shell">
       <header className="trainer-header">
-        <h1>Treinador</h1>
+        <h1>{tx("Treinador", "Trainer")}</h1>
         <span className="trainer-rom">
           <Link to="/jogar">{entry.rom.replace(/\.[^.]+$/, "")}</Link>
         </span>
       </header>
 
-      <section className="trainer-card" aria-label="Cartão de treinador">
+      <section className="trainer-card" aria-label={tx("Cartão de treinador", "Trainer card")}>
         <div className="trainer-card-nome">
-          <span className="trainer-card-rotulo">Nome</span>
+          <span className="trainer-card-rotulo">{tx("Nome", "Name")}</span>
           <strong>
             {entry.playerName}{" "}
-            <span aria-label={t.gender === "female" ? "feminino" : "masculino"}>
+            <span aria-label={t.gender === "female" ? tx("feminino", "female") : tx("masculino", "male")}>
               {t.gender === "female" ? "♀" : "♂"}
             </span>
           </strong>
@@ -84,11 +89,11 @@ const TrainerPage = () => {
             <dd>{formatTrainerId(t.trainerId)}</dd>
           </div>
           <div>
-            <dt>Tempo</dt>
+            <dt>{tx("Tempo", "Time")}</dt>
             <dd>{formatPlayTime(segundos)}</dd>
           </div>
           <div>
-            <dt>Dinheiro</dt>
+            <dt>{tx("Dinheiro", "Money")}</dt>
             <dd>{formatMoney(t.money)}</dd>
           </div>
           <div>
@@ -99,12 +104,12 @@ const TrainerPage = () => {
             </dd>
           </div>
           <div>
-            <dt>Insígnias</dt>
+            <dt>{tx("Insígnias", "Badges")}</dt>
             <dd>{insignias} / 8</dd>
           </div>
           {lugar && (
             <div>
-              <dt>Salvo em</dt>
+              <dt>{tx("Salvo em", "Saved at")}</dt>
               <dd>{lugar}</dd>
             </div>
           )}
@@ -113,7 +118,7 @@ const TrainerPage = () => {
 
       <div className="trainer-grade">
         <section>
-          <h2>Insígnias</h2>
+          <h2>{tx("Insígnias", "Badges")}</h2>
           <ol className="trainer-insignias">
             {HOENN_BADGES.map((b, i) => (
               <li key={b.name} className={t.badges[i] ? "tem" : undefined}>
@@ -126,7 +131,9 @@ const TrainerPage = () => {
                     {b.leader} · {b.city}
                   </span>
                 </span>
-                <span className="visually-hidden">{t.badges[i] ? "conquistada" : "ainda não"}</span>
+                <span className="visually-hidden">
+                  {t.badges[i] ? tx("conquistada", "earned") : tx("ainda não", "not yet")}
+                </span>
               </li>
             ))}
           </ol>
@@ -134,7 +141,7 @@ const TrainerPage = () => {
 
         <section>
           <h2>
-            Cidades <span className="trainer-de">{t.visitedTowns.length} / 16</span>
+            {tx("Cidades", "Towns")} <span className="trainer-de">{t.visitedTowns.length} / 16</span>
           </h2>
           <ul className="trainer-cidades">
             {HOENN_TOWNS.map((nome, i) => {
@@ -142,26 +149,28 @@ const TrainerPage = () => {
               return (
                 <li key={nome} className={foi ? "foi" : undefined}>
                   {nome}
-                  <span className="visually-hidden">{foi ? " — visitada" : " — ainda não"}</span>
+                  <span className="visually-hidden">
+                    {foi ? tx(" — visitada", " — visited") : tx(" — ainda não", " — not yet")}
+                  </span>
                 </li>
               );
             })}
           </ul>
           <p className="trainer-sub">
-            <Link to="/mapa?region=hoenn">Ver Hoenn no mapa →</Link>
+            <Link to="/mapa?region=hoenn">{tx("Ver Hoenn no mapa →", "See Hoenn on the map →")}</Link>
           </p>
         </section>
       </div>
 
       <section>
-        <h2>Time</h2>
+        <h2>{tx("Time", "Team")}</h2>
         <div className="trainer-minis">
           {entry.party.map((m) => (
             <PokemonMini
               key={m.personality}
               id={m.national}
               label={m.nickname}
-              sub={`nv ${m.level}`}
+              sub={`${tx("nv", "lv")} ${m.level}`}
               slug={slugOf.get(m.national)}
             />
           ))}
@@ -173,7 +182,7 @@ const TrainerPage = () => {
           PC <span className="trainer-de">{noPc} pokémon</span>
         </h2>
         {noPc === 0 ? (
-          <p className="trainer-sub">As 14 caixas estão vazias.</p>
+          <p className="trainer-sub">{tx("As 14 caixas estão vazias.", "All 14 boxes are empty.")}</p>
         ) : (
           entry.boxes.map((c, i) =>
             c.pokemon.length === 0 ? null : (
@@ -198,10 +207,12 @@ const TrainerPage = () => {
       </section>
 
       <section>
-        <h2>Linha do tempo</h2>
+        <h2>{tx("Linha do tempo", "Timeline")}</h2>
         <p className="trainer-sub">
-          Cada vez que o jogo salva, o site compara com o save anterior. O que veio
-          antes do primeiro registro não tem como ser recuperado.
+          {tx(
+            "Cada vez que o jogo salva, o site compara com o save anterior. O que veio antes do primeiro registro não tem como ser recuperado.",
+            "Every time the game saves, the site compares it with the previous save. What happened before the first record can't be recovered."
+          )}
         </p>
         <ol className="trainer-linha">
           {eventos.map((e, i) => (
@@ -209,7 +220,7 @@ const TrainerPage = () => {
               <span className="trainer-evento-tempo">{formatPlayTime(e.playSeconds)}</span>
               <span className="trainer-evento-texto">{describeEvent(e, nameOf)}</span>
               <time className="trainer-evento-data" dateTime={new Date(e.at).toISOString()}>
-                {new Date(e.at).toLocaleString("pt-BR", {
+                {new Date(e.at).toLocaleString(localeOf(lang), {
                   day: "2-digit",
                   month: "2-digit",
                   hour: "2-digit",

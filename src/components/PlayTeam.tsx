@@ -3,6 +3,7 @@ import Card from "./Card";
 import TeamMemberSheet from "./TeamMemberSheet";
 import { usePokemonsByNames } from "../hooks/usePokemon";
 import type { Gen3PartyMember } from "../emulator/saveParse/gen3";
+import { useT } from "../i18n/lang";
 
 interface Props {
   /** `null` = o save não abriu; `[]` = abriu e o time está vazio. */
@@ -26,17 +27,19 @@ interface Props {
 const PlayTeam = ({ team, lido }: Props) => {
   const ids = (team ?? []).map((m) => String(m.national));
   const { pokemons, isLoading, isError } = usePokemonsByNames(ids);
+  const t = useT();
 
   if (!lido) return null;
 
   if (team === null) {
     return (
       <section className="play-panel">
-        <h2>Seu time</h2>
+        <h2>{t("Seu time", "Your team")}</h2>
         <p className="play-panel-hint">
-          Não deu para ler o time deste save. O leitor entende save de bateria
-          de Gen 3 (Ruby, Sapphire, Emerald, FireRed, LeafGreen); romhack e
-          outras gerações guardam o progresso de outro jeito.
+          {t(
+            "Não deu para ler o time deste save. O leitor entende save de bateria de Gen 3 (Ruby, Sapphire, Emerald, FireRed, LeafGreen); romhack e outras gerações guardam o progresso de outro jeito.",
+            "Couldn't read the team from this save. The reader understands Gen 3 battery saves (Ruby, Sapphire, Emerald, FireRed, LeafGreen); romhacks and other generations store progress differently."
+          )}
         </p>
       </section>
     );
@@ -45,9 +48,9 @@ const PlayTeam = ({ team, lido }: Props) => {
   if (team.length === 0) {
     return (
       <section className="play-panel">
-        <h2>Seu time</h2>
+        <h2>{t("Seu time", "Your team")}</h2>
         <p className="play-panel-hint">
-          O save abriu, mas ainda não há pokémon no time.
+          {t("O save abriu, mas ainda não há pokémon no time.", "The save opened, but there are no Pokémon in the team yet.")}
         </p>
       </section>
     );
@@ -55,10 +58,13 @@ const PlayTeam = ({ team, lido }: Props) => {
 
   return (
     <section className="play-panel">
-      <h2>Seu time</h2>
+      <h2>{t("Seu time", "Your team")}</h2>
       {isError && (
         <p className="play-panel-hint">
-          O time foi lido do save, mas não deu para buscar os dados na PokéAPI.
+          {t(
+            "O time foi lido do save, mas não deu para buscar os dados na PokéAPI.",
+            "The team was read from the save, but the PokéAPI data couldn't be fetched."
+          )}
         </p>
       )}
       <ul className="play-team-list">
@@ -77,7 +83,9 @@ const PlayTeam = ({ team, lido }: Props) => {
               )}
               <div className="play-team-info">
                 <span className="play-team-apelido">{membro.nickname}</span>
-                <span className="play-team-nivel">nível {membro.level}</span>
+                <span className="play-team-nivel">
+                  {t("nível", "level")} {membro.level}
+                </span>
               </div>
               <TeamMemberSheet membro={membro} pokemon={pokemon} />
             </li>
@@ -85,10 +93,12 @@ const PlayTeam = ({ team, lido }: Props) => {
         })}
       </ul>
       <p className="play-panel-hint">
-        <Link to="/treinador">Ficha do treinador e linha do tempo →</Link>
+        <Link to="/treinador">
+          {t("Ficha do treinador e linha do tempo →", "Trainer card and timeline →")}
+        </Link>
       </p>
       {isLoading && (
-        <p className="play-panel-hint">Buscando os dados de cada um…</p>
+        <p className="play-panel-hint">{t("Buscando os dados de cada um…", "Fetching each one's data…")}</p>
       )}
     </section>
   );

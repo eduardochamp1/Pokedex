@@ -92,9 +92,10 @@ describe("rótulos", () => {
   });
 
   it("método em português, desconhecido vira título", () => {
-    expect(methodLabel("walk")).toBe("Andando na grama");
-    expect(methodLabel("super-rod")).toBe("Super Rod");
-    expect(methodLabel("metodo-novo")).toBe("Metodo Novo");
+    expect(methodLabel("walk", "pt")).toBe("Andando na grama");
+    expect(methodLabel("walk", "en")).toBe("Walking in grass");
+    expect(methodLabel("super-rod", "pt")).toBe("Super Rod");
+    expect(methodLabel("metodo-novo", "en")).toBe("Metodo Novo");
   });
 
   it("versões: rótulo, região e ordem", () => {

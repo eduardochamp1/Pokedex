@@ -7,6 +7,7 @@
  * nível e a chance somada.
  */
 import { versionOrder } from "../data/versions";
+import { getLang, type Lang } from "../i18n/lang";
 
 export interface EncounterArea {
   location_area: { name: string; url: string };
@@ -49,27 +50,28 @@ export function areaLabel(slug: string): string {
   return titulo(s);
 }
 
-const METODOS: Record<string, string> = {
-  walk: "Andando na grama",
-  surf: "Surfando",
-  "old-rod": "Old Rod",
-  "good-rod": "Good Rod",
-  "super-rod": "Super Rod",
-  "rock-smash": "Rock Smash",
-  headbutt: "Headbutt",
-  gift: "Presente",
-  "gift-egg": "Ovo de presente",
-  "npc-trade": "Troca com NPC",
-  "only-one": "Encontro único",
-  static: "Encontro único",
-  "dark-grass": "Grama escura",
-  horde: "Horda",
-  "roaming-grass": "Errante (grama)",
-  "roaming-water": "Errante (água)",
+const METODOS: Record<string, [string, string]> = {
+  walk: ["Andando na grama", "Walking in grass"],
+  surf: ["Surfando", "Surfing"],
+  "old-rod": ["Old Rod", "Old Rod"],
+  "good-rod": ["Good Rod", "Good Rod"],
+  "super-rod": ["Super Rod", "Super Rod"],
+  "rock-smash": ["Rock Smash", "Rock Smash"],
+  headbutt: ["Headbutt", "Headbutt"],
+  gift: ["Presente", "Gift"],
+  "gift-egg": ["Ovo de presente", "Gift egg"],
+  "npc-trade": ["Troca com NPC", "In-game trade"],
+  "only-one": ["Encontro único", "One-time encounter"],
+  static: ["Encontro único", "One-time encounter"],
+  "dark-grass": ["Grama escura", "Dark grass"],
+  horde: ["Horda", "Horde"],
+  "roaming-grass": ["Errante (grama)", "Roaming (grass)"],
+  "roaming-water": ["Errante (água)", "Roaming (water)"],
 };
 
-export function methodLabel(method: string): string {
-  return METODOS[method] ?? titulo(method);
+export function methodLabel(method: string, lang: Lang = getLang()): string {
+  const par = METODOS[method];
+  return par ? (lang === "en" ? par[1] : par[0]) : titulo(method);
 }
 
 export function encounterVersions(areas: EncounterArea[]): string[] {
@@ -108,19 +110,20 @@ export function encountersFor(areas: EncounterArea[], version: string): Encounte
   return rows;
 }
 
-const CONDICOES: Record<string, string> = {
-  "swarm-yes": "enxame",
-  "time-morning": "manhã",
-  "time-day": "dia",
-  "time-night": "noite",
-  "season-spring": "primavera",
-  "season-summer": "verão",
-  "season-autumn": "outono",
-  "season-winter": "inverno",
-  "radar-on": "Poké Radar",
+const CONDICOES: Record<string, [string, string]> = {
+  "swarm-yes": ["enxame", "swarm"],
+  "time-morning": ["manhã", "morning"],
+  "time-day": ["dia", "day"],
+  "time-night": ["noite", "night"],
+  "season-spring": ["primavera", "spring"],
+  "season-summer": ["verão", "summer"],
+  "season-autumn": ["outono", "autumn"],
+  "season-winter": ["inverno", "winter"],
+  "radar-on": ["Poké Radar", "Poké Radar"],
 };
 
 /** Condição traduzida quando é comum; a rara vira título, sem inventar tradução. */
-export function conditionLabel(name: string): string {
-  return CONDICOES[name] ?? titulo(name);
+export function conditionLabel(name: string, lang: Lang = getLang()): string {
+  const par = CONDICOES[name];
+  return par ? (lang === "en" ? par[1] : par[0]) : titulo(name);
 }

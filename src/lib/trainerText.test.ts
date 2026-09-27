@@ -44,3 +44,17 @@ describe("describeEvent", () => {
     expect(describeEvent({ ...lv, from: 8, to: 12 }, nome)).toBe("MUDKIP subiu do nível 8 para o 12");
   });
 });
+
+describe("em inglês", () => {
+  it("formatos e frases", () => {
+    expect(formatMoney(3300, "en")).toBe("₽3,300");
+    expect(describeEvent({ ...base, kind: "badge", index: 0 }, nome, "en")).toBe("Earned Roxanne's Stone Badge");
+    expect(describeEvent({ ...base, kind: "town", index: 7 }, nome, "en")).toBe("Reached Petalburg City");
+    expect(describeEvent({ ...base, kind: "evolved", nickname: "MUDKIP", from: 258, to: 259 }, nome, "en")).toBe(
+      "MUDKIP evolved from Mudkip into Marshtomp"
+    );
+    expect(describeEvent({ ...base, kind: "start", owned: 1, seen: 6 }, nome, "en")).toBe(
+      "Started recording: 1 caught, 6 seen"
+    );
+  });
+});

@@ -17,52 +17,70 @@ import { ITEMS } from "../data/items";
 import { LANDMARKS } from "../data/landmarks";
 import { LORE_EVENTS } from "../data/lore";
 import "../styles/commandPalette.css";
+import { useLang, tr, type Lang } from "../i18n/lang";
+import { generationLabel } from "../i18n/common";
 
 const HOUR = 60 * 60 * 1000;
 
-const PAGINAS: CommandItem[] = [
-  { kind: "page", label: "Pokédex", to: "/", keywords: ["inicio", "home", "lista"] },
-  { kind: "page", label: "Comparar", to: "/comparar", keywords: ["arena", "versus"] },
-  { kind: "page", label: "Time", to: "/time", keywords: ["montador", "equipe", "cobertura"] },
-  { kind: "page", label: "Mapa", to: "/mapa", keywords: ["regioes", "mundo"] },
-  { kind: "page", label: "Jogar", to: "/jogar", keywords: ["emulador", "gba", "rom"] },
-  { kind: "page", label: "Treinador", to: "/treinador", keywords: ["ficha", "linha do tempo", "save"] },
-  { kind: "page", label: "Lore", to: "/lore", keywords: ["historia", "universo"] },
-  { kind: "page", label: "Quiz", to: "/quiz", keywords: ["quem e esse pokemon", "silhueta", "jogo"] },
-  { kind: "page", label: "Tamanhos", to: "/tamanhos", keywords: ["altura", "escala"] },
-  { kind: "page", label: "Favoritos", to: "/favoritos", keywords: ["colecao"] },
+/**
+ * As páginas, com rótulo no idioma do site e palavras-chave nos dois: quem
+ * está em inglês e digita "equipe" também acha o Time.
+ */
+const PAGINAS: { to: string; pt: string; en: string; keywords: string[] }[] = [
+  { to: "/", pt: "Pokédex", en: "Pokédex", keywords: ["inicio", "home", "lista", "list"] },
+  { to: "/comparar", pt: "Comparar", en: "Compare", keywords: ["arena", "versus"] },
+  { to: "/time", pt: "Time", en: "Team", keywords: ["montador", "equipe", "cobertura", "builder", "coverage"] },
+  { to: "/mapa", pt: "Mapa", en: "Map", keywords: ["regioes", "mundo", "regions", "world"] },
+  { to: "/jogar", pt: "Jogar", en: "Play", keywords: ["emulador", "gba", "rom", "emulator"] },
+  { to: "/treinador", pt: "Treinador", en: "Trainer", keywords: ["ficha", "linha do tempo", "save", "card", "timeline"] },
+  { to: "/lore", pt: "Lore", en: "Lore", keywords: ["historia", "universo", "history", "universe"] },
+  { to: "/quiz", pt: "Quiz", en: "Quiz", keywords: ["quem e esse pokemon", "silhueta", "jogo", "whos that pokemon", "silhouette"] },
+  { to: "/tamanhos", pt: "Tamanhos", en: "Sizes", keywords: ["altura", "escala", "height", "scale"] },
+  { to: "/favoritos", pt: "Favoritos", en: "Favorites", keywords: ["colecao", "collection"] },
 ];
+
+const paginas = (lang: Lang): CommandItem[] =>
+  PAGINAS.map((p) => ({
+    kind: "page",
+    label: lang === "en" ? p.en : p.pt,
+    to: p.to,
+    keywords: [p.pt, p.en, ...p.keywords],
+  }));
 
 const loreDe = (aba: string, rotulo: string, nomes: { label: string }[]): CommandItem[] =>
   nomes.map(({ label }) => ({ kind: "lore", label, to: `/lore?aba=${aba}`, keywords: [], hint: rotulo }));
 
 /** Tudo da lore que tem nome, apontando para a aba onde ele está. */
-const LORE: CommandItem[] = [
-  ...loreDe("timeline", "Cronologia", LORE_EVENTS.map((e) => ({ label: e.title }))),
-  ...loreDe("myths", "Mitos", MYTHS.map((m) => ({ label: m.title }))),
-  ...loreDe("villains", "Vilões", VILLAIN_TEAMS.map((v) => ({ label: v.name }))),
-  ...loreDe("humans", "Humanos", HUMAN_LEGENDS.map((h) => ({ label: h.name }))),
-  ...loreDe("civilizations", "Civilizações", CIVILIZATIONS.map((c) => ({ label: c.name }))),
-  ...loreDe("battles", "Batalhas", BATTLES.map((b) => ({ label: b.title }))),
-  ...loreDe("dimensions", "Dimensões", DIMENSIONS.map((d) => ({ label: d.name }))),
-  ...loreDe("items", "Itens", ITEMS.map((i) => ({ label: i.name }))),
-  ...loreDe("landmarks", "Lugares", LANDMARKS.map((l) => ({ label: l.name }))),
-];
+const lore = (lang: Lang): CommandItem[] => {
+  const t = (pt: string, en: string) => tr(lang, pt, en);
+  return [
+    ...loreDe("timeline", t("Cronologia", "Timeline"), LORE_EVENTS.map((e) => ({ label: e.title }))),
+    ...loreDe("myths", t("Mitos", "Myths"), MYTHS.map((m) => ({ label: m.title }))),
+    ...loreDe("villains", t("Vilões", "Villains"), VILLAIN_TEAMS.map((v) => ({ label: v.name }))),
+    ...loreDe("humans", t("Humanos", "Humans"), HUMAN_LEGENDS.map((h) => ({ label: h.name }))),
+    ...loreDe("civilizations", t("Civilizações", "Civilizations"), CIVILIZATIONS.map((c) => ({ label: c.name }))),
+    ...loreDe("battles", t("Batalhas", "Battles"), BATTLES.map((b) => ({ label: b.title }))),
+    ...loreDe("dimensions", t("Dimensões", "Dimensions"), DIMENSIONS.map((d) => ({ label: d.name }))),
+    ...loreDe("items", t("Itens", "Items"), ITEMS.map((i) => ({ label: i.name }))),
+    ...loreDe("landmarks", t("Lugares", "Places"), LANDMARKS.map((l) => ({ label: l.name }))),
+  ];
+};
 
-const REGIOES: CommandItem[] = REGIONS.map((r) => ({
-  kind: "region",
-  label: r.name,
-  to: `/mapa?region=${r.id}`,
-  keywords: [r.id, r.inspiration],
-  hint: `Geração ${r.generation}`,
-}));
+const regioes = (lang: Lang): CommandItem[] =>
+  REGIONS.map((r) => ({
+    kind: "region",
+    label: r.name,
+    to: `/mapa?region=${r.id}`,
+    keywords: [r.id, r.inspiration],
+    hint: generationLabel(r.generation, lang),
+  }));
 
-const ROTULO_DO_TIPO: Record<CommandKind, string> = {
-  page: "Página",
-  pokemon: "Pokémon",
-  ability: "Habilidade",
-  region: "Região",
-  lore: "Lore",
+const ROTULO_DO_TIPO: Record<CommandKind, [string, string]> = {
+  page: ["Página", "Page"],
+  pokemon: ["Pokémon", "Pokémon"],
+  ability: ["Habilidade", "Ability"],
+  region: ["Região", "Region"],
+  lore: ["Lore", "Lore"],
 };
 
 const humanize = (slug: string) =>
@@ -86,6 +104,8 @@ const CommandPalette = ({ onClose }: Props) => {
   const [query, setQuery] = useState("");
   const [ativo, setAtivo] = useState(0);
   const listId = useId();
+  const lang = useLang();
+  const t = (pt: string, en: string) => tr(lang, pt, en);
 
   useEffect(() => {
     const d = dialogRef.current;
@@ -116,8 +136,8 @@ const CommandPalette = ({ onClose }: Props) => {
       to: `/habilidade/${a.name}`,
       keywords: [a.name],
     }));
-    return [...PAGINAS, ...REGIOES, ...pokemon, ...abilities, ...LORE];
-  }, [index, habilidades.data]);
+    return [...paginas(lang), ...regioes(lang), ...pokemon, ...abilities, ...lore(lang)];
+  }, [index, habilidades.data, lang]);
 
   const resultados = useMemo(() => searchCommands(query, itens), [query, itens]);
   const atual = Math.min(ativo, Math.max(0, resultados.length - 1));
@@ -162,7 +182,7 @@ const CommandPalette = ({ onClose }: Props) => {
     <dialog
       ref={dialogRef}
       className="palette"
-      aria-label="Buscar no site"
+      aria-label={t("Buscar no site", "Search the site")}
       onClose={onClose}
       onClick={(e) => {
         // Clique no fundo (fora da caixa) fecha.
@@ -179,7 +199,7 @@ const CommandPalette = ({ onClose }: Props) => {
             setAtivo(0);
           }}
           onKeyDown={onKeyDown}
-          placeholder="Pokémon, habilidade, região, lore ou página…"
+          placeholder={t("Pokémon, habilidade, região, lore ou página…", "Pokémon, ability, region, lore or page…")}
           role="combobox"
           aria-expanded={resultados.length > 0}
           aria-controls={listId}
@@ -187,9 +207,11 @@ const CommandPalette = ({ onClose }: Props) => {
           aria-autocomplete="list"
         />
         {query.trim() && resultados.length === 0 ? (
-          <p className="palette-vazio">Nada encontrado para “{query.trim()}”.</p>
+          <p className="palette-vazio">
+            {t("Nada encontrado para", "Nothing found for")} “{query.trim()}”.
+          </p>
         ) : (
-          <ul id={listId} role="listbox" className="palette-lista" aria-label="Resultados">
+          <ul id={listId} role="listbox" className="palette-lista" aria-label={t("Resultados", "Results")}>
             {resultados.map((r, i) => (
               <li
                 key={`${r.kind}-${r.to}-${r.label}`}
@@ -207,13 +229,14 @@ const CommandPalette = ({ onClose }: Props) => {
                 )}
                 <span className="palette-rotulo">{r.label}</span>
                 {r.hint && <span className="palette-dica">{r.hint}</span>}
-                <span className="palette-tipo">{ROTULO_DO_TIPO[r.kind]}</span>
+                <span className="palette-tipo">{t(...ROTULO_DO_TIPO[r.kind])}</span>
               </li>
             ))}
           </ul>
         )}
         <p className="palette-rodape">
-          <kbd>↑</kbd> <kbd>↓</kbd> escolher · <kbd>Enter</kbd> abrir · <kbd>Esc</kbd> fechar
+          <kbd>↑</kbd> <kbd>↓</kbd> {t("escolher", "choose")} · <kbd>Enter</kbd> {t("abrir", "open")} ·{" "}
+          <kbd>Esc</kbd> {t("fechar", "close")}
         </p>
       </div>
     </dialog>

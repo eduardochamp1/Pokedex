@@ -4,6 +4,8 @@ import { natureOf, type StatKey } from "../lib/gen3Stats";
 import { abilityForGen3Slot, moveSlugById } from "../lib/teamSheet";
 import { prettyMoveName } from "../lib/moves";
 import "../styles/teamSheet.css";
+import { useLang, tr } from "../i18n/lang";
+import { statLabel } from "../i18n/common";
 
 interface Props {
   membro: Gen3PartyMember;
@@ -11,17 +13,18 @@ interface Props {
   pokemon?: Pokemon;
 }
 
-const LINHAS: { key: StatKey; label: string }[] = [
-  { key: "hp", label: "HP" },
-  { key: "atk", label: "Atq" },
-  { key: "def", label: "Def" },
-  { key: "spa", label: "Atq Esp" },
-  { key: "spd", label: "Def Esp" },
-  { key: "spe", label: "Vel" },
+/** Chave de gen3Stats -> slug da PokéAPI, que é o que statLabel conhece. */
+const LINHAS: { key: StatKey; slug: string }[] = [
+  { key: "hp", slug: "hp" },
+  { key: "atk", slug: "attack" },
+  { key: "def", slug: "defense" },
+  { key: "spa", slug: "special-attack" },
+  { key: "spd", slug: "special-defense" },
+  { key: "spe", slug: "speed" },
 ];
 
-const ROTULO: Record<StatKey, string> = Object.fromEntries(
-  LINHAS.map((l) => [l.key, l.label])
+const SLUG: Record<StatKey, string> = Object.fromEntries(
+  LINHAS.map((l) => [l.key, l.slug])
 ) as Record<StatKey, string>;
 
 const AMIZADE_MAX = 255;
@@ -34,45 +37,51 @@ const AMIZADE_MAX = 255;
  * e a ficha é para quem quer abrir.
  */
 const TeamMemberSheet = ({ membro, pokemon }: Props) => {
+  const lang = useLang();
+  const t = (pt: string, en: string) => tr(lang, pt, en);
+  const rotulo = (k: StatKey) => statLabel(SLUG[k], lang);
   const natureza = natureOf(membro.nature);
   const habilidade = pokemon ? abilityForGen3Slot(pokemon, membro.abilitySlot) : undefined;
   const totalEvs = LINHAS.reduce((s, l) => s + membro.evs[l.key], 0);
 
   return (
     <details className="team-sheet">
-      <summary>Ficha</summary>
+      <summary>{t("Ficha", "Details")}</summary>
 
       <dl className="team-sheet-fatos">
         {natureza && (
           <>
-            <dt>Natureza</dt>
+            <dt>{t("Natureza", "Nature")}</dt>
             <dd>
               {natureza.name}
               {natureza.up && natureza.down ? (
                 <span className="team-sheet-efeito">
                   {" "}
-                  +{ROTULO[natureza.up]} −{ROTULO[natureza.down]}
+                  +{rotulo(natureza.up)} −{rotulo(natureza.down)}
                 </span>
               ) : (
-                <span className="team-sheet-efeito"> neutra</span>
+                <span className="team-sheet-efeito"> {t("neutra", "neutral")}</span>
               )}
             </dd>
           </>
         )}
         {habilidade && (
           <>
-            <dt>Habilidade</dt>
+            <dt>{t("Habilidade", "Ability")}</dt>
             <dd>{prettyMoveName(habilidade)}</dd>
           </>
         )}
-        <dt>Amizade</dt>
+        <dt>{t("Amizade", "Friendship")}</dt>
         <dd>
           {membro.friendship}
-          <span className="team-sheet-efeito"> de {AMIZADE_MAX}</span>
+          <span className="team-sheet-efeito">
+            {" "}
+            {t("de", "of")} {AMIZADE_MAX}
+          </span>
         </dd>
         {membro.shiny && (
           <>
-            <dt>Cor</dt>
+            <dt>{t("Cor", "Color")}</dt>
             <dd>Shiny ✨</dd>
           </>
         )}
@@ -81,22 +90,22 @@ const TeamMemberSheet = ({ membro, pokemon }: Props) => {
       <table className="team-sheet-status">
         <thead>
           <tr>
-            <th scope="col">Status</th>
-            <th scope="col">Valor</th>
+            <th scope="col">{t("Status", "Stat")}</th>
+            <th scope="col">{t("Valor", "Value")}</th>
             <th scope="col">IV</th>
             <th scope="col">EV</th>
           </tr>
         </thead>
         <tbody>
-          {LINHAS.map(({ key, label }) => {
+          {LINHAS.map(({ key }) => {
             const sobe = natureza?.up === key;
             const desce = natureza?.down === key;
             return (
               <tr key={key}>
                 <th scope="row">
-                  {label}
-                  {sobe && <span className="team-sheet-sobe" aria-label="natureza sobe"> ▲</span>}
-                  {desce && <span className="team-sheet-desce" aria-label="natureza desce"> ▼</span>}
+                  {rotulo(key)}
+                  {sobe && <span className="team-sheet-sobe" aria-label={t("natureza sobe", "nature raises")}> ▲</span>}
+                  {desce && <span className="team-sheet-desce" aria-label={t("natureza desce", "nature lowers")}> ▼</span>}
                 </th>
                 <td>
                   {key === "hp" ? `${membro.stats.hp}/${membro.stats.maxHp}` : membro.stats[key]}
@@ -112,7 +121,7 @@ const TeamMemberSheet = ({ membro, pokemon }: Props) => {
         <tfoot>
           <tr>
             <th scope="row" colSpan={3}>
-              EVs somados
+              {t("EVs somados", "Total EVs")}
             </th>
             <td>{totalEvs}/510</td>
           </tr>
@@ -125,7 +134,7 @@ const TeamMemberSheet = ({ membro, pokemon }: Props) => {
             const slug = pokemon ? moveSlugById(pokemon.moves, m.id) : undefined;
             return (
               <li key={i}>
-                <span>{slug ? prettyMoveName(slug) : `Golpe #${m.id}`}</span>
+                <span>{slug ? prettyMoveName(slug) : `${t("Golpe", "Move")} #${m.id}`}</span>
                 <span className="team-sheet-pp">PP {m.pp}</span>
               </li>
             );

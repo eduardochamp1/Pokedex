@@ -2,6 +2,7 @@ import { useState } from "react";
 import { BALLS, STATUSES, ballMultiplier, catchChance, type Status } from "../lib/capture";
 import { calcGen3Stat } from "../lib/gen3Stats";
 import { dexMarkOf, usePlayerDex } from "../lib/playerDex";
+import { useLang, tr } from "../i18n/lang";
 
 interface Props {
   national: number;
@@ -13,15 +14,21 @@ interface Props {
 /** IV médio: o HP real do pokémon selvagem não é conhecido antes da batalha. */
 const IV_MEDIO = 15;
 
-const pct = (p: number) =>
-  p >= 1 ? "100%" : p <= 0 ? "0%" : p < 0.001 ? "<0,1%" : `${(p * 100).toFixed(1).replace(".", ",")}%`;
+/** Vírgula decimal em português, ponto em inglês. */
+const decimal = (n: number, casas: number, en: boolean) => {
+  const s = n.toFixed(casas);
+  return en ? s : s.replace(".", ",");
+};
+
+const pct = (p: number, en: boolean) =>
+  p >= 1 ? "100%" : p <= 0 ? "0%" : p < 0.001 ? `<${decimal(0.1, 1, en)}%` : `${decimal(p * 100, 1, en)}%`;
 
 /** Média de bolas até capturar, 1/p. Uma casa decimal abaixo de 10: 1,3 não é 2. */
-const bolasEsperadas = (p: number) => {
+const bolasEsperadas = (p: number, en: boolean) => {
   if (p <= 0) return "—";
   if (p >= 1) return "1";
   const n = 1 / p;
-  return `≈ ${n < 10 ? n.toFixed(1).replace(".", ",") : Math.round(n)}`;
+  return `≈ ${n < 10 ? decimal(n, 1, en) : Math.round(n)}`;
 };
 
 /**
@@ -36,6 +43,9 @@ const CapturePanel = ({ national, captureRate, baseHp, types }: Props) => {
   const [umPs, setUmPs] = useState(false);
   const [status, setStatus] = useState<Status>("none");
   const [turn, setTurn] = useState(1);
+  const lang = useLang();
+  const en = lang === "en";
+  const t = (pt: string, enText: string) => tr(lang, pt, enText);
 
   const dex = usePlayerDex();
   const owned = dexMarkOf(dex, national) === "owned";
@@ -46,12 +56,13 @@ const CapturePanel = ({ national, captureRate, baseHp, types }: Props) => {
   return (
     <div className="capture">
       <p className="detail-muted">
-        Taxa de captura <strong>{captureRate}</strong> · regras de Gen 3 (Emerald)
+        {t("Taxa de captura", "Catch rate")} <strong>{captureRate}</strong> ·{" "}
+        {t("regras de Gen 3 (Emerald)", "Gen 3 rules (Emerald)")}
       </p>
 
       <div className="capture-campos">
         <label>
-          Nível
+          {t("Nível", "Level")}
           <input
             type="number"
             min={1}
@@ -61,17 +72,17 @@ const CapturePanel = ({ national, captureRate, baseHp, types }: Props) => {
           />
         </label>
         <label>
-          Status
+          {t("Status", "Status")}
           <select value={status} onChange={(e) => setStatus(e.target.value as Status)}>
             {STATUSES.map((s) => (
               <option key={s.id} value={s.id}>
-                {s.label}
+                {en ? s.labelEn : s.label}
               </option>
             ))}
           </select>
         </label>
         <label>
-          Turno
+          {t("Turno", "Turn")}
           <input
             type="number"
             min={1}
@@ -89,28 +100,33 @@ const CapturePanel = ({ national, captureRate, baseHp, types }: Props) => {
             value={hpPct}
             disabled={umPs}
             onChange={(e) => setHpPct(Number(e.target.value))}
-            aria-label="HP restante, em porcentagem"
+            aria-label={t("HP restante, em porcentagem", "Remaining HP, in percent")}
           />
         </label>
         <label className="capture-check">
           <input type="checkbox" checked={umPs} onChange={(e) => setUmPs(e.target.checked)} />
-          1 PS (False Swipe)
+          {t("1 PS (False Swipe)", "1 HP (False Swipe)")}
         </label>
       </div>
 
       <table className="capture-tabela">
         <thead>
           <tr>
-            <th scope="col">Bola</th>
-            <th scope="col">Chance</th>
-            <th scope="col">Bolas</th>
+            <th scope="col">{t("Bola", "Ball")}</th>
+            <th scope="col">{t("Chance", "Chance")}</th>
+            <th scope="col">{t("Bolas", "Balls")}</th>
           </tr>
         </thead>
         <tbody>
           {BALLS.map((b) => {
             const mult = ballMultiplier(b.id, { types, level, owned, turn });
             const p = catchChance({ catchRate: captureRate, ball: mult, maxHp, hp, status });
-            const nota = b.id === "repeat" ? (owned ? "você já tem — ×3" : "você ainda não tem") : b.note;
+            const nota =
+              b.id === "repeat"
+                ? owned
+                  ? t("você já tem — ×3", "you already have it — ×3")
+                  : t("você ainda não tem", "you don't have it yet")
+                : b.note && t(...b.note);
             return (
               <tr key={b.id}>
                 <th scope="row">
@@ -119,16 +135,19 @@ const CapturePanel = ({ national, captureRate, baseHp, types }: Props) => {
                 </th>
                 <td>
                   <span className="capture-barra" style={{ width: `${Math.min(1, p) * 100}%` }} />
-                  <span className="capture-valor">{pct(p)}</span>
+                  <span className="capture-valor">{pct(p, en)}</span>
                 </td>
-                <td>{bolasEsperadas(p)}</td>
+                <td>{bolasEsperadas(p, en)}</td>
               </tr>
             );
           })}
         </tbody>
       </table>
       <p className="detail-muted capture-rodape">
-        HP calculado com IV {IV_MEDIO} e sem EV. "Bolas" é quantas, em média, até capturar.
+        {t(
+          `HP calculado com IV ${IV_MEDIO} e sem EV. "Bolas" é quantas, em média, até capturar.`,
+          `HP computed with IV ${IV_MEDIO} and no EVs. "Balls" is how many, on average, until the catch.`
+        )}
       </p>
     </div>
   );

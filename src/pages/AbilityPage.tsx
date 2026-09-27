@@ -8,9 +8,10 @@ import { pokemonLabel } from "../lib/pokemonLabel";
 import { generationNumberFromName } from "../lib/regionForPokemon";
 import type { AbilityDetail } from "../types/pokemon";
 import "../styles/ability.css";
+import { useLang, tr } from "../i18n/lang";
+import { generationLabel } from "../i18n/common";
 
 const HOUR = 60 * 60 * 1000;
-const ROMANOS = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"];
 
 const humanize = (slug: string) =>
   slug
@@ -24,6 +25,8 @@ const humanize = (slug: string) =>
  */
 const AbilityPage = () => {
   const { slug = "" } = useParams<{ slug: string }>();
+  const lang = useLang();
+  const t = (pt: string, en: string) => tr(lang, pt, en);
   const { data, isLoading, isError } = useQuery<AbilityDetail | null>({
     queryKey: ["ability", slug],
     queryFn: ({ signal }) =>
@@ -36,16 +39,18 @@ const AbilityPage = () => {
   if (isLoading) {
     return (
       <div className="ability-shell">
-        <p className="detail-muted">Carregando…</p>
+        <p className="detail-muted">{t("Carregando…", "Loading…")}</p>
       </div>
     );
   }
   if (isError || !data) {
     return (
       <div className="ability-shell">
-        <h1>Habilidade</h1>
+        <h1>{t("Habilidade", "Ability")}</h1>
         <p className="detail-muted">
-          {isError ? "Não foi possível consultar a PokéAPI." : `Não existe habilidade "${slug}".`}
+          {isError
+            ? t("Não foi possível consultar a PokéAPI.", "Couldn't reach the PokéAPI.")
+            : t(`Não existe habilidade "${slug}".`, `There is no ability "${slug}".`)}
         </p>
       </div>
     );
@@ -72,7 +77,8 @@ const AbilityPage = () => {
         <h1>{nome}</h1>
         {geracao && (
           <span className="ability-gen">
-            desde a <Link to="/lore?aba=generations">Geração {ROMANOS[geracao]}</Link>
+            {t("desde a", "since")}{" "}
+            <Link to="/lore?aba=generations">{generationLabel(geracao, lang)}</Link>
           </span>
         )}
       </header>
@@ -85,15 +91,15 @@ const AbilityPage = () => {
 
       <section>
         <h2>
-          Comum <span className="ability-conta">{regular.length}</span>
+          {t("Comum", "Regular")} <span className="ability-conta">{regular.length}</span>
         </h2>
-        {regular.length ? grade(regular) : <p className="detail-muted">Nenhum.</p>}
+        {regular.length ? grade(regular) : <p className="detail-muted">{t("Nenhum.", "None.")}</p>}
       </section>
 
       {hidden.length > 0 && (
         <section>
           <h2>
-            Oculta <span className="ability-conta">{hidden.length}</span>
+            {t("Oculta", "Hidden")} <span className="ability-conta">{hidden.length}</span>
           </h2>
           {grade(hidden)}
         </section>

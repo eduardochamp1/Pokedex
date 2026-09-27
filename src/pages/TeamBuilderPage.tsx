@@ -17,6 +17,7 @@ import {
 } from "../lib/teamAnalysis";
 import type { TypeName } from "../data/typeMatchups";
 import "../styles/team.css";
+import { useLang, tr } from "../i18n/lang";
 
 const TypeDot = ({ type }: { type: TypeName }) => (
   <span className="card-type-dot-lg" data-type={type}>
@@ -38,6 +39,8 @@ function tomDe(m: number): string {
  */
 const TeamBuilderPage = () => {
   const [params, setParams] = useSearchParams();
+  const lang = useLang();
+  const t = (pt: string, en: string) => tr(lang, pt, en);
   const names = parseTeamParam(params.get("time"));
   const setNames = (next: string[]) => {
     const p = new URLSearchParams(params);
@@ -58,11 +61,11 @@ const TeamBuilderPage = () => {
     const porId = /^\d+$/.test(nome) && index ? namesForIds([Number(nome)], index)[0] : undefined;
     const final = porId ?? nome;
     if (index && !index.has(final)) {
-      setAviso(`Não achei "${entrada.trim()}".`);
+      setAviso(t(`Não achei "${entrada.trim()}".`, `Couldn't find "${entrada.trim()}".`));
       return;
     }
     if (names.includes(final)) {
-      setAviso(`${final} já está no time.`);
+      setAviso(t(`${final} já está no time.`, `${final} is already on the team.`));
       return;
     }
     setAviso(null);
@@ -93,7 +96,7 @@ const TeamBuilderPage = () => {
   return (
     <div className="team-shell">
       <header className="team-header">
-        <h1>Time</h1>
+        <h1>{t("Time", "Team")}</h1>
         <span className="team-count">
           {names.length} / {MAX_TEAM}
         </span>
@@ -109,8 +112,8 @@ const TeamBuilderPage = () => {
         <input
           value={entrada}
           onChange={(e) => setEntrada(e.target.value)}
-          placeholder="Nome ou número"
-          aria-label="Pokémon para adicionar ao time"
+          placeholder={t("Nome ou número", "Name or number")}
+          aria-label={t("Pokémon para adicionar ao time", "Pokémon to add to the team")}
           list="team-names"
           disabled={names.length >= MAX_TEAM}
         />
@@ -120,16 +123,16 @@ const TeamBuilderPage = () => {
           ))}
         </datalist>
         <button type="submit" disabled={names.length >= MAX_TEAM || !entrada.trim()}>
-          Adicionar
+          {t("Adicionar", "Add")}
         </button>
         {doSave.length > 0 && (
           <button type="button" className="team-secundario" onClick={() => setNames(doSave)}>
-            Usar o time do save ({treinador?.playerName})
+            {t("Usar o time do save", "Use the team from the save")} ({treinador?.playerName})
           </button>
         )}
         {names.length > 0 && (
           <button type="button" className="team-secundario" onClick={() => setNames([])}>
-            Limpar
+            {t("Limpar", "Clear")}
           </button>
         )}
       </form>
@@ -141,7 +144,10 @@ const TeamBuilderPage = () => {
 
       {names.length === 0 ? (
         <p className="team-vazio">
-          Adicione até seis pokémon para ver o que o time aguenta e o que ele acerta.
+          {t(
+            "Adicione até seis pokémon para ver o que o time aguenta e o que ele acerta.",
+            "Add up to six Pokémon to see what the team can take and what it hits hard."
+          )}
         </p>
       ) : (
         <>
@@ -159,7 +165,7 @@ const TeamBuilderPage = () => {
                     type="button"
                     className="team-remover"
                     onClick={() => setNames(names.filter((n) => n !== nome))}
-                    aria-label={`Tirar ${nome} do time`}
+                    aria-label={t(`Tirar ${nome} do time`, `Remove ${nome} from the team`)}
                   >
                     ×
                   </button>
@@ -170,11 +176,11 @@ const TeamBuilderPage = () => {
 
           {membros.length > 0 && (
             <>
-              <section className="team-resumo" aria-label="Resumo">
+              <section className="team-resumo" aria-label={t("Resumo", "Summary")}>
                 <div>
-                  <h2>Pontos fracos</h2>
+                  <h2>{t("Pontos fracos", "Weak spots")}</h2>
                   {lacunas.weakSpots.length === 0 ? (
-                    <p className="team-ok">Nenhum tipo pega o time desprevenido.</p>
+                    <p className="team-ok">{t("Nenhum tipo pega o time desprevenido.", "No type catches the team off guard.")}</p>
                   ) : (
                     <p className="team-tipos">
                       {lacunas.weakSpots.map((t) => (
@@ -184,9 +190,9 @@ const TeamBuilderPage = () => {
                   )}
                 </div>
                 <div>
-                  <h2>Ninguém acerta forte</h2>
+                  <h2>{t("Ninguém acerta forte", "Nobody hits hard")}</h2>
                   {lacunas.uncovered.length === 0 ? (
-                    <p className="team-ok">Algum tipo do time acerta 2× em todos os 18.</p>
+                    <p className="team-ok">{t("Algum tipo do time acerta 2× em todos os 18.", "Some type on the team hits all 18 for 2×.")}</p>
                   ) : (
                     <p className="team-tipos">
                       {lacunas.uncovered.map((t) => (
@@ -198,22 +204,24 @@ const TeamBuilderPage = () => {
               </section>
 
               <section>
-                <h2>Defesa</h2>
+                <h2>{t("Defesa", "Defense")}</h2>
                 <p className="team-nota">
-                  Quanto cada tipo de golpe causa em cada membro. Linha marcada: dois ou
-                  mais fracos, e mais fracos do que quem resiste.
+                  {t(
+                    "Quanto cada tipo de golpe causa em cada membro. Linha marcada: dois ou mais fracos, e mais fracos do que quem resiste.",
+                    "How much each move type deals to each member. Marked row: two or more weak members, and more weak than resistant ones."
+                  )}
                 </p>
                 <div className="team-tabela-wrap">
                   <table className="team-tabela">
                     <thead>
                       <tr>
-                        <th scope="col">Golpe</th>
+                        <th scope="col">{t("Golpe", "Move")}</th>
                         {membros.map((m) => (
                           <th key={m.name} scope="col">
                             {m.name}
                           </th>
                         ))}
-                        <th scope="col">Fracos</th>
+                        <th scope="col">{t("Fracos", "Weak")}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -239,17 +247,19 @@ const TeamBuilderPage = () => {
               </section>
 
               <section>
-                <h2>Ataque</h2>
+                <h2>{t("Ataque", "Offense")}</h2>
                 <p className="team-nota">
-                  Contando só os tipos de cada membro, como se usassem golpes do próprio
-                  tipo.
+                  {t(
+                    "Contando só os tipos de cada membro, como se usassem golpes do próprio tipo.",
+                    "Counting only each member's types, as if they used moves of their own type."
+                  )}
                 </p>
                 <ul className="team-ataque">
                   {ataque.map((r) => (
                     <li key={r.defender} className={r.best >= 2 ? "is-covered" : "is-gap"}>
                       <TypeDot type={r.defender} />
                       <span className="team-ataque-quem">
-                        {r.by.length ? r.by.join(", ") : `melhor: ${multiplierLabel(r.best)}`}
+                        {r.by.length ? r.by.join(", ") : `${t("melhor", "best")}: ${multiplierLabel(r.best)}`}
                       </span>
                     </li>
                   ))}

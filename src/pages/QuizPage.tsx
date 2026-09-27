@@ -14,8 +14,8 @@ import {
   type Round,
 } from "../lib/quiz";
 import "../styles/quiz.css";
-
-const ROMANOS = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"];
+import { useLang, tr } from "../i18n/lang";
+import { generationLabel } from "../i18n/common";
 
 /**
  * "Quem é esse Pokémon?" — a silhueta é o sprite local com o brilho zerado
@@ -23,6 +23,8 @@ const ROMANOS = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"];
  */
 const QuizPage = () => {
   const [params, setParams] = useSearchParams();
+  const lang = useLang();
+  const t = (pt: string, en: string) => tr(lang, pt, en);
   const gen = parseQuizGen(params.get("ger"));
   const pool = useMemo(() => poolFor(gen), [gen]);
 
@@ -104,17 +106,17 @@ const QuizPage = () => {
   return (
     <div className="quiz-shell">
       <header className="quiz-header">
-        <h1>Quem é esse Pokémon?</h1>
+        <h1>{t("Quem é esse Pokémon?", "Who's that Pokémon?")}</h1>
         <label className="quiz-recorte">
-          <span>Gerações</span>
+          <span>{t("Gerações", "Generations")}</span>
           <select
             value={String(gen)}
             onChange={(e) => trocarRecorte(parseQuizGen(e.target.value))}
           >
-            <option value="all">Todas</option>
+            <option value="all">{t("Todas", "All")}</option>
             {GEN_RANGES.map((_, i) => (
               <option key={i} value={i + 1}>
-                Geração {ROMANOS[i]}
+                {generationLabel(i + 1, lang)}
               </option>
             ))}
           </select>
@@ -123,15 +125,15 @@ const QuizPage = () => {
 
       <dl className="quiz-placar">
         <div>
-          <dt>Sequência</dt>
+          <dt>{t("Sequência", "Streak")}</dt>
           <dd>{sequencia}</dd>
         </div>
         <div>
-          <dt>Recorde</dt>
+          <dt>{t("Recorde", "Best")}</dt>
           <dd>{recorde}</dd>
         </div>
         <div>
-          <dt>Nesta visita</dt>
+          <dt>{t("Nesta visita", "This visit")}</dt>
           <dd>
             {placar.acertos}/{placar.total}
           </dd>
@@ -142,7 +144,7 @@ const QuizPage = () => {
         <img
           key={round.answer}
           src={pixelSpriteUrl(round.answer)}
-          alt={revelado ? nome(round.answer) : "Silhueta de um pokémon"}
+          alt={revelado ? nome(round.answer) : t("Silhueta de um pokémon", "Silhouette of a Pokémon")}
           width={96}
           height={96}
           className="quiz-sprite"
@@ -152,11 +154,11 @@ const QuizPage = () => {
           {revelado &&
             (acertou ? (
               <>
-                É o <strong>{nome(round.answer)}</strong>!
+                {t("É o", "It's")} <strong>{nome(round.answer)}</strong>!
               </>
             ) : (
               <>
-                Era o <strong>{nome(round.answer)}</strong>.
+                {t("Era o", "It was")} <strong>{nome(round.answer)}</strong>.
               </>
             ))}
         </p>
@@ -188,10 +190,10 @@ const QuizPage = () => {
       {revelado && (
         <div className="quiz-depois">
           <button type="button" className="quiz-proximo" onClick={proximo} autoFocus>
-            Próximo →
+            {t("Próximo →", "Next →")}
           </button>
           {slugOf.get(round.answer) && (
-            <Link to={`/pokemon/${slugOf.get(round.answer)}`}>Ver a ficha</Link>
+            <Link to={`/pokemon/${slugOf.get(round.answer)}`}>{t("Ver a ficha", "See the profile")}</Link>
           )}
         </div>
       )}

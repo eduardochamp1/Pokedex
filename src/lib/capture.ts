@@ -16,25 +16,25 @@
 
 export type Status = "none" | "sleep" | "freeze" | "paralysis" | "poison" | "burn";
 
-export const STATUSES: { id: Status; label: string }[] = [
-  { id: "none", label: "Nenhum" },
-  { id: "sleep", label: "Dormindo" },
-  { id: "freeze", label: "Congelado" },
-  { id: "paralysis", label: "Paralisado" },
-  { id: "poison", label: "Envenenado" },
-  { id: "burn", label: "Queimado" },
+export const STATUSES: { id: Status; label: string; labelEn: string }[] = [
+  { id: "none", label: "Nenhum", labelEn: "None" },
+  { id: "sleep", label: "Dormindo", labelEn: "Asleep" },
+  { id: "freeze", label: "Congelado", labelEn: "Frozen" },
+  { id: "paralysis", label: "Paralisado", labelEn: "Paralyzed" },
+  { id: "poison", label: "Envenenado", labelEn: "Poisoned" },
+  { id: "burn", label: "Queimado", labelEn: "Burned" },
 ];
 
 export type BallId = "poke" | "great" | "ultra" | "master" | "net" | "nest" | "repeat" | "timer";
 
-export const BALLS: { id: BallId; label: string; note?: string }[] = [
+export const BALLS: { id: BallId; label: string; note?: [string, string] }[] = [
   { id: "poke", label: "Poké Ball" },
   { id: "great", label: "Great Ball" },
   { id: "ultra", label: "Ultra Ball" },
-  { id: "net", label: "Net Ball", note: "×3 em água e inseto" },
-  { id: "nest", label: "Nest Ball", note: "melhor quanto menor o nível" },
-  { id: "repeat", label: "Repeat Ball", note: "×3 se você já tem a espécie" },
-  { id: "timer", label: "Timer Ball", note: "melhora a cada turno" },
+  { id: "net", label: "Net Ball", note: ["×3 em água e inseto", "×3 on Water and Bug types"] },
+  { id: "nest", label: "Nest Ball", note: ["melhor quanto menor o nível", "better the lower the level"] },
+  { id: "repeat", label: "Repeat Ball", note: ["×3 se você já tem a espécie", "×3 if you already caught the species"] },
+  { id: "timer", label: "Timer Ball", note: ["melhora a cada turno", "improves every turn"] },
   { id: "master", label: "Master Ball" },
 ];
 

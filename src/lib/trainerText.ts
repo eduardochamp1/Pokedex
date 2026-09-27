@@ -4,6 +4,7 @@
  */
 import { HOENN_BADGES, HOENN_TOWNS } from "../data/hoenn";
 import type { TrainerEvent } from "./trainerLog";
+import { getLang, localeOf, type Lang } from "../i18n/lang";
 
 /** "45min", "2h 05min" — como o cartão de treinador do jogo, sem segundos. */
 export function formatPlayTime(totalSeconds: number): string {
@@ -13,8 +14,8 @@ export function formatPlayTime(totalSeconds: number): string {
   return `${h}h ${String(m).padStart(2, "0")}min`;
 }
 
-export function formatMoney(value: number): string {
-  return `₽${value.toLocaleString("pt-BR")}`;
+export function formatMoney(value: number, lang: Lang = getLang()): string {
+  return `₽${value.toLocaleString(localeOf(lang))}`;
 }
 
 /** O ID de treinador aparece no jogo com cinco dígitos. */
@@ -24,25 +25,43 @@ export function formatTrainerId(id: number): string {
 
 const contar = (n: number, palavra: string) => `${n} ${palavra}${n === 1 ? "" : "s"}`;
 
-export function describeEvent(e: TrainerEvent, nameOf: (national: number) => string): string {
+export function describeEvent(
+  e: TrainerEvent,
+  nameOf: (national: number) => string,
+  lang: Lang = getLang()
+): string {
+  const en = lang === "en";
   switch (e.kind) {
     case "start":
-      return `Começou a registrar: ${contar(e.owned, "capturado")}, ${contar(e.seen, "visto")}`;
+      return en
+        ? `Started recording: ${e.owned} caught, ${e.seen} seen`
+        : `Começou a registrar: ${contar(e.owned, "capturado")}, ${contar(e.seen, "visto")}`;
     case "captured":
-      return `Capturou ${nameOf(e.national)}`;
+      return en ? `Caught ${nameOf(e.national)}` : `Capturou ${nameOf(e.national)}`;
     case "badge": {
       const b = HOENN_BADGES[e.index];
+      if (en) return b ? `Earned ${b.leader}'s ${b.name}` : `Earned badge ${e.index + 1}`;
       return b ? `Ganhou a ${b.name} de ${b.leader}` : `Ganhou a insígnia ${e.index + 1}`;
     }
-    case "town":
-      return `Chegou a ${HOENN_TOWNS[e.index] ?? `cidade ${e.index + 1}`}`;
+    case "town": {
+      const nome = HOENN_TOWNS[e.index];
+      if (en) return `Reached ${nome ?? `town ${e.index + 1}`}`;
+      return `Chegou a ${nome ?? `cidade ${e.index + 1}`}`;
+    }
     case "level":
+      if (en) {
+        return e.to - e.from === 1
+          ? `${e.nickname} grew to level ${e.to}`
+          : `${e.nickname} grew from level ${e.from} to ${e.to}`;
+      }
       return e.to - e.from === 1
         ? `${e.nickname} subiu para o nível ${e.to}`
         : `${e.nickname} subiu do nível ${e.from} para o ${e.to}`;
     case "evolved":
-      return `${e.nickname} evoluiu de ${nameOf(e.from)} para ${nameOf(e.to)}`;
+      return en
+        ? `${e.nickname} evolved from ${nameOf(e.from)} into ${nameOf(e.to)}`
+        : `${e.nickname} evoluiu de ${nameOf(e.from)} para ${nameOf(e.to)}`;
     case "rewind":
-      return "Um save anterior foi carregado";
+      return en ? "An earlier save was loaded" : "Um save anterior foi carregado";
   }
 }
