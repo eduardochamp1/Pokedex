@@ -1,0 +1,29 @@
+/* ========= /dados: exportar e importar ========= */
+.dados-bloco {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+}
+.dados-resumo { list-style: none; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.9rem; }
+.dados-resumo strong { font-family: var(--font-display); font-size: 1.2rem; }
+.dados-bloco button {
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--accent);
+  background: var(--surface-1);
+  color: var(--text);
+  cursor: pointer;
+}
+.dados-bloco button:hover,
+.dados-bloco button:focus-visible { background: var(--surface-2); }
+.dados-arquivo { display: grid; gap: 6px; font-size: 0.85rem; color: var(--text-muted); }
+.dados-arquivo input { font: inherit; color: var(--text); }
+.dados-erro { color: var(--fav); }
+.dados-confirmar { display: grid; gap: 8px; }
+.dados-acoes { display: flex; gap: 8px; }
+.dados-bloco .dados-perigo { border-color: var(--fav); }

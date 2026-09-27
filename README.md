@@ -240,6 +240,14 @@ Calculadora de dano de Gen 3, seguindo a decompilação (pokeemerald:
 - **Resultado** — faixa de dano, % do HP, nocaute garantido ou com chance em
   N golpes, e as 16 rolagens
 
+### Seus dados (`/dados`)
+Sem conta e sem servidor: o que o site guarda no `localStorage` (favoritos,
+fichas de treinador, Pokédex dos jogos, recordes e preferências) vai para
+um arquivo `.json`, e o arquivo importado em outro navegador substitui os
+dados de lá, com confirmação e resumo do que vem. Fica de fora a última ROM
+aberta (só existe no aparelho de origem) e os saves do emulador, que têm o
+próprio backup em `/jogar`.
+
 ### Jogos (`/jogos`)
 Os 24 jogos principais de 1996 até hoje, por ano de lançamento no Japão, com
 plataforma, geração, região e remake. Cada um liga à região no mapa, à aba

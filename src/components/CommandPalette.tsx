@@ -24,6 +24,7 @@ const PAGINAS: { to: string; pt: string; en: string; keywords: string[] }[] = [
   { to: "/mapa", pt: "Mapa", en: "Map", keywords: ["regioes", "mundo", "regions", "world"] },
   { to: "/jogar", pt: "Jogar", en: "Play", keywords: ["emulador", "gba", "rom", "emulator"] },
   { to: "/treinador", pt: "Treinador", en: "Trainer", keywords: ["ficha", "linha do tempo", "save", "card", "timeline"] },
+  { to: "/dados", pt: "Seus dados (exportar/importar)", en: "Your data (export/import)", keywords: ["dados", "data", "backup", "exportar", "export", "importar", "import", "sincronizar", "sync", "outro aparelho", "device"] },
   { to: "/jogos", pt: "Linha do tempo dos jogos", en: "Games timeline", keywords: ["jogos", "games", "timeline", "linha do tempo", "lançamento", "release", "remake"] },
   { to: "/evolucoes", pt: "Evoluções", en: "Evolutions", keywords: ["evolução", "evolution", "árvore", "tree", "pedra", "stone", "troca", "trade"] },
   { to: "/ginasios", pt: "Ginásios", en: "Gyms", keywords: ["ginásio", "gym", "líder", "leader", "insígnia", "badge", "roxanne", "brock"] },
