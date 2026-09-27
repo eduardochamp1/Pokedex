@@ -167,3 +167,36 @@
 @media (max-width: 600px) {
   .team-shell { padding: 20px 16px 48px; }
 }
+
+/* Sugestões: que tipo consertaria o time */
+.team-sugestoes-filtro { font-size: 0.85rem; color: var(--text-muted); display: inline-block; margin-bottom: 10px; }
+.team-sugestoes { list-style: none; display: grid; gap: 12px; }
+.team-sugestao {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  display: grid;
+  gap: 8px;
+}
+.team-sugestao-tipos { display: flex; gap: 6px; }
+.team-sugestao-porque { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.85rem; }
+.team-sugestao-custo { color: var(--text-muted); }
+.team-sugestao-vazio { font-size: 0.8rem; color: var(--text-muted); }
+.team-sugestao-especies { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.team-sugestao-especies button {
+  font: inherit;
+  font-size: 0.72rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 84px;
+  padding: 4px;
+  color: var(--text);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.team-sugestao-especies button:hover:not(:disabled),
+.team-sugestao-especies button:focus-visible { border-color: var(--accent); }
+.team-sugestao-especies img { image-rendering: pixelated; }

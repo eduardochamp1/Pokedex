@@ -50,6 +50,10 @@ Uma Pokédex web completa em **React + TypeScript + Vite**, consumindo a [PokéA
 - **Defesa** — quanto cada tipo de golpe causa em cada membro, com as linhas de
   perigo marcadas (dois ou mais fracos, e mais fracos do que quem resiste)
 - **Ataque** — que tipos o time acerta 2×, contando os tipos de cada membro
+- **Quem consertaria o time** — as 171 combinações de tipo pontuadas pelo que
+  resolvem (aguentar os pontos fracos, acertar o que ninguém acerta) e pelo
+  que pioram; as três melhores com espécies daquela combinação exata, das
+  listas de `/type`, para adicionar num clique (opção de ficar até a Gen 3)
 - Mesma matriz 18×18 do Comparar, sem request
 
 ### Quiz (`/quiz`)

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Card from "../components/Card";
+import TeamSuggestions from "../components/TeamSuggestions";
 import { usePokemonIndex, usePokemonsByNames } from "../hooks/usePokemon";
 import { useTrainerEntry } from "../lib/trainerLog";
 import { namesForIds } from "../lib/filters";
@@ -202,6 +203,16 @@ const TeamBuilderPage = () => {
                   )}
                 </div>
               </section>
+
+              {names.length < MAX_TEAM && (
+                <TeamSuggestions
+                  membros={membros}
+                  index={index}
+                  onAdd={(n) => {
+                    if (!names.includes(n)) setNames([...names, n]);
+                  }}
+                />
+              )}
 
               <section>
                 <h2>{t("Defesa", "Defense")}</h2>

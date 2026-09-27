@@ -180,6 +180,27 @@ function useTypeNames(typeName: string | undefined) {
   });
 }
 
+/**
+ * Várias listas de tipo de uma vez, com a mesma chave de cache de
+ * `useTypeNames`: o que o filtro da Home já carregou não é buscado de novo.
+ */
+export function useTypeLists(typeNames: string[]): Record<string, string[] | undefined> {
+  const results = useQueries({
+    queries: typeNames.map((typeName) => ({
+      queryKey: ["type-names", typeName.toLowerCase()],
+      queryFn: async ({ signal }: { signal: AbortSignal }) => {
+        const data = await getPokemonsByType(typeName, signal);
+        if (!data) return [] as string[];
+        return data.pokemon.map((p) => resolveName(p.pokemon.name));
+      },
+      staleTime: HOUR,
+    })),
+  });
+  const out: Record<string, string[] | undefined> = {};
+  typeNames.forEach((t, i) => (out[t] = results[i]?.data));
+  return out;
+}
+
 /** Nomes de uma geracao — lista COMPLETA de especies (um request). */
 function useGenerationNames(gen: number | undefined) {
   return useQuery<string[]>({
