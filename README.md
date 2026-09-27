@@ -253,6 +253,25 @@ Página com **13 abas** cobrindo a mitologia oficial:
 
 A busca da sidebar filtra as 13 abas simultaneamente. Todo verbete cita sua fonte na Bulbapedia. Chips de pokémon são clicáveis (link para o detail) e têm botão de filtro.
 
+### Em todo o site
+- **Busca com Ctrl+K** (ou `/`, e o botão ⌕ na navbar) — Pokémon, habilidades,
+  regiões, verbetes da lore e páginas num lugar só, só pelo teclado. Carrega na
+  primeira abertura, porque indexa a lore inteira. Aberta em `/jogar`, desliga o
+  teclado do jogo: o SDL do core não sabe de campo de texto, e digitar andaria
+  com o personagem
+- **Português e inglês** — seletor PT | EN na navbar; o padrão sai do navegador.
+  Tradução em linha (`t("Buscar", "Search")`), ao lado do original. A PokéAPI
+  responde no idioma escolhido, sem misturar os dois. A **lore inteira** tem
+  versão em inglês em `src/data/en/`, só com os campos de texto, e
+  `src/i18n/lore.test.ts` exige par para cada verbete e acusa português
+  esquecido no inglês
+- **Offline e instalável** — o service worker (`public/sw.js`, escrito à mão)
+  guarda o build inteiro na primeira visita: um plugin do Vite
+  (`vite-plugin-sw.ts`) injeta a lista de arquivos e a versão. Toda rota abre
+  sem rede, o wasm do emulador incluído; sprites e PokéAPI entram no cache
+  conforme são vistos (a PokéAPI com teto de 400 respostas). Faixa de "sem
+  conexão" e botão **Instalar** quando o navegador oferece
+
 ### UX / Visual
 - **Tema dark** com paleta em design tokens
 - **Paleta canônica por tipo** — cores oficiais para os 18 tipos
