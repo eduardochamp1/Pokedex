@@ -14,6 +14,10 @@ Uma Pokédex web completa em **React + TypeScript + Vite**, consumindo a [PokéA
 - **Filtro por raridade** (lendários, míticos, bebês, iniciais)
 - **Cross-filter** — busca + tipo + geração + raridade se combinam por interseção, com o total de resultados visível e paginação real
 - **Favoritos persistentes** no `localStorage` com contador no navbar
+- **Seu jogo** — com um save de Gen 3 lido em `/jogar`, a sidebar mostra o
+  progresso da dex do jogo (capturados e vistos de 386) e filtra por
+  Capturados / Vistos, não capturados / Não vistos (`?meu=`). As cartas ganham
+  um selo de pokébola: cheia se capturou, contorno se só viu
 
 ### Página de detalhe (`/pokemon/:nameOrId`)
 - **Visualizador de sprites** com quatro modos: normal, shiny ✨, animado (GIF), animado shiny ✨
@@ -75,6 +79,10 @@ via [mGBA](https://mgba.io) compilado para WebAssembly.
 - **Seu time, lido do save** — o save de bateria de Gen 3 é interpretado e o
   time aparece com as **mesmas cartas** da Pokédex, com apelido e nível. É onde
   o emulador deixa de ser ilha e vira fonte de dados do site
+- **Sua dex, lida do save** — os bits de visto e capturado (seção 0, `0x5C` e
+  `0x28`, medidos num save real de Emerald) vão para o `localStorage` a cada
+  gravação, e a Pokédex da Home passa a saber o que você já pegou sem carregar
+  o core
 - **Gamepad virtual** para toque, **gamepad físico** pela Gamepad API (layout
   standard) e **teclas remapeáveis** — clique numa tecla da legenda e pressione
   a nova. A legenda lê do mesmo mapa que o `bindKey`, então não mente
