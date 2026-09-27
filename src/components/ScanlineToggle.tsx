@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { applyScanline, readScanline } from "../lib/scanline";
+import { useT } from "../i18n/lang";
 
 /**
  * Liga e desliga a scanline. Fica na navbar porque e a unica barra presente
@@ -7,14 +8,16 @@ import { applyScanline, readScanline } from "../lib/scanline";
  */
 const ScanlineToggle = () => {
   const [on, setOn] = useState(readScanline);
+  const t = useT();
+  const rotulo = on ? t("Desligar a scanline", "Turn scanlines off") : t("Ligar a scanline", "Turn scanlines on");
 
   return (
     <button
       type="button"
       className={"scanline-toggle" + (on ? " is-on" : "")}
       aria-pressed={on}
-      title={on ? "Desligar a scanline" : "Ligar a scanline"}
-      aria-label={on ? "Desligar a scanline" : "Ligar a scanline"}
+      title={rotulo}
+      aria-label={rotulo}
       onClick={() => {
         const next = !on;
         setOn(next);

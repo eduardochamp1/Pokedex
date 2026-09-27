@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import type { Pokemon } from "../types/pokemon";
+import { useT } from "../i18n/lang";
 
 interface Props {
   pokemon: Pokemon;
@@ -8,15 +9,16 @@ interface Props {
 
 type Mode = "static" | "shiny" | "animated" | "animated-shiny";
 
-const MODE_LABELS: Record<Mode, string> = {
-  static: "Normal",
-  shiny: "Shiny ✨",
-  animated: "Animado",
-  "animated-shiny": "Anim. ✨",
+const MODE_LABELS: Record<Mode, [string, string]> = {
+  static: ["Normal", "Normal"],
+  shiny: ["Shiny ✨", "Shiny ✨"],
+  animated: ["Animado", "Animated"],
+  "animated-shiny": ["Anim. ✨", "Anim. ✨"],
 };
 
 const SpriteViewer = ({ pokemon, onSelect }: Props) => {
   const [mode, setMode] = useState<Mode>("static");
+  const t = useT();
 
   const sources = useMemo(() => {
     const art = pokemon.sprites.other?.["official-artwork"];
@@ -51,13 +53,13 @@ const SpriteViewer = ({ pokemon, onSelect }: Props) => {
             <img
               src={sources[m]}
               crossOrigin="anonymous"
-              alt={MODE_LABELS[m]}
+              alt={t(...MODE_LABELS[m])}
               loading="lazy"
               decoding="async"
               width={64}
               height={64}
             />
-            <span>{MODE_LABELS[m]}</span>
+            <span>{t(...MODE_LABELS[m])}</span>
           </button>
         </li>
       ))}

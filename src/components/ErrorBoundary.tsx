@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import { getLang, tr } from "../i18n/lang";
 
 interface Props {
   children: ReactNode;
@@ -28,16 +29,20 @@ class ErrorBoundary extends Component<Props, State> {
   render(): ReactNode {
     const { error } = this.state;
     if (!error) return this.props.children;
+    // Classe não usa hook: lê o idioma direto. O App re-renderiza na troca.
+    const t = (pt: string, en: string) => tr(getLang(), pt, en);
 
     return (
       <div className="boundary-shell" role="alert">
         <div className="boundary-code" aria-hidden="true">
           !
         </div>
-        <h1>Algo quebrou nesta tela</h1>
+        <h1>{t("Algo quebrou nesta tela", "Something broke on this screen")}</h1>
         <p>
-          O resto do site continua funcionando. Se persistir, recarregue a
-          página.
+          {t(
+            "O resto do site continua funcionando. Se persistir, recarregue a página.",
+            "The rest of the site still works. If it keeps happening, reload the page."
+          )}
         </p>
         <pre className="boundary-detail">{error.message}</pre>
         <div className="boundary-actions">
@@ -46,9 +51,9 @@ class ErrorBoundary extends Component<Props, State> {
             className="boundary-cta"
             onClick={() => this.setState({ error: null })}
           >
-            Tentar de novo
+            {t("Tentar de novo", "Try again")}
           </button>
-          <a href="/">Ir para a Pokédex</a>
+          <a href="/">{t("Ir para a Pokédex", "Go to the Pokédex")}</a>
         </div>
       </div>
     );

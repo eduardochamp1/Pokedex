@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useAbilities } from "../hooks/useAbilities";
 import { pickLocalized } from "../lib/localize";
 import type { PokemonAbility } from "../types/pokemon";
+import { useT } from "../i18n/lang";
 
 interface Props {
   abilities: PokemonAbility[];
@@ -17,9 +18,10 @@ function humanize(slug: string): string {
 
 const AbilityList = ({ abilities }: Props) => {
   const { resolved, isLoading } = useAbilities(abilities);
+  const t = useT();
 
   if (abilities.length === 0) {
-    return <p className="detail-muted">Sem habilidades registradas.</p>;
+    return <p className="detail-muted">{t("Sem habilidades registradas.", "No abilities listed.")}</p>;
   }
 
   return (
@@ -35,16 +37,16 @@ const AbilityList = ({ abilities }: Props) => {
           <li key={a.slug} className="ability-item">
             <div className="ability-head">
               <strong>
-                <Link to={`/habilidade/${a.slug}`} title="Todos os pokémon com esta habilidade">
+                <Link to={`/habilidade/${a.slug}`} title={t("Todos os pokémon com esta habilidade", "Every Pokémon with this ability")}>
                   {nome}
                 </Link>
               </strong>
-              {a.isHidden && <span className="ability-hidden">oculta</span>}
+              {a.isHidden && <span className="ability-hidden">{t("oculta", "hidden")}</span>}
             </div>
             {efeito ? (
               <p className="ability-effect">{efeito}</p>
             ) : isLoading ? (
-              <p className="ability-effect detail-muted">Carregando…</p>
+              <p className="ability-effect detail-muted">{t("Carregando…", "Loading…")}</p>
             ) : null}
           </li>
         );

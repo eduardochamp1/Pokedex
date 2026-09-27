@@ -1,12 +1,14 @@
 import { useMemo, useState } from "react";
 import { extractFrames, type Toggles } from "../hooks/useSpriteFrames";
 import type { Pokemon } from "../types/pokemon";
+import { useT } from "../i18n/lang";
 
 interface Props {
   pokemon: Pokemon;
 }
 
 const SpriteScrubber = ({ pokemon }: Props) => {
+  const t = useT();
   const [toggles, setToggles] = useState<Toggles>({
     shiny: false,
     animated: false,
@@ -28,13 +30,13 @@ const SpriteScrubber = ({ pokemon }: Props) => {
         {current ? (
           <img
             src={current.url}
-            alt={`${pokemon.name} — Geração ${current.gen}`}
+            alt={`${pokemon.name} — ${t("Geração", "Generation")} ${current.gen}`}
             crossOrigin="anonymous"
             loading={current.isAnimated ? "lazy" : "eager"}
           />
         ) : (
           <span className="sprite-scrubber-empty">
-            Sem sprite disponível para este filtro
+            {t("Sem sprite disponível para este filtro", "No sprite available for this filter")}
           </span>
         )}
       </div>
@@ -46,10 +48,12 @@ const SpriteScrubber = ({ pokemon }: Props) => {
             max={frames.length - 1}
             value={safeIndex}
             onChange={(e) => setIndex(Number(e.target.value))}
-            aria-label="Deslizar por geração"
+            aria-label={t("Deslizar por geração", "Slide through generations")}
             className="sprite-scrubber-range"
           />
-          <div className="sprite-scrubber-label">Geração {current?.gen}</div>
+          <div className="sprite-scrubber-label">
+            {t("Geração", "Generation")} {current?.gen}
+          </div>
         </>
       )}
       <div className="sprite-scrubber-toggles">
@@ -71,7 +75,7 @@ const SpriteScrubber = ({ pokemon }: Props) => {
               setToggles((t) => ({ ...t, animated: e.target.checked }))
             }
           />{" "}
-          🎬 Animado
+          🎬 {t("Animado", "Animated")}
         </label>
         <label>
           <input
@@ -81,7 +85,7 @@ const SpriteScrubber = ({ pokemon }: Props) => {
               setToggles((t) => ({ ...t, back: e.target.checked }))
             }
           />{" "}
-          ↩️ Costas
+          ↩️ {t("Costas", "Back")}
         </label>
       </div>
     </div>

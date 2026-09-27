@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { useT } from "../i18n/lang";
 
 interface Props {
   /** URL do .ogg vindo de pokemon.cries.latest. */
@@ -16,6 +17,7 @@ interface Props {
 const CryButton = ({ src, name }: Props) => {
   const ref = useRef<HTMLAudioElement | null>(null);
   const [failed, setFailed] = useState(false);
+  const t = useT();
 
   if (!src || failed) return null;
 
@@ -30,8 +32,8 @@ const CryButton = ({ src, name }: Props) => {
           el.currentTime = 0;
           void el.play().catch(() => setFailed(true));
         }}
-        aria-label={`Ouvir o som de ${name}`}
-        title={`Ouvir o som de ${name}`}
+        aria-label={t(`Ouvir o som de ${name}`, `Play ${name}'s cry`)}
+        title={t(`Ouvir o som de ${name}`, `Play ${name}'s cry`)}
       >
         🔊
       </button>

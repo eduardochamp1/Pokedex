@@ -21,18 +21,13 @@ import EncounterPanel from "../components/EncounterPanel";
 import CapturePanel from "../components/CapturePanel";
 import "../styles/detailExtras.css";
 import { DetailSkeleton } from "../components/Skeleton";
-
-const STAT_LABELS: Record<string, string> = {
-  hp: "HP",
-  attack: "Atq",
-  defense: "Def",
-  "special-attack": "Atq Esp",
-  "special-defense": "Def Esp",
-  speed: "Vel",
-};
+import { useLang, tr } from "../i18n/lang";
+import { statLabel } from "../i18n/common";
 
 const DetailPage = () => {
   const { nameOrId } = useParams<{ nameOrId: string }>();
+  const lang = useLang();
+  const t = (pt: string, en: string) => tr(lang, pt, en);
   const navigate = useNavigate();
   const location = useLocation();
   const { data: pokemon, isLoading, isError } = usePokemonDetail(nameOrId);
@@ -62,16 +57,16 @@ const DetailPage = () => {
   if (isError) {
     return (
       <div className="detail-shell">
-        <p>Não foi possível carregar este pokémon. Tente de novo.</p>
-        <Link to="/">← Voltar para a Pokédex</Link>
+        <p>{t("Não foi possível carregar este pokémon. Tente de novo.", "Couldn't load this Pokémon. Try again.")}</p>
+        <Link to="/">{t("← Voltar para a Pokédex", "← Back to the Pokédex")}</Link>
       </div>
     );
   }
   if (!pokemon) {
     return (
       <div className="detail-shell">
-        <p>Pokémon não encontrado.</p>
-        <Link to="/">← Voltar para a Pokédex</Link>
+        <p>{t("Pokémon não encontrado.", "Pokémon not found.")}</p>
+        <Link to="/">{t("← Voltar para a Pokédex", "← Back to the Pokédex")}</Link>
       </div>
     );
   }
@@ -85,7 +80,7 @@ const DetailPage = () => {
         type="button"
         className="detail-close"
         onClick={goBack}
-        aria-label="Fechar"
+        aria-label={t("Fechar", "Close")}
       >
         ✕
       </button>
@@ -108,7 +103,7 @@ const DetailPage = () => {
               className="detail-fav-btn"
               onClick={() => updateFavoritePokemons(pokemon.name)}
             >
-              {isFav ? "♥ Nos favoritos" : "♡ Favoritar"}
+              {isFav ? t("♥ Nos favoritos", "♥ In favorites") : t("♡ Favoritar", "♡ Favorite")}
             </button>
             <CryButton src={pokemon.cries?.latest} name={pokemon.name} />
           </div>
@@ -116,7 +111,7 @@ const DetailPage = () => {
 
         {species.data && species.data.varieties.length > 1 && (
           <aside className="detail-panel detail-panel-forms">
-            <h3>Formas</h3>
+            <h3>{t("Formas", "Forms")}</h3>
             <VarietySwitcher
               varieties={species.data.varieties}
               currentName={pokemon.name}
@@ -125,9 +120,9 @@ const DetailPage = () => {
         )}
 
         <aside className="detail-panel detail-panel-evo">
-          <h3>Evoluções</h3>
+          <h3>{t("Evoluções", "Evolutions")}</h3>
           {evolution.isLoading ? (
-            <p className="detail-muted">Carregando…</p>
+            <p className="detail-muted">{t("Carregando…", "Loading…")}</p>
           ) : (
             <EvolutionChain
               steps={evolution.data ?? []}
@@ -138,39 +133,39 @@ const DetailPage = () => {
 
         {species.data && (
           <aside className="detail-panel detail-panel-lore">
-            <h3>Sobre</h3>
+            <h3>{t("Sobre", "About")}</h3>
             <PokemonLore species={species.data} />
           </aside>
         )}
 
         <aside className="detail-panel detail-panel-meta">
-          <h3>Ficha</h3>
+          <h3>{t("Ficha", "Profile")}</h3>
           <PokemonMeta pokemon={pokemon} species={species.data} />
         </aside>
 
         <aside className="detail-panel detail-panel-defense">
-          <h3>Defesas</h3>
+          <h3>{t("Defesas", "Defenses")}</h3>
           <TypeDefense types={pokemon.types.map((t) => t.type.name)} />
         </aside>
 
         <aside className="detail-panel detail-panel-abilities">
-          <h3>Habilidades</h3>
+          <h3>{t("Habilidades", "Abilities")}</h3>
           <AbilityList abilities={pokemon.abilities} />
         </aside>
 
         <aside className="detail-panel detail-panel-moves">
-          <h3>Golpes</h3>
+          <h3>{t("Golpes", "Moves")}</h3>
           <MoveList moves={pokemon.moves ?? []} />
         </aside>
 
         <aside className="detail-panel detail-panel-encounters">
-          <h3>Onde encontrar</h3>
+          <h3>{t("Onde encontrar", "Where to find")}</h3>
           <EncounterPanel pokemonId={pokemon.id} />
         </aside>
 
         {species.data && (
           <aside className="detail-panel detail-panel-capture">
-            <h3>Chance de captura</h3>
+            <h3>{t("Chance de captura", "Catch chance")}</h3>
             <CapturePanel
               national={pokemon.id}
               captureRate={species.data.capture_rate}
@@ -181,17 +176,17 @@ const DetailPage = () => {
         )}
 
         <aside className="detail-panel detail-panel-scrubber">
-          <h3>Sprite através das gerações</h3>
+          <h3>{t("Sprite através das gerações", "Sprite across generations")}</h3>
           <SpriteScrubber pokemon={pokemon} />
         </aside>
 
         <aside className="detail-panel detail-panel-stats">
-          <h3>Status base</h3>
+          <h3>{t("Status base", "Base stats")}</h3>
           <ul className="detail-stats">
             {pokemon.stats.map((s) => (
               <li key={s.stat.name}>
                 <span className="detail-stat-label">
-                  {STAT_LABELS[s.stat.name] ?? s.stat.name}
+                  {statLabel(s.stat.name, lang)}
                 </span>
                 <span className="detail-stat-bar">
                   <span

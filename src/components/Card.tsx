@@ -10,10 +10,11 @@ import { tType } from "../data/i18n";
 import { preloadDetailPage } from "../pages/routeModules";
 import type { Pokemon } from "../types/pokemon";
 import type { DexMark } from "../lib/playerDex";
+import { useT } from "../i18n/lang";
 
-const DEX_MARK_LABEL: Record<DexMark, string> = {
-  owned: "Capturado no seu jogo",
-  seen: "Visto no seu jogo",
+const DEX_MARK_LABEL: Record<DexMark, [string, string]> = {
+  owned: ["Capturado no seu jogo", "Caught in your game"],
+  seen: ["Visto no seu jogo", "Seen in your game"],
 };
 
 /** A API de transicao ainda nao esta na lib DOM de todo TypeScript. */
@@ -48,6 +49,7 @@ const Card = ({
   dexMark,
 }: Props) => {
   const { favoritePokemons, updateFavoritePokemons } = useContext(FavoriteContext);
+  const t = useT();
   const cardRef = useRef<HTMLDivElement>(null);
   useTiltEffect(cardRef, { maxDeg: variant === "mini" ? 4 : 8 });
 
@@ -124,8 +126,8 @@ const Card = ({
               }}
               aria-label={
                 isFavorite
-                  ? `Remover ${pokemon.name} dos favoritos`
-                  : `Favoritar ${pokemon.name}`
+                  ? t(`Remover ${pokemon.name} dos favoritos`, `Remove ${pokemon.name} from favorites`)
+                  : t(`Favoritar ${pokemon.name}`, `Add ${pokemon.name} to favorites`)
               }
             >
               {isFavorite ? "♥" : "♡"}
@@ -152,7 +154,7 @@ const Card = ({
         <div className="card-meta-row">
           <span className="card-id">{String(pokemon.id).padStart(4, "0")}</span>
           <span className="card-hp">
-            PS <strong>{stats[0].value}</strong>
+            {t("PS", "HP")} <strong>{stats[0].value}</strong>
           </span>
         </div>
         {variant === "grid" && (
@@ -185,22 +187,22 @@ const Card = ({
               sprite: artwork,
             });
           }}
-          aria-label={`Adicionar ${pokemon.name} ao comparador`}
-          title="Adicionar ao comparador"
+          aria-label={t(`Adicionar ${pokemon.name} ao comparador`, `Add ${pokemon.name} to the size comparison`)}
+          title={t("Adicionar ao comparador", "Add to the size comparison")}
         >
           📏
         </button>
       )}
       {/* Simbolo de raridade no canto, como na carta: le-se sem depender de cor. */}
       {isLegendary && !isMythical && (
-        <span className="card-badge" title="Lendário" aria-hidden="true">
+        <span className="card-badge" title={t("Lendário", "Legendary")} aria-hidden="true">
           ★
         </span>
       )}
       {isMythical && (
         <span
           className="card-badge card-badge-mythical"
-          title="Mítico"
+          title={t("Mítico", "Mythical")}
           aria-hidden="true"
         >
           ✦
@@ -211,8 +213,8 @@ const Card = ({
         <span
           className={`card-dexmark card-dexmark-${dexMark}`}
           role="img"
-          aria-label={DEX_MARK_LABEL[dexMark]}
-          title={DEX_MARK_LABEL[dexMark]}
+          aria-label={t(...DEX_MARK_LABEL[dexMark])}
+          title={t(...DEX_MARK_LABEL[dexMark])}
         />
       )}
     </>

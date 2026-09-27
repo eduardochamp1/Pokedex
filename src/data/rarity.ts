@@ -54,10 +54,10 @@ export const STARTERS: string[] = [
 ];
 
 export const RARITIES = [
-  { id: "legendary", label: "Lendários", names: LEGENDARY },
-  { id: "mythical",  label: "Míticos",   names: MYTHICAL  },
-  { id: "baby",      label: "Bebês",     names: BABY      },
-  { id: "starter",   label: "Iniciais",  names: STARTERS  },
+  { id: "legendary", label: "Lendários", labelEn: "Legendary", names: LEGENDARY },
+  { id: "mythical",  label: "Míticos",   labelEn: "Mythical",  names: MYTHICAL  },
+  { id: "baby",      label: "Bebês",     labelEn: "Baby",      names: BABY      },
+  { id: "starter",   label: "Iniciais",  labelEn: "Starters",  names: STARTERS  },
 ] as const;
 
 export type RarityId = (typeof RARITIES)[number]["id"];

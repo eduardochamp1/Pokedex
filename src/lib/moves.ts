@@ -12,12 +12,12 @@ import type { PokemonMove } from "../types/pokemon";
 /** Os quatro metodos que importam; o resto (formas, eventos) vira "outro". */
 export type LearnMethod = "level-up" | "machine" | "egg" | "tutor" | "other";
 
-export const LEARN_METHODS: { id: LearnMethod; label: string }[] = [
-  { id: "level-up", label: "Por nível" },
-  { id: "machine", label: "MT/MO" },
-  { id: "egg", label: "Ovo" },
-  { id: "tutor", label: "Tutor" },
-  { id: "other", label: "Outros" },
+export const LEARN_METHODS: { id: LearnMethod; label: string; labelEn: string }[] = [
+  { id: "level-up", label: "Por nível", labelEn: "Level up" },
+  { id: "machine", label: "MT/MO", labelEn: "TM/HM" },
+  { id: "egg", label: "Ovo", labelEn: "Egg" },
+  { id: "tutor", label: "Tutor", labelEn: "Tutor" },
+  { id: "other", label: "Outros", labelEn: "Other" },
 ];
 
 export interface LearnedMove {
@@ -126,10 +126,11 @@ export function sortMoves(moves: LearnedMove[]): LearnedMove[] {
 /** Separa por metodo, ja ordenado, mantendo a ordem de LEARN_METHODS. */
 export function groupByMethod(
   moves: LearnedMove[]
-): { method: LearnMethod; label: string; moves: LearnedMove[] }[] {
-  return LEARN_METHODS.map(({ id, label }) => ({
+): { method: LearnMethod; label: string; labelEn: string; moves: LearnedMove[] }[] {
+  return LEARN_METHODS.map(({ id, label, labelEn }) => ({
     method: id,
     label,
+    labelEn,
     moves: sortMoves(moves.filter((m) => m.method === id)),
   })).filter((group) => group.moves.length > 0);
 }

@@ -3,6 +3,7 @@ import Pagination from "./Pagination";
 import { CardSkeleton } from "./Skeleton";
 import type { Pokemon as PokemonT } from "../types/pokemon";
 import type { DexMark } from "../lib/playerDex";
+import { useT } from "../i18n/lang";
 
 interface Props {
   pokemons: PokemonT[];
@@ -25,6 +26,7 @@ const Pokedex = ({
   total,
   dexMarkOf,
 }: Props) => {
+  const t = useT();
   const onLeftClickHandler = () => {
     if (page > 0) setPage(page - 1);
   };
@@ -38,7 +40,8 @@ const Pokedex = ({
         <h1>Pokédex</h1>
         {total !== undefined && (
           <span className="pokedex-count">
-            {total} {total === 1 ? "resultado" : "resultados"}
+            {total}{" "}
+            {total === 1 ? t("resultado", "result") : t("resultados", "results")}
           </span>
         )}
         <Pagination

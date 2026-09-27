@@ -4,6 +4,7 @@ import { LEGENDARY, MYTHICAL } from "../data/rarity";
 import { tType } from "../data/i18n";
 import { displayName } from "../api";
 import type { Pokemon } from "../types/pokemon";
+import { useT } from "../i18n/lang";
 
 interface Props {
   pokemon: Pokemon;
@@ -17,6 +18,7 @@ interface Props {
 }
 
 const CardHero = ({ pokemon, spriteUrl, viewTransitionName }: Props) => {
+  const t = useT();
   const heroRef = useRef<HTMLDivElement>(null);
   useTiltEffect(heroRef, { maxDeg: 12 });
 
@@ -80,7 +82,7 @@ const CardHero = ({ pokemon, spriteUrl, viewTransitionName }: Props) => {
         <div className="card-meta-row">
           <span className="card-id">{String(pokemon.id).padStart(4, "0")}</span>
           <span className="card-hp">
-            PS{" "}
+            {t("PS", "HP")}{" "}
             <strong>
               {pokemon.stats.find((s) => s.stat.name === "hp")?.base_stat ?? 0}
             </strong>
@@ -89,14 +91,14 @@ const CardHero = ({ pokemon, spriteUrl, viewTransitionName }: Props) => {
       </div>
       {/* Simbolo de raridade no canto, como na carta: le-se sem depender de cor. */}
       {isLegendary && !isMythical && (
-        <span className="card-badge" title="Lendário" aria-hidden="true">
+        <span className="card-badge" title={t("Lendário", "Legendary")} aria-hidden="true">
           ★
         </span>
       )}
       {isMythical && (
         <span
           className="card-badge card-badge-mythical"
-          title="Mítico"
+          title={t("Mítico", "Mythical")}
           aria-hidden="true"
         >
           ✦

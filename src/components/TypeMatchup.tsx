@@ -1,5 +1,6 @@
 import { attackMultiplier, type TypeName } from "../data/typeMatchups";
 import { tType } from "../data/i18n";
+import { getLang, tr } from "../i18n/lang";
 
 interface Props {
   attacker: string[];
@@ -8,7 +9,7 @@ interface Props {
 }
 
 function label(m: number): string {
-  if (m === 0) return "sem efeito";
+  if (m === 0) return tr(getLang(), "sem efeito", "no effect");
   return `${m}×`;
 }
 

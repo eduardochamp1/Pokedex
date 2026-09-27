@@ -1,4 +1,5 @@
 import { RARITIES, type RarityId } from "../data/rarity";
+import { useLang, tr } from "../i18n/lang";
 
 interface Props {
   value: RarityId | undefined;
@@ -6,18 +7,19 @@ interface Props {
 }
 
 const RarityFilter = ({ value, onChange }: Props) => {
+  const lang = useLang();
   return (
     <div className="type-filter">
-      <label htmlFor="rarity-select">Raridade:</label>
+      <label htmlFor="rarity-select">{tr(lang, "Raridade:", "Rarity:")}</label>
       <select
         id="rarity-select"
         value={value ?? ""}
         onChange={(e) => onChange((e.target.value as RarityId) || undefined)}
       >
-        <option value="">Todas</option>
+        <option value="">{tr(lang, "Todas", "All")}</option>
         {RARITIES.map((r) => (
           <option key={r.id} value={r.id}>
-            {r.label} ({r.names.length})
+            {lang === "en" ? r.labelEn : r.label} ({r.names.length})
           </option>
         ))}
       </select>

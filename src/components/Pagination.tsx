@@ -1,3 +1,5 @@
+import { useT } from "../i18n/lang";
+
 interface Props {
   page: number;
   totalPages: number;
@@ -8,6 +10,7 @@ interface Props {
 const Pagination = ({ page, totalPages, onLeftClick, onRightClick }: Props) => {
   const isFirst = page <= 1;
   const isLast = page >= totalPages;
+  const t = useT();
 
   return (
     <div className="pagination-container">
@@ -15,18 +18,18 @@ const Pagination = ({ page, totalPages, onLeftClick, onRightClick }: Props) => {
         type="button"
         onClick={onLeftClick}
         disabled={isFirst}
-        aria-label="Página anterior"
+        aria-label={t("Página anterior", "Previous page")}
       >
         <div>🢀</div>
       </button>
       <div>
-        {page} de {totalPages}
+        {page} {t("de", "of")} {totalPages}
       </div>
       <button
         type="button"
         onClick={onRightClick}
         disabled={isLast}
-        aria-label="Próxima página"
+        aria-label={t("Próxima página", "Next page")}
       >
         <div>🢂</div>
       </button>

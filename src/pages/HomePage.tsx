@@ -23,6 +23,7 @@ import { tGenus, tType } from "../data/i18n";
 import { pickLocalized } from "../lib/localize";
 import { sortNamesAlphabetically } from "../lib/filters";
 import { dexMarkOf, nationalsFor, usePlayerDex } from "../lib/playerDex";
+import { localeOf, useLang, tr } from "../i18n/lang";
 import {
   parseHomeParams,
   toSearchParams,
@@ -33,6 +34,8 @@ import {
 const HomePage = () => {
   const [params, setParams] = useSearchParams();
   const current = parseHomeParams(params);
+  const lang = useLang();
+  const t = (pt: string, en: string) => tr(lang, pt, en);
 
   /** Aplica uma mudanca parcial; qualquer criterio novo volta para a pagina 1. */
   const update = (patch: Partial<HomeParams>) => {
@@ -123,8 +126,8 @@ const HomePage = () => {
         <section className="home-featured">
           <div className="home-featured-copy">
             <div className="home-featured-daily">
-              Pokémon do dia ·{" "}
-              {new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long" })}
+              {t("Pokémon do dia", "Pokémon of the day")} ·{" "}
+              {new Date().toLocaleDateString(localeOf(lang), { day: "2-digit", month: "long" })}
             </div>
             {featuredSpecies.data && (
               <div className="home-featured-genus">{tGenus(featuredGenus)}</div>
@@ -153,22 +156,22 @@ const HomePage = () => {
 
       {ultimoJogo && (
         <Link to="/jogar" className="home-resume">
-          <span className="home-resume-label">Você parou em</span>
+          <span className="home-resume-label">{t("Você parou em", "You left off at")}</span>
           <strong>{ultimoJogo}</strong>
-          <span className="home-resume-cta">retomar →</span>
+          <span className="home-resume-cta">{t("retomar →", "resume →")}</span>
         </Link>
       )}
 
       <div className="home-layout">
         <aside className="home-sidebar">
-          <h3>Buscar</h3>
+          <h3>{t("Buscar", "Search")}</h3>
           <Searchbar value={searchInput} onChange={setSearchInput} />
-          <h3>Tipo</h3>
+          <h3>{t("Tipo", "Type")}</h3>
           <TypeFilter
             value={current.type}
             onChange={(v) => update({ type: v })}
           />
-          <h3>Geração ou região</h3>
+          <h3>{t("Geração ou região", "Generation or region")}</h3>
           <DexFilter
             generation={current.generation}
             pokedex={current.pokedex}
@@ -177,14 +180,14 @@ const HomePage = () => {
               update({ generation: next.generation, pokedex: next.pokedex })
             }
           />
-          <h3>Raridade</h3>
+          <h3>{t("Raridade", "Rarity")}</h3>
           <RarityFilter
             value={current.rarity}
             onChange={(v) => update({ rarity: v })}
           />
           {playerDex && (
             <>
-              <h3>Seu jogo</h3>
+              <h3>{t("Seu jogo", "Your game")}</h3>
               <PlayerDexFilter
                 entry={playerDex}
                 value={mine}
@@ -192,9 +195,9 @@ const HomePage = () => {
               />
             </>
           )}
-          <h3>Ordenar</h3>
+          <h3>{t("Ordenar", "Sort")}</h3>
           <div className="type-filter">
-            <label htmlFor="sort-select">Ordem:</label>
+            <label htmlFor="sort-select">{t("Ordem:", "Order:")}</label>
             <select
               id="sort-select"
               value={current.sort}
@@ -204,7 +207,7 @@ const HomePage = () => {
             >
               {SORTS.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.label}
+                  {lang === "en" ? s.labelEn : s.label}
                 </option>
               ))}
             </select>
@@ -213,11 +216,13 @@ const HomePage = () => {
         <main>
           {isError ? (
             <div className="not-found-text">
-              Não foi possível consultar a PokéAPI. Verifique sua conexão e
-              tente de novo.
+              {t(
+                "Não foi possível consultar a PokéAPI. Verifique sua conexão e tente de novo.",
+                "Couldn't reach the PokéAPI. Check your connection and try again."
+              )}
             </div>
           ) : notFound ? (
-            <div className="not-found-text">Nenhum pokémon encontrado.</div>
+            <div className="not-found-text">{t("Nenhum pokémon encontrado.", "No Pokémon found.")}</div>
           ) : isLoading ? (
             <CardSkeleton count={10} />
           ) : (

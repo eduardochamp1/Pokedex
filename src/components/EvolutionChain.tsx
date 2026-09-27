@@ -1,4 +1,5 @@
 import { useQueries } from "@tanstack/react-query";
+import { evolutionConditionText } from "../lib/evolution";
 import { Link } from "react-router-dom";
 import { searchPokemon } from "../api";
 import Card from "./Card";
@@ -35,8 +36,8 @@ const EvolutionChain = ({ steps, currentName }: Props) => {
             {i > 0 && (
               <span className="evo-arrow-group" aria-hidden="true">
                 <span className="evo-arrow">→</span>
-                {step.condition && (
-                  <span className="evo-condition">{step.condition}</span>
+                {evolutionConditionText(step.detail) && (
+                  <span className="evo-condition">{evolutionConditionText(step.detail)}</span>
                 )}
               </span>
             )}

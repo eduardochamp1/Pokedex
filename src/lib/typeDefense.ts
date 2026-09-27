@@ -1,5 +1,6 @@
 import { POKEMON_TYPES } from "../hooks/usePokemon";
 import { attackMultiplier, type TypeName } from "../data/typeMatchups";
+import { getLang, tr } from "../i18n/lang";
 
 export interface DefenseGroup {
   multiplier: number;
@@ -36,7 +37,7 @@ export function defenseProfile(defenderTypes: string[]): DefenseGroup[] {
 
 /** Rotulo curto do multiplicador, para badge. */
 export function multiplierLabel(m: number): string {
-  if (m === 0) return "imune";
+  if (m === 0) return tr(getLang(), "imune", "immune");
   if (m === 0.25) return "¼×";
   if (m === 0.5) return "½×";
   return `${m}×`;

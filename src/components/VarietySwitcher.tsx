@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { searchPokemon } from "../api";
 import Card from "./Card";
 import type { Pokemon, PokemonVariety } from "../types/pokemon";
+import { getLang, tr } from "../i18n/lang";
 
 interface Props {
   varieties: PokemonVariety[];
@@ -14,7 +15,7 @@ const NOTABLE_FORM_RE =
 
 function labelFor(name: string, isDefault: boolean): string {
   const parts = name.split("-").slice(1);
-  if (parts.length === 0) return isDefault ? "Padrão" : name;
+  if (parts.length === 0) return isDefault ? tr(getLang(), "Padrão", "Default") : name;
   return parts
     .map((w) => {
       if (w === "mega") return "Mega";
@@ -38,7 +39,7 @@ const VarietySwitcher = ({ varieties, currentName }: Props) => {
   });
 
   if (notable.length <= 1)
-    return <p className="detail-muted">Sem formas alternativas.</p>;
+    return <p className="detail-muted">{tr(getLang(), "Sem formas alternativas.", "No alternate forms.")}</p>;
 
   return (
     <ul className="variety-list">

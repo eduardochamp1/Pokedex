@@ -78,3 +78,37 @@ describe("evolutionConditionText", () => {
     expect(evolutionConditionText(undefined)).toBe("");
   });
 });
+
+describe("evolutionConditionText em inglês", () => {
+  const base = {
+    trigger: { name: "level-up", url: "" },
+    min_level: null,
+    item: null,
+    held_item: null,
+    known_move: null,
+    location: null,
+    min_happiness: null,
+    min_affection: null,
+    min_beauty: null,
+    needs_overworld_rain: false,
+    time_of_day: "",
+    turn_upside_down: false,
+    gender: null,
+  } as unknown as Parameters<typeof evolutionConditionText>[0];
+
+  it("nível, amizade e hora", () => {
+    expect(evolutionConditionText({ ...base!, min_level: 16 }, "en")).toBe("level 16");
+    expect(evolutionConditionText({ ...base!, min_happiness: 220, time_of_day: "night" }, "en")).toBe(
+      "friendship 220, at night"
+    );
+  });
+
+  it("troca segurando item", () => {
+    expect(
+      evolutionConditionText(
+        { ...base!, trigger: { name: "trade", url: "" }, held_item: { name: "metal-coat", url: "" } },
+        "en"
+      )
+    ).toBe("trade holding Metal Coat");
+  });
+});

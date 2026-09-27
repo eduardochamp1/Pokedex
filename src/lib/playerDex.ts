@@ -24,9 +24,9 @@ export interface PlayerDexEntry {
 export type DexMark = "owned" | "seen";
 
 export const DEX_FILTERS = [
-  { id: "capturados", label: "Capturados" },
-  { id: "vistos", label: "Vistos, não capturados" },
-  { id: "faltam", label: "Não vistos" },
+  { id: "capturados", label: "Capturados", labelEn: "Caught" },
+  { id: "vistos", label: "Vistos, não capturados", labelEn: "Seen, not caught" },
+  { id: "faltam", label: "Não vistos", labelEn: "Not seen" },
 ] as const;
 
 export type DexFilter = (typeof DEX_FILTERS)[number]["id"];

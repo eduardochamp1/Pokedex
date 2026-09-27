@@ -21,10 +21,10 @@ import {
   totalPagesOf,
 } from "../lib/filters";
 import { RARITIES, type RarityId } from "../data/rarity";
-import { evolutionConditionText } from "../lib/evolution";
 import type { EncounterArea } from "../lib/encounters";
 import type {
   EvolutionChain,
+  EvolutionDetail,
   EvolutionNode,
   MoveDetail,
   Pokemon,
@@ -56,22 +56,22 @@ export const GENERATIONS = [
  * reflete isso em vez de inventar um total que nao existe.
  */
 export const REGIONAL_DEXES = [
-  { id: "kanto", label: "Kanto" },
-  { id: "original-johto", label: "Johto" },
-  { id: "hoenn", label: "Hoenn" },
-  { id: "extended-sinnoh", label: "Sinnoh" },
-  { id: "updated-unova", label: "Unova" },
-  { id: "kalos-central", label: "Kalos · Central" },
-  { id: "kalos-coastal", label: "Kalos · Costa" },
-  { id: "kalos-mountain", label: "Kalos · Montanha" },
-  { id: "updated-alola", label: "Alola" },
-  { id: "galar", label: "Galar" },
-  { id: "isle-of-armor", label: "Galar · Ilha da Armadura" },
-  { id: "crown-tundra", label: "Galar · Tundra da Coroa" },
-  { id: "hisui", label: "Hisui" },
-  { id: "paldea", label: "Paldea" },
-  { id: "kitakami", label: "Paldea · Kitakami" },
-  { id: "blueberry", label: "Paldea · Blueberry" },
+  { id: "kanto", label: "Kanto", labelEn: "Kanto" },
+  { id: "original-johto", label: "Johto", labelEn: "Johto" },
+  { id: "hoenn", label: "Hoenn", labelEn: "Hoenn" },
+  { id: "extended-sinnoh", label: "Sinnoh", labelEn: "Sinnoh" },
+  { id: "updated-unova", label: "Unova", labelEn: "Unova" },
+  { id: "kalos-central", label: "Kalos · Central", labelEn: "Kalos · Central" },
+  { id: "kalos-coastal", label: "Kalos · Costa", labelEn: "Kalos · Coastal" },
+  { id: "kalos-mountain", label: "Kalos · Montanha", labelEn: "Kalos · Mountain" },
+  { id: "updated-alola", label: "Alola", labelEn: "Alola" },
+  { id: "galar", label: "Galar", labelEn: "Galar" },
+  { id: "isle-of-armor", label: "Galar · Ilha da Armadura", labelEn: "Galar · Isle of Armor" },
+  { id: "crown-tundra", label: "Galar · Tundra da Coroa", labelEn: "Galar · Crown Tundra" },
+  { id: "hisui", label: "Hisui", labelEn: "Hisui" },
+  { id: "paldea", label: "Paldea", labelEn: "Paldea" },
+  { id: "kitakami", label: "Paldea · Kitakami", labelEn: "Paldea · Kitakami" },
+  { id: "blueberry", label: "Paldea · Blueberry", labelEn: "Paldea · Blueberry" },
 ] as const;
 
 export type RegionalDexId = (typeof REGIONAL_DEXES)[number]["id"];
@@ -376,20 +376,21 @@ export function useMoveDetail(moveName: string | undefined) {
 export interface EvolutionStep {
   name: string;
   /** Condicao para chegar NESTE estagio; vazio no primeiro. */
-  condition: string;
+  /**
+   * O dado cru da condição, e não a frase: a frase depende do idioma, e esta
+   * consulta fica uma hora em cache. `EvolutionChain` monta o texto.
+   */
+  detail?: EvolutionDetail;
 }
 
 function flattenEvolutionChain(
   node: EvolutionNode,
-  condition = ""
+  detail?: EvolutionDetail
 ): EvolutionStep[] {
-  const steps: EvolutionStep[] = [{ name: node.species.name, condition }];
+  const steps: EvolutionStep[] = [{ name: node.species.name, detail }];
   for (const child of node.evolves_to) {
     steps.push(
-      ...flattenEvolutionChain(
-        child,
-        evolutionConditionText(child.evolution_details?.[0])
-      )
+      ...flattenEvolutionChain(child, child.evolution_details?.[0])
     );
   }
   return steps;

@@ -1,4 +1,5 @@
 import { FormEvent } from "react";
+import { useT } from "../i18n/lang";
 
 interface Props {
   value: string;
@@ -6,6 +7,7 @@ interface Props {
 }
 
 const Searchbar = ({ value, onChange }: Props) => {
+  const t = useT();
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
   };
@@ -16,9 +18,9 @@ const Searchbar = ({ value, onChange }: Props) => {
         <input
           type="search"
           value={value}
-          placeholder="Buscar pokémon…"
+          placeholder={t("Buscar pokémon…", "Search Pokémon…")}
           onChange={(e) => onChange(e.target.value)}
-          aria-label="Buscar pokémon por nome ou id"
+          aria-label={t("Buscar pokémon por nome ou id", "Search Pokémon by name or number")}
         />
       </div>
     </form>

@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { remove, clear, useComparator } from "../lib/comparatorStore";
+import { useT } from "../i18n/lang";
 
 const ComparatorButton = () => {
   const cart = useComparator();
+  const t = useT();
   const [open, setOpen] = useState(false);
   if (cart.length === 0) return null;
 
@@ -13,7 +15,7 @@ const ComparatorButton = () => {
         type="button"
         className="comparator-fab"
         onClick={() => setOpen((v) => !v)}
-        aria-label={`Comparador (${cart.length})`}
+        aria-label={`${t("Comparador", "Size comparison")} (${cart.length})`}
       >
         📏 <span className="comparator-fab-count">{cart.length}</span>
       </button>
@@ -21,14 +23,16 @@ const ComparatorButton = () => {
         <div
           className="comparator-modal"
           role="dialog"
-          aria-label="Carrinho de comparação"
+          aria-label={t("Carrinho de comparação", "Comparison cart")}
           onClick={() => setOpen(false)}
         >
           <div
             className="comparator-modal-body"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3>No comparador ({cart.length}/6)</h3>
+            <h3>
+              {t("No comparador", "In the comparison")} ({cart.length}/6)
+            </h3>
             <ul>
               {cart.map((c) => (
                 <li key={c.name}>
@@ -37,7 +41,7 @@ const ComparatorButton = () => {
                   <button
                     type="button"
                     onClick={() => remove(c.name)}
-                    aria-label={`Remover ${c.name}`}
+                    aria-label={`${t("Remover", "Remove")} ${c.name}`}
                   >
                     ×
                   </button>
@@ -46,10 +50,10 @@ const ComparatorButton = () => {
             </ul>
             <div className="comparator-modal-actions">
               <button type="button" onClick={clear}>
-                Limpar
+                {t("Limpar", "Clear")}
               </button>
               <Link to="/tamanhos" onClick={() => setOpen(false)}>
-                Abrir página
+                {t("Abrir página", "Open page")}
               </Link>
             </div>
           </div>

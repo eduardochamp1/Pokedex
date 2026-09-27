@@ -4,19 +4,14 @@ import TypeMatchup from "../components/TypeMatchup";
 import { usePokemonDetail, usePokemonIndex } from "../hooks/usePokemon";
 import { useDebounce } from "../hooks/useDebounce";
 import type { Pokemon } from "../types/pokemon";
-
-const STAT_LABELS: Record<string, string> = {
-  hp: "HP",
-  attack: "Atq",
-  defense: "Def",
-  "special-attack": "Atq Esp",
-  "special-defense": "Def Esp",
-  speed: "Vel",
-};
+import { useLang, tr } from "../i18n/lang";
+import { statLabel } from "../i18n/common";
 
 const totalOf = (p: Pokemon) => p.stats.reduce((s, x) => s + x.base_stat, 0);
 
 const ComparePage = () => {
+  const lang = useLang();
+  const t = (pt: string, en: string) => tr(lang, pt, en);
   const [left, setLeft] = useState("bulbasaur");
   const [right, setRight] = useState("charmander");
   const leftDeb = useDebounce(left.trim(), 350);
@@ -34,10 +29,10 @@ const ComparePage = () => {
     query: typeof leftQ,
     term: string
   ): string | null => {
-    if (!term) return "Digite um nome ou id.";
-    if (query.isLoading) return "Carregando…";
-    if (query.isError) return "Não foi possível consultar a PokéAPI.";
-    if (query.isSuccess && !query.data) return `Nada encontrado para "${term}".`;
+    if (!term) return t("Digite um nome ou id.", "Type a name or number.");
+    if (query.isLoading) return t("Carregando…", "Loading…");
+    if (query.isError) return t("Não foi possível consultar a PokéAPI.", "Couldn't reach the PokéAPI.");
+    if (query.isSuccess && !query.data) return t(`Nada encontrado para "${term}".`, `Nothing found for "${term}".`);
     return null;
   };
   const leftStatus = slotStatus(leftQ, leftDeb);
@@ -57,14 +52,14 @@ const ComparePage = () => {
           value={left}
           onChange={(e) => setLeft(e.target.value)}
           placeholder="Pokémon 1"
-          aria-label="Selecionar pokémon 1"
+          aria-label={t("Selecionar pokémon 1", "Choose Pokémon 1")}
           list="compare-names"
         />
         <button
           type="button"
           className="compare-swap"
           onClick={swap}
-          aria-label="Trocar posições"
+          aria-label={t("Trocar posições", "Swap sides")}
         >
           ⇄
         </button>
@@ -72,7 +67,7 @@ const ComparePage = () => {
           value={right}
           onChange={(e) => setRight(e.target.value)}
           placeholder="Pokémon 2"
-          aria-label="Selecionar pokémon 2"
+          aria-label={t("Selecionar pokémon 2", "Choose Pokémon 2")}
           list="compare-names"
         />
         <datalist id="compare-names">
@@ -102,10 +97,10 @@ const ComparePage = () => {
       {both && (
         <>
           <section className="compare-section">
-            <h2>Status base</h2>
+            <h2>{t("Status base", "Base stats")}</h2>
             <ul className="compare-stats">
               {both[0].stats.map((s, i) => {
-                const label = STAT_LABELS[s.stat.name] ?? s.stat.name;
+                const label = statLabel(s.stat.name, lang);
                 const lv = s.base_stat;
                 const rv = both[1].stats[i]?.base_stat ?? 0;
                 const max = Math.max(lv, rv, 1);
@@ -162,10 +157,12 @@ const ComparePage = () => {
           </section>
 
           <section className="compare-section">
-            <h2>Efetividade</h2>
+            <h2>{t("Efetividade", "Effectiveness")}</h2>
             <div className="matchup-grid">
               <div>
-                <h3 className="matchup-title">{both[0].name} ataca</h3>
+                <h3 className="matchup-title">
+                  {both[0].name} {t("ataca", "attacks")}
+                </h3>
                 <TypeMatchup
                   attacker={both[0].types.map((t) => t.type.name)}
                   defender={both[1].types.map((t) => t.type.name)}
@@ -173,7 +170,9 @@ const ComparePage = () => {
                 />
               </div>
               <div>
-                <h3 className="matchup-title">{both[1].name} ataca</h3>
+                <h3 className="matchup-title">
+                  {both[1].name} {t("ataca", "attacks")}
+                </h3>
                 <TypeMatchup
                   attacker={both[1].types.map((t) => t.type.name)}
                   defender={both[0].types.map((t) => t.type.name)}

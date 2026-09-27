@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useLang, tr } from "../i18n/lang";
 import {
   DEX_FILTERS,
   TOTAL_DA_DEX_GEN3,
@@ -24,12 +25,14 @@ const semExtensao = (rom: string) => rom.replace(/\.[^.]+$/, "");
 const PlayerDexFilter = ({ entry, value, onChange }: Props) => {
   const capturados = entry.owned.length;
   const vistos = entry.seen.length;
+  const lang = useLang();
+  const t = (pt: string, en: string) => tr(lang, pt, en);
 
   return (
     <div className="player-dex">
       <p className="player-dex-jogo">
-        <Link to="/treinador" className="player-dex-treinador" title="Ficha do treinador">
-          <strong>{entry.playerName || "Você"}</strong>
+        <Link to="/treinador" className="player-dex-treinador" title={t("Ficha do treinador", "Trainer card")}>
+          <strong>{entry.playerName || t("Você", "You")}</strong>
         </Link>{" "}
         ·{" "}
         <Link to="/jogar">{semExtensao(entry.rom)}</Link>
@@ -37,7 +40,10 @@ const PlayerDexFilter = ({ entry, value, onChange }: Props) => {
       <div
         className="player-dex-barra"
         role="img"
-        aria-label={`${capturados} capturados e ${vistos} vistos de ${TOTAL_DA_DEX_GEN3}`}
+        aria-label={t(
+          `${capturados} capturados e ${vistos} vistos de ${TOTAL_DA_DEX_GEN3}`,
+          `${capturados} caught and ${vistos} seen of ${TOTAL_DA_DEX_GEN3}`
+        )}
       >
         <span
           className="player-dex-vistos"
@@ -49,20 +55,23 @@ const PlayerDexFilter = ({ entry, value, onChange }: Props) => {
         />
       </div>
       <p className="player-dex-numeros">
-        {capturados} {capturados === 1 ? "capturado" : "capturados"} · {vistos}{" "}
-        {vistos === 1 ? "visto" : "vistos"} de {TOTAL_DA_DEX_GEN3}
+        {lang === "en"
+          ? `${capturados} caught · ${vistos} seen of ${TOTAL_DA_DEX_GEN3}`
+          : `${capturados} ${capturados === 1 ? "capturado" : "capturados"} · ${vistos} ${
+              vistos === 1 ? "visto" : "vistos"
+            } de ${TOTAL_DA_DEX_GEN3}`}
       </p>
       <div className="type-filter">
-        <label htmlFor="player-dex-select">Mostrar:</label>
+        <label htmlFor="player-dex-select">{t("Mostrar:", "Show:")}</label>
         <select
           id="player-dex-select"
           value={value ?? ""}
           onChange={(e) => onChange((e.target.value as DexFilter) || undefined)}
         >
-          <option value="">Todos</option>
+          <option value="">{t("Todos", "All")}</option>
           {DEX_FILTERS.map((f) => (
             <option key={f.id} value={f.id}>
-              {f.label}
+              {lang === "en" ? f.labelEn : f.label}
             </option>
           ))}
         </select>

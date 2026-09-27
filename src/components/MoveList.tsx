@@ -14,20 +14,23 @@ import { versionGroupLabel } from "../data/versionGroups";
 import { isPlayable } from "../emulator/playable";
 import { tType } from "../data/i18n";
 import type { PokemonMove } from "../types/pokemon";
+import { useLang, tr } from "../i18n/lang";
 
 interface Props {
   moves: PokemonMove[];
 }
 
-const DAMAGE_CLASS: Record<string, string> = {
-  physical: "Físico",
-  special: "Especial",
-  status: "Status",
+const DAMAGE_CLASS: Record<string, [string, string]> = {
+  physical: ["Físico", "Physical"],
+  special: ["Especial", "Special"],
+  status: ["Status", "Status"],
 };
 
 /** Uma linha da lista. Só busca o detalhe depois de aberta. */
 const MoveRow = ({ move }: { move: LearnedMove }) => {
   const [open, setOpen] = useState(false);
+  const lang = useLang();
+  const t = (pt: string, en: string) => tr(lang, pt, en);
   const detail = useMoveDetail(open ? move.name : undefined);
   const data = detail.data;
 
@@ -59,18 +62,18 @@ const MoveRow = ({ move }: { move: LearnedMove }) => {
       {open && (
         <div className="move-detail">
           {detail.isLoading ? (
-            <p className="detail-muted">Carregando…</p>
+            <p className="detail-muted">{t("Carregando…", "Loading…")}</p>
           ) : detail.isError ? (
-            <p className="detail-muted">Não deu para consultar este golpe.</p>
+            <p className="detail-muted">{t("Não deu para consultar este golpe.", "Couldn't load this move.")}</p>
           ) : data ? (
             <>
               <dl className="move-stats">
                 <div>
-                  <dt>Poder</dt>
+                  <dt>{t("Poder", "Power")}</dt>
                   <dd>{data.power ?? "—"}</dd>
                 </div>
                 <div>
-                  <dt>Precisão</dt>
+                  <dt>{t("Precisão", "Accuracy")}</dt>
                   <dd>{data.accuracy !== null ? `${data.accuracy}%` : "—"}</dd>
                 </div>
                 <div>
@@ -78,17 +81,18 @@ const MoveRow = ({ move }: { move: LearnedMove }) => {
                   <dd>{data.pp ?? "—"}</dd>
                 </div>
                 <div>
-                  <dt>Classe</dt>
+                  <dt>{t("Classe", "Category")}</dt>
                   <dd>
-                    {DAMAGE_CLASS[data.damage_class.name] ??
-                      data.damage_class.name}
+                    {DAMAGE_CLASS[data.damage_class.name]
+                      ? t(...DAMAGE_CLASS[data.damage_class.name])
+                      : data.damage_class.name}
                   </dd>
                 </div>
               </dl>
               {flavor && <p className="move-flavor">{flavor}</p>}
             </>
           ) : (
-            <p className="detail-muted">Golpe não encontrado na API.</p>
+            <p className="detail-muted">{t("Golpe não encontrado na API.", "Move not found in the API.")}</p>
           )}
         </div>
       )}
@@ -103,6 +107,8 @@ const MoveRow = ({ move }: { move: LearnedMove }) => {
  * descricao sao buscados por golpe, so quando a linha e aberta.
  */
 const MoveList = ({ moves }: Props) => {
+  const lang = useLang();
+  const t = (pt: string, en: string) => tr(lang, pt, en);
   const versionGroups = useMemo(() => availableVersionGroups(moves), [moves]);
   const preferred = useMemo(() => preferredVersionGroup(moves), [moves]);
   const [chosen, setChosen] = useState<string | undefined>();
@@ -118,13 +124,13 @@ const MoveList = ({ moves }: Props) => {
   );
 
   if (versionGroups.length === 0) {
-    return <p className="detail-muted">Sem golpes registrados na API.</p>;
+    return <p className="detail-muted">{t("Sem golpes registrados na API.", "No moves listed in the API.")}</p>;
   }
 
   return (
     <div className="move-block">
       <label className="move-version">
-        <span>Jogo</span>
+        <span>{t("Jogo", "Game")}</span>
         <select
           value={versionGroup}
           onChange={(e) => setChosen(e.target.value)}
@@ -141,9 +147,9 @@ const MoveList = ({ moves }: Props) => {
           <Link
             className="move-version-play"
             to={`/jogar?jogo=${versionGroup}`}
-            title={`Abrir /jogar com ${versionGroupLabel(versionGroup)}`}
+            title={t(`Abrir /jogar com ${versionGroupLabel(versionGroup)}`, `Open /jogar with ${versionGroupLabel(versionGroup)}`)}
           >
-            jogar
+            {t("jogar", "play")}
           </Link>
         )}
       </label>
@@ -151,7 +157,7 @@ const MoveList = ({ moves }: Props) => {
       {groups.map((group) => (
         <section key={group.method} className="move-group">
           <h4>
-            {group.label}
+            {lang === "en" ? group.labelEn : group.label}
             <span className="move-count">{group.moves.length}</span>
           </h4>
           <ul className="move-list">

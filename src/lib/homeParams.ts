@@ -3,8 +3,8 @@ import { RARITIES, type RarityId } from "../data/rarity";
 import { parseDexFilter, type DexFilter } from "./playerDex";
 
 export const SORTS = [
-  { id: "id", label: "Número" },
-  { id: "nome", label: "Nome" },
+  { id: "id", label: "Número", labelEn: "Number" },
+  { id: "nome", label: "Nome", labelEn: "Name" },
 ] as const;
 
 export type SortId = (typeof SORTS)[number]["id"];

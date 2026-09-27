@@ -1,4 +1,5 @@
 import { GENERATIONS, REGIONAL_DEXES } from "../hooks/usePokemon";
+import { useLang, tr } from "../i18n/lang";
 
 interface Props {
   generation: number | undefined;
@@ -19,11 +20,13 @@ interface Props {
  * resultado tecnicamente correto e inútil como filtro.
  */
 const DexFilter = ({ generation, pokedex, onChange }: Props) => {
+  const lang = useLang();
+  const t = (pt: string, en: string) => tr(lang, pt, en);
   const value = generation ? `ger:${generation}` : pokedex ? `dex:${pokedex}` : "";
 
   return (
     <div className="type-filter">
-      <label htmlFor="dex-select">Geração ou região:</label>
+      <label htmlFor="dex-select">{t("Geração ou região:", "Generation or region:")}</label>
       <select
         id="dex-select"
         value={value}
@@ -35,18 +38,18 @@ const DexFilter = ({ generation, pokedex, onChange }: Props) => {
           return onChange({ pokedex: id });
         }}
       >
-        <option value="">Todas</option>
-        <optgroup label="Geração — espécies que estrearam nela">
+        <option value="">{t("Todas", "All")}</option>
+        <optgroup label={t("Geração — espécies que estrearam nela", "Generation — species that debuted in it")}>
           {GENERATIONS.map((g) => (
             <option key={g.id} value={`ger:${g.id}`}>
               {g.label}
             </option>
           ))}
         </optgroup>
-        <optgroup label="Pokédex regional — tudo que aparece na região">
+        <optgroup label={t("Pokédex regional — tudo que aparece na região", "Regional Pokédex — everything found in the region")}>
           {REGIONAL_DEXES.map((d) => (
             <option key={d.id} value={`dex:${d.id}`}>
-              {d.label}
+              {lang === "en" ? d.labelEn : d.label}
             </option>
           ))}
         </optgroup>
