@@ -28,11 +28,25 @@ Uma Pokédex web completa em **React + TypeScript + Vite**, consumindo a [PokéA
 - **Evoluções** — chain completa com cards clicáveis
 - **Formas alternativas** — Mega X/Y, Gigantamax, Origin, Regional, Therian, Ultra, etc.
 - **Link para o mapa** — resolve a região de origem pela lista de emblemáticos ou pela geração da espécie
+- **Onde encontrar** — rotas, método, nível e chance jogo a jogo, de
+  `/pokemon/{id}/encounters`, com os slots de cada área somados numa linha. Abre
+  no Emerald quando o save diz que é o seu jogo
+- **Chance de captura** — as oito bolas com as regras de Gen 3, em aritmética
+  inteira como em pokeemerald (taxa 45 com HP cheio dá os 6,25% clássicos). A
+  Repeat Ball olha a sua dex
 
 ### Comparador (`/comparar`)
 - **Duas slots** com busca independente e autocomplete de todos os nomes
 - **Status lado a lado** com barras espelhadas e vencedor por atributo
 - **Efetividade de tipo** nos dois sentidos, via matriz canônica 18×18 local
+
+### Time (`/time`)
+- **Até seis pokémon**, guardados na URL (`?time=mudkip,torchic`) — o link
+  leva o time junto; importa o time do save de Emerald com um clique
+- **Defesa** — quanto cada tipo de golpe causa em cada membro, com as linhas de
+  perigo marcadas (dois ou mais fracos, e mais fracos do que quem resiste)
+- **Ataque** — que tipos o time acerta 2×, contando os tipos de cada membro
+- Mesma matriz 18×18 do Comparar, sem request
 
 ### Favoritos (`/favoritos`)
 - Grid reaproveita o cache do detail
