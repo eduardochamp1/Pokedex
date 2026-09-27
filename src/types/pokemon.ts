@@ -109,6 +109,13 @@ export interface AbilityDetail {
     flavor_text: string;
     language: { name: string };
   }[];
+  /** Vêm na mesma resposta; a página da habilidade usa. */
+  generation?: { name: string; url: string };
+  pokemon?: {
+    is_hidden: boolean;
+    slot: number;
+    pokemon: { name: string; url: string };
+  }[];
 }
 
 export interface EvolutionDetail {

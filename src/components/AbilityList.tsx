@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useAbilities } from "../hooks/useAbilities";
 import { pickLocalized } from "../lib/localize";
 import type { PokemonAbility } from "../types/pokemon";
@@ -33,7 +34,11 @@ const AbilityList = ({ abilities }: Props) => {
         return (
           <li key={a.slug} className="ability-item">
             <div className="ability-head">
-              <strong>{nome}</strong>
+              <strong>
+                <Link to={`/habilidade/${a.slug}`} title="Todos os pokémon com esta habilidade">
+                  {nome}
+                </Link>
+              </strong>
               {a.isHidden && <span className="ability-hidden">oculta</span>}
             </div>
             {efeito ? (

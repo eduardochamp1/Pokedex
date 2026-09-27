@@ -1,0 +1,43 @@
+/* ========= /habilidade/:slug ========= */
+.ability-shell {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.ability-header {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 16px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+}
+.ability-header h1 {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.ability-gen { color: var(--text-muted); }
+.ability-gen a { color: var(--accent); }
+.ability-texto { max-width: 70ch; display: grid; gap: 10px; color: var(--text-muted); }
+.ability-texto .ability-curto { color: var(--text); font-size: 1.05rem; }
+.ability-flavor { font-style: italic; }
+.ability-shell h2 {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  margin-bottom: 12px;
+}
+.ability-conta { color: var(--text-muted); font-weight: 400; letter-spacing: 0; }
+.ability-grade { display: flex; flex-wrap: wrap; gap: 10px; }
+
+@media (max-width: 600px) {
+  .ability-shell { padding: 20px 16px 48px; }
+}

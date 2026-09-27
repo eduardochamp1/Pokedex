@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useTrainerEntry } from "../lib/trainerLog";
 import {
@@ -9,50 +9,10 @@ import {
 } from "../lib/trainerText";
 import { HOENN_BADGES, HOENN_TOWNS, hoennLocationName } from "../data/hoenn";
 import { usePokemonIndex } from "../hooks/usePokemon";
-import { pixelSpriteUrl } from "../lib/sprites";
+import PokemonMini from "../components/PokemonMini";
 import { pokemonLabel } from "../lib/pokemonLabel";
 import { TOTAL_DA_DEX_GEN3 } from "../lib/playerDex";
 import "../styles/trainer.css";
-
-/** Sprite pequeno + legenda, com link para a ficha da espécie quando dá. */
-const Mini = ({
-  national,
-  label,
-  sub,
-  slug,
-}: {
-  national: number;
-  label: string;
-  sub?: string;
-  slug?: string;
-}) => {
-  const [broken, setBroken] = useState(false);
-  const conteudo = (
-    <>
-      {broken ? (
-        <span className="trainer-mini-vazio" aria-hidden="true">?</span>
-      ) : (
-        <img
-          src={pixelSpriteUrl(national)}
-          alt=""
-          width={48}
-          height={48}
-          loading="lazy"
-          onError={() => setBroken(true)}
-        />
-      )}
-      <span className="trainer-mini-nome">{label}</span>
-      {sub && <span className="trainer-mini-sub">{sub}</span>}
-    </>
-  );
-  return slug ? (
-    <Link to={`/pokemon/${slug}`} className="trainer-mini">
-      {conteudo}
-    </Link>
-  ) : (
-    <span className="trainer-mini">{conteudo}</span>
-  );
-};
 
 /**
  * A ficha do treinador e a linha do tempo da partida, lidas do save de
@@ -197,9 +157,9 @@ const TrainerPage = () => {
         <h2>Time</h2>
         <div className="trainer-minis">
           {entry.party.map((m) => (
-            <Mini
+            <PokemonMini
               key={m.personality}
-              national={m.national}
+              id={m.national}
               label={m.nickname}
               sub={`nv ${m.level}`}
               slug={slugOf.get(m.national)}
@@ -223,9 +183,9 @@ const TrainerPage = () => {
                 </h3>
                 <div className="trainer-minis">
                   {c.pokemon.map((p, j) => (
-                    <Mini
+                    <PokemonMini
                       key={j}
-                      national={p.national}
+                      id={p.national}
                       label={p.nickname}
                       slug={slugOf.get(p.national)}
                     />
