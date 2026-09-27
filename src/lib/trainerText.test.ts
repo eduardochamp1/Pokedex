@@ -45,6 +45,13 @@ describe("describeEvent", () => {
   });
 });
 
+describe("conquista", () => {
+  it("pelo nome da conquista", () => {
+    expect(describeEvent({ ...base, kind: "achievement", id: "dex-10" }, nome)).toBe("Conquista: 10 capturados");
+    expect(describeEvent({ ...base, kind: "achievement", id: "badge-8" }, nome, "en")).toBe("Achievement: All badges");
+  });
+});
+
 describe("insígnia por jogo", () => {
   it("FR/LG fala das insígnias de Kanto", () => {
     expect(describeEvent({ ...base, kind: "badge", index: 0 }, nome, "pt", "frlg")).toBe(

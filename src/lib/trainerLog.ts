@@ -14,12 +14,15 @@
 import { useSyncExternalStore } from "react";
 import type { Gen3Game, Gen3Save, Gen3Trainer } from "../emulator/saveParse/gen3";
 import type { StoredBox } from "./pcBoxes";
+import { newlyDone } from "./achievements";
 
 export interface SnapshotMon {
   personality: number;
   national: number;
   nickname: string;
   level: number;
+  /** Ausente nas fichas gravadas antes das conquistas. */
+  shiny?: boolean;
 }
 
 export interface Snapshot {
@@ -50,6 +53,7 @@ export type TrainerEvent = Base &
     | { kind: "level"; national: number; nickname: string; from: number; to: number }
     | { kind: "evolved"; nickname: string; from: number; to: number }
     | { kind: "rewind" }
+    | { kind: "achievement"; id: string }
   );
 
 export interface TrainerEntry {
@@ -87,6 +91,7 @@ export function snapshotOf(save: Gen3Save, at: number): Snapshot | null {
       national: m.national,
       nickname: m.nickname,
       level: m.level,
+      shiny: m.shiny,
     })),
   };
 }
@@ -207,6 +212,7 @@ export function recordTrainerSave(rom: string, save: Gen3Save, now: number = Dat
 
   const anterior = entradas[rom];
   let novos: TrainerEvent[];
+  let comparar = false;
   if (!anterior) {
     novos = [
       { at: now, playSeconds: snap.playSeconds, kind: "start", owned: snap.owned.length, seen: snap.seenCount },
@@ -216,6 +222,7 @@ export function recordTrainerSave(rom: string, save: Gen3Save, now: number = Dat
     novos = [{ at: now, playSeconds: snap.playSeconds, kind: "rewind" }];
   } else {
     novos = diffSnapshots(anterior.last, snap);
+    comparar = true;
   }
 
   const entry: TrainerEntry = {
@@ -231,6 +238,13 @@ export function recordTrainerSave(rom: string, save: Gen3Save, now: number = Dat
     last: snap,
     events: [...(anterior?.events ?? []), ...novos].slice(-MAX_EVENTS),
   };
+  // Conquista destravada vira evento — mas não na primeira leitura (despejaria
+  // tudo o que já estava feito) nem ao voltar para um save antigo.
+  if (anterior && comparar) {
+    const base = { at: now, playSeconds: snap.playSeconds };
+    const feitas = newlyDone(anterior, entry).map((id): TrainerEvent => ({ ...base, kind: "achievement", id }));
+    if (feitas.length) entry.events = [...entry.events, ...feitas].slice(-MAX_EVENTS);
+  }
   entradas = { ...entradas, [rom]: entry };
   try {
     localStorage.setItem(KEY, JSON.stringify(entradas));

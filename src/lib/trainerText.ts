@@ -4,6 +4,7 @@
  */
 import { HOENN_TOWNS } from "../data/hoenn";
 import { badgesOf } from "./gen3Game";
+import { achievementById } from "./achievements";
 import type { Gen3Game } from "../emulator/saveParse/gen3";
 import type { TrainerEvent } from "./trainerLog";
 import { getLang, localeOf, type Lang } from "../i18n/lang";
@@ -64,6 +65,11 @@ export function describeEvent(
       return en
         ? `${e.nickname} evolved from ${nameOf(e.from)} into ${nameOf(e.to)}`
         : `${e.nickname} evoluiu de ${nameOf(e.from)} para ${nameOf(e.to)}`;
+    case "achievement": {
+      const a = achievementById(e.id);
+      const nome = a ? (en ? a.title.en : a.title.pt) : e.id;
+      return en ? `Achievement: ${nome}` : `Conquista: ${nome}`;
+    }
     case "rewind":
       return en ? "An earlier save was loaded" : "Um save anterior foi carregado";
   }

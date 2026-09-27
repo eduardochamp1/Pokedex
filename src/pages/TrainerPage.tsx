@@ -12,6 +12,7 @@ import { badgesOf, gameLabel, regionOfGame } from "../lib/gen3Game";
 import { usePokemonIndex } from "../hooks/usePokemon";
 import PokemonMini from "../components/PokemonMini";
 import PcBoxes from "../components/PcBoxes";
+import Achievements from "../components/Achievements";
 import { pokemonLabel } from "../lib/pokemonLabel";
 import { TOTAL_DA_DEX_GEN3 } from "../lib/playerDex";
 import "../styles/trainer.css";
@@ -188,6 +189,8 @@ const TrainerPage = () => {
           </p>
         )}
       </div>
+
+      <Achievements entry={entry} />
 
       <section>
         <h2>{tx("Time", "Team")}</h2>

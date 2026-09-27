@@ -230,6 +230,11 @@ leem time, Pokédex, PC e tempo de jogo, sem dinheiro nem insígnias.
   jogo foi salvo
 - **Insígnias** de Hoenn ou de Kanto conforme o jogo, **cidades de Hoenn**
   (só Emerald) e o time
+- **Conquistas** — dex (10 a 200), insígnias, Hoenn inteira, time cheio,
+  nível 50 e 100, evolução, shiny, caixa cheia, 10 horas e ₽100.000, com o
+  quanto falta. Todas saem da ficha, sem nada gravado à parte; a que depende
+  do que o jogo não registra não aparece. A que destrava entre dois saves
+  entra na linha do tempo
 - **PC** — as 14 caixas com busca por apelido, espécie ou número, filtro por
   caixa e shiny, ordem por caixa, dex ou nível, e a ficha de cada pokémon
   (natureza, IVs, EVs, golpes, status). A caixa não guarda nível nem status:

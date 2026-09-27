@@ -76,6 +76,22 @@ function save(over: Partial<{
 
 const snap = (o?: Parameters<typeof save>[0]) => snapshotOf(save(o), 1000) as Snapshot;
 
+describe("conquistas na linha do tempo", () => {
+  it("a primeira leitura não despeja o que já estava feito", () => {
+    recordTrainerSave("e.gba", save({ owned: Array.from({ length: 12 }, (_, i) => i + 1) }), 1000);
+    expect(latestTrainerEntry()?.events.map((e) => e.kind)).toEqual(["start"]);
+  });
+
+  it("o que destrava entre dois saves vira evento, depois das capturas", () => {
+    const nove = Array.from({ length: 9 }, (_, i) => i + 1);
+    recordTrainerSave("e.gba", save({ owned: nove, seconds: 100 }), 1000);
+    recordTrainerSave("e.gba", save({ owned: [...nove, 263], seconds: 200 }), 2000);
+    const ev = latestTrainerEntry()?.events ?? [];
+    expect(ev.map((e) => e.kind)).toEqual(["start", "captured", "achievement"]);
+    expect(ev[2]).toMatchObject({ kind: "achievement", id: "dex-10" });
+  });
+});
+
 describe("PC", () => {
   it("guarda a ficha inteira de cada pokémon da caixa", () => {
     const m = membro(252, 5, 0xabc, "TREECKO");
@@ -116,7 +132,7 @@ describe("FireRed/LeafGreen", () => {
     recordTrainerSave("leafgreen.gba", frlg(), 1000);
     recordTrainerSave("leafgreen.gba", frlg([true, false, false, false, false, false, false, false]), 2000);
     const kinds = latestTrainerEntry()?.events.map((e) => e.kind);
-    expect(kinds).toEqual(["start", "badge"]);
+    expect(kinds).toEqual(["start", "badge", "achievement"]);
   });
 
   it("Ruby/Sapphire sem insígnias não inventa evento", () => {
