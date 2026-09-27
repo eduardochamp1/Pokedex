@@ -4,6 +4,7 @@ import "./App.css";
 import Navbar from "./components/Navbar";
 import CommandLauncher from "./components/CommandLauncher";
 import { OfflineBanner } from "./components/AppStatus";
+import { useT } from "./i18n/lang";
 import HomePage from "./pages/HomePage";
 import { RouteFallback } from "./components/Skeleton";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -28,6 +29,9 @@ const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 
 function App() {
   const { favorites, toggle } = useFavorites();
+  // Ler o idioma aqui, na raiz, faz a árvore inteira re-renderizar na troca —
+  // inclusive quem só usa pickLocalized e não chama useT.
+  const t = useT();
 
   return (
     <FavoriteProvider
@@ -39,7 +43,7 @@ function App() {
       {/* Primeiro foco tabulável da página: sem ele, quem navega por teclado
           passa pelos 7 links do menu em toda troca de rota. */}
       <a className="skip-link" href="#conteudo">
-        Pular para o conteúdo
+        {t("Pular para o conteúdo", "Skip to content")}
       </a>
       <Navbar />
       <CommandLauncher />

@@ -4,6 +4,7 @@ import FavoriteContext from "../contexts/favoritesContext";
 import ScanlineToggle from "./ScanlineToggle";
 import { openSearch } from "../lib/searchEvents";
 import { InstallButton } from "./AppStatus";
+import LangToggle from "./LangToggle";
 import { usePausedGame } from "../emulator/usePausedGame";
 
 const Navbar = () => {
@@ -119,6 +120,7 @@ const Navbar = () => {
         <span aria-hidden="true">⌕</span>
         <kbd className="nav-search-kbd">Ctrl K</kbd>
       </button>
+      <LangToggle />
       <InstallButton />
       <ScanlineToggle />
     </nav>
