@@ -3845,6 +3845,30 @@ html[data-scanline="on"] body::after {
       transparent 1px 3px
     );
 }
+.nav-install {
+  flex-shrink: 0;
+  height: 28px;
+  margin-left: 6px;
+  padding: 0 10px;
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-sm);
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.nav-install:hover,
+.nav-install:focus-visible { background: var(--accent); color: var(--accent-ink); }
+
+/* Sem rede: faixa logo abaixo da navbar, sem cobrir nada. */
+.offline-banner {
+  padding: 8px 16px;
+  text-align: center;
+  font-size: 0.82rem;
+  background: color-mix(in srgb, var(--accent-alt) 18%, var(--surface-1));
+  border-bottom: 2px solid var(--accent-alt);
+  color: var(--text);
+}
+
 /* Busca: ícone + atalho; no celular, só o ícone. */
 .nav-search {
   flex-shrink: 0;

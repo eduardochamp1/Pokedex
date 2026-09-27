@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { localRoms } from "./vite-plugin-local-roms";
+import { serviceWorkerPrecache } from "./vite-plugin-sw";
 
 /**
  * O core do emulador (mGBA compilado para wasm) usa threads, e threads exigem
@@ -21,7 +22,7 @@ const crossOriginIsolationHeaders = {
 };
 
 export default defineConfig({
-  plugins: [react(), localRoms()],
+  plugins: [react(), localRoms(), serviceWorkerPrecache()],
   /**
    * O core do emulador fica **fora** do pre-bundle do Vite.
    *

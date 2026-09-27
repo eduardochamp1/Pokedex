@@ -13,7 +13,7 @@
       "src": "logo192.png",
       "type": "image/png",
       "sizes": "192x192",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "logo512.png",
@@ -25,6 +25,28 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "theme_color": "#0d0e14",
-  "background_color": "#0d0e14"
+  "theme_color": "#0b0e13",
+  "background_color": "#0b0e13",
+  "shortcuts": [
+    {
+      "name": "Jogar",
+      "url": "/jogar",
+      "description": "Emulador GB, GBC e GBA"
+    },
+    {
+      "name": "Quiz",
+      "url": "/quiz",
+      "description": "Quem é esse Pokémon?"
+    },
+    {
+      "name": "Time",
+      "url": "/time",
+      "description": "Montador de time"
+    },
+    {
+      "name": "Treinador",
+      "url": "/treinador",
+      "description": "Ficha e linha do tempo do seu save"
+    }
+  ]
 }
