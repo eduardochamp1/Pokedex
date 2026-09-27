@@ -85,7 +85,7 @@ via [mGBA](https://mgba.io) compilado para WebAssembly.
   o core
 - **Ficha de cada pokémon do time** — natureza (com o que sobe e desce), IVs,
   EVs, status, golpes com PP, amizade, shiny e a habilidade **de Gen 3** (o
-  Gengar do save tem Levitate, não Cursed Body). Os offsets foram medidos num
+  Gengar de Gen 3 tem Levitate, não Cursed Body). Os offsets foram medidos num
   Mudkip real, e os seis status que o jogo gravou fecharam com a fórmula de
   `lib/gen3Stats` aplicada ao que foi lido
 - **Gamepad virtual** para toque, **gamepad físico** pela Gamepad API (layout
