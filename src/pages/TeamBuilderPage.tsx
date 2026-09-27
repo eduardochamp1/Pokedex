@@ -73,7 +73,7 @@ const TeamBuilderPage = () => {
     setEntrada("");
   };
 
-  // O time do save de Emerald, quando /jogar já leu um.
+  // O time do save, quando /jogar já leu um.
   const treinador = useTrainerEntry();
   const doSave = useMemo(
     () =>

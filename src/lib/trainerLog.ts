@@ -12,7 +12,7 @@
  * de forma errada descartada na leitura.
  */
 import { useSyncExternalStore } from "react";
-import type { Gen3Save, Gen3Trainer } from "../emulator/saveParse/gen3";
+import type { Gen3Game, Gen3Save, Gen3Trainer } from "../emulator/saveParse/gen3";
 
 export interface SnapshotMon {
   personality: number;
@@ -26,7 +26,9 @@ export interface Snapshot {
   playSeconds: number;
   owned: number[];
   seenCount: number;
+  /** Vazio onde o jogo não foi medido: sem insígnias, nenhum evento delas. */
   badges: boolean[];
+  /** Só Emerald registra cidades; nos outros fica vazio. */
   towns: number[];
   party: SnapshotMon[];
 }
@@ -51,6 +53,8 @@ export type TrainerEvent = Base &
 
 export interface TrainerEntry {
   rom: string;
+  /** Ausente nas entradas gravadas antes de FR/LG e R/S serem lidos: eram Emerald. */
+  game?: Gen3Game;
   updatedAt: number;
   playerName: string;
   trainer: Gen3Trainer;
@@ -75,8 +79,8 @@ export function snapshotOf(save: Gen3Save, at: number): Snapshot | null {
     playSeconds: segundos(save.trainer),
     owned: [...(save.pokedex?.owned ?? [])],
     seenCount: save.pokedex?.seen.length ?? 0,
-    badges: [...save.trainer.badges],
-    towns: [...save.trainer.visitedTowns],
+    badges: [...(save.trainer.badges ?? [])],
+    towns: [...(save.trainer.visitedTowns ?? [])],
     party: save.party.map((m) => ({
       personality: m.personality,
       national: m.national,
@@ -192,8 +196,9 @@ export function reloadTrainerLog(): void {
 reloadTrainerLog();
 
 /**
- * Registra um save lido. Save sem ficha de treinador (fora de Emerald) não
- * entra: sem tempo de jogo não há como ordenar a linha do tempo.
+ * Registra um save lido. Save sem ficha de treinador (sem chave de
+ * segurança lida) não entra: sem tempo de jogo não há como ordenar a linha do
+ * tempo.
  */
 export function recordTrainerSave(rom: string, save: Gen3Save, now: number = Date.now()): void {
   const snap = snapshotOf(save, now);
@@ -214,6 +219,7 @@ export function recordTrainerSave(rom: string, save: Gen3Save, now: number = Dat
 
   const entry: TrainerEntry = {
     rom,
+    game: save.game,
     updatedAt: now,
     playerName: save.playerName,
     trainer: save.trainer,

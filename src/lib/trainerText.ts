@@ -2,7 +2,9 @@
  * Os textos da ficha do treinador e da linha do tempo. Puro: o nome de cada
  * pokémon chega por uma função, para a página decidir de onde ele vem.
  */
-import { HOENN_BADGES, HOENN_TOWNS } from "../data/hoenn";
+import { HOENN_TOWNS } from "../data/hoenn";
+import { badgesOf } from "./gen3Game";
+import type { Gen3Game } from "../emulator/saveParse/gen3";
 import type { TrainerEvent } from "./trainerLog";
 import { getLang, localeOf, type Lang } from "../i18n/lang";
 
@@ -28,7 +30,8 @@ const contar = (n: number, palavra: string) => `${n} ${palavra}${n === 1 ? "" : 
 export function describeEvent(
   e: TrainerEvent,
   nameOf: (national: number) => string,
-  lang: Lang = getLang()
+  lang: Lang = getLang(),
+  game: Gen3Game = "emerald"
 ): string {
   const en = lang === "en";
   switch (e.kind) {
@@ -39,7 +42,7 @@ export function describeEvent(
     case "captured":
       return en ? `Caught ${nameOf(e.national)}` : `Capturou ${nameOf(e.national)}`;
     case "badge": {
-      const b = HOENN_BADGES[e.index];
+      const b = badgesOf(game)[e.index];
       if (en) return b ? `Earned ${b.leader}'s ${b.name}` : `Earned badge ${e.index + 1}`;
       return b ? `Ganhou a ${b.name} de ${b.leader}` : `Ganhou a insígnia ${e.index + 1}`;
     }

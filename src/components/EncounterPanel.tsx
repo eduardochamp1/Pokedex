@@ -10,6 +10,7 @@ import {
 } from "../lib/encounters";
 import { versionLabel, versionRegion } from "../data/versions";
 import { useT } from "../i18n/lang";
+import { saveVersion } from "../lib/gen3Game";
 
 interface Props {
   pokemonId: number;
@@ -18,9 +19,8 @@ interface Props {
 /**
  * Onde encontrar este pokémon, jogo a jogo.
  *
- * Abre no jogo que o save diz que você está jogando (Emerald, hoje o único
- * lido), quando este pokémon aparece nele; senão, no mais recente que a
- * PokéAPI cobre.
+ * Abre no jogo que o save diz que você está jogando, quando este pokémon
+ * aparece nele; senão, no mais recente que a PokéAPI cobre.
  */
 const EncounterPanel = ({ pokemonId }: Props) => {
   const { data, isLoading, isError } = useEncounters(pokemonId);
@@ -44,7 +44,8 @@ const EncounterPanel = ({ pokemonId }: Props) => {
     );
   }
 
-  const doSave = treinador && versoes.includes("emerald") ? "emerald" : undefined;
+  const doSeuJogo = treinador ? saveVersion(treinador.game ?? "emerald", treinador.rom) : undefined;
+  const doSave = doSeuJogo && versoes.includes(doSeuJogo) ? doSeuJogo : undefined;
   const versao = escolhido && versoes.includes(escolhido) ? escolhido : doSave ?? versoes[versoes.length - 1];
   const linhas = encountersFor(areas, versao);
   const regiao = versionRegion(versao);

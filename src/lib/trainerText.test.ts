@@ -45,6 +45,17 @@ describe("describeEvent", () => {
   });
 });
 
+describe("insígnia por jogo", () => {
+  it("FR/LG fala das insígnias de Kanto", () => {
+    expect(describeEvent({ ...base, kind: "badge", index: 0 }, nome, "pt", "frlg")).toBe(
+      "Ganhou a Boulder Badge de Brock"
+    );
+    expect(describeEvent({ ...base, kind: "badge", index: 7 }, nome, "en", "frlg")).toBe(
+      "Earned Giovanni's Earth Badge"
+    );
+  });
+});
+
 describe("em inglês", () => {
   it("formatos e frases", () => {
     expect(formatMoney(3300, "en")).toBe("₽3,300");

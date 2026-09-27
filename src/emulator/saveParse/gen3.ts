@@ -64,8 +64,8 @@ const SECOES_DO_SAVEBLOCK1 = [1, 2, 3, 4];
  * offset (`0x0034`), que **não** foi verificado aqui: na fixture aquela posição
  * guarda 806170637, que não é contagem de time nenhuma.
  */
-const OFF_CONTAGEM_DO_TIME = 0x0234;
-const OFF_PRIMEIRO_DO_TIME = 0x0238;
+/** Emerald; o FR/LG usa outro — ver `LAYOUTS`. */
+const OFF_CONTAGEM_DO_TIME_RSE = 0x0234;
 const TAMANHO_DO_REGISTRO = 100;
 const MAX_NO_TIME = 6;
 
@@ -103,8 +103,7 @@ const OFF_SID = 0x0c;
 const OFF_HORAS = 0x0e;
 const OFF_MINUTOS = 0x10;
 const OFF_SEGUNDOS = 0x11;
-const OFF_CHAVE_DE_SEGURANCA = 0xac;
-const OFF_DINHEIRO = 0x490;
+const OFF_CODIGO_DO_JOGO = 0xac;
 /** Grupo e número do mapa. Medido: 0 e 10, Oldale Town — onde o save foi feito. */
 const OFF_MAPA = 0x04;
 
@@ -115,9 +114,66 @@ const OFF_MAPA = 0x04;
  * 0x86F (visitou Littleroot) e 0x870 (visitou Oldale) ligadas — exatamente o
  * começo de Emerald, com as insígnias entre flags que se confirmaram.
  */
-const OFF_FLAGS = 0x1270;
-const FLAG_PRIMEIRA_INSIGNIA = 0x867;
-const FLAG_PRIMEIRA_CIDADE = 0x86f;
+const FLAG_PRIMEIRA_CIDADE_E = 0x86f;
+
+export type Gen3Game = "emerald" | "frlg" | "rs";
+
+/**
+ * Onde cada jogo guarda o que difere entre eles.
+ *
+ * **Emerald e FR/LG foram medidos** em saves reais. O de FR/LG foi gerado para
+ * isto, jogando LeafGreen até pegar o Bulbasaur (jogador LG): contagem do time
+ * em 0x34 (=1) e registro em 0x38, com checksum válido, espécie 1, nível 5 e o
+ * OT igual ao TID/SID do treinador; chave de segurança em 0xAF8 (há cópia em
+ * 0xF20), e o dinheiro em 0x290 dando os 3000 do começo em duas gravações com
+ * chaves diferentes; flags a partir de 0xEE0, com 0x828 ("tem pokémon")
+ * ligada e as oito insígnias 0x820–0x827 logo antes dela.
+ *
+ * **Ruby/Sapphire não foram medidos** — não há ROM nem save aqui. O time fica
+ * no mesmo lugar do Emerald pela documentação, e ele se valida sozinho: cada
+ * registro tem checksum, então offset errado dá time vazio, não time inventado.
+ * Dinheiro e insígnias de RS não têm como se validar assim, e ficam `null`.
+ */
+interface Layout {
+  contagemDoTime: number;
+  /** `null` = não medido. */
+  dinheiro: { offset: number; chave: number | null } | null;
+  flags: number | null;
+  primeiraInsignia: number | null;
+  /** Cidades visitadas e mapa só foram medidos em Emerald. */
+  hoenn: boolean;
+}
+
+const LAYOUTS: Record<Gen3Game, Layout> = {
+  emerald: {
+    contagemDoTime: OFF_CONTAGEM_DO_TIME_RSE,
+    dinheiro: { offset: 0x490, chave: 0xac },
+    flags: 0x1270,
+    primeiraInsignia: 0x867,
+    hoenn: true,
+  },
+  frlg: {
+    contagemDoTime: 0x34,
+    dinheiro: { offset: 0x290, chave: 0xaf8 },
+    flags: 0xee0,
+    primeiraInsignia: 0x820,
+    hoenn: false,
+  },
+  rs: {
+    contagemDoTime: OFF_CONTAGEM_DO_TIME_RSE,
+    dinheiro: null,
+    flags: null,
+    primeiraInsignia: null,
+    hoenn: false,
+  },
+};
+
+/** 0 é Ruby/Sapphire, 1 é FR/LG; qualquer outro valor é a chave do Emerald. */
+function jogoDoCodigo(codigo: number): Gen3Game {
+  if (codigo === 0) return "rs";
+  if (codigo === 1) return "frlg";
+  return "emerald";
+}
 const INSIGNIAS = 8;
 const CIDADES = 16;
 
@@ -227,13 +283,14 @@ export interface Gen3Trainer {
   trainerId: number;
   secretId: number;
   playTime: { hours: number; minutes: number; seconds: number };
-  money: number;
-  /** As oito insígnias de Hoenn, na ordem dos ginásios. */
-  badges: boolean[];
-  /** Índices, na ordem das flags de cidade visitada, das já visitadas. */
-  visitedTowns: number[];
-  /** Grupo e número do mapa onde o jogo foi salvo. */
-  location: { group: number; num: number };
+  /** `null` onde não foi medido (Ruby/Sapphire). */
+  money: number | null;
+  /** As oito insígnias da região, na ordem dos ginásios. `null` = não medido. */
+  badges: boolean[] | null;
+  /** Índices das cidades de Hoenn visitadas. Só Emerald; `null` nos outros. */
+  visitedTowns: number[] | null;
+  /** Grupo e número do mapa onde o jogo foi salvo. Só Emerald. */
+  location: { group: number; num: number } | null;
 }
 
 export interface Gen3BoxMon {
@@ -265,11 +322,11 @@ export interface Gen3Pokedex {
 }
 
 export interface Gen3Save {
+  game: Gen3Game;
   playerName: string;
   party: Gen3PartyMember[];
   /** `null` quando os bits não passam na sanidade — ver `lerDex`. */
   pokedex: Gen3Pokedex | null;
-  /** `null` fora de Emerald: só ele foi medido. */
   trainer: Gen3Trainer | null;
   boxes: Gen3Storage | null;
 }
@@ -401,16 +458,28 @@ function lerTreinador(
   view: DataView,
   bytes: Uint8Array,
   secao0: number,
-  sb1: Uint8Array
-): Gen3Trainer | null {
-  const chave = view.getUint32(secao0 + OFF_CHAVE_DE_SEGURANCA, true);
-  if (chave === 0 || chave === 1) return null;
-
+  sb1: Uint8Array,
+  layout: Layout
+): Gen3Trainer {
   const vb1 = new DataView(sb1.buffer, sb1.byteOffset, sb1.byteLength);
-  const flag = (f: number) => ((sb1[OFF_FLAGS + (f >> 3)] ?? 0) >> (f & 7)) & 1;
-  const visitedTowns: number[] = [];
-  for (let i = 0; i < CIDADES; i++) if (flag(FLAG_PRIMEIRA_CIDADE + i)) visitedTowns.push(i);
+  const flag = (f: number) =>
+    layout.flags === null ? 0 : ((sb1[layout.flags + (f >> 3)] ?? 0) >> (f & 7)) & 1;
 
+  let money: number | null = null;
+  if (layout.dinheiro) {
+    const chave = layout.dinheiro.chave === null ? 0 : view.getUint32(secao0 + layout.dinheiro.chave, true);
+    const valor = (vb1.getUint32(layout.dinheiro.offset, true) ^ chave) >>> 0;
+    // O jogo nunca passa de 999.999; acima disso a leitura está errada.
+    money = valor <= 999_999 ? valor : null;
+  }
+
+  let visitedTowns: number[] | null = null;
+  if (layout.hoenn) {
+    visitedTowns = [];
+    for (let i = 0; i < CIDADES; i++) if (flag(FLAG_PRIMEIRA_CIDADE_E + i)) visitedTowns.push(i);
+  }
+
+  const primeira = layout.primeiraInsignia;
   return {
     gender: bytes[secao0 + OFF_GENERO] === 1 ? "female" : "male",
     trainerId: view.getUint16(secao0 + OFF_TID, true),
@@ -420,10 +489,10 @@ function lerTreinador(
       minutes: bytes[secao0 + OFF_MINUTOS] ?? 0,
       seconds: bytes[secao0 + OFF_SEGUNDOS] ?? 0,
     },
-    money: (vb1.getUint32(OFF_DINHEIRO, true) ^ chave) >>> 0,
-    badges: Array.from({ length: INSIGNIAS }, (_, i) => flag(FLAG_PRIMEIRA_INSIGNIA + i) === 1),
+    money,
+    badges: primeira === null ? null : Array.from({ length: INSIGNIAS }, (_, i) => flag(primeira + i) === 1),
     visitedTowns,
-    location: { group: sb1[OFF_MAPA] ?? 0, num: sb1[OFF_MAPA + 1] ?? 0 },
+    location: layout.hoenn ? { group: sb1[OFF_MAPA] ?? 0, num: sb1[OFF_MAPA + 1] ?? 0 } : null,
   };
 }
 
@@ -478,12 +547,14 @@ export function parseGen3Save(bytes: Uint8Array): Gen3Save | null {
   if (!sb1) return null;
   const vb1 = new DataView(sb1.buffer, sb1.byteOffset, sb1.byteLength);
 
-  const contagem = vb1.getUint32(OFF_CONTAGEM_DO_TIME, true);
+  const game = jogoDoCodigo(view.getUint32(secao0 + OFF_CODIGO_DO_JOGO, true));
+  const layout = LAYOUTS[game];
+  const contagem = vb1.getUint32(layout.contagemDoTime, true);
   if (contagem > MAX_NO_TIME) return null;
 
   const party: Gen3PartyMember[] = [];
   for (let slot = 0; slot < contagem; slot++) {
-    const off = OFF_PRIMEIRO_DO_TIME + slot * TAMANHO_DO_REGISTRO;
+    const off = layout.contagemDoTime + 4 + slot * TAMANHO_DO_REGISTRO;
     if (off + TAMANHO_DO_REGISTRO > sb1.length) break;
     const r = decifrarRegistro(sb1, off);
     if (!r) continue;
@@ -537,10 +608,11 @@ export function parseGen3Save(bytes: Uint8Array): Gen3Save | null {
   const pc = juntarSecoes(bytes, atual.secoes, SECOES_DO_PC);
 
   return {
+    game,
     playerName,
     party,
     pokedex: lerDex(bytes, secao0),
-    trainer: lerTreinador(view, bytes, secao0, sb1),
+    trainer: lerTreinador(view, bytes, secao0, sb1, layout),
     boxes: pc ? lerCaixas(pc) : null,
   };
 }

@@ -155,6 +155,8 @@ function montarSave(opts: {
   capturados?: number[];
   treinador?: Treinador;
   caixas?: Caixas;
+  /** Layout do jogo. Emerald é o padrão, que é o save real que mediu tudo. */
+  jogo?: "emerald" | "frlg" | "rs";
 }): Uint8Array {
   const rotacao = opts.rotacao ?? 4;
   const bytes = new Uint8Array(131072 + (opts.rodape ?? 0));
@@ -163,16 +165,28 @@ function montarSave(opts: {
   // --- SaveBlock1: contagem do time e os registros de 100 bytes
   const sb1 = new Uint8Array(4 * DADOS);
   const vb1 = new DataView(sb1.buffer);
-  vb1.setUint32(0x0234, opts.time.length, true);
+  // Medido: no Emerald o time fica em 0x234/0x238; no FR/LG, em 0x34/0x38.
+  const jogo = opts.jogo ?? "emerald";
+  const offTime = jogo === "frlg" ? 0x34 : 0x234;
+  vb1.setUint32(offTime, opts.time.length, true);
 
-  opts.time.forEach((m, slot) => escreverRegistro(sb1, 0x0238 + slot * 100, m, true));
+  opts.time.forEach((m, slot) => escreverRegistro(sb1, offTime + 4 + slot * 100, m, true));
 
   // --- treinador: dinheiro cifrado, flags e posição, tudo em SaveBlock1
   const t = { ...TREINADOR_PADRAO, ...opts.treinador };
-  vb1.setUint32(0x0490, (t.dinheiro ^ t.chave) >>> 0, true);
-  const flag = (f: number) => (sb1[0x1270 + (f >> 3)] |= 1 << (f & 7));
-  for (const i of t.insignias) flag(0x867 + i);
-  for (const i of t.visitadas) flag(0x86f + i);
+  if (jogo === "emerald") {
+    vb1.setUint32(0x0490, (t.dinheiro ^ t.chave) >>> 0, true);
+    const flag = (f: number) => (sb1[0x1270 + (f >> 3)] |= 1 << (f & 7));
+    for (const i of t.insignias) flag(0x867 + i);
+    for (const i of t.visitadas) flag(0x86f + i);
+  } else if (jogo === "frlg") {
+    // Medido no save real de LeafGreen: dinheiro em 0x290, flags a partir de 0xEE0.
+    vb1.setUint32(0x0290, (t.dinheiro ^ t.chave) >>> 0, true);
+    const flag = (f: number) => (sb1[0xee0 + (f >> 3)] |= 1 << (f & 7));
+    for (const i of t.insignias) flag(0x820 + i);
+  } else {
+    vb1.setUint32(0x0490, t.dinheiro, true);
+  }
   sb1[4] = t.mapa[0];
   sb1[5] = t.mapa[1];
 
@@ -204,7 +218,9 @@ function montarSave(opts: {
       view.setUint16(base + 0x0e, t.horas, true);
       bytes[base + 0x10] = t.minutos;
       bytes[base + 0x11] = t.segundos;
-      view.setUint32(base + 0xac, t.chave, true);
+      // 0xAC: 0 em Ruby/Sapphire, 1 em FR/LG, a chave de segurança no Emerald.
+      view.setUint32(base + 0xac, jogo === "emerald" ? t.chave : jogo === "frlg" ? 1 : 0, true);
+      if (jogo === "frlg") view.setUint32(base + 0xaf8, t.chave, true);
     }
     const indiceNoPc = id - 5;
     if (indiceNoPc >= 0) {
@@ -235,6 +251,9 @@ function montarSave(opts: {
 
   return bytes;
 }
+
+/** Bulbasaur: índice interno 1, igual ao nacional. O do save real de LeafGreen. */
+const BULBASAUR = { indice: 1, apelido: "BULBASAUR", nivel: 5, pv: 0x12345678, otid: 0x91f53b1b };
 
 /** Mudkip: índice interno 283, nacional 258. Foi o caso do save real. */
 const MUDKIP = { indice: 283, apelido: "MUDKIP", nivel: 5 };
@@ -505,18 +524,44 @@ describe("parseGen3Save", () => {
     expect(save?.trainer?.playTime.hours).toBe(123);
   });
 
+  // ---- os outros jogos de Gen 3
+
+  it("identifica o jogo pelo campo 0xAC", () => {
+    expect(parseGen3Save(montarSave({ nome: "ZE", time: [MUDKIP] }))?.game).toBe("emerald");
+    expect(parseGen3Save(montarSave({ nome: "LG", time: [BULBASAUR], jogo: "frlg" }))?.game).toBe("frlg");
+    expect(parseGen3Save(montarSave({ nome: "RS", time: [MUDKIP], jogo: "rs" }))?.game).toBe("rs");
+  });
+
   /**
-   * Só Emerald foi medido. Ruby e Sapphire guardam as flags em outro lugar e
-   * não cifram o dinheiro; o campo 0xAC deles vale 0 (e 1 em FR/LG).
+   * Medido num save real de LeafGreen gerado para isto (jogador LG, só um
+   * Bulbasaur): time em 0x34/0x38, chave em 0xAF8, dinheiro em 0x290 dando os
+   * 3000 do começo, insígnias em 0x820 logo antes da flag de "tem pokémon".
    */
-  it("não inventa ficha de treinador fora de Emerald", () => {
-    for (const chave of [0, 1]) {
-      const save = parseGen3Save(
-        montarSave({ nome: "ZE", time: [MUDKIP], treinador: { ...TREINADOR_PADRAO, chave } })
-      );
-      expect(save?.party).toHaveLength(1);
-      expect(save?.trainer).toBeNull();
-    }
+  it("lê o time e o treinador de FireRed/LeafGreen", () => {
+    const save = parseGen3Save(
+      montarSave({
+        nome: "LG",
+        jogo: "frlg",
+        time: [BULBASAUR],
+        treinador: { ...TREINADOR_PADRAO, chave: 0xf7322c2d, dinheiro: 3000, insignias: [0, 2] },
+      })
+    );
+    expect(save?.party).toMatchObject([{ slot: 0, national: 1, level: 5 }]);
+    expect(save?.trainer?.money).toBe(3000);
+    expect(save?.trainer?.badges).toEqual([true, false, true, false, false, false, false, false]);
+    // Cidades e mapa de Kanto não foram medidos: ficam de fora, não inventados.
+    expect(save?.trainer?.visitedTowns).toBeNull();
+    expect(save?.trainer?.location).toBeNull();
+  });
+
+  /** Ruby/Sapphire não foram medidos: só o que é comum aos três jogos. */
+  it("em Ruby/Sapphire lê time e treinador básico, sem dinheiro nem insígnias", () => {
+    const save = parseGen3Save(montarSave({ nome: "RS", jogo: "rs", time: [MUDKIP] }));
+    expect(save?.party[0]?.national).toBe(258);
+    expect(save?.trainer?.trainerId).toBe(45125);
+    expect(save?.trainer?.playTime.minutes).toBe(45);
+    expect(save?.trainer?.money).toBeNull();
+    expect(save?.trainer?.badges).toBeNull();
   });
 
   it("o time guarda o PV, que identifica o pokémon quando ele evolui", () => {

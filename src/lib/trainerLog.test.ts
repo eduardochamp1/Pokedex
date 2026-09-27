@@ -55,6 +55,7 @@ function save(over: Partial<{
 }> = {}): Gen3Save {
   const s = over.seconds ?? 45 * 60 + 50;
   return {
+    game: "emerald",
     playerName: "ZE",
     party: over.party ?? [membro(258, 8, 0x25b7b8b0, "MUDKIP")],
     pokedex: { seen: over.seen ?? [252, 258, 261], owned: over.owned ?? [258] },
@@ -73,6 +74,36 @@ function save(over: Partial<{
 }
 
 const snap = (o?: Parameters<typeof save>[0]) => snapshotOf(save(o), 1000) as Snapshot;
+
+describe("FireRed/LeafGreen", () => {
+  /** O save medido: LG, Bulbasaur nv 5, sem cidades nem mapa (só Emerald tem). */
+  const frlg = (badges = Array(8).fill(false)): Gen3Save => {
+    const s = save({ party: [membro(1, 5, 0x12345678, "BULBASAUR")], owned: [1], seen: [1], badges });
+    return { ...s, game: "frlg", trainer: s.trainer && { ...s.trainer, visitedTowns: null, location: null } };
+  };
+
+  it("registra com o jogo, sem cidades", () => {
+    recordTrainerSave("leafgreen.gba", frlg(), 1000);
+    const e = latestTrainerEntry();
+    expect(e?.game).toBe("frlg");
+    expect(e?.last.towns).toEqual([]);
+  });
+
+  it("insígnia vira evento; cidade nunca", () => {
+    recordTrainerSave("leafgreen.gba", frlg(), 1000);
+    recordTrainerSave("leafgreen.gba", frlg([true, false, false, false, false, false, false, false]), 2000);
+    const kinds = latestTrainerEntry()?.events.map((e) => e.kind);
+    expect(kinds).toEqual(["start", "badge"]);
+  });
+
+  it("Ruby/Sapphire sem insígnias não inventa evento", () => {
+    const s = save();
+    const rs: Gen3Save = { ...s, game: "rs", trainer: s.trainer && { ...s.trainer, money: null, badges: null, visitedTowns: null, location: null } };
+    recordTrainerSave("ruby.gba", rs, 1000);
+    recordTrainerSave("ruby.gba", { ...rs, pokedex: { seen: [258], owned: [258] } }, 2000);
+    expect(latestTrainerEntry()?.events.map((e) => e.kind)).toEqual(["start"]);
+  });
+});
 
 describe("diffSnapshots", () => {
   it("nada mudou, nenhum evento", () => {

@@ -7,7 +7,8 @@ import {
   formatPlayTime,
   formatTrainerId,
 } from "../lib/trainerText";
-import { HOENN_BADGES, HOENN_TOWNS, hoennLocationName } from "../data/hoenn";
+import { HOENN_TOWNS, hoennLocationName } from "../data/hoenn";
+import { badgesOf, gameLabel, regionOfGame } from "../lib/gen3Game";
 import { usePokemonIndex } from "../hooks/usePokemon";
 import PokemonMini from "../components/PokemonMini";
 import { pokemonLabel } from "../lib/pokemonLabel";
@@ -16,8 +17,8 @@ import "../styles/trainer.css";
 import { localeOf, useLang, tr } from "../i18n/lang";
 
 /**
- * A ficha do treinador e a linha do tempo da partida, lidas do save de
- * Emerald e guardadas por `trainerLog`. Não carrega o emulador: a página vive
+ * A ficha do treinador e a linha do tempo da partida, lidas do save de um
+ * jogo da 3ª geração e guardadas por `trainerLog`. Não carrega o emulador: a página vive
  * do que o `/jogar` gravou da última vez que leu o save.
  */
 const TrainerPage = () => {
@@ -48,19 +49,21 @@ const TrainerPage = () => {
           <h1>{tx("Treinador", "Trainer")}</h1>
         </header>
         <p className="trainer-vazio">
-          {tx("Ainda não há ficha. Ela nasce do save de um jogo de", "No card yet. It comes from the save of a")}{" "}
-          <strong>Pokémon Emerald</strong>{" "}
-          {tx("aberto em", "game opened in")} <Link to="/jogar">{tx("Jogar", "Play")}</Link> —{" "}
-          {tx("o único que foi medido até aqui.", "the only one measured so far.")}
+          {tx("Ainda não há ficha. Ela nasce do save de", "No card yet. It comes from the save of")}{" "}
+          <strong>Emerald</strong>, <strong>FireRed/LeafGreen</strong>{" "}
+          {tx("ou", "or")} <strong>Ruby/Sapphire</strong>{" "}
+          {tx("aberto em", "opened in")} <Link to="/jogar">{tx("Jogar", "Play")}</Link>.
         </p>
       </div>
     );
   }
 
   const t = entry.trainer;
+  const game = entry.game ?? "emerald";
+  const regiao = regionOfGame(game);
   const segundos = t.playTime.hours * 3600 + t.playTime.minutes * 60 + t.playTime.seconds;
-  const insignias = t.badges.filter(Boolean).length;
-  const lugar = hoennLocationName(t.location.group, t.location.num);
+  const insignias = t.badges?.filter(Boolean).length;
+  const lugar = t.location ? hoennLocationName(t.location.group, t.location.num) : undefined;
   const noPc = entry.boxes.reduce((n, c) => n + c.pokemon.length, 0);
   const eventos = [...entry.events].reverse();
 
@@ -69,7 +72,7 @@ const TrainerPage = () => {
       <header className="trainer-header">
         <h1>{tx("Treinador", "Trainer")}</h1>
         <span className="trainer-rom">
-          <Link to="/jogar">{entry.rom.replace(/\.[^.]+$/, "")}</Link>
+          <Link to="/jogar">{entry.rom.replace(/\.[^.]+$/, "")}</Link> · {gameLabel(game)}
         </span>
       </header>
 
@@ -92,10 +95,12 @@ const TrainerPage = () => {
             <dt>{tx("Tempo", "Time")}</dt>
             <dd>{formatPlayTime(segundos)}</dd>
           </div>
-          <div>
-            <dt>{tx("Dinheiro", "Money")}</dt>
-            <dd>{formatMoney(t.money)}</dd>
-          </div>
+          {t.money !== null && (
+            <div>
+              <dt>{tx("Dinheiro", "Money")}</dt>
+              <dd>{formatMoney(t.money)}</dd>
+            </div>
+          )}
           <div>
             <dt>Pokédex</dt>
             <dd>
@@ -103,10 +108,12 @@ const TrainerPage = () => {
               <span className="trainer-de"> / {TOTAL_DA_DEX_GEN3}</span>
             </dd>
           </div>
-          <div>
-            <dt>{tx("Insígnias", "Badges")}</dt>
-            <dd>{insignias} / 8</dd>
-          </div>
+          {insignias !== undefined && (
+            <div>
+              <dt>{tx("Insígnias", "Badges")}</dt>
+              <dd>{insignias} / 8</dd>
+            </div>
+          )}
           {lugar && (
             <div>
               <dt>{tx("Salvo em", "Saved at")}</dt>
@@ -116,14 +123,24 @@ const TrainerPage = () => {
         </dl>
       </section>
 
+      {game === "rs" && (
+        <p className="trainer-sub">
+          {tx(
+            "Em Ruby/Sapphire o site lê time, Pokédex, PC e tempo de jogo; dinheiro e insígnias ficam de fora — não houve save desses jogos para medir onde eles ficam.",
+            "In Ruby/Sapphire the site reads team, Pokédex, PC and play time; money and badges are left out — there was no save of those games to measure where they live."
+          )}
+        </p>
+      )}
+
       <div className="trainer-grade">
+        {t.badges && (
         <section>
           <h2>{tx("Insígnias", "Badges")}</h2>
           <ol className="trainer-insignias">
-            {HOENN_BADGES.map((b, i) => (
-              <li key={b.name} className={t.badges[i] ? "tem" : undefined}>
+            {badgesOf(game).map((b, i) => (
+              <li key={b.name} className={t.badges?.[i] ? "tem" : undefined}>
                 <span className="trainer-insignia-marca" aria-hidden="true">
-                  {t.badges[i] ? "◆" : "◇"}
+                  {t.badges?.[i] ? "◆" : "◇"}
                 </span>
                 <span>
                   <strong>{b.name}</strong>
@@ -132,20 +149,22 @@ const TrainerPage = () => {
                   </span>
                 </span>
                 <span className="visually-hidden">
-                  {t.badges[i] ? tx("conquistada", "earned") : tx("ainda não", "not yet")}
+                  {t.badges?.[i] ? tx("conquistada", "earned") : tx("ainda não", "not yet")}
                 </span>
               </li>
             ))}
           </ol>
         </section>
+        )}
 
+        {t.visitedTowns ? (
         <section>
           <h2>
             {tx("Cidades", "Towns")} <span className="trainer-de">{t.visitedTowns.length} / 16</span>
           </h2>
           <ul className="trainer-cidades">
             {HOENN_TOWNS.map((nome, i) => {
-              const foi = t.visitedTowns.includes(i);
+              const foi = t.visitedTowns?.includes(i);
               return (
                 <li key={nome} className={foi ? "foi" : undefined}>
                   {nome}
@@ -160,6 +179,13 @@ const TrainerPage = () => {
             <Link to="/mapa?region=hoenn">{tx("Ver Hoenn no mapa →", "See Hoenn on the map →")}</Link>
           </p>
         </section>
+        ) : (
+          <p className="trainer-sub">
+            <Link to={`/mapa?region=${regiao}`}>
+              {regiao === "kanto" ? tx("Ver Kanto no mapa →", "See Kanto on the map →") : tx("Ver Hoenn no mapa →", "See Hoenn on the map →")}
+            </Link>
+          </p>
+        )}
       </div>
 
       <section>
@@ -218,7 +244,7 @@ const TrainerPage = () => {
           {eventos.map((e, i) => (
             <li key={`${e.at}-${i}`} className={`trainer-evento trainer-evento-${e.kind}`}>
               <span className="trainer-evento-tempo">{formatPlayTime(e.playSeconds)}</span>
-              <span className="trainer-evento-texto">{describeEvent(e, nameOf)}</span>
+              <span className="trainer-evento-texto">{describeEvent(e, nameOf, lang, game)}</span>
               <time className="trainer-evento-data" dateTime={new Date(e.at).toISOString()}>
                 {new Date(e.at).toLocaleString(localeOf(lang), {
                   day: "2-digit",

@@ -34,7 +34,7 @@ Uma Pokédex web completa em **React + TypeScript + Vite**, consumindo a [PokéA
 - **Link para o mapa** — resolve a região de origem pela lista de emblemáticos ou pela geração da espécie
 - **Onde encontrar** — rotas, método, nível e chance jogo a jogo, de
   `/pokemon/{id}/encounters`, com os slots de cada área somados numa linha. Abre
-  no Emerald quando o save diz que é o seu jogo
+  no jogo do seu save (Emerald, FireRed, LeafGreen, Ruby ou Sapphire)
 - **Chance de captura** — as oito bolas com as regras de Gen 3, em aritmética
   inteira como em pokeemerald (taxa 45 com HP cheio dá os 6,25% clássicos). A
   Repeat Ball olha a sua dex
@@ -46,7 +46,7 @@ Uma Pokédex web completa em **React + TypeScript + Vite**, consumindo a [PokéA
 
 ### Time (`/time`)
 - **Até seis pokémon**, guardados na URL (`?time=mudkip,torchic`) — o link
-  leva o time junto; importa o time do save de Emerald com um clique
+  leva o time junto; importa o time do save com um clique
 - **Defesa** — quanto cada tipo de golpe causa em cada membro, com as linhas de
   perigo marcadas (dois ou mais fracos, e mais fracos do que quem resiste)
 - **Ataque** — que tipos o time acerta 2×, contando os tipos de cada membro
@@ -215,12 +215,21 @@ sprites já são locais; o artwork da PokéAPI e a folha do Google Fonts levam
 
 ### Treinador (`/treinador`)
 A ficha do treinador e a linha do tempo da partida, lidas do save de
-**Emerald** em `/jogar` e guardadas no `localStorage` — a página não carrega
-o emulador.
+**Emerald**, **FireRed/LeafGreen** ou **Ruby/Sapphire** em `/jogar` e
+guardadas no `localStorage` — a página não carrega o emulador.
+
+O leitor tem um layout por jogo, identificado pelo campo `0xAC` da seção 0
+(0 = R/S, 1 = FR/LG, chave de segurança = Emerald). Emerald e FR/LG foram
+medidos em saves reais — o de LeafGreen gerado jogando até o Bulbasaur: time
+em `0x34`, dinheiro em `0x290` com a chave em `0xAF8`, insígnias a partir da
+flag `0x820` sobre a base `0xEE0`. Ruby/Sapphire não tiveram save para medir:
+leem time, Pokédex, PC e tempo de jogo, sem dinheiro nem insígnias.
+
 
 - **Cartão** — nome, ID, tempo de jogo, dinheiro, Pokédex, insígnias e onde o
   jogo foi salvo
-- **Insígnias e cidades de Hoenn**, time e as **14 caixas do PC**
+- **Insígnias** de Hoenn ou de Kanto conforme o jogo, **cidades de Hoenn**
+  (só Emerald), time e as **14 caixas do PC**
 - **Linha do tempo** — `saves/` guarda um backup sobrescrito, sem histórico.
   Então a cada leitura do save o site compara com o anterior e registra o que
   mudou: capturas, insígnias, cidades, níveis e evoluções (pelo PV, que não
