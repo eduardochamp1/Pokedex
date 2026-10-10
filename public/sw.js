@@ -119,6 +119,11 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
 
+  // Pastas locais de dev/preview (ROMs e saves do disco): nunca pelo cache. Um
+  // save devolvido do cache é o progresso de antes da última gravação, e uma
+  // ROM de 32 MB não tem por que ser duplicada aqui.
+  if (url.origin === self.location.origin && url.pathname.startsWith("/local-")) return;
+
   // Navegação: é uma SPA, então qualquer rota resolve para o mesmo HTML. Rede
   // primeiro, para pegar um deploy novo; o HTML do cache quando não há rede.
   if (request.mode === "navigate") {

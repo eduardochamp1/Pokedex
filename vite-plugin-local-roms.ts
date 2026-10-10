@@ -2,6 +2,8 @@ import {
   mkdir,
   readdir,
   readFile,
+  rename,
+  rm,
   stat,
   writeFile,
 } from "node:fs/promises";
@@ -217,9 +219,17 @@ function middleware(root: string): Connect.NextHandleFunction {
           }
           try {
             await mkdir(savesDir, { recursive: true });
-            // Grava em temporario e renomeia por cima seria o ideal; aqui o
-            // writeFile direto basta e mantem o codigo simples.
-            await writeFile(target, body);
+            // Temporario + rename: se o processo cair no meio da gravacao,
+            // o save anterior continua inteiro em vez de ficar truncado.
+            // O sufixo .tmp nao casa com SAVE_EXT, entao nao aparece na lista.
+            const temp = `${target}.tmp`;
+            try {
+              await writeFile(temp, body);
+              await rename(temp, target);
+            } catch (error) {
+              await rm(temp, { force: true });
+              throw error;
+            }
             json(res, { ok: true, fileName: name, size: body.length });
           } catch (error) {
             res.statusCode = 500;
