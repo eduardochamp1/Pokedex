@@ -36,7 +36,7 @@ export async function requestPersistence(): Promise<StorageStatus> {
   const storage = navigator.storage;
   if (!storage?.estimate) return { persistent: false, supported: false };
 
-  let persistent = false;
+  let persistent: boolean;
   try {
     persistent = (await storage.persisted?.()) ?? false;
     if (!persistent && storage.persist) {

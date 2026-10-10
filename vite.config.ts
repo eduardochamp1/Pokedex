@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { localRoms } from "./vite-plugin-local-roms";
-import { serviceWorkerPrecache } from "./vite-plugin-sw";
+import { localRoms } from "./vite-plugin-local-roms.ts";
+import { serviceWorkerPrecache } from "./vite-plugin-sw.ts";
 
 /**
  * O core do emulador (mGBA compilado para wasm) usa threads, e threads exigem

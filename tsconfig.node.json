@@ -11,6 +11,7 @@
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "emitDeclarationOnly": true,
+    "allowImportingTsExtensions": true,
     "declaration": true,
     "outDir": "./.tsbuild-node",
     "types": [

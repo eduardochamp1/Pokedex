@@ -9,7 +9,7 @@ interface Options {
 let activeRaf = 0;
 
 export function useTiltEffect(
-  ref: RefObject<HTMLElement>,
+  ref: RefObject<HTMLElement | null>,
   options: Options = {}
 ) {
   const { maxDeg = 8, scale = 1 } = options;

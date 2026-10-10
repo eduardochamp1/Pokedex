@@ -18,7 +18,11 @@ export default tseslint.config(
       "react-refresh": reactRefresh,
     },
     rules: {
-      ...reactHooks.configs.recommended.rules,
+      // So as duas regras classicas. O `recommended` do plugin v7 liga tambem
+      // as regras do React Compiler (refs, set-state-in-effect...), e o projeto
+      // nao usa o compilador.
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
       "react-refresh/only-export-components": [
         "warn",
         { allowConstantExport: true },

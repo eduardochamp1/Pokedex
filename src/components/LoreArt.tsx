@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { REGION_SHAPES } from "../data/regionMap";
 
 /* ============ Villain emblems ============ */
@@ -257,8 +258,8 @@ export const DimensionPortal = ({ dimId, color, spriteUrl }: DimensionProps) => 
 };
 
 interface Scene {
-  back: JSX.Element;
-  front?: JSX.Element;
+  back: ReactElement;
+  front?: ReactElement;
 }
 
 function dimensionScene(id: string, color: string): Scene {

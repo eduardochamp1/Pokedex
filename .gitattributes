@@ -1,0 +1,8 @@
+* text=auto eol=lf
+*.png binary
+*.ico binary
+*.gba binary
+*.gbc binary
+*.gb binary
+*.sav binary
+*.wasm binary
