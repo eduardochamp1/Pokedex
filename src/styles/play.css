@@ -366,6 +366,17 @@
   text-align: right;
 }
 
+/* Enquanto o turbo está segurado a barra não manda: ela some de foco em vez
+   de sumir da tela, para não deslocar a fileira de controles. */
+.play-speed input:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.play-speed span.is-overridden {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
 /* Gamepad virtual */
 .play-gamepad {
   display: grid;
@@ -741,8 +752,13 @@
   .play-gamepad {
     max-width: none;
   }
+  /* Volume e velocidade ficam: no toque não existe outro caminho para eles.
+     Cada um ocupa a linha inteira, que é o que cabe no dedo. */
   .play-slider {
-    display: none;
+    flex: 1 1 100%;
+  }
+  .play-slider input {
+    flex: 1;
   }
   /* No celular a moldura ocupava 68vh e empurrava o gamepad para fora da
      dobra: dava para ver o jogo ou tocar nos botoes, nunca as duas coisas.
@@ -1227,4 +1243,36 @@
   background: var(--accent);
   color: var(--accent-ink);
   font-weight: 700;
+}
+
+/* A ROM em execução não sai da biblioteca: o ✕ fica visível, mas apagado. */
+.play-rom-remove:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ========= Toque ========= */
+/* O turbo por botão só existe onde não há teclado para segurar o Espaço. */
+.play-turbo-btn {
+  display: none;
+}
+@media (hover: none) and (pointer: coarse) {
+  .play-turbo-btn {
+    display: inline-flex;
+  }
+  /* A dica ensina um atalho de teclado; no toque quem responde é o botão. */
+  .play-turbo:not(.is-on) {
+    display: none;
+  }
+  /* Tela cheia esconde o gamepad virtual junto com a página: no celular o
+     jogo ficaria sem controle nenhum. */
+  .play-fs-btn {
+    display: none;
+  }
+  /* A régua de 44 px do projeto, que os botões do palco e dos slots furavam. */
+  .play-controls button,
+  .play-sidebar button {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }

@@ -50,8 +50,10 @@ import { useKeyBindings } from "./useKeyBindings";
 
 import {
   forgetLastRom,
+  getFastForward,
   getLastRom,
   getVolume,
+  rememberFastForward,
   rememberLastRom,
   rememberVolume,
 } from "./session";
@@ -258,36 +260,37 @@ function baseDe(
  * `SETIMMEDIATE` a abertura do jogo chega exatamente no mesmo ponto em 4 s.
  * Era ele que produzia as arrancadas aleatórias em velocidade normal.
  *
- * `timestepSync` fica como a pessoa deixou na tela de A/V. Desligá-lo no turbo
- * não acelerava e fazia o core mirar 300 quadros por segundo e falhar — daí a
- * sensação de "mais pesado e não acelera".
+ * `timestepSync` não aparece mais aqui, e nem na tela de A/V: ele é constante,
+ * vem de `MGBA_CORE_SETTINGS` e ninguém o desliga. Desligá-lo no turbo não
+ * acelerava e fazia o core mirar 300 quadros por segundo e falhar; desligá-lo
+ * em velocidade normal punha o jogo inteiro a 6,8×. Ver `AvSettings`.
  */
 function aplicarVelocidade(
   core: mGBAEmulator | null | undefined,
+  multiplicador: number,
   turbo: boolean,
-  prefs: { audioSync: boolean; timestepSync: boolean },
+  prefs: { audioSync: boolean },
   volumeAntes: { current: number | null }
 ): void {
   if (!core) return;
 
-  core.setFastForwardMultiplier(turbo ? TURBO_MULTIPLIER : 1);
+  core.setFastForwardMultiplier(turbo ? TURBO_MULTIPLIER : multiplicador);
 
   if (turbo) {
     if (volumeAntes.current === null) {
       const atual = core.getVolume();
       volumeAntes.current = typeof atual === "number" ? atual : null;
     }
-    // Mudo enquanto acelera, como o `muteOnFastForward` do gbajs3 e como o
-    // mGBA de mesa: o resampler acelerado vira chiado.
+    // Mudo só no turbo, que é um impulso de segundos: o resampler a 10× vira
+    // chiado. A barra não muta — quem escolhe 2× para avançar um trecho longo
+    // provavelmente ainda quer ouvir o jogo, e o mGBA de mesa concorda
+    // (`fastForwardMute=0` no config.ini).
     core.setVolume(0);
     return;
   }
 
   // Fora da aceleração, a tela de A/V manda de novo.
-  core.setCoreSettings({
-    timestepSync: prefs.timestepSync,
-    audioSync: prefs.audioSync,
-  });
+  core.setCoreSettings({ audioSync: prefs.audioSync });
   if (volumeAntes.current !== null) {
     core.setVolume(volumeAntes.current);
     volumeAntes.current = null;
@@ -359,28 +362,33 @@ export function useEmulator() {
   const [rewinding, setRewinding_] = useState(false);
   /** Turbo segurado neste instante — a barra de velocidade mostra isso. */
   const [turboActive, setTurboActive] = useState(false);
+  /** Velocidade escolhida na barra. Preferência gravada, sobrevive ao F5. */
+  const [fastForward, setFastForwardState] = useState(getFastForward);
+  /**
+   * A velocidade da barra lida por ref.
+   *
+   * `setTurbo` precisa dela para saber ao que voltar quando a tecla é solta, e
+   * é `useCallback` com lista vazia de propósito: a PlayPage o tem nas
+   * dependências do efeito de atalhos E o chama na limpeza, então uma
+   * identidade instável faria o React rodar a limpeza antiga e desfazer a
+   * escolha nova. Pela ref, a função é estável e lê sempre o valor atual.
+   */
+  const fastForwardRef = useRef(fastForward);
+  fastForwardRef.current = fastForward;
   /** Sincronia de áudio/vídeo, contador de FPS e o log do core. */
   const diagnostics = useDiagnostics(coreRef);
   const attachDiagnostics = diagnostics.attach;
   /** Volume de fora do turbo, guardado enquanto o turbo silencia o core. */
   const volumeAntesRef = useRef<number | null>(null);
   /**
-   * As preferências de A/V que o turbo pisa e precisa devolver, lidas por ref.
+   * A preferência de A/V que o turbo pisa e precisa devolver, lida por ref.
    *
-   * São duas: `timestepSync`, que o turbo desliga para o multiplicador ter o
-   * que multiplicar, e `audioSync`. `aplicarVelocidade` restaura as duas ao
-   * soltar, e os callbacks que a chamam são estáveis (`useCallback` com lista
-   * vazia) de propósito — pela ref eles leem sempre o valor atual sem serem
-   * remontados.
+   * Só `audioSync`: `aplicarVelocidade` a reafirma ao soltar o turbo, e os
+   * callbacks que a chamam são estáveis (`useCallback` com lista vazia) de
+   * propósito — pela ref eles leem sempre o valor atual sem serem remontados.
    */
-  const prefsRef = useRef({
-    audioSync: diagnostics.av.audioSync,
-    timestepSync: diagnostics.av.timestepSync,
-  });
-  prefsRef.current = {
-    audioSync: diagnostics.av.audioSync,
-    timestepSync: diagnostics.av.timestepSync,
-  };
+  const prefsRef = useRef({ audioSync: diagnostics.av.audioSync });
+  prefsRef.current = { audioSync: diagnostics.av.audioSync };
   /**
    * O callback do core e registrado uma vez na inicializacao; a ref evita
    * recriar aquele efeito so porque o backup mudou de identidade.
@@ -750,7 +758,13 @@ export function useEmulator() {
       }
       // Volume E velocidade: a barra guardava 5x e o jogo novo entrava em 1x.
       core.setVolume(volume / 100);
-      aplicarVelocidade(core, false, prefsRef.current, volumeAntesRef);
+      aplicarVelocidade(
+        core,
+        fastForwardRef.current,
+        false,
+        prefsRef.current,
+        volumeAntesRef
+      );
       rememberLastRom(flatName);
       setLoadedRom(flatName);
       setStatus({ kind: "running", rom: flatName });
@@ -774,7 +788,13 @@ export function useEmulator() {
       }
       // Volume E velocidade: a barra guardava 5x e o jogo novo entrava em 1x.
       core.setVolume(volume / 100);
-      aplicarVelocidade(core, false, prefsRef.current, volumeAntesRef);
+      aplicarVelocidade(
+        core,
+        fastForwardRef.current,
+        false,
+        prefsRef.current,
+        volumeAntesRef
+      );
       rememberLastRom(fileName);
       setLoadedRom(fileName);
       setStatus({ kind: "running", rom: fileName });
@@ -806,7 +826,13 @@ export function useEmulator() {
         return;
       }
       core.setVolume(volume / 100);
-      aplicarVelocidade(core, false, prefsRef.current, volumeAntesRef);
+      aplicarVelocidade(
+        core,
+        fastForwardRef.current,
+        false,
+        prefsRef.current,
+        volumeAntesRef
+      );
       setLoadedRom(fileName);
       setRomId(identifyRom(lerCabecalho(core, fileName)));
 
@@ -1086,19 +1112,42 @@ export function useEmulator() {
   }, []);
 
   /**
+   * A velocidade da barra.
+   *
+   * Gravada: é escolha de quem joga, não estado do jogo. O turbo não passa por
+   * aqui — ele é um impulso por cima desta escolha e volta para ela ao soltar.
+   */
+  const setFastForward = useCallback((multiplicador: number) => {
+    setFastForwardState(multiplicador);
+    rememberFastForward(multiplicador);
+    aplicarVelocidade(
+      coreRef.current,
+      multiplicador,
+      false,
+      prefsRef.current,
+      volumeAntesRef
+    );
+  }, []);
+
+  /**
    * Turbo momentâneo, enquanto a tecla estiver segurada.
    *
-   * É o modelo do mGBA de mesa, e o único que ele oferece: velocidade normal,
-   * ou segurar a tecla para acelerar sem teto. Não há régua de velocidade lá,
-   * e não há mais aqui — a que existia mentia, porque o core não honra o
-   * multiplicador (medido: pedir 5× e pedir metade dão 1× igual).
+   * Vai direto ao core sem passar por `setFastForward`: a barra é preferência
+   * gravada, e um impulso de segundos não pode sobrescrevê-la. Ao soltar,
+   * volta para o que a barra diz — daí o `fastForwardRef`.
    *
    * Estável de propósito: a PlayPage tem este `setTurbo` nas dependências do
    * efeito de atalhos E o chama na limpeza. Com identidade variável, o React
    * rodava a limpeza antiga e desligava o turbo logo depois de ligá-lo.
    */
   const setTurbo = useCallback((active: boolean) => {
-    aplicarVelocidade(coreRef.current, active, prefsRef.current, volumeAntesRef);
+    aplicarVelocidade(
+      coreRef.current,
+      fastForwardRef.current,
+      active,
+      prefsRef.current,
+      volumeAntesRef
+    );
     setTurboActive(active);
   }, []);
 
@@ -1228,7 +1277,7 @@ export function useEmulator() {
       setTeamLido(false);
       return;
     }
-    let bytes: Uint8Array | null = null;
+    let bytes: Uint8Array | null;
     try {
       bytes = core.getSave();
     } catch {
@@ -1447,6 +1496,8 @@ export function useEmulator() {
     /** Estável: o loop do gamepad não pode ser recriado a cada render. */
     gamepadApi,
     rewinding,
+    fastForward,
+    setFastForward,
     turboActive,
     av: diagnostics.av,
     setAv: diagnostics.setAv,

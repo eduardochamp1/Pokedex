@@ -11,7 +11,14 @@ import {
 import { sdlKeyFromEvent } from "../emulator/keyNames";
 import { padLabel } from "../emulator/announce";
 import PlayAnnouncer from "../components/PlayAnnouncer";
-import { SHORTCUT_HELP, isTypingTarget, shortcutFor } from "../emulator/shortcuts";
+import {
+  SHORTCUT_HELP,
+  TURBO_MULTIPLIER,
+  VELOCIDADE_MAX,
+  VELOCIDADE_MIN,
+  isTypingTarget,
+  shortcutFor,
+} from "../emulator/shortcuts";
 import {
   AV_TOGGLES,
   formatLogLine,
@@ -33,7 +40,7 @@ import { useDisplay } from "../emulator/useDisplay";
 import { formatBytes } from "../emulator/storage";
 import ScreenshotThumb from "../components/ScreenshotThumb";
 import PlayTeam from "../components/PlayTeam";
-import { localeOf, useLang, tr } from "../i18n/lang";
+import { localeOf, useLang, tr, type Lang } from "../i18n/lang";
 import { generationLabel } from "../i18n/common";
 
 const GROUPS: KeyBinding["group"][] = [
@@ -62,10 +69,10 @@ function romano(geracao: number): string {
  * estiver mapeada para um botao do jogo — senao a tecla teria dois donos.
  * Ver `shortcutFor` em shortcuts.ts.
  */
-function teclaDoTurbo(bindings: KeyBinding[]): string {
+function teclaDoTurbo(bindings: KeyBinding[], lang: Lang): string {
   return bindings.some((b) => b.sdlKey === "Space")
-    ? "a tecla de turbo (hoje ocupada pelo jogo)"
-    : "Espaço";
+    ? tr(lang, "a tecla de turbo (hoje ocupada pelo jogo)", "the turbo key (taken by the game right now)")
+    : tr(lang, "Espaço", "Space");
 }
 
 /** Nome da regiao como o resto do site a escreve. */
@@ -86,9 +93,13 @@ const PlayPage = () => {
   // que vira o elemento de tela cheia e que define o espaço disponível.
   const screenRef = useRef<HTMLDivElement>(null);
   const display = useDisplay(screenRef, emu.canvas, emu.notify);
-  // A idade dos slots é relativa a este instante. Sem timer próprio: o painel
-  // já re-renderiza a cada captura automática (30 s) e a cada ação de estado.
-  const now = Date.now();
+  // A idade dos slots é relativa a este instante. Com timer próprio: pausado,
+  // nada mais re-renderiza a página, e "há 2 min" ficava parado para sempre.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 30_000);
+    return () => window.clearInterval(id);
+  }, []);
 
   /**
    * `?jogo=<versionGroupId>` — de onde a ficha e a lore apontam para ca.
@@ -116,7 +127,8 @@ const PlayPage = () => {
   const gamepadName = useGamepad(emu.gamepadApi, playing);
   // Avulsas para o efeito dos atalhos: cada uma é estável por si, ao contrário
   // do objeto `emu`, que é novo a cada render.
-  const { bindings, setTurbo, saveState, loadState } = emu;
+  const { bindings, setTurbo, setRewinding, saveState, loadState } = emu;
+  const { setInputEnabled, notify, rebindKey } = emu;
 
   // Enquanto captura, o core não pode receber o teclado: a tecla que está
   // sendo escolhida iria para o jogo junto. `toggleInput(false)` desliga a
@@ -124,9 +136,15 @@ const PlayPage = () => {
   // chegue aos handlers que o SDL registrou.
   useEffect(() => {
     if (!capturing) return;
-    emu.setInputEnabled(false);
+    setInputEnabled(false);
 
     const onKey = (e: KeyboardEvent) => {
+      // Tab sai da captura e segue o caminho normal: sem isto o foco ficava
+      // preso aqui e a ação acabava vinculada à própria tecla Tab.
+      if (e.key === "Tab") {
+        setCapturing(null);
+        return;
+      }
       e.preventDefault();
       e.stopImmediatePropagation();
       if (e.key === "Escape") {
@@ -136,23 +154,25 @@ const PlayPage = () => {
       const sdlKey = sdlKeyFromEvent(e);
       if (!sdlKey) {
         const shown = e.key || e.code;
-        emu.notify(
+        notify(
           shown
-            ? `"${shown}" não serve como tecla de jogo. Escolha outra.`
-            : "Não deu para identificar essa tecla. Escolha outra."
+            ? tr(lang, `"${shown}" não serve como tecla de jogo. Escolha outra.`, `"${shown}" can't be used as a game key. Pick another.`)
+            : tr(lang, "Não deu para identificar essa tecla. Escolha outra.", "Couldn't identify that key. Pick another.")
         );
         return;
       }
-      emu.rebindKey(capturing, sdlKey);
+      rebindKey(capturing, sdlKey);
       setCapturing(null);
     };
 
     window.addEventListener("keydown", onKey, { capture: true });
     return () => {
       window.removeEventListener("keydown", onKey, { capture: true });
-      emu.setInputEnabled(true);
+      setInputEnabled(true);
     };
-  }, [capturing, emu]);
+    // Funções avulsas, e não o objeto `emu`: ele é novo a cada render, e com
+    // ele na lista o efeito religava e desligava a entrada do core toda vez.
+  }, [capturing, lang, setInputEnabled, notify, rebindKey]);
 
   /**
    * Põe o foco no palco do emulador.
@@ -189,13 +209,27 @@ const PlayPage = () => {
         if (!e.repeat) setTurbo(true);
         return;
       }
+      if (shortcut.kind === "rewind") {
+        if (!e.repeat) setRewinding(true);
+        return;
+      }
       const slot = shortcut.slot as SaveStateSlot;
       if (shortcut.kind === "save") void saveState(slot);
       else loadState(slot);
     };
 
     const onKeyUp = (e: KeyboardEvent) => {
-      if (shortcutFor(e, boundKeys)?.kind === "turbo") setTurbo(false);
+      const kind = shortcutFor(e, boundKeys)?.kind;
+      if (kind === "turbo") setTurbo(false);
+      else if (kind === "rewind") setRewinding(false);
+    };
+
+    // Tecla solta com a janela sem foco (Alt+Tab no meio do turbo) nunca gera
+    // keyup aqui: sem isto o jogo ficava acelerado, ou rebobinando, até alguém
+    // apertar e soltar a tecla de novo.
+    const soltarTudo = () => {
+      setTurbo(false);
+      setRewinding(false);
     };
 
     // Fase de **captura**, e na janela: assim estes dois rodam antes de
@@ -207,16 +241,36 @@ const PlayPage = () => {
     // impede que o Espaço acione um botão focado.
     window.addEventListener("keydown", onKeyDown, { capture: true });
     window.addEventListener("keyup", onKeyUp, { capture: true });
+    window.addEventListener("blur", soltarTudo);
     return () => {
       window.removeEventListener("keydown", onKeyDown, { capture: true });
       window.removeEventListener("keyup", onKeyUp, { capture: true });
-      // Soltar a tecla fora da janela deixaria o turbo preso para sempre.
-      setTurbo(false);
+      window.removeEventListener("blur", soltarTudo);
+      soltarTudo();
     };
     // Dependências avulsas, e não o objeto `emu`: ele é recriado a cada render,
     // e com ele na lista a limpeza rodava toda renderização — o turbo ligava e
     // era desligado no mesmo instante pelo próprio efeito.
-  }, [playing, capturing, bindings, setTurbo, saveState, loadState]);
+  }, [playing, capturing, bindings, setTurbo, setRewinding, saveState, loadState]);
+
+  /**
+   * Arquivo solto fora da moldura.
+   *
+   * Sem isto o navegador trata o arquivo como navegação: abre a ROM como se
+   * fosse uma página e a sessão do jogo morre. A moldura continua sendo o
+   * único alvo que carrega; o resto da página só recusa.
+   */
+  useEffect(() => {
+    const recusar = (e: globalThis.DragEvent) => {
+      if (e.dataTransfer?.types.includes("Files")) e.preventDefault();
+    };
+    window.addEventListener("dragover", recusar);
+    window.addEventListener("drop", recusar);
+    return () => {
+      window.removeEventListener("dragover", recusar);
+      window.removeEventListener("drop", recusar);
+    };
+  }, []);
 
   const onDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -367,6 +421,12 @@ const PlayPage = () => {
                         "Drag a ROM here, pick a file or take one from your library on the side."
                       )}
                     </p>
+                    <p className="play-overlay-hint">
+                      {tx(
+                        "ROM é a cópia em arquivo de um cartucho (.gb, .gbc ou .gba). O site não traz nenhuma: você usa as suas.",
+                        "A ROM is a cartridge copied to a file (.gb, .gbc or .gba). The site ships none: you bring your own."
+                      )}
+                    </p>
                   </>
                 ) : emu.status.kind === "checking" ? (
                   <p>{tx("Verificando o navegador…", "Checking the browser…")}</p>
@@ -402,8 +462,8 @@ const PlayPage = () => {
                     "play-rewind" + (emu.rewinding ? " is-rewinding" : "")
                   }
                   title={tx(
-                    `Segure para voltar no tempo (até ${rewindSeconds()} s)`,
-                    `Hold to go back in time (up to ${rewindSeconds()} s)`
+                    `Segure (ou segure a tecla R) para voltar no tempo (até ${rewindSeconds()} s)`,
+                    `Hold (or hold the R key) to go back in time (up to ${rewindSeconds()} s)`
                   )}
                   onPointerDown={(e) => {
                     e.preventDefault();
@@ -414,6 +474,21 @@ const PlayPage = () => {
                   onPointerCancel={() => emu.setRewinding(false)}
                 >
                   ⏪ {tx("Rebobinar", "Rewind")}
+                </button>
+                {/* Só aparece no toque (ver play.css): lá não há Espaço para
+                    segurar, e o turbo simplesmente não existia. */}
+                <button
+                  type="button"
+                  className={"play-turbo-btn" + (emu.turboActive ? " is-on" : "")}
+                  onPointerDown={(e) => {
+                    e.preventDefault();
+                    emu.setTurbo(true);
+                  }}
+                  onPointerUp={() => emu.setTurbo(false)}
+                  onPointerLeave={() => emu.setTurbo(false)}
+                  onPointerCancel={() => emu.setTurbo(false)}
+                >
+                  ⏩ Turbo
                 </button>
                 <button
                   type="button"
@@ -433,6 +508,7 @@ const PlayPage = () => {
                 {display.fullscreenSupported && (
                   <button
                     type="button"
+                    className="play-fs-btn"
                     onClick={() => void display.toggleFullscreen()}
                   >
                     {display.isFullscreen
@@ -479,11 +555,26 @@ const PlayPage = () => {
                   <span>{emu.volume}%</span>
                 </label>
 
-                {/* Sem régua de velocidade, como no mGBA de mesa: lá também
-                    só existem velocidade normal e o turbo enquanto a tecla
-                    está segurada. A régua que havia aqui mentia — o core não
-                    honra o multiplicador, medido pedindo 5× e pedindo metade,
-                    e os dois davam 1×. */}
+                {/* A régua voltou junto com o core 2.5.0: na 2.5.1 o
+                    `setFastForwardMultiplier` estava quebrado e pedir 5× ou
+                    metade dava 1× igual, então ela mentia. Medido agora, o
+                    core obedece — ver a tabela em shortcuts.ts. */}
+                <label className="play-slider play-speed">
+                  {tx("Velocidade", "Speed")}
+                  <input
+                    type="range"
+                    min={VELOCIDADE_MIN}
+                    max={VELOCIDADE_MAX}
+                    step={1}
+                    value={emu.fastForward}
+                    disabled={emu.turboActive}
+                    onChange={(e) => emu.setFastForward(Number(e.target.value))}
+                  />
+                  <span className={emu.turboActive ? "is-overridden" : ""}>
+                    {emu.fastForward}×
+                  </span>
+                </label>
+
                 <span
                   className={
                     "play-turbo" + (emu.turboActive ? " is-on" : "")
@@ -491,8 +582,10 @@ const PlayPage = () => {
                   role="status"
                 >
                   {emu.turboActive
-                    ? "Turbo"
-                    : `Velocidade normal · segure ${teclaDoTurbo(emu.bindings)} para acelerar`}
+                    ? `Turbo ${TURBO_MULTIPLIER}×`
+                    : en
+                      ? `Hold ${teclaDoTurbo(emu.bindings, lang)} for turbo`
+                      : `Segure ${teclaDoTurbo(emu.bindings, lang)} para o turbo`}
                 </span>
               </div>
 
@@ -504,6 +597,10 @@ const PlayPage = () => {
                     type="button"
                     className={"play-pad play-pad-" + b.area}
                     aria-label={padLabel(b.button, lang)}
+                    // Fora da ordem do Tab: é controle de toque. No teclado o
+                    // jogo já tem as próprias teclas, e um botão focável que
+                    // Enter não aciona é uma armadilha.
+                    tabIndex={-1}
                     onPointerDown={(e) => {
                       e.preventDefault();
                       emu.pressButton(b.button);
@@ -527,7 +624,13 @@ const PlayPage = () => {
               type="button"
               className="play-primary"
               onClick={() => romInputRef.current?.click()}
-              disabled={emu.status.kind === "unsupported"}
+              // Antes de o core subir, `playFile` não tem para onde mandar o
+              // arquivo e saía em silêncio.
+              disabled={
+                emu.status.kind === "unsupported" ||
+                emu.status.kind === "checking" ||
+                emu.status.kind === "loading"
+              }
             >
               {tx("Escolher arquivo…", "Choose file…")}
             </button>
@@ -673,6 +776,9 @@ const PlayPage = () => {
                         className="play-rom-remove"
                         title={tx(`Remover ${rom.fileName} da biblioteca`, `Remove ${rom.fileName} from the library`)}
                         aria-label={tx(`Remover ${rom.fileName} da biblioteca`, `Remove ${rom.fileName} from the library`)}
+                        // O jogo em execução não pode sair da biblioteca: a
+                        // confirmação só devolvia "feche antes".
+                        disabled={rom.fileName === currentRom}
                         onClick={() => setRemoving(rom.fileName)}
                       >
                         ✕
@@ -1039,9 +1145,12 @@ const PlayPage = () => {
             ) : (
               // Rolável: sem foco, quem usa só teclado não consegue rolar.
               <ol className="play-log" tabIndex={0} aria-label={tx("Log do core", "Core log")}>
-                {emu.log.map((line, i) => (
+                {/* Chave pelo `seq` da linha, nunca pelo indice: a janela
+                    desliza, e com o indice todos os 80 itens trocavam de chave
+                    a cada linha nova — a lista inteira era recriada. */}
+                {emu.log.map((line) => (
                   <li
-                    key={`${i}-${line.message}`}
+                    key={line.seq}
                     className={isProblem(line.level) ? "is-problem" : ""}
                   >
                     {formatLogLine(line)}

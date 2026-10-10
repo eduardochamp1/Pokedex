@@ -78,3 +78,14 @@ describe("isTypingTarget", () => {
     expect(isTypingTarget(null)).toBe(false);
   });
 });
+
+describe("shortcutFor: rebobinar", () => {
+  it("R rebobina, maiúsculo ou não", () => {
+    expect(shortcutFor({ key: "r", shiftKey: false })).toEqual({ kind: "rewind" });
+    expect(shortcutFor({ key: "R", shiftKey: true })).toEqual({ kind: "rewind" });
+  });
+
+  it("quem deu o R ao jogo fica com o jogo", () => {
+    expect(shortcutFor({ key: "r", shiftKey: false }, new Set(["R"]))).toBeNull();
+  });
+});

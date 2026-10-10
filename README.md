@@ -99,8 +99,8 @@ via [mGBA](https://mgba.io) compilado para WebAssembly.
   slots de um jogo não aparecem em outro
 - **"Continuar de onde parou"** — o core já capturava um estado automático a
   cada 30 s; agora ele tem um botão em vez de ser descartado
-- **Atalhos** — F1–F6 carregam um estado, Shift+F1–F6 gravam, e segurar Espaço
-  dá turbo enquanto durar
+- **Atalhos** — F1–F6 carregam um estado, Shift+F1–F6 gravam, segurar Espaço
+  dá turbo e segurar R rebobina, enquanto durar
 - **Biblioteca gerenciável** — cada ROM mostra quanto ocupa e pode ser removida;
   o save de bateria fica, então o progresso volta se a ROM voltar
 - **Backup automático em `saves/`** no disco, mais exportar/importar `.sav`
@@ -128,9 +128,10 @@ via [mGBA](https://mgba.io) compilado para WebAssembly.
 - **Gamepad virtual** para toque, **gamepad físico** pela Gamepad API (layout
   standard) e **teclas remapeáveis** — clique numa tecla da legenda e pressione
   a nova. A legenda lê do mesmo mapa que o `bindKey`, então não mente
-- **Rebobinar** — segure e o jogo anda para trás, até ~10 s
+- **Rebobinar** — segure o botão (ou a tecla R) e o jogo anda para trás, até ~10 s
 - **Captura de tela** em PNG, com download
-- **Volume**, e turbo ao segurar Espaço
+- **Volume**, **barra de velocidade** de 1× a 10× (lembrada entre visitas) e
+  turbo de 10× ao segurar Espaço — no toque, um botão de turbo no lugar da tecla
 - **Diagnóstico** quando falta isolamento: a página diz exatamente qual header
   está ausente em vez de falhar em silêncio
 
@@ -386,7 +387,7 @@ abas da Lore, sem violações:
 
 ## 🛠️ Stack
 
-- **[React 18](https://react.dev)** com hooks
+- **[React 19](https://react.dev)** com hooks
 - **[TypeScript](https://www.typescriptlang.org/)** em modo estrito
 - **[Vite](https://vitejs.dev)** como bundler
 - **[React Router](https://reactrouter.com)** para roteamento, com code splitting por rota
@@ -426,6 +427,7 @@ A aplicação abre em [http://localhost:3000](http://localhost:3000).
 | `npm run gen3:species <rom.gba>` | Regera `src/emulator/saveParse/gen3Species.ts` lendo a tabela de espécies da sua ROM. A ROM não entra no repo nem no bundle |
 | `npm run gen3:save-check "<arquivo.sav>"` | Valida o leitor de save contra um `.sav` de verdade. A suíte usa um save sintético; este é para quem tem um real |
 | `npm run wiki:check` | Confere se todo campo `wiki` aponta para um artigo real da Bulbapedia — sem página inexistente, sem redirect e sem desambiguação (precisa de rede) |
+| `npm run bench` | Mede a velocidade do emulador em quadros **emulados** por segundo e compara `/jogar` com `dev/teste-core.html`, que é o core sem a página em volta. Precisa do `npm run dev` de pé e do Chrome instalado (`CHROME=<caminho>` se não estiver no lugar de sempre) |
 
 > **Deploy:** é uma SPA com `BrowserRouter`. O host precisa reescrever qualquer
 > rota para `index.html`, senão `/lore` e `/pokemon/:id` dão 404 no refresh — e
@@ -622,17 +624,18 @@ carta na cor do tipo e o dourado reservado a raridade.
   por varredura — há exatamente um u32 entre 1 e 6 nos primeiros 0x400 bytes.
   `SECTOR_DATA_SIZE` é **3968**, o menor tamanho que valida os 28 checksums;
   esta fixture não o distingue de 4084, porque o espaço entre os dois é zero.
-- **Não há régua de velocidade, e isso é decisão medida.** O core não honra
-  `setFastForwardMultiplier` para a velocidade do jogo: medido com o relógio do
-  auto-state, que conta tempo emulado (validado pausando — pausado marca zero),
-  pedir 5× deu **1,10×** e pedir metade deu **1,00×**, contra 1,11× de base.
-  Nem `baseFpsTarget`, nem `setMainLoopTiming`, nem ligar ou desligar
-  `audioSync` movem esse número; o contador de FPS do próprio core marca 60
-  com o multiplicador em 5. O que o multiplicador alcança é o caminho do áudio,
-  e era daí que vinha "acelera a música e não o jogo". Uma régua que não faz
-  efeito é pior do que régua nenhuma, então ela saiu. O que ficou é o modelo do
-  mGBA de mesa, que também não tem régua: velocidade normal e turbo ao segurar
-  a tecla, sem teto (`fastForwardHeldRatio=-1`, `holdFastForward=Space`).
+- **A régua de velocidade depende da versão do core.** Na mGBA-wasm 2.5.1 o
+  `setFastForwardMultiplier` não mexia na velocidade do jogo: pedir 5× deu
+  1,10× e pedir metade deu 1,00×. Uma régua que não faz efeito é pior do que
+  régua nenhuma, então ela tinha saído. Com o core fixado em **2.5.0** ele
+  obedece — medido em quadros emulados: 5× entrega 5,01×, 10× entrega 9,91×, e
+  acima disso a máquina satura (tabela em `src/emulator/shortcuts.ts`). Por
+  isso a barra voltou, com teto em 10×, e o `package.json` fixa a versão sem
+  `^`. `npm run bench` repete a medição.
+- **O log do core custava o turbo.** O core emite ~3 linhas DEBUG/INFO por
+  quadro; cada uma virava estado do React e renderizava a página inteira, e o
+  turbo parava em 1,0–1,4×. Hoje DEBUG e INFO nem chegam ao painel e o resto é
+  descarregado a cada 250 ms.
 - **`FSSync()` rejeita**, e engolir essa rejeição prendia a tela em
   "Carregando…" para sempre. Carregar é fatal e vira `status` de erro; gravar,
   apagar e importar são recuperáveis e viram aviso sem derrubar o jogo.

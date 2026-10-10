@@ -351,10 +351,69 @@ describe("useEmulator — turbo", () => {
     expect(dublê.volumes.at(-1)).toBe(70);
   });
 
-  /** A régua saiu: o hook não expõe mais nada para ajustá-la. */
-  it("não existe mais controle de velocidade no hook", async () => {
+  /**
+   * A régua voltou com o core 2.5.0.
+   *
+   * Ela tinha sido removida porque a 2.5.1 quebrou o
+   * `setFastForwardMultiplier` — pedir 5× ou metade davam 1× igual, então a
+   * régua mentia. Com o core preso em 2.5.0 o multiplicador obedece, medido
+   * pelo `npm run bench`.
+   */
+  it("a barra manda o multiplicador escolhido para o core", async () => {
     const emu = await montar();
-    expect("setFastForward" in emu.atual).toBe(false);
-    expect("fastForward" in emu.atual).toBe(false);
+
+    await act(async () => {
+      emu.atual.setFastForward(4);
+    });
+    expect(multiplicadores.at(-1)).toBe(4);
+    expect(emu.atual.fastForward).toBe(4);
+  });
+
+  /** O turbo é impulso: pisa na barra e devolve o valor dela ao soltar. */
+  it("o turbo sobrepõe a barra e volta para ela, não para 1", async () => {
+    const emu = await montar();
+    await act(async () => {
+      emu.atual.setFastForward(3);
+    });
+
+    await act(async () => {
+      emu.atual.setTurbo(true);
+    });
+    expect(multiplicadores.at(-1)).toBe(TURBO_MULTIPLIER);
+
+    await act(async () => {
+      emu.atual.setTurbo(false);
+    });
+    expect(multiplicadores.at(-1)).toBe(3);
+  });
+
+  /** A escolha é preferência de quem joga: tem que sobreviver ao F5. */
+  it("a velocidade escolhida fica gravada", async () => {
+    const primeira = await montar();
+    await act(async () => {
+      primeira.atual.setFastForward(6);
+    });
+
+    const segunda = await montar();
+    expect(segunda.atual.fastForward).toBe(6);
+  });
+
+  /**
+   * Só o turbo silencia.
+   *
+   * Quem põe 2× para avançar um trecho longo ainda quer ouvir o jogo — e o
+   * mGBA de mesa concorda (`fastForwardMute=0`). O mudo é para o impulso de
+   * segundos a 10×, onde o resampler vira chiado.
+   */
+  it("a barra não silencia o jogo", async () => {
+    const emu = await montar();
+    dublê.volume = 70;
+    dublê.volumes.length = 0;
+
+    await act(async () => {
+      emu.atual.setFastForward(5);
+    });
+
+    expect(dublê.volumes).not.toContain(0);
   });
 });

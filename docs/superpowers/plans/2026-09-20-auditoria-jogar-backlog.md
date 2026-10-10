@@ -6,6 +6,52 @@
 
 Auditoria de 2026-09-20: 8 lentes, 42 achados, 31 refutadores, 4 ângulos de oportunidade (20 propostas) e uma varredura de bugs no core.
 
+## Situação em 2026-10-09
+
+Conferido contra o código. As caixas abaixo continuam como a auditoria as deixou
+— o que vale é esta seção.
+
+**Corrigido nesta data**
+
+- Turbo e rebobinar presos quando a tecla é solta fora da janela (`blur`)
+- Rebobinar sem caminho por teclado → segurar **R**
+- Captura de tecla: dependia do objeto `emu`, prendia o foco e vinculava Tab
+- Botões do gamepad virtual focáveis sem resposta ao teclado → fora do Tab
+- "Escolher arquivo…" habilitado enquanto o core baixa
+- Remover a ROM em execução (a confirmação sempre falhava) → desabilitado
+- ROM solta fora da moldura derrubava a sessão
+- Idade dos save states congelada com o jogo pausado
+- "ROM" nunca explicada no estado vazio
+- Meta description sem o emulador
+- Toque: volume e velocidade escondidos, turbo inexistente, tela cheia sem
+  controle, alvos abaixo de 44 px
+- Textos de /jogar que ainda saíam só em português
+
+**Já estava resolvido antes** (há código para isso hoje)
+
+- Integração: links de /jogar para a dex, mapa e lore; `?jogo=` vindo da ficha
+  de golpes; "Você parou em…" na Home; item na navbar e na paleta de comandos
+- Detecção de ROM (`romId.ts`), nome e base do jogo na tela
+- Leitor de save Gen 3, painel "Seu time", dex pessoal, página do treinador,
+  comparador de saves, conquistas
+- Miniaturas das capturas no painel; anúncio de avisos por `role="status"`
+  sempre montado; nomes acessíveis de slots e do gamepad; contraste (auditoria
+  axe de 2026-09-27)
+
+**Fica como está, por decisão**
+
+- Coerência visual (sombra dura nos botões, painéis "janela", glifos bitmap, o
+  verde com dois sentidos, as duas regras de `.play-screen`): gosto de
+  design, não defeito
+- Celular deitado e save states longe do jogo: pedem redesenho do layout
+- Texto do erro de COOP/COEP falando de `npm`: só aparece para quem hospeda
+
+**Ideias não construídas** (são funcionalidades novas, não pendências)
+
+- Consultor de tipos sobre o jogo (F7), HUD lendo a RAM, diário/Nuzlocke,
+  gravador de clipe, patch de ROM no navegador, moldura na cor da geração,
+  arrastar `.sav` em qualquer página
+
 ---
 
 ## 42 achados das sete lentes

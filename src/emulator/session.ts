@@ -10,9 +10,11 @@
  * progresso do jogo continua vindo do IDBFS do core, nao daqui.
  */
 import { clearPref, loadPref, savePref } from "./prefs";
+import { VELOCIDADE_MAX, VELOCIDADE_MIN } from "./shortcuts";
 
 const LAST_ROM = "last-rom";
 const VOLUME = "volume";
+const FAST_FORWARD = "fast-forward";
 
 const isString = (value: unknown): value is string =>
   typeof value === "string" && value.length > 0;
@@ -20,6 +22,19 @@ const isString = (value: unknown): value is string =>
 /** Volume em 0..100. */
 const isVolume = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100;
+
+/**
+ * Velocidade da barra, inteira e dentro da faixa que a máquina entrega.
+ *
+ * Um valor gravado fora da faixa cai no padrão em vez de ir para o core: pedir
+ * acima do teto não é de graça — medido, 12× não entrega mais que 10× e ainda
+ * aumenta a dispersão.
+ */
+const isFastForward = (value: unknown): value is number =>
+  typeof value === "number" &&
+  Number.isInteger(value) &&
+  value >= VELOCIDADE_MIN &&
+  value <= VELOCIDADE_MAX;
 
 /**
  * Ultima ROM jogada.
@@ -46,5 +61,20 @@ export function rememberVolume(percent: number): void {
 
 export function getVolume(): number {
   return loadPref(VOLUME, isVolume) ?? 100;
+}
+
+/**
+ * Velocidade escolhida na barra.
+ *
+ * É preferência de quem joga, não estado do jogo — por isso sobrevive ao F5,
+ * como o volume. O turbo não passa por aqui: ele é momentâneo e volta para
+ * este valor ao soltar a tecla.
+ */
+export function rememberFastForward(multiplicador: number): void {
+  savePref(FAST_FORWARD, multiplicador);
+}
+
+export function getFastForward(): number {
+  return loadPref(FAST_FORWARD, isFastForward) ?? VELOCIDADE_MIN;
 }
 
