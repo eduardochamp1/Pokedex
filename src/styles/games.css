@@ -36,7 +36,6 @@
   display: grid;
   gap: 4px;
 }
-.jogos-seu { border-color: var(--accent); }
 .jogos-titulo { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .jogos-tag {
   font-size: 0.66rem;
@@ -47,8 +46,6 @@
   padding: 1px 7px;
   color: var(--text-muted);
 }
-.jogos-tag-seu { border-color: var(--accent); color: var(--accent); }
 .jogos-nota { font-size: 0.82rem; }
 .jogos-links { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 0.8rem; }
 .jogos-links a { color: var(--accent); }
-.jogos-jogar { font-weight: 700; }

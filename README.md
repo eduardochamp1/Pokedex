@@ -3,7 +3,7 @@
 Uma Pokédex web completa em **React + TypeScript + Vite**, consumindo a [PokéAPI](https://pokeapi.co) — com filtros combináveis, busca parcial, comparador, favoritos, sprites shiny/animados, formas alternativas (Mega, Gigantamax), evoluções, um mapa-múndi interativo e uma seção completa de **lore** do universo Pokémon.
 
 > O emulador de GB/GBC/GBA e tudo o que lia o save (treinador, ginásios, calculadora
-> de dano) saíram daqui para um projeto próprio, o **Jogar**, em outubro de 2026.
+> de dano) saíram daqui para um projeto próprio, o **[Pokemu](https://github.com/eduardochamp1/pokemu)**, em outubro de 2026.
 
 ---
 
@@ -158,10 +158,6 @@ abas da Lore, sem violações:
   subiu para 4,5:1; títulos de item da Lore clareados no mesmo matiz
 - **Nomes acessíveis** — os filtros da Home tinham o rótulo em `display:none`;
   imagens ao lado do próprio nome em texto têm `alt=""`
-- **Jogar** — uma região viva sempre montada anuncia carregar, pausar,
-  continuar e fechar o jogo e os avisos; o log do core rola pelo teclado; o
-  direcional do controle virtual tem nome no idioma da página. O Tab não fica
-  preso no jogo
 
 ## 🛠️ Stack
 

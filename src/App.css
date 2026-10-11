@@ -386,35 +386,6 @@ img { display: block; max-width: 100%; }
 }
 .card-badge-mythical { color: #ff8ec7; }
 
-/*
- * Selo da dex do save: uma pokebola de 14px. Capturado e a bola cheia (o
- * vermelho do PS em cima, o papel embaixo); so visto e o contorno vazio. A
- * forma muda junto com a cor, entao le-se sem depender dela.
- */
-.card-dexmark {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  z-index: 2;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 2px solid var(--paper-ink);
-  box-sizing: border-box;
-  filter: drop-shadow(0 1px 1px rgba(242, 231, 201, 0.9));
-}
-/* Divide o canto com o simbolo de raridade: vai para o lado dele. */
-.card-badge ~ .card-dexmark { left: 26px; }
-.card-dexmark-owned {
-  background:
-    radial-gradient(circle, var(--paper) 0 2px, var(--paper-ink) 2px 3px, transparent 3px),
-    linear-gradient(var(--paper-ps) 0 45%, var(--paper-ink) 45% 55%, var(--paper) 55%);
-}
-.card-dexmark-seen {
-  background: transparent;
-  border-style: dotted;
-}
-
 @property --shine-angle {
   syntax: "<angle>";
   inherits: false;
@@ -2261,7 +2232,6 @@ img { display: block; max-width: 100%; }
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
 }
 
-
 /* ========= Humanos =========
    Retrato de treinador nao existe em fonte que o projeto possa usar: o
    repositorio de sprites da PokeAPI so serve pokemon, item, insignia e tipo,
@@ -4031,52 +4001,4 @@ html[data-scanline="on"] body::after {
   .lore-quote-caret { animation: none; }
   ::view-transition-old(card-flip),
   ::view-transition-new(card-flip) { animation: none; }
-}
-
-/* Jogo pausado esperando em /jogar. Molde do .nav-count, cor diferente: nao e
-   contagem, e estado — e o gold ja e a cor de "guardado" no resto do site. */
-.nav-paused {
-  margin-left: 5px;
-  padding: 0 5px;
-  border-radius: var(--radius-pill);
-  background: var(--accent-alt);
-  color: var(--bg);
-  font-size: 0.55rem;
-  letter-spacing: -0.06em;
-}
-
-/* ========= "Você parou em…" =========
-   A Home sabia o último jogo desde sempre — `getLastRom()` já estava no
-   localStorage — e não usava. Um clique devolve a pessoa ao jogo, sem passar
-   pela biblioteca. */
-.home-resume {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 4px 10px;
-  margin: 0 0 18px;
-  padding: 10px 14px;
-  border-radius: var(--radius-sm);
-  background: var(--surface-1);
-  border: 2px solid var(--border);
-  border-left: 3px solid var(--accent-alt);
-  color: var(--text);
-  text-decoration: none;
-  transition: border-color var(--dur-fast), background var(--dur-fast);
-}
-.home-resume:hover {
-  border-color: var(--accent-alt);
-  background: var(--surface-3);
-}
-.home-resume-label {
-  font-size: 0.62rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--accent-alt);
-}
-.home-resume strong { font-size: 0.9rem; }
-.home-resume-cta {
-  margin-left: auto;
-  font-size: 0.72rem;
-  color: var(--text-muted);
 }

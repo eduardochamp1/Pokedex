@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import { serviceWorkerPrecache } from "./vite-plugin-sw.ts";
 
 /**
- * Porta 3001, e nao 3000: a 3000 ficou com o projeto Jogar (o emulador, que
+ * Porta 3001, e nao 3000: a 3000 ficou com o projeto Pokemu (o emulador, que
  * saiu daqui), porque os saves dele moram no IndexedDB daquela origem.
  */
 export default defineConfig({
