@@ -6,11 +6,10 @@
  *
  * No build, `vite-plugin-sw.ts` troca os dois marcadores abaixo pela versão e
  * pela lista de arquivos do bundle. É isso que deixa o app inteiro disponível
- * offline depois da primeira visita — inclusive rotas nunca abertas e o core
- * do emulador (as ROMs e os saves já ficam no IndexedDB).
+ * offline depois da primeira visita — inclusive rotas nunca abertas.
  *
  * Três caches, para poder limpar um sem derrubar os outros:
- *  - BUILD: o bundle desta versão (JS, CSS, wasm, HTML). Nomes com hash, então
+ *  - BUILD: o bundle desta versão (JS, CSS, HTML). Nomes com hash, então
  *    cache primeiro; o de um deploy anterior é apagado ao ativar.
  *  - RUNTIME: o resto da mesma origem, sobretudo os 1.342 sprites (4,4 MB).
  *    Sem versão: um deploy não joga fora o que a pessoa já baixou.
@@ -118,11 +117,6 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
-
-  // Pastas locais de dev/preview (ROMs e saves do disco): nunca pelo cache. Um
-  // save devolvido do cache é o progresso de antes da última gravação, e uma
-  // ROM de 32 MB não tem por que ser duplicada aqui.
-  if (url.origin === self.location.origin && url.pathname.startsWith("/local-")) return;
 
   // Navegação: é uma SPA, então qualquer rota resolve para o mesmo HTML. Rede
   // primeiro, para pegar um deploy novo; o HTML do cache quando não há rede.

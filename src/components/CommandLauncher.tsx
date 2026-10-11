@@ -1,6 +1,5 @@
 import { Suspense, lazy, useEffect, useState } from "react";
 import { OPEN_SEARCH_EVENT } from "../lib/searchEvents";
-import { setGameKeyboard } from "../emulator/core";
 
 /** A paleta traz a lore inteira para indexar: só carrega quando abre. */
 const CommandPalette = lazy(() => import("./CommandPalette"));
@@ -11,8 +10,7 @@ const digitando = (el: EventTarget | null) =>
 
 /**
  * Ctrl+K (⌘K no Mac) abre a busca em qualquer página; "/" também, quando o
- * foco não está num campo — menos em /jogar, onde as teclas do jogo são
- * remapeáveis e "/" pode ser um botão. Lá vale só o Ctrl+K.
+ * foco não está num campo.
  */
 const CommandLauncher = () => {
   const [aberta, setAberta] = useState(false);
@@ -25,8 +23,7 @@ const CommandLauncher = () => {
         !e.ctrlKey &&
         !e.metaKey &&
         !e.altKey &&
-        !digitando(e.target) &&
-        !window.location.pathname.startsWith("/jogar");
+        !digitando(e.target);
       if (atalho || barra) {
         e.preventDefault();
         setAberta(true);
@@ -40,13 +37,6 @@ const CommandLauncher = () => {
       window.removeEventListener(OPEN_SEARCH_EVENT, onEvento);
     };
   }, []);
-
-  // Com a busca aberta, o teclado é dela e não do jogo (ver setGameKeyboard).
-  useEffect(() => {
-    if (!aberta) return;
-    setGameKeyboard(false);
-    return () => setGameKeyboard(true);
-  }, [aberta]);
 
   if (!aberta) return null;
   return (

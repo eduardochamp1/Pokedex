@@ -3,7 +3,6 @@ import { useSearchParams } from "react-router-dom";
 import Card from "../components/Card";
 import TeamSuggestions from "../components/TeamSuggestions";
 import { usePokemonIndex, usePokemonsByNames } from "../hooks/usePokemon";
-import { useTrainerEntry } from "../lib/trainerLog";
 import { namesForIds } from "../lib/filters";
 import { tType } from "../data/i18n";
 import { multiplierLabel } from "../lib/typeDefense";
@@ -74,19 +73,6 @@ const TeamBuilderPage = () => {
     setEntrada("");
   };
 
-  // O time do save, quando /jogar já leu um.
-  const treinador = useTrainerEntry();
-  const doSave = useMemo(
-    () =>
-      treinador && index
-        ? namesForIds(
-            treinador.party.map((m) => m.national),
-            index
-          )
-        : [],
-    [treinador, index]
-  );
-
   const membros: TeamMember[] = pokemons
     .filter(Boolean)
     .map((p) => ({ name: p.name, types: p.types.map((t) => t.type.name as TypeName) }));
@@ -126,11 +112,6 @@ const TeamBuilderPage = () => {
         <button type="submit" disabled={names.length >= MAX_TEAM || !entrada.trim()}>
           {t("Adicionar", "Add")}
         </button>
-        {doSave.length > 0 && (
-          <button type="button" className="team-secundario" onClick={() => setNames(doSave)}>
-            {t("Usar o time do save", "Use the team from the save")} ({treinador?.playerName})
-          </button>
-        )}
         {names.length > 0 && (
           <button type="button" className="team-secundario" onClick={() => setNames([])}>
             {t("Limpar", "Clear")}

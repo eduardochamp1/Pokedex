@@ -19,12 +19,7 @@ const FavoritesPage = lazy(() => import("./pages/FavoritesPage"));
 const ComparePage = lazy(() => import("./pages/ComparePage"));
 const LorePage = lazy(() => import("./pages/LorePage"));
 const MapPage = lazy(() => import("./pages/MapPage"));
-const PlayPage = lazy(() => import("./pages/PlayPage"));
 const SizesPage = lazy(() => import("./pages/SizesPage"));
-const TrainerPage = lazy(() => import("./pages/TrainerPage"));
-const SaveComparePage = lazy(() => import("./pages/SaveComparePage"));
-const DamagePage = lazy(() => import("./pages/DamagePage"));
-const GymsPage = lazy(() => import("./pages/GymsPage"));
 const EvolutionsPage = lazy(() => import("./pages/EvolutionsPage"));
 const GamesPage = lazy(() => import("./pages/GamesPage"));
 const DataPage = lazy(() => import("./pages/DataPage"));
@@ -65,12 +60,7 @@ function App() {
             <Route path="/comparar" element={<ComparePage />} />
             <Route path="/lore" element={<LorePage />} />
             <Route path="/mapa" element={<MapPage />} />
-            <Route path="/jogar" element={<PlayPage />} />
             <Route path="/tamanhos" element={<SizesPage />} />
-            <Route path="/treinador" element={<TrainerPage />} />
-            <Route path="/treinador/comparar" element={<SaveComparePage />} />
-            <Route path="/dano" element={<DamagePage />} />
-            <Route path="/ginasios" element={<GymsPage />} />
             <Route path="/evolucoes" element={<EvolutionsPage />} />
             <Route path="/jogos" element={<GamesPage />} />
             <Route path="/dados" element={<DataPage />} />

@@ -2,7 +2,6 @@ import { describe, it, expect } from "vitest";
 import { TIMELINE_GAMES } from "../data/gameTimeline";
 import { VERSION_GROUPS } from "../data/versionGroups";
 import { REGIONS } from "../data/regions";
-import { isPlayable } from "../emulator/playable";
 import { byYear, filterGames } from "./gameTimeline";
 
 describe("os dados da linha do tempo", () => {
@@ -18,9 +17,6 @@ describe("os dados da linha do tempo", () => {
     for (const g of TIMELINE_GAMES) if (g.region !== "hisui") expect(regioes.has(g.region), g.title).toBe(true);
   });
 
-  it("jogáveis no emulador: os nove de GB, GBC e GBA", () => {
-    expect(TIMELINE_GAMES.filter((g) => isPlayable(g.versionGroup))).toHaveLength(9);
-  });
 });
 
 describe("byYear / filterGames", () => {
@@ -31,9 +27,8 @@ describe("byYear / filterGames", () => {
     expect(anos.find((a) => a.year === 2004)?.games.map((g) => g.title)).toEqual(["FireRed & LeafGreen", "Emerald"]);
   });
 
-  it("filtra por jogável, por remake e por geração", () => {
-    expect(filterGames(TIMELINE_GAMES, { playableOnly: true, remakes: "all", generation: "all" }).every((g) => isPlayable(g.versionGroup))).toBe(true);
-    expect(filterGames(TIMELINE_GAMES, { playableOnly: false, remakes: "only", generation: "all" }).map((g) => g.title)).toContain("FireRed & LeafGreen");
-    expect(filterGames(TIMELINE_GAMES, { playableOnly: false, remakes: "none", generation: 3 }).map((g) => g.title)).toEqual(["Ruby & Sapphire", "Emerald"]);
+  it("filtra por remake e por geração", () => {
+    expect(filterGames(TIMELINE_GAMES, { remakes: "only", generation: "all" }).map((g) => g.title)).toContain("FireRed & LeafGreen");
+    expect(filterGames(TIMELINE_GAMES, { remakes: "none", generation: 3 }).map((g) => g.title)).toEqual(["Ruby & Sapphire", "Emerald"]);
   });
 });

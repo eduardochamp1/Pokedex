@@ -10,7 +10,6 @@ describe("parseHomeParams", () => {
       generation: undefined,
       pokedex: undefined,
       rarity: undefined,
-      mine: undefined,
       sort: "id",
       page: 0,
     });
@@ -54,7 +53,6 @@ describe("toSearchParams", () => {
       generation: undefined,
       pokedex: undefined,
       rarity: undefined,
-      mine: undefined,
       sort: "id",
       page: 0,
     });
@@ -68,7 +66,6 @@ describe("toSearchParams", () => {
       generation: 3,
       pokedex: undefined,
       rarity: undefined,
-      mine: undefined,
       sort: "nome" as const,
       page: 2,
     };
@@ -82,24 +79,3 @@ describe("SORTS", () => {
   });
 });
 
-describe("meu — filtro pela dex do jogo", () => {
-  it("le os tres valores", () => {
-    for (const v of ["capturados", "vistos", "faltam"] as const) {
-      expect(parseHomeParams(new URLSearchParams(`meu=${v}`)).mine).toBe(v);
-    }
-  });
-
-  it("recusa valor desconhecido", () => {
-    expect(parseHomeParams(new URLSearchParams("meu=todos")).mine).toBeUndefined();
-  });
-
-  it("faz ida e volta junto com os outros filtros", () => {
-    const s = toSearchParams({
-      ...parseHomeParams(new URLSearchParams("tipo=water")),
-      mine: "faltam",
-    });
-    expect(s.get("meu")).toBe("faltam");
-    expect(parseHomeParams(s).mine).toBe("faltam");
-    expect(parseHomeParams(s).type).toBe("water");
-  });
-});

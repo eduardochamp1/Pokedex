@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useEncounters } from "../hooks/usePokemon";
-import { useTrainerEntry } from "../lib/trainerLog";
 import {
   conditionLabel,
   encounterVersions,
@@ -10,7 +9,6 @@ import {
 } from "../lib/encounters";
 import { versionLabel, versionRegion } from "../data/versions";
 import { useT } from "../i18n/lang";
-import { saveVersion } from "../lib/gen3Game";
 
 interface Props {
   pokemonId: number;
@@ -19,12 +17,10 @@ interface Props {
 /**
  * Onde encontrar este pokémon, jogo a jogo.
  *
- * Abre no jogo que o save diz que você está jogando, quando este pokémon
- * aparece nele; senão, no mais recente que a PokéAPI cobre.
+ * Abre no jogo mais recente que a PokéAPI cobre.
  */
 const EncounterPanel = ({ pokemonId }: Props) => {
   const { data, isLoading, isError } = useEncounters(pokemonId);
-  const treinador = useTrainerEntry();
   const [escolhido, setEscolhido] = useState<string | undefined>(undefined);
   const t = useT();
 
@@ -44,9 +40,7 @@ const EncounterPanel = ({ pokemonId }: Props) => {
     );
   }
 
-  const doSeuJogo = treinador ? saveVersion(treinador.game ?? "emerald", treinador.rom) : undefined;
-  const doSave = doSeuJogo && versoes.includes(doSeuJogo) ? doSeuJogo : undefined;
-  const versao = escolhido && versoes.includes(escolhido) ? escolhido : doSave ?? versoes[versoes.length - 1];
+  const versao = escolhido && versoes.includes(escolhido) ? escolhido : versoes[versoes.length - 1];
   const linhas = encountersFor(areas, versao);
   const regiao = versionRegion(versao);
 
@@ -62,7 +56,6 @@ const EncounterPanel = ({ pokemonId }: Props) => {
           {versoes.map((v) => (
             <option key={v} value={v}>
               {versionLabel(v)}
-              {v === doSave ? t(" — seu jogo", " — your game") : ""}
             </option>
           ))}
         </select>

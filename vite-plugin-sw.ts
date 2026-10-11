@@ -9,8 +9,8 @@ import type { Plugin } from "vite";
  * O worker é escrito à mão em `public/sw.js` e copiado como está — então não
  * sabe os nomes com hash que o Vite gerou. Sem a lista, só ia para o cache o
  * que a pessoa já tinha aberto: a Lore abria offline, o Quiz nunca visitado
- * não. Com ela, a instalação guarda o app inteiro (~2,9 MB, o wasm do
- * emulador incluído) e toda rota abre sem rede.
+ * não. Com ela, a instalação guarda o app inteiro e toda rota
+ * abre sem rede.
  *
  * A versão é um hash da lista: muda a cada deploy com arquivo novo, e é isso
  * que faz o worker novo instalar e o cache do build anterior ser apagado.

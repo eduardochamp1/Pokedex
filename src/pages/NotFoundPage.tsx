@@ -48,7 +48,6 @@ const NotFoundPage = () => {
       </Link>
       <Link to="/lore">{t("Explorar a lore", "Explore the lore")}</Link>
       <Link to="/mapa">{t("Ver o mapa", "See the map")}</Link>
-      <Link to="/jogar">{t("Jogar", "Play")}</Link>
     </div>
   </div>
   );

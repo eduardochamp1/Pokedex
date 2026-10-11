@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import { useMoveDetail } from "../hooks/usePokemon";
 import { pickLocalized } from "../lib/localize";
 import {
@@ -11,7 +10,6 @@ import {
   type LearnedMove,
 } from "../lib/moves";
 import { versionGroupLabel } from "../data/versionGroups";
-import { isPlayable } from "../emulator/playable";
 import { tType } from "../data/i18n";
 import type { PokemonMove } from "../types/pokemon";
 import { useLang, tr } from "../i18n/lang";
@@ -141,17 +139,6 @@ const MoveList = ({ moves }: Props) => {
             </option>
           ))}
         </select>
-        {/* O seletor sempre nomeou Emerald, Crystal, FireRed — e a aba que roda
-            exatamente esses ficava a um clique que nao existia. */}
-        {isPlayable(versionGroup) && (
-          <Link
-            className="move-version-play"
-            to={`/jogar?jogo=${versionGroup}`}
-            title={t(`Abrir /jogar com ${versionGroupLabel(versionGroup)}`, `Open /jogar with ${versionGroupLabel(versionGroup)}`)}
-          >
-            {t("jogar", "play")}
-          </Link>
-        )}
       </label>
 
       {groups.map((group) => (

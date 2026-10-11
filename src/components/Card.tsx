@@ -9,13 +9,7 @@ import { LEGENDARY, MYTHICAL } from "../data/rarity";
 import { tType } from "../data/i18n";
 import { preloadDetailPage } from "../pages/routeModules";
 import type { Pokemon } from "../types/pokemon";
-import type { DexMark } from "../lib/playerDex";
 import { useT } from "../i18n/lang";
-
-const DEX_MARK_LABEL: Record<DexMark, [string, string]> = {
-  owned: ["Capturado no seu jogo", "Caught in your game"],
-  seen: ["Visto no seu jogo", "Seen in your game"],
-};
 
 /** A API de transicao ainda nao esta na lib DOM de todo TypeScript. */
 type ViewTransitionDocument = Document & {
@@ -29,8 +23,6 @@ interface Props {
   showActions?: boolean;
   /** Posicao na grade: atrasa a entrada de cada carta em cascata. */
   index?: number;
-  /** O que a dex do jogo lido do save diz deste pokemon. */
-  dexMark?: DexMark;
 }
 
 const STAT_ORDER = ["hp", "attack", "defense"] as const;
@@ -46,7 +38,6 @@ const Card = ({
   linkTo,
   showActions = true,
   index = 0,
-  dexMark,
 }: Props) => {
   const { favoritePokemons, updateFavoritePokemons } = useContext(FavoriteContext);
   const t = useT();
@@ -207,15 +198,6 @@ const Card = ({
         >
           ✦
         </span>
-      )}
-      {/* Do save: pokebola cheia se capturou, so o contorno se viu. */}
-      {dexMark && (
-        <span
-          className={`card-dexmark card-dexmark-${dexMark}`}
-          role="img"
-          aria-label={t(...DEX_MARK_LABEL[dexMark])}
-          title={t(...DEX_MARK_LABEL[dexMark])}
-        />
       )}
     </>
   );

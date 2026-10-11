@@ -22,7 +22,6 @@
   },
   "include": [
     "vite.config.ts",
-    "vite-plugin-local-roms.ts",
     "scripts/**/*.mjs",
     "vite-plugin-sw.ts",
     "vite-plugin-sw.test.ts"

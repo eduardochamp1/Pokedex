@@ -1,9 +1,7 @@
 /** Agrupar e filtrar a linha do tempo dos jogos. Puro. */
 import type { TimelineGame } from "../data/gameTimeline";
-import { isPlayable } from "../emulator/playable";
 
 export interface TimelineFilter {
-  playableOnly: boolean;
   remakes: "all" | "only" | "none";
   generation: number | "all";
 }
@@ -11,7 +9,6 @@ export interface TimelineFilter {
 export function filterGames(games: TimelineGame[], f: TimelineFilter): TimelineGame[] {
   return games.filter(
     (g) =>
-      (!f.playableOnly || isPlayable(g.versionGroup)) &&
       (f.remakes === "all" || (f.remakes === "only") === Boolean(g.remake)) &&
       (f.generation === "all" || g.generation === f.generation)
   );

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { BALLS, STATUSES, ballMultiplier, catchChance, type Status } from "../lib/capture";
 import { calcGen3Stat } from "../lib/gen3Stats";
-import { dexMarkOf, usePlayerDex } from "../lib/playerDex";
 import { useLang, tr } from "../i18n/lang";
 
 interface Props {
@@ -47,8 +46,8 @@ const CapturePanel = ({ national, captureRate, baseHp, types }: Props) => {
   const en = lang === "en";
   const t = (pt: string, enText: string) => tr(lang, pt, enText);
 
-  const dex = usePlayerDex();
-  const owned = dexMarkOf(dex, national) === "owned";
+  // A Repeat Ball rende ×3 em espécie já capturada, e só quem joga sabe disso.
+  const [owned, setOwned] = useState(false);
 
   const maxHp = calcGen3Stat("hp", baseHp, IV_MEDIO, 0, level, 0, national);
   const hp = umPs ? 1 : Math.max(1, Math.round((maxHp * hpPct) / 100));
@@ -106,6 +105,10 @@ const CapturePanel = ({ national, captureRate, baseHp, types }: Props) => {
         <label className="capture-check">
           <input type="checkbox" checked={umPs} onChange={(e) => setUmPs(e.target.checked)} />
           {t("1 PS (False Swipe)", "1 HP (False Swipe)")}
+        </label>
+        <label className="capture-check">
+          <input type="checkbox" checked={owned} onChange={(e) => setOwned(e.target.checked)} />
+          {t("Já capturei um", "I already caught one")}
         </label>
       </div>
 

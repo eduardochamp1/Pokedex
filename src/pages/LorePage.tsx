@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import "../styles/lore.css";
 import { LORE_EVENTS } from "../data/lore";
 import { REGIONS } from "../data/regions";
@@ -29,7 +29,6 @@ import {
 import { REGION_SHAPES } from "../data/regionMap";
 import { pixelSpriteUrl } from "../lib/sprites";
 import { STARTERS } from "../data/rarity";
-import { isPlayableGeneration } from "../emulator/playable";
 import {
   parseLoreTab,
   serializeLoreTab,
@@ -86,8 +85,7 @@ const LorePage = () => {
    *
    * Sem isso a Lore nao era enderecavel: nao dava para mandar link para a
    * Cronologia, nem para a aba de Geracoes, nem para voltar onde se estava
-   * depois de recarregar — e quem quisesse apontar para ca, como a aba
-   * /jogar, so conseguia apontar para a Lore inteira.
+   * depois de recarregar.
    */
   const [params, setParams] = useSearchParams();
   const tab = parseLoreTab(params);
@@ -338,26 +336,12 @@ const LorePage = () => {
                       <span className="gen-slide-year">{g.year}</span>
                     </div>
                   </div>
-                  {/* Geracoes I a III rodam no core desta casa; da IV em
-                      diante e DS, 3DS e Switch. A assimetria e informacao: ela
-                      mostra de relance qual epoca da para jogar aqui. */}
                   <div className="gen-games">
-                    {g.mainGames.map((game) =>
-                      isPlayableGeneration(g.id) ? (
-                        <Link
-                          key={game}
-                          to="/jogar"
-                          className="gen-game-badge gen-game-badge-jogavel"
-                          title={tx(`${game} roda no emulador desta aba`, `${game} runs in this site's emulator`)}
-                        >
-                          {game}
-                        </Link>
-                      ) : (
-                        <span key={game} className="gen-game-badge">
-                          {game}
-                        </span>
-                      )
-                    )}
+                    {g.mainGames.map((game) => (
+                      <span key={game} className="gen-game-badge">
+                        {game}
+                      </span>
+                    ))}
                   </div>
                   <p className="gen-slide-fact">{g.gimmick}</p>
                   <WikiSource wiki={g.wiki} />

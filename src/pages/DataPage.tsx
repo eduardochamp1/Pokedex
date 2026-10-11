@@ -30,12 +30,6 @@ const Resumo = ({ r }: { r: BackupSummary }) => {
         <strong>{r.favorites}</strong> {t("favoritos", "favorites")}
       </li>
       <li>
-        <strong>{r.trainerCards}</strong> {t("fichas de treinador", "trainer cards")}
-      </li>
-      <li>
-        <strong>{r.playerDexes}</strong> {t("Pokédex de jogo", "game Pokédexes")}
-      </li>
-      <li>
         <strong>{r.other}</strong> {t("preferências e recordes", "preferences and records")}
       </li>
     </ul>

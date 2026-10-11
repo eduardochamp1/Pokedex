@@ -1,18 +1,16 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import Searchbar from "../components/Searchbar";
 import Pokedex from "../components/Pokedex";
 import TypeFilter from "../components/TypeFilter";
 import DexFilter from "../components/DexFilter";
 import RarityFilter from "../components/RarityFilter";
-import PlayerDexFilter from "../components/PlayerDexFilter";
 import CardHero from "../components/CardHero";
 import { CardSkeleton } from "../components/Skeleton";
 import { useDebounce } from "../hooks/useDebounce";
 import { useFeaturedPokemon } from "../hooks/useFeaturedPokemon";
 // So o modulo de sessao, que le do localStorage: nao arrasta o core do
 // emulador, que sao ~1,8 MB para descobrir um nome de arquivo.
-import { getLastRom } from "../emulator/session";
 import {
   usePokemonList,
   usePokemonPage,
@@ -22,7 +20,6 @@ import {
 import { tGenus, tType } from "../data/i18n";
 import { pickLocalized } from "../lib/localize";
 import { sortNamesAlphabetically } from "../lib/filters";
-import { dexMarkOf, nationalsFor, usePlayerDex } from "../lib/playerDex";
 import { localeOf, useLang, tr } from "../i18n/lang";
 import {
   parseHomeParams,
@@ -54,28 +51,12 @@ const HomePage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch]);
 
-  /**
-   * A dex do jogo lido do save em /jogar. Sem ela, `meu=` na URL e ignorado:
-   * um link compartilhado nao pode esvaziar a grade de quem nunca jogou.
-   */
-  const playerDex = usePlayerDex();
-  const mine = playerDex ? current.mine : undefined;
-  const mineNationals = useMemo(
-    () => (playerDex && mine ? nationalsFor(playerDex, mine) : undefined),
-    [playerDex, mine]
-  );
-  const markOf = useCallback(
-    (id: number) => dexMarkOf(playerDex, id),
-    [playerDex]
-  );
-
   const selection = usePokemonSelection({
     search: debouncedSearch,
     type: current.type,
     generation: current.generation,
     pokedex: current.pokedex,
     rarity: current.rarity,
-    nationals: mineNationals,
   });
 
   const orderedNames = useMemo(() => {
@@ -91,14 +72,6 @@ const HomePage = () => {
   const isSelecting = selection.names !== null;
 
   const featured = useFeaturedPokemon();
-  /**
-   * O ultimo jogo aberto em /jogar, se houver.
-   *
-   * "Fechar jogo" limpa esse registro de proposito, entao quem fechou nao e
-   * convidado de volta. Lido uma vez, no primeiro render: o valor so muda em
-   * outra aba do site, e voltar para a Home remonta a pagina.
-   */
-  const ultimoJogo = useMemo(() => getLastRom(), []);
   const featuredSpecies = usePokemonSpecies(featured.data?.species.url);
 
   const pokemons = isSelecting ? selected.pokemons : listQuery.data?.pokemons ?? [];
@@ -154,13 +127,7 @@ const HomePage = () => {
         </section>
       )}
 
-      {ultimoJogo && (
-        <Link to="/jogar" className="home-resume">
-          <span className="home-resume-label">{t("Você parou em", "You left off at")}</span>
-          <strong>{ultimoJogo}</strong>
-          <span className="home-resume-cta">{t("retomar →", "resume →")}</span>
-        </Link>
-      )}
+
 
       <div className="home-layout">
         <aside className="home-sidebar">
@@ -185,16 +152,6 @@ const HomePage = () => {
             value={current.rarity}
             onChange={(v) => update({ rarity: v })}
           />
-          {playerDex && (
-            <>
-              <h3>{t("Seu jogo", "Your game")}</h3>
-              <PlayerDexFilter
-                entry={playerDex}
-                value={mine}
-                onChange={(v) => update({ mine: v })}
-              />
-            </>
-          )}
           <h3>{t("Ordenar", "Sort")}</h3>
           <div className="type-filter">
             <label htmlFor="sort-select">{t("Ordem:", "Order:")}</label>
@@ -233,7 +190,6 @@ const HomePage = () => {
               setPage={(p) => update({ page: p })}
               totalPages={totalPages}
               total={total}
-              dexMarkOf={playerDex ? markOf : undefined}
             />
           )}
         </div>

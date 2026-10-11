@@ -2,11 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { TIMELINE_GAMES } from "../data/gameTimeline";
 import { REGIONS } from "../data/regions";
-import { versionGroupOf } from "../data/versions";
 import { byYear, filterGames, type TimelineFilter } from "../lib/gameTimeline";
-import { isPlayable } from "../emulator/playable";
-import { useTrainerEntry } from "../lib/trainerLog";
-import { saveVersion } from "../lib/gen3Game";
 import { generationLabel } from "../i18n/common";
 import { useLang, tr } from "../i18n/lang";
 import "../styles/trainer.css";
@@ -17,14 +13,12 @@ const nomeDaRegiao = (id: string) => REGIONS.find((r) => r.id === id)?.name ?? i
 
 /**
  * Os jogos principais de 1996 até hoje, por ano, cada um ligado à região no
- * mapa, à lore das gerações e — quando o emulador roda — a `/jogar`.
+ * mapa e à lore das gerações.
  */
 const GamesPage = () => {
   const lang = useLang();
   const t = (pt: string, en: string) => tr(lang, pt, en);
-  const [f, setF] = useState<TimelineFilter>({ playableOnly: false, remakes: "all", generation: "all" });
-  const entry = useTrainerEntry();
-  const grupoDoSave = entry ? versionGroupOf(saveVersion(entry.game ?? "emerald", entry.rom)) : undefined;
+  const [f, setF] = useState<TimelineFilter>({ remakes: "all", generation: "all" });
   const anos = byYear(filterGames(TIMELINE_GAMES, f));
   const geracoes = [...new Set(TIMELINE_GAMES.map((g) => g.generation))];
 
@@ -60,10 +54,6 @@ const GamesPage = () => {
             <option value="only">{t("Só remakes", "Remakes only")}</option>
           </select>
         </label>
-        <label>
-          <input type="checkbox" checked={f.playableOnly} onChange={(e) => setF({ ...f, playableOnly: e.target.checked })} />{" "}
-          {t("Só os que rodam em Jogar", "Only those that run in Play")}
-        </label>
       </div>
 
       {anos.length === 0 ? (
@@ -75,13 +65,11 @@ const GamesPage = () => {
               <h2 className="jogos-ano-numero">{year}</h2>
               <ul className="jogos-cartoes">
                 {games.map((g) => {
-                  const jogavel = isPlayable(g.versionGroup);
                   return (
-                    <li key={g.versionGroup} className={`jogos-cartao${g.versionGroup === grupoDoSave ? " jogos-seu" : ""}`}>
+                    <li key={g.versionGroup} className="jogos-cartao">
                       <div className="jogos-titulo">
                         <strong>Pokémon {g.title}</strong>
                         {g.remake && <span className="jogos-tag">remake</span>}
-                        {g.versionGroup === grupoDoSave && <span className="jogos-tag jogos-tag-seu">{t("seu save", "your save")}</span>}
                       </div>
                       <p className="trainer-sub">
                         {g.platform} · {generationLabel(g.generation, lang)} · {nomeDaRegiao(g.region)}
@@ -92,11 +80,6 @@ const GamesPage = () => {
                           <Link to={`/mapa?region=${g.region}`}>{t("região no mapa", "region on the map")}</Link>
                         )}
                         <Link to="/lore?aba=generations">{t("a geração na lore", "the generation in the lore")}</Link>
-                        {jogavel && (
-                          <Link to={`/jogar?jogo=${g.versionGroup}`} className="jogos-jogar">
-                            ▶ {t("jogar", "play")}
-                          </Link>
-                        )}
                       </p>
                     </li>
                   );

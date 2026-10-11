@@ -1,7 +1,7 @@
 {
   "short_name": "Pokédex",
-  "name": "Pokédex — lore, mapa e emulador",
-  "description": "Pokédex completa em React com lore do universo, mapa-múndi e emulador GB/GBC/GBA.",
+  "name": "Pokédex — lore, mapa e quiz",
+  "description": "Pokédex completa em React com a lore do universo, mapa-múndi, evoluções, quiz e montador de time.",
   "lang": "pt-BR",
   "icons": [
     {
@@ -29,11 +29,6 @@
   "background_color": "#0b0e13",
   "shortcuts": [
     {
-      "name": "Jogar",
-      "url": "/jogar",
-      "description": "Emulador GB, GBC e GBA"
-    },
-    {
       "name": "Quiz",
       "url": "/quiz",
       "description": "Quem é esse Pokémon?"
@@ -42,11 +37,6 @@
       "name": "Time",
       "url": "/time",
       "description": "Montador de time"
-    },
-    {
-      "name": "Treinador",
-      "url": "/treinador",
-      "description": "Ficha e linha do tempo do seu save"
     }
   ]
 }
