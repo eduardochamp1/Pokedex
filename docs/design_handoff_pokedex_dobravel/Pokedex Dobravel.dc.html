@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0b0e13;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#f2f2f5}
+a{color:#9bbc0f}a:hover{color:#b9dc2a}
+*{box-sizing:border-box}
+</style>
+</helmet>
+<div style="min-height:100vh;background:#0b0e13;padding:{{ outerPad }};display:flex;justify-content:center;align-items:flex-start">
+<div style="width:100%;max-width:1280px;background:{{ shellBg }};border-radius:{{ shellRadius }};box-shadow:{{ shellShadow }};padding:{{ shellPad }};display:flex;flex-direction:column;gap:14px;min-height:{{ shellMin }}">
+
+<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+<div style="display:flex;align-items:center;gap:12px">
+<div style="width:44px;height:44px;border-radius:50%;background:#9ad8ff;border:4px solid #f2f2f5;box-shadow:0 0 0 3px #7a1220;position:relative"><div style="position:absolute;left:8px;top:7px;width:12px;height:12px;border-radius:50%;background:#fff;opacity:.85"></div></div>
+<div style="display:flex;gap:6px"><span style="width:11px;height:11px;border-radius:50%;background:#ee1e35;border:2px solid #7a1220"></span><span style="width:11px;height:11px;border-radius:50%;background:#e8c33c;border:2px solid #7a1220"></span><span style="width:11px;height:11px;border-radius:50%;background:#9bbc0f;border:2px solid #7a1220"></span></div>
+<span style="font-family:'Press Start 2P',monospace;font-size:14px;color:#f2f2f5;text-shadow:2px 2px 0 #7a1220">POKÉDEX</span>
+</div>
+<div style="display:flex;gap:6px;flex-wrap:wrap;flex:1;min-width:0">
+<sc-for list="{{ navItems }}" as="n" hint-placeholder-count="8">
+<span style="font-family:'Press Start 2P',monospace;font-size:9px;padding:9px 10px;border-radius:6px;background:{{ n.bg }};color:{{ n.fg }};border:2px solid {{ n.bd }};cursor:default;white-space:nowrap">{{ n.label }}<sc-if value="{{ n.count }}" hint-placeholder-val="{{ false }}"> {{ n.count }}</sc-if></span>
+</sc-for>
+</div>
+<div style="display:flex;gap:8px;align-items:center">
+<span style="font-family:'Press Start 2P',monospace;font-size:9px;padding:9px 10px;border-radius:6px;background:#10131c;color:#a2a9b8;border:2px solid #3a445c">⌕ CTRL K</span>
+<span style="font-family:'Press Start 2P',monospace;font-size:9px;padding:9px 10px;border-radius:6px;background:#10131c;color:#9bbc0f;border:2px solid #3a445c">PT</span>
+</div>
+</div>
+
+<sc-if value="{{ isNarrow }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:8px">
+<button onClick="{{ showList }}" style="flex:1;font-family:'Press Start 2P',monospace;font-size:10px;padding:12px;min-height:44px;border-radius:6px;border:2px solid #7a1220;background:{{ tabListBg }};color:{{ tabListFg }};cursor:pointer">LISTA</button>
+<button onClick="{{ showDetail }}" style="flex:1;font-family:'Press Start 2P',monospace;font-size:10px;padding:12px;min-height:44px;border-radius:6px;border:2px solid #7a1220;background:{{ tabDetBg }};color:{{ tabDetFg }};cursor:pointer">FICHA</button>
+</div>
+</sc-if>
+
+<div style="display:flex;flex:1;gap:0;min-height:{{ bodyMin }};align-items:stretch">
+
+<div style="display:{{ listDisplay }};flex:1;min-width:0;background:#10131c;border:{{ screenBorder }};border-radius:{{ paneRadiusL }};flex-direction:column;overflow:hidden">
+<div style="padding:14px;display:flex;flex-direction:column;gap:10px;border-bottom:2px solid #2b3345;background:#151823">
+<div style="display:flex;gap:8px">
+<input value="{{ query }}" onInput="{{ onQuery }}" placeholder="Buscar Pokémon ou número" style="flex:1;min-width:0;height:44px;padding:0 12px;border-radius:6px;border:2px solid #3a445c;background:#0b0e13;color:#f2f2f5;font-family:'Space Grotesk',system-ui,sans-serif;font-size:15px;outline:none" style-focus="border-color:#9bbc0f">
+<div style="display:flex;border:2px solid #3a445c;border-radius:6px;overflow:hidden">
+<button onClick="{{ setListView }}" aria-label="Lista" style="width:44px;border:0;cursor:pointer;font-family:'Press Start 2P',monospace;font-size:11px;background:{{ listBtnBg }};color:{{ listBtnFg }}">☰</button>
+<button onClick="{{ setGridView }}" aria-label="Grade" style="width:44px;border:0;cursor:pointer;font-family:'Press Start 2P',monospace;font-size:11px;background:{{ gridBtnBg }};color:{{ gridBtnFg }}">▦</button>
+</div>
+</div>
+<div style="display:flex;gap:6px;flex-wrap:wrap">
+<sc-for list="{{ typeChips }}" as="c" hint-placeholder-count="8">
+<button onClick="{{ c.pick }}" style="font-family:'Press Start 2P',monospace;font-size:8px;padding:8px 9px;min-height:30px;border-radius:6px;border:2px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};cursor:pointer;display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:{{ c.dot }}"></span>{{ c.label }}</button>
+</sc-for>
+</div>
+</div>
+
+<div style="flex:1;overflow:auto;max-height:{{ listMax }};padding:10px">
+<sc-if value="{{ isListView }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:4px">
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="8">
+<div onClick="{{ r.pick }}" style="display:flex;align-items:center;gap:12px;padding:6px 12px 6px 8px;border-radius:6px;background:{{ r.bg }};border:2px solid {{ r.bd }};cursor:pointer" style-hover="background:#1e2330">
+<span style="font-family:'Press Start 2P',monospace;font-size:10px;width:14px;color:#9bbc0f">{{ r.cursor }}</span>
+<img src="{{ r.sprite }}" width="48" height="48" style="image-rendering:pixelated;flex:none" alt="{{ r.name }}">
+<span style="font-family:'Press Start 2P',monospace;font-size:9px;color:#838a9d;width:44px">{{ r.num }}</span>
+<span style="font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:17px;flex:1;min-width:0">{{ r.name }}</span>
+<span style="display:flex;gap:5px">
+<sc-for list="{{ r.dots }}" as="d" hint-placeholder-count="1"><span style="width:12px;height:12px;border-radius:50%;background:{{ d.color }};border:2px solid #0b0e13;outline:1px solid #3a445c"></span></sc-for>
+</span>
+<span style="color:#e8543f;width:16px;text-align:center">{{ r.fav }}</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isGridView }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px">
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="0">
+<div onClick="{{ r.pick }}" style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px 10px;border-radius:6px;background:{{ r.bg }};border:2px solid {{ r.bd }};cursor:pointer;position:relative" style-hover="background:#1e2330">
+<span style="position:absolute;left:6px;top:6px;font-family:'Press Start 2P',monospace;font-size:7px;color:#838a9d">{{ r.num }}</span>
+<span style="position:absolute;right:6px;top:4px;color:#e8543f;font-size:12px">{{ r.fav }}</span>
+<img src="{{ r.sprite }}" width="80" height="80" style="image-rendering:pixelated;margin-top:10px" alt="{{ r.name }}">
+<span style="font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:14px">{{ r.name }}</span>
+<span style="display:flex;gap:5px">
+<sc-for list="{{ r.dots }}" as="d" hint-placeholder-count="1"><span style="width:10px;height:10px;border-radius:50%;background:{{ d.color }};border:2px solid #0b0e13;outline:1px solid #3a445c"></span></sc-for>
+</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="padding:40px 12px;text-align:center;font-family:'Press Start 2P',monospace;font-size:10px;color:#838a9d;line-height:1.8">NENHUM POKÉMON<br>ENCONTRADO</div>
+</sc-if>
+</div>
+
+<div style="padding:10px 14px;border-top:2px solid #2b3345;background:#151823;display:flex;justify-content:space-between;align-items:center;font-family:'Press Start 2P',monospace;font-size:9px;color:#a2a9b8">
+<span>{{ countLabel }}</span><span style="color:#9bbc0f">1 / 1</span>
+</div>
+</div>
+
+<sc-if value="{{ showHinge }}" hint-placeholder-val="{{ true }}">
+<div style="width:26px;flex:none;background:#8f1523;border-top:2px solid #7a1220;border-bottom:2px solid #7a1220;display:flex;flex-direction:column;justify-content:space-around;align-items:center;margin:14px 0">
+<span style="width:14px;height:34px;border-radius:4px;background:#5c0d18"></span><span style="width:14px;height:34px;border-radius:4px;background:#5c0d18"></span><span style="width:14px;height:34px;border-radius:4px;background:#5c0d18"></span>
+</div>
+</sc-if>
+
+<div style="display:{{ detailDisplay }};flex:1;min-width:0;background:#10131c;border:{{ screenBorder }};border-radius:{{ paneRadiusR }};flex-direction:column;overflow:hidden">
+<div style="background:#9bbc0f;color:#0b0e13;padding:16px 18px 0;position:relative;display:flex;flex-direction:column;align-items:center">
+<div style="width:100%;display:flex;justify-content:space-between;align-items:center;font-family:'Press Start 2P',monospace;font-size:10px">
+<span>Nº {{ sel.num }}</span>
+<span>{{ sel.rarity }}</span>
+<button onClick="{{ toggleFav }}" aria-label="Favoritar" style="width:44px;height:44px;border:2px solid #0b0e13;border-radius:6px;background:transparent;color:{{ sel.favColor }};font-size:20px;cursor:pointer;margin:-8px -8px 0 0">{{ sel.fav }}</button>
+</div>
+<div style="width:224px;height:224px;margin-top:-8px;background:radial-gradient(circle at 50% 60%,#b9dc2a 0,#9bbc0f 60%);display:flex;align-items:center;justify-content:center">
+<img src="{{ sel.sprite }}" width="192" height="192" style="image-rendering:pixelated;filter:drop-shadow(4px 4px 0 rgba(11,14,19,.35))" alt="{{ sel.name }}">
+</div>
+<div style="height:8px;width:100%;background:repeating-linear-gradient(90deg,#0b0e13 0 8px,transparent 8px 16px);opacity:.25"></div>
+</div>
+
+<div style="padding:18px 22px 22px;display:flex;flex-direction:column;gap:16px;overflow:auto;flex:1">
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'Press Start 2P',monospace;font-size:9px;color:#838a9d">{{ sel.genus }}</div>
+<div style="font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:34px;line-height:1.1">{{ sel.name }}</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<sc-for list="{{ sel.types }}" as="t" hint-placeholder-count="2"><span style="font-family:'Press Start 2P',monospace;font-size:9px;padding:8px 10px;border-radius:6px;background:{{ t.color }};color:#0b0e13">{{ t.label }}</span></sc-for>
+</div>
+</div>
+<p style="margin:0;font-size:15px;line-height:1.55;color:#cfd3dd;text-wrap:pretty">“{{ sel.flavor }}”</p>
+<div style="display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ sel.stats }}" as="s" hint-placeholder-count="6">
+<div style="display:grid;grid-template-columns:44px 1fr 36px;gap:10px;align-items:center">
+<span style="font-family:'Press Start 2P',monospace;font-size:9px;color:#a2a9b8">{{ s.label }}</span>
+<span style="height:12px;background:#1e2330;border:2px solid #2b3345;border-radius:3px;overflow:hidden;display:block"><span style="display:block;height:100%;width:{{ s.pct }};background:{{ s.color }}"></span></span>
+<span style="font-family:'Press Start 2P',monospace;font-size:9px;text-align:right">{{ s.value }}</span>
+</div>
+</sc-for>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<div style="background:#151823;border:2px solid #2b3345;border-radius:6px;padding:10px 12px"><div style="font-family:'Press Start 2P',monospace;font-size:8px;color:#838a9d;margin-bottom:8px">ALTURA</div><div style="font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:18px">{{ sel.height }}</div></div>
+<div style="background:#151823;border:2px solid #2b3345;border-radius:6px;padding:10px 12px"><div style="font-family:'Press Start 2P',monospace;font-size:8px;color:#838a9d;margin-bottom:8px">PESO</div><div style="font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:18px">{{ sel.weight }}</div></div>
+</div>
+</div>
+</div>
+</div>
+
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:0 6px">
+<div style="display:grid;grid-template-columns:repeat(3,44px);grid-template-rows:repeat(3,44px);gap:0">
+<span></span><button onClick="{{ prev }}" aria-label="Anterior" style="border:0;background:#1e2330;color:#f2f2f5;border-radius:6px 6px 0 0;cursor:pointer;font-size:14px" style-active="background:#9bbc0f;color:#0b0e13">▲</button><span></span>
+<span style="background:#1e2330;border-radius:6px 0 0 6px"></span><span style="background:#1e2330"></span><span style="background:#1e2330;border-radius:0 6px 6px 0"></span>
+<span></span><button onClick="{{ next }}" aria-label="Próximo" style="border:0;background:#1e2330;color:#f2f2f5;border-radius:0 0 6px 6px;cursor:pointer;font-size:14px" style-active="background:#9bbc0f;color:#0b0e13">▼</button><span></span>
+</div>
+<div style="font-family:'Press Start 2P',monospace;font-size:9px;color:#f2f2f5;text-align:center;line-height:1.8;text-shadow:1px 1px 0 #7a1220">{{ selNumLabel }}<br><span style="opacity:.85">↑ ↓ NAVEGAR</span></div>
+<div style="display:flex;gap:12px;align-items:center;transform:rotate(-18deg)">
+<button onClick="{{ showList }}" aria-label="B" style="width:48px;height:48px;border-radius:50%;border:3px solid #7a1220;background:#2b3345;color:#f2f2f5;font-family:'Press Start 2P',monospace;font-size:11px;cursor:pointer;margin-top:18px">B</button>
+<button onClick="{{ showDetail }}" aria-label="A" style="width:48px;height:48px;border-radius:50%;border:3px solid #7a1220;background:#9bbc0f;color:#0b0e13;font-family:'Press Start 2P',monospace;font-size:11px;cursor:pointer">A</button>
+</div>
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const TYPES={normal:['NORMAL','#a8a77a'],fire:['FOGO','#ee8130'],water:['ÁGUA','#6390f0'],electric:['ELÉTRICO','#f7d02c'],grass:['PLANTA','#7ac74c'],ice:['GELO','#96d9d6'],poison:['VENENO','#a33ea1'],flying:['VOADOR','#a98ff3'],psychic:['PSÍQUICO','#f95587'],ghost:['FANTASMA','#735797'],fairy:['FADA','#d685ad']};
+const P=[
+[1,'Bulbasaur',['grass','poison'],[45,49,49,65,65,45],7,69,'Semente','Uma semente cresce em suas costas desde o nascimento e se desenvolve junto com ele.'],
+[4,'Charmander',['fire'],[39,52,43,60,50,65],6,85,'Lagarto','A chama na ponta da cauda mostra o humor dele. Ela balança quando está feliz.'],
+[6,'Charizard',['fire','flying'],[78,84,78,109,85,100],17,905,'Chama','Voa pelos céus em busca de oponentes fortes. Seu sopro derrete qualquer coisa.'],
+[7,'Squirtle',['water'],[44,48,65,50,64,43],5,90,'Tartaruga Mini','Recolhe-se no casco e esguicha água com força quando se sente ameaçado.'],
+[9,'Blastoise',['water'],[79,83,100,85,105,78],16,855,'Marisco','Os canhões em seu casco disparam jatos de água capazes de atravessar aço.'],
+[25,'Pikachu',['electric'],[35,55,40,50,50,90],4,60,'Rato','Guarda eletricidade nas bochechas e a libera quando sente perigo.'],
+[39,'Jigglypuff',['normal','fairy'],[115,45,20,45,25,20],5,55,'Bola','Canta uma melodia que faz qualquer um adormecer, e se irrita quando ninguém escuta.'],
+[52,'Meowth',['normal'],[40,45,35,40,40,90],4,42,'Gato Arranhão','Adora objetos que brilham. À noite sai pela cidade em busca de moedas.'],
+[54,'Psyduck',['water'],[50,52,48,65,50,55],8,196,'Pato','Sempre com dor de cabeça. Quando a dor passa, usa poderes inesperados.'],
+[94,'Gengar',['ghost','poison'],[60,65,60,130,75,110],15,405,'Sombra','Esconde-se nas sombras e dizem que baixa a temperatura do ambiente.'],
+[129,'Magikarp',['water'],[20,10,55,15,20,80],9,100,'Peixe','Muito fraco e quase inútil em batalha. Ainda assim, é incrivelmente resistente.'],
+[131,'Lapras',['water','ice'],[130,85,80,85,95,60],25,2200,'Transporte','Entende a fala humana e carrega pessoas nas costas pelo mar.'],
+[133,'Eevee',['normal'],[55,55,50,45,65,55],3,65,'Evolução','Seu corpo instável pode mudar de forma para se adaptar a qualquer ambiente.'],
+[143,'Snorlax',['normal'],[160,110,65,65,110,30],21,4600,'Dorminhoco','Só acorda para comer. Depois de encher a barriga, volta a dormir.'],
+[150,'Mewtwo',['psychic'],[106,110,90,154,90,130],20,1220,'Genético','Criado por manipulação genética. Seu coração de combate é feroz.'],
+[151,'Mew',['psychic'],[100,100,100,100,100,100],4,40,'Nova Espécie','Dizem que possui o código genético de todos os Pokémon.']];
+const SL=['PS','ATK','DEF','SPA','SPD','VEL'];
+const NAV=['Pokédex','Comparar','Time','Mapa','Lore','Quiz','Tamanhos','Favoritos'];
+class Component extends DCLogic{
+state={sel:25,q:'',type:'',view:'list',pane:'list',favs:[25],w:typeof window!=='undefined'?window.innerWidth:1200};
+componentDidMount(){this._r=()=>this.setState({w:window.innerWidth});window.addEventListener('resize',this._r);this._k=e=>{if(e.target.tagName==='INPUT')return;if(e.key==='ArrowDown'||e.key==='ArrowRight'){e.preventDefault();this.move(1)}if(e.key==='ArrowUp'||e.key==='ArrowLeft'){e.preventDefault();this.move(-1)}};window.addEventListener('keydown',this._k)}
+componentWillUnmount(){window.removeEventListener('resize',this._r);window.removeEventListener('keydown',this._k)}
+list(){const q=this.state.q.trim().toLowerCase(),t=this.state.type;return P.filter(p=>(!t||p[2].includes(t))&&(!q||p[1].toLowerCase().includes(q)||String(p[0]).includes(q)))}
+move(d){const l=this.list();if(!l.length)return;let i=l.findIndex(p=>p[0]===this.state.sel);i=(i+d+l.length)%l.length;this.setState({sel:l[i][0]})}
+renderVals(){
+const s=this.state,narrow=s.w<860,l=this.list(),cur=P.find(p=>p[0]===s.sel)||P[5];
+const pad=n=>String(n).padStart(4,'0');
+const isFav=s.favs.includes(cur[0]);
+const dots=p=>p[2].map(t=>({color:TYPES[t][1]}));
+const rows=l.map(p=>({name:p[1],num:pad(p[0]),sprite:'sprites/'+p[0]+'.png',dots:dots(p),fav:s.favs.includes(p[0])?'♥':'',cursor:p[0]===s.sel?'▶':'',bg:p[0]===s.sel?'#1e2330':'transparent',bd:p[0]===s.sel?'#9bbc0f':'transparent',pick:()=>this.setState({sel:p[0],pane:narrow?'detail':s.pane})}));
+const typeChips=[['','TODOS','#f2f2f5']].concat(Object.keys(TYPES).filter(t=>P.some(p=>p[2].includes(t))).map(t=>[t,TYPES[t][0],TYPES[t][1]])).map(c=>{const on=s.type===c[0];return{label:c[1],dot:c[0]===''?'#9bbc0f':c[2],bg:on?'#9bbc0f':'#0b0e13',fg:on?'#0b0e13':'#a2a9b8',bd:on?'#9bbc0f':'#3a445c',pick:()=>this.setState({type:c[0]})}});
+const maxS=Math.max(...cur[3]);
+const stats=cur[3].map((v,i)=>({label:SL[i],value:v,pct:Math.min(100,v/180*100).toFixed(0)+'%',color:v>=100?'#9bbc0f':v>=60?'#e8c33c':'#e8543f'}));
+const navItems=NAV.map(n=>{const a=n==='Pokédex';return{label:n,count:n==='Favoritos'&&s.favs.length?String(s.favs.length):'',bg:a?'#9bbc0f':'#a8192a',fg:a?'#0b0e13':'#f2f2f5',bd:a?'#0b0e13':'#7a1220'}});
+const lp=narrow&&s.pane!=='list',dp=narrow&&s.pane!=='detail';
+const b=v=>v?'#9bbc0f':'#0b0e13',f=v=>v?'#0b0e13':'#a2a9b8';
+const rar=cur[0]===151?'✦ MÍTICO':cur[0]===150?'★ LENDÁRIO':'';
+return{
+outerPad:narrow?'0':'32px 24px',shellBg:'#c8202f',shellRadius:narrow?'0':'22px',shellShadow:narrow?'none':'8px 8px 0 #242c3d, inset 0 0 0 3px #8f1523',shellPad:narrow?'14px':'22px 24px 22px',shellMin:narrow?'100vh':'0',
+bodyMin:narrow?'0':'640px',listDisplay:lp?'none':'flex',detailDisplay:dp?'none':'flex',showHinge:!narrow,isNarrow:narrow,
+screenBorder:'4px solid #5c0d18',paneRadiusL:narrow?'10px':'14px 0 0 14px',paneRadiusR:narrow?'10px':'0 14px 14px 0',listMax:narrow?'none':'520px',
+tabListBg:b(s.pane==='list'),tabListFg:f(s.pane==='list'),tabDetBg:b(s.pane==='detail'),tabDetFg:f(s.pane==='detail'),
+query:s.q,onQuery:e=>this.setState({q:e.target.value}),
+setListView:()=>this.setState({view:'list'}),setGridView:()=>this.setState({view:'grid'}),
+listBtnBg:b(s.view==='list'),listBtnFg:f(s.view==='list'),gridBtnBg:b(s.view==='grid'),gridBtnFg:f(s.view==='grid'),
+isListView:s.view==='list',isGridView:s.view==='grid',isEmpty:!l.length,rows,typeChips,navItems,
+countLabel:l.length+' DE '+P.length+' REGISTRADOS',selNumLabel:'Nº '+pad(cur[0]),
+showList:()=>this.setState({pane:'list'}),showDetail:()=>this.setState({pane:'detail'}),
+prev:()=>this.move(-1),next:()=>this.move(1),
+toggleFav:()=>this.setState(st=>({favs:st.favs.includes(cur[0])?st.favs.filter(x=>x!==cur[0]):st.favs.concat(cur[0])})),
+sel:{num:pad(cur[0]),name:cur[1],sprite:'sprites/'+cur[0]+'.png',genus:cur[6].toUpperCase(),flavor:cur[7],rarity:rar,fav:isFav?'♥':'♡',favColor:isFav?'#c8202f':'#0b0e13',types:cur[2].map(t=>({label:TYPES[t][0],color:TYPES[t][1]})),stats,height:(cur[4]/10).toFixed(1).replace('.',',')+' m',weight:(cur[5]/10).toFixed(1).replace('.',',')+' kg'}
+}}}
+</script>
+</body>
+</html>
