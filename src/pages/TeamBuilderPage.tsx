@@ -83,9 +83,9 @@ const TeamBuilderPage = () => {
         <>
           <div className="pane-bar">
             <div className="pane-bar-row">
-              <h1 className="pane-h" style={{ flex: 1 }}>
+              <h2 className="pane-h" style={{ flex: 1 }}>
                 {t("MONTAR TIME", "BUILD TEAM")} · {names.length}/{MAX_TEAM}
-              </h1>
+              </h2>
               <button type="button" className="pane-btn" disabled={names.length === 0} onClick={() => setNames([])}>
                 {t("LIMPAR", "CLEAR")}
               </button>

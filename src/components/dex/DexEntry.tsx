@@ -197,7 +197,7 @@ const DexEntry = ({ nameOrId, featured = false, search }: Props) => {
           </div>
           <div className="entry-id">
             {genus && <div className="px">{semAcento(tGenus(genus, lang))}</div>}
-            <h1>{nome}</h1>
+            <h2>{nome}</h2>
             <div className="entry-types">
               {tipos.map((tp) => (
                 <span key={tp} className="type-tag" data-type={tp} style={{ background: `var(--t-${tp})` }}>

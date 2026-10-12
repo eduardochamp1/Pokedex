@@ -515,7 +515,7 @@
   .dev-tab { flex: none; }
   .dev-tools { margin-left: auto; }
   .dev-title { font-size: 12px; }
-  .dev-mtabs { display: flex; }
+  .dev-mtabs { display: flex; flex: 1 1 100%; order: 4; }
   .dev-body { height: auto; min-height: 60vh; }
   .dev-hinge { display: none; }
   .dev-pane { border-radius: 10px; }
@@ -581,7 +581,7 @@
   min-width: 18px;
   justify-content: flex-end;
 }
-.pane-bar h1.pane-h { color: var(--text); font-size: 10px; }
+.pane-bar h2.pane-h { color: var(--text); font-size: 10px; }
 /* Na faixa em coluna, `flex: 1` do campo achatava a altura dele. */
 .roster-bar .pane-input { flex: none; width: 100%; }
 

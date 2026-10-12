@@ -54,7 +54,7 @@
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
 }
-.team-ataque li.is-gap { border-style: dashed; opacity: 0.7; }
+.team-ataque li.is-gap { border-style: dashed; }
 .team-ataque-quem {
   font-size: 0.78rem;
   color: var(--text-muted);

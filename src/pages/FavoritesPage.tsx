@@ -38,7 +38,7 @@ const FavoritesPage = () => {
       left={
         <>
           <div className="pane-bar">
-            <h1 className="pane-h">{t("COLECAO", "COLLECTION")}</h1>
+            <h2 className="pane-h">{t("COLECAO", "COLLECTION")}</h2>
             <p className="fav-hint">{t("Toque para tirar da coleção.", "Tap to remove from the collection.")}</p>
           </div>
           <RosterList

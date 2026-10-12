@@ -32,8 +32,8 @@ const CryButton = ({ src, name }: Props) => {
           el.currentTime = 0;
           void el.play().catch(() => setFailed(true));
         }}
-        aria-label={t(`Ouvir o som de ${name}`, `Play ${name}'s cry`)}
-        title={t(`Ouvir o som de ${name}`, `Play ${name}'s cry`)}
+        aria-label={t(`Ouvir o grito de ${name}`, `Play the cry of ${name}`)}
+        title={t(`Ouvir o grito de ${name}`, `Play the cry of ${name}`)}
       >
         {t("GRITO", "CRY")}
       </button>

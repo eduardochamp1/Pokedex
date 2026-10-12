@@ -126,7 +126,7 @@ const Tela = ({ modos, titulo, lateral, children }: TelaProps) => {
       left={
         <>
           <div className="pane-bar">
-            <h1 className="pane-h">{tr(lang, "QUEM E ESSE POKEMON?", "WHO'S THAT POKEMON?")}</h1>
+            <h2 className="pane-h">{tr(lang, "QUEM E ESSE POKEMON?", "WHO'S THAT POKEMON?")}</h2>
           </div>
           <div className="pane-scroll">
             {modos}

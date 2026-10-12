@@ -180,7 +180,7 @@ const LorePage = () => {
       left={
         <>
         <div className="pane-bar">
-        <h1 className="pane-h">{tx("UNIVERSO POKEMON", "POKEMON UNIVERSE")}</h1>
+        <h2 className="pane-h">{tx("UNIVERSO POKEMON", "POKEMON UNIVERSE")}</h2>
 
         <div className="lore-search">
           <input

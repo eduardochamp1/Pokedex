@@ -308,6 +308,21 @@ Diferenças em relação ao handoff:
   páginas da Fase 4 foram conferidas por inspeção da página (estrutura, cores computadas,
   ausência de erro e de rolagem lateral), não pelo olho.
 
+### Auditoria e offline (2026-10-12)
+
+- **axe-core 4.x** (WCAG 2.1 A/AA + boas práticas) em 79 páginas do build de produção: todas
+  as rotas em 1360 px e em 375 px, mais a tela da direita no celular. A primeira passada
+  achou seis tipos de problema, todos corrigidos; a segunda deu **zero violações**.
+  Corrigido: nome acessível diferente do texto visível (marca, CTRL K, grito); abas do
+  celular fora de landmark; dois nav com o mesmo nome na Lore; contraste na lista de
+  ataque do Time (opacidade); página sem h1 no celular (o título ia embora com a tela
+  escondida — o h1 agora é do aparelho, e os títulos de painel viraram h2); salto de
+  nível de título em Golpes.
+- **Offline**: com o service worker instalado (42 arquivos no cache do build) e o servidor
+  derrubado, 19 rotas abriram por navegação completa, inclusive uma ficha nunca visitada e
+  a 404. A internet da máquina seguia ligada, então isto prova o **shell** sem servidor; o
+  comportamento com a PokéAPI fora do ar não foi testado.
+
 ## Bloqueios
 
 _(vazio)_

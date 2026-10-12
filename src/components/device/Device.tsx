@@ -106,7 +106,7 @@ const Device = ({ children }: { children: ReactNode }) => {
       <div className="dev">
         <div className="dev-shell">
           <header className="dev-top">
-            <Link to="/" className="dev-brand" aria-label={t("Ir para a Pokédex", "Go to the Pokédex")}>
+            <Link to="/" className="dev-brand" title={t("Ir para a Pokédex", "Go to the Pokédex")}>
               <span className="dev-lens" aria-hidden="true" />
               <span className="dev-lights" aria-hidden="true">
                 <span />
@@ -115,7 +115,7 @@ const Device = ({ children }: { children: ReactNode }) => {
               </span>
               <span className="dev-title">POKEDEX</span>
             </Link>
-            <nav className="dev-tabs" aria-label={t("Seções", "Sections")}>
+            <nav className="dev-tabs" aria-label={t("Abas do aparelho", "Device tabs")}>
               {abas.map((a) => (
                 <NavLink
                   key={a.to}
@@ -134,7 +134,7 @@ const Device = ({ children }: { children: ReactNode }) => {
               <button
                 type="button"
                 onClick={openSearch}
-                aria-label={t("Buscar no site (Ctrl+K)", "Search the site (Ctrl+K)")}
+                aria-label={t("CTRL K: buscar no site", "CTRL K: search the site")}
                 title={t("Buscar no site (Ctrl+K)", "Search the site (Ctrl+K)")}
               >
                 CTRL K
@@ -143,22 +143,24 @@ const Device = ({ children }: { children: ReactNode }) => {
               <InstallButton />
               <ScanlineToggle />
             </div>
+            {config && (
+              <div className="dev-mtabs" role="group" aria-label={t("Tela", "Screen")}>
+                <button type="button" className="dev-mtab" aria-pressed={pane === "left"} onClick={() => setPane("left")}>
+                  {config.labels[0]}
+                </button>
+                <button type="button" className="dev-mtab" aria-pressed={pane === "right"} onClick={() => setPane("right")}>
+                  {config.labels[1]}
+                </button>
+              </div>
+            )}
           </header>
-
-          {config && (
-            <div className="dev-mtabs" role="group" aria-label={t("Tela", "Screen")}>
-              <button type="button" className="dev-mtab" aria-pressed={pane === "left"} onClick={() => setPane("left")}>
-                {config.labels[0]}
-              </button>
-              <button type="button" className="dev-mtab" aria-pressed={pane === "right"} onClick={() => setPane("right")}>
-                {config.labels[1]}
-              </button>
-            </div>
-          )}
 
           {/* O único <main> do site: é o landmark que leitor de tela procura, e
               o destino do link "pular para o conteúdo". */}
           <main id="conteudo" tabIndex={-1} className="dev-body">
+            {/* Só nas páginas de duas telas: as de tela única já trazem o próprio
+                título, e no celular uma das telas (com o título dela) some. */}
+            {config && <h1 className="visually-hidden">{abas.find((a) => sectionOf(a.to) === section)?.label ?? "POKEDEX"}</h1>}
             {children}
           </main>
 

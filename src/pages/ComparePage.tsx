@@ -108,7 +108,7 @@ const ComparePage = () => {
       left={
         <>
           <div className="pane-bar">
-            <h1 className="pane-h">ARENA</h1>
+            <h2 className="pane-h">ARENA</h2>
             <div className="pane-bar-row">
               <button type="button" className="pane-btn" aria-pressed={slot === "a"} onClick={() => setSlot("a")}>
                 SLOT A

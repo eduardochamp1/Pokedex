@@ -67,7 +67,7 @@ const MapPage = () => {
       left={
         <>
           <div className="pane-bar">
-            <h1 className="pane-h">{t("MAPA DO MUNDO POKEMON", "MAP OF THE POKEMON WORLD")}</h1>
+            <h2 className="pane-h">{t("MAPA DO MUNDO POKEMON", "MAP OF THE POKEMON WORLD")}</h2>
             <p className="map-hint">
               {t("Toque numa região para abrir o dossiê.", "Tap a region to open its dossier.")}
             </p>

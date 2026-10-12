@@ -97,7 +97,7 @@ const SizesPage = () => {
       left={
         <>
           <div className="pane-bar">
-            <h1 className="pane-h">{t("COMPARACOES PRONTAS", "READY-MADE COMPARISONS")}</h1>
+            <h2 className="pane-h">{t("COMPARACOES PRONTAS", "READY-MADE COMPARISONS")}</h2>
             <div className="pane-bar-row">
               {PRESETS.map((p) => (
                 <button key={p.title[0]} type="button" className="pane-btn sizes-preset" onClick={() => loadPreset(p.names)}>
