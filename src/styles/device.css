@@ -501,6 +501,20 @@
     padding: 14px;
     min-height: 100vh;
   }
+  /* As abas viram uma fileira só, que rola de lado: empilhadas elas tomavam
+     meia tela antes de aparecer qualquer conteúdo. */
+  .dev-top { gap: 10px; }
+  .dev-tabs {
+    order: 3;
+    flex: 1 1 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+  .dev-tab { flex: none; }
+  .dev-tools { margin-left: auto; }
+  .dev-title { font-size: 12px; }
   .dev-mtabs { display: flex; }
   .dev-body { height: auto; min-height: 60vh; }
   .dev-hinge { display: none; }
@@ -511,3 +525,20 @@
   .pane-band h1,
   .pane-band h2 { font-size: 26px; }
 }
+
+/* O seletor de idioma dentro da barra do aparelho: duas teclas coladas. */
+.dev-tools .lang-toggle {
+  display: flex;
+  border: 0;
+  background: none;
+  padding: 0;
+  gap: 0;
+}
+.dev-tools .lang-toggle button { border-radius: 0; }
+.dev-tools .lang-toggle button:first-child { border-radius: var(--radius-sm) 0 0 var(--radius-sm); border-right: 0; }
+.dev-tools .lang-toggle button:last-child { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+.dev-tools .lang-toggle button[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.dev-tools .scanline-toggle { width: 40px; padding: 0; }

@@ -1,0 +1,448 @@
+/* ==========================================================================
+   Pokédex — lista (tela esquerda) e ficha (tela direita).
+   Medidas do handoff, seção "1. Pokédex".
+   ========================================================================== */
+
+/* ---------- Controles da lista ---------- */
+.dex-view {
+  display: flex;
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  flex: none;
+}
+.dex-view button {
+  width: 44px;
+  height: 40px;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  background: var(--bg);
+  color: var(--text-muted);
+  box-shadow: none;
+  padding: 0;
+}
+.dex-view button[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.dex-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.dex-chip {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  padding: 8px 9px;
+  min-height: 30px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border-strong);
+  background: var(--bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: none;
+}
+.dex-chip:hover { color: var(--text); }
+.dex-chip[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent-ink);
+}
+.dex-chip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.dex-filtros-toggle {
+  align-self: flex-start;
+  background: none;
+  border: 0;
+  padding: 4px 0;
+  color: var(--text-muted);
+  cursor: pointer;
+  box-shadow: none;
+}
+.dex-filtros-toggle:hover { color: var(--text); }
+.dex-filtros-on { color: var(--accent); }
+.dex-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+
+/* ---------- Lista ---------- */
+.dex-rows,
+.dex-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.dex-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.dex-row img { flex: none; margin: -8px 0; }
+.dex-cursor {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  width: 14px;
+  flex: none;
+  color: var(--accent);
+}
+.dex-num {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  color: var(--text-dim);
+  width: 44px;
+  flex: none;
+}
+.dex-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 17px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dex-dots {
+  display: flex;
+  gap: 5px;
+  flex: none;
+}
+.dex-fav {
+  color: var(--fav);
+  width: 16px;
+  text-align: center;
+  flex: none;
+}
+
+/* ---------- Grade ---------- */
+.dex-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(124px, 1fr));
+  gap: 8px;
+}
+.dex-cell {
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 4px 10px;
+  position: relative;
+  text-align: center;
+}
+.dex-cell img { margin-top: 6px; }
+.dex-cell-num {
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  font-family: var(--font-pixel);
+  font-size: 7px;
+  color: var(--text-dim);
+}
+.dex-cell-fav {
+  position: absolute;
+  right: 6px;
+  top: 4px;
+  color: var(--fav);
+  font-size: 12px;
+}
+.dex-cell-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+}
+.dex-cell .type-dot { width: 10px; height: 10px; }
+
+.dex-pager {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent);
+}
+.dex-pager button {
+  width: 36px;
+  height: 32px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border-strong);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: none;
+  font-size: 10px;
+}
+.dex-pager button:disabled { opacity: 0.35; cursor: not-allowed; }
+.dex-pager button:hover:not(:disabled) { border-color: var(--accent); }
+
+/* ---------- Ficha: faixa verde ---------- */
+.entry-band { padding-bottom: 0; }
+.entry-band-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+}
+.entry-daily { opacity: 0.8; }
+.entry-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+/* O botão do grito e o coração, com a mesma tecla de contorno escuro. */
+.entry-actions button {
+  height: 44px;
+  min-width: 44px;
+  padding: 0 12px;
+  border: 2px solid var(--accent-ink);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--accent-ink);
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  cursor: pointer;
+  box-shadow: none;
+}
+.entry-actions button:hover { background: var(--accent-hover); }
+.entry-actions .entry-fav {
+  font-size: 20px;
+  padding: 0;
+  font-family: inherit;
+}
+.entry-fav[aria-pressed="true"] { color: #a3121f; }
+
+.entry-band-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 12px;
+}
+.entry-sprite {
+  width: 128px;
+  height: 128px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 60%, var(--accent-hover) 0, var(--accent) 70%);
+}
+.entry-sprite img {
+  filter: drop-shadow(3px 3px 0 rgba(11, 14, 19, 0.35));
+  object-fit: contain;
+}
+.entry-id {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.entry-types {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* ---------- Ficha: abas ---------- */
+.entry-tabs {
+  display: flex;
+  background: var(--surface-1);
+  border-bottom: 2px solid var(--border);
+  flex: none;
+}
+.entry-tabs button {
+  flex: 1;
+  min-height: 44px;
+  border: 0;
+  border-bottom: 4px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-dim);
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  cursor: pointer;
+  box-shadow: none;
+  padding: 0 4px;
+}
+.entry-tabs button:hover { color: var(--text); }
+.entry-tabs button[aria-selected="true"] {
+  border-bottom-color: var(--accent);
+  color: var(--accent);
+  background: var(--surface-2);
+}
+
+/* ---------- Ficha: conteúdo ---------- */
+.entry-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.entry-flavor {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--text);
+  border-left: 4px solid var(--accent);
+  padding-left: 14px;
+}
+.entry-facts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.entry-facts .pane-card { padding: 12px; gap: 6px; }
+.entry-facts strong {
+  font-family: var(--font-display);
+  font-size: 20px;
+}
+
+.entry-stats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.entry-stats li {
+  display: grid;
+  grid-template-columns: 64px 1fr 36px;
+  align-items: center;
+  gap: 10px;
+}
+.entry-stats .px { color: var(--text-muted); font-size: 8px; }
+.entry-stats strong {
+  text-align: right;
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+}
+.entry-stat-bar {
+  height: 14px;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.entry-stat-bar span {
+  display: block;
+  height: 100%;
+}
+.entry-stat-total {
+  border-top: 2px solid var(--border);
+  padding-top: 10px;
+}
+.entry-stat-total strong { color: var(--accent); }
+
+.entry-defense {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+.entry-defense li {
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface-1);
+  text-align: center;
+}
+.entry-defense-type {
+  display: block;
+  padding: 5px 0;
+  font-family: var(--font-pixel);
+  font-size: 7px;
+  color: var(--accent-ink);
+}
+.entry-defense-mult {
+  display: block;
+  min-height: 28px;
+  line-height: 28px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-dim);
+}
+.entry-defense .is-x4 .entry-defense-mult { background: var(--pokeball-red); color: #fff; }
+.entry-defense .is-x2 .entry-defense-mult { background: var(--fav); color: var(--accent-ink); }
+.entry-defense .is-resist .entry-defense-mult { background: #1d3a24; color: var(--accent-hover); }
+.entry-defense .is-immune .entry-defense-mult { background: var(--bg); color: var(--text); }
+
+.entry-evo {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.entry-evo-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.entry-evo-cond {
+  color: var(--accent-alt);
+  font-size: 8px;
+  max-width: 120px;
+  text-align: center;
+}
+.entry-evo-card {
+  flex-direction: column;
+  gap: 2px;
+  width: 112px;
+  padding: 8px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  border-color: var(--border);
+}
+
+@media (max-width: 859px) {
+  .entry-defense { grid-template-columns: repeat(6, 1fr); gap: 4px; }
+  .entry-sprite { width: 104px; height: 104px; }
+  .entry-sprite img { width: 104px; height: 104px; }
+  .entry-facts { gap: 6px; }
+  .dex-name { font-size: 16px; }
+}
+
+/* O botão do grito traz largura fixa do estilo antigo (era só um ícone). */
+.entry-actions .cry-button {
+  width: auto;
+  white-space: nowrap;
+  border-radius: var(--radius-sm);
+}
+
+/* A nota musical não existe na fonte bitmap: vem da fonte do sistema. */
+.entry-actions .cry-button::before {
+  content: "♪ ";
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+@media (max-width: 859px) {
+  /* Dezoito chips em quatro linhas empurravam a lista para fora da tela. */
+  .dex-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+  .dex-chip { flex: none; }
+  .dex-row { gap: 8px; padding-left: 4px; }
+  .dex-row img { width: 56px; height: 56px; margin: -4px 0; }
+  .dex-num { width: 38px; }
+}

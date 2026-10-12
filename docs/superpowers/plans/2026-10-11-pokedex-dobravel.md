@@ -97,7 +97,7 @@ só com o dono pedindo.
   Teste: `src/lib/deviceNav.test.ts` (a aba de um endereço). O teste de componente ficou de
   fora: a suíte roda em ambiente node, sem jsdom; A/B e D-pad foram conferidos no navegador.
 
-- [ ] **1.3 Pokédex — painel esquerdo.** 👁
+- [x] **1.3 Pokédex — painel esquerdo.** 👁
   Criar `src/components/dex/DexList.tsx` e `src/styles/dex.css`. Recebe o mesmo estado que
   a `HomePage` já calcula (`current`, `update`, `pokemons`, `total`, `totalPages`). Faixa
   de controles: busca, alternância lista/grade (preferência em `localStorage`
@@ -108,7 +108,7 @@ só com o dono pedindo.
   Cada item é um `Link` para `/pokemon/:nome` preservando a query atual. O selecionado
   recebe `aria-current`. Skeleton enquanto carrega; estado vazio.
 
-- [ ] **1.4 Pokédex — ficha (painel direito), parte 1: cabeçalho, Sobre e Status.** 👁
+- [x] **1.4 Pokédex — ficha (painel direito), parte 1: cabeçalho, Sobre e Status.** 👁
   Criar `src/components/dex/DexEntry.tsx` (recebe `nameOrId`). Usa `usePokemonDetail` e
   `usePokemonSpecies` como a `DetailPage` atual. Faixa verde: NO., raridade
   (`LEGENDARY`/`MYTHICAL`), `CryButton`, ♥ (favoritos), sprite 128 px, genus, nome, tipos.
@@ -119,14 +119,14 @@ só com o dono pedindo.
   escala 0–180), TOTAL e `TypeDefense` no formato de grade de 18 tipos.
   Carregando → `Skeleton`; erro/404 → mensagem no painel.
 
-- [ ] **1.5 Pokédex — ficha, parte 2: Evol., Golpes e Local.** 👁
+- [x] **1.5 Pokédex — ficha, parte 2: Evol., Golpes e Local.** 👁
   **Evol.:** `EvolutionChain` em linha, sprite 72 px, condição em `#e8c33c` com →, estágio
   atual com borda verde; cada estágio é link para a ficha. **Golpes:** `MoveList` como
   tabela GOLPE/TIPO/CAT./PODER/PREC. mantendo o seletor de jogo. **Local:**
   `EncounterPanel` em cartões + `CapturePanel` (decisão 4) com o visual novo, e
   `PokemonLore` se houver.
 
-- [ ] **1.6 Pokédex — página, rotas e teclado.** 👁
+- [x] **1.6 Pokédex — página, rotas e teclado.** 👁
   Reescrever `HomePage.tsx` para montar `<Panes left={<DexList/>} right={<DexEntry/>} />`
   e servir `/` e `/pokemon/:nameOrId` (em `App.tsx`, as duas rotas apontam para ela;
   `DetailPage.tsx` e `routeModules.ts` saem). Sem seleção: ficha do Pokémon do dia.
@@ -137,7 +137,7 @@ só com o dono pedindo.
   (`dexNav.test.ts`: primeiro, último, lista vazia, item fora da lista).
   Atualizar `CommandPalette` e qualquer `Link` para `/pokemon/…` (continuam válidos).
 
-- [ ] **1.7 REVISÃO da Fase 1.** Rodar a verificação completa + `npm run build`. Conferir
+- [x] **1.7 REVISÃO da Fase 1.** Rodar a verificação completa + `npm run build`. Conferir
   no navegador: `/`, `/pokemon/25`, `/?tipo=fire&ger=1`, busca, lista×grade, as cinco abas
   da ficha, favoritar, Ctrl+K, troca de idioma, 375 px (LISTA/FICHA, A/B, D-pad).
   Escrever em **Notas de revisão** o que ficou diferente do handoff. **Parar o loop** e
@@ -229,7 +229,30 @@ só com o dono pedindo.
 
 ## Notas de revisão
 
-_(preencher ao fim de cada fase: o que divergiu do handoff e por quê)_
+### Fase 1 (2026-10-11)
+
+Conferido no navegador: `/`, `/pokemon/pikachu`, `/pokemon/charizard?tipo=fire&aba=status`,
+as cinco abas da ficha, setas do teclado e D-pad, e 375 px (LISTA/FICHA, A/B).
+
+Diferenças em relação ao handoff:
+
+- **Golpes** continua no formato atual (golpes agrupados por método, com seletor de jogo),
+  e não a tabela GOLPE/TIPO/CAT./PODER/PREC.: tipo, categoria e poder exigem uma consulta à
+  PokéAPI por golpe (dezenas por ficha). Fica como melhoria, se o dono quiser.
+- **Sobre** ganhou as seções que o protótipo não tinha: ficha técnica (`PokemonMeta`),
+  formas, sprites e o sprite através das gerações.
+- **Local** usa a calculadora de captura atual (decisão 4) e o painel de encontros atual, com
+  o estilo antigo por dentro; o acabamento visual deles fica para a tarefa 4.2.
+- **Formas** (`VarietySwitcher`) ainda usa a carta antiga em miniatura; troca na Fase 4.
+- **Filtros** de geração, dex regional, raridade e ordem ficam num bloco recolhível "FILTROS".
+- **Celular:** as abas do topo e os chips de tipo viram fileiras que rolam de lado, em vez
+  de quebrar em várias linhas.
+- **D-pad:** ganhou ◀ ▶ (trocar de página); nas pontas da lista, ▲ ▼ viram a página.
+- **Texto da Pokédex** (flavor) sai em inglês quando a PokéAPI não tem português — é o
+  comportamento que o site já tinha.
+- **Teste de componente** do aparelho não foi escrito (a suíte roda sem jsdom); há testes
+  das funções puras `sectionOf` e `neighbor`.
+- A transição de virada da carta para a ficha saiu junto com a página de detalhe.
 
 ## Bloqueios
 

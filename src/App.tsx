@@ -11,7 +11,6 @@ import { RouteFallback } from "./components/Skeleton";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { FavoriteProvider } from "./contexts/favoritesContext";
 import { useFavorites } from "./hooks/useFavorites";
-import { DetailPage } from "./pages/routeModules";
 
 // A Home entra no bundle inicial; o resto e carregado sob demanda — a Lore
 // sozinha carrega ~2.000 linhas de dados curados.
@@ -54,7 +53,7 @@ function App() {
       <ErrorBoundary>
         <Suspense fallback={<SinglePane><RouteFallback /></SinglePane>}>
           <Routes>
-            <Route path="/" element={<SinglePane><HomePage /></SinglePane>} />
+            <Route path="/" element={<HomePage />} />
             <Route path="/favoritos" element={<SinglePane><FavoritesPage /></SinglePane>} />
             <Route path="/comparar" element={<SinglePane><ComparePage /></SinglePane>} />
             <Route path="/lore" element={<SinglePane><LorePage /></SinglePane>} />
@@ -66,7 +65,7 @@ function App() {
             <Route path="/time" element={<SinglePane><TeamBuilderPage /></SinglePane>} />
             <Route path="/habilidade/:slug" element={<SinglePane><AbilityPage /></SinglePane>} />
             <Route path="/quiz" element={<SinglePane><QuizPage /></SinglePane>} />
-            <Route path="/pokemon/:nameOrId" element={<SinglePane><DetailPage /></SinglePane>} />
+            <Route path="/pokemon/:nameOrId" element={<HomePage />} />
             <Route path="*" element={<SinglePane><NotFoundPage /></SinglePane>} />
           </Routes>
         </Suspense>

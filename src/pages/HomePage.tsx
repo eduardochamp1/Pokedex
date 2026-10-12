@@ -1,35 +1,34 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import Searchbar from "../components/Searchbar";
-import Pokedex from "../components/Pokedex";
-import TypeFilter from "../components/TypeFilter";
-import DexFilter from "../components/DexFilter";
-import RarityFilter from "../components/RarityFilter";
-import CardHero from "../components/CardHero";
-import { CardSkeleton } from "../components/Skeleton";
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { Panes } from "../components/device/Panes";
+import { useDevicePage } from "../components/device/DeviceContext";
+import DexList from "../components/dex/DexList";
+import DexEntry from "../components/dex/DexEntry";
 import { useDebounce } from "../hooks/useDebounce";
 import { useFeaturedPokemon } from "../hooks/useFeaturedPokemon";
-// So o modulo de sessao, que le do localStorage: nao arrasta o core do
-// emulador, que sao ~1,8 MB para descobrir um nome de arquivo.
 import {
+  usePokemonDetail,
   usePokemonList,
   usePokemonPage,
   usePokemonSelection,
-  usePokemonSpecies,
 } from "../hooks/usePokemon";
-import { tGenus, tType } from "../data/i18n";
-import { pickLocalized } from "../lib/localize";
 import { sortNamesAlphabetically } from "../lib/filters";
-import { localeOf, useLang, tr } from "../i18n/lang";
-import {
-  parseHomeParams,
-  toSearchParams,
-  SORTS,
-  type HomeParams,
-} from "../lib/homeParams";
+import { neighbor } from "../lib/dexNav";
+import { useLang, tr } from "../i18n/lang";
+import { parseHomeParams, toSearchParams, type HomeParams } from "../lib/homeParams";
+import "../styles/dex.css";
 
+/**
+ * A Pokédex: lista à esquerda, ficha à direita.
+ *
+ * Serve `/` e `/pokemon/:nameOrId` — é a mesma tela, e o endereço só diz qual
+ * ficha está aberta. Em `/`, sem seleção, a ficha mostra o pokémon do dia.
+ */
 const HomePage = () => {
   const [params, setParams] = useSearchParams();
+  const { nameOrId } = useParams<{ nameOrId: string }>();
+  const location = useLocation();
+  const navigate = useNavigate();
   const current = parseHomeParams(params);
   const lang = useLang();
   const t = (pt: string, en: string) => tr(lang, pt, en);
@@ -68,133 +67,69 @@ const HomePage = () => {
 
   const selected = usePokemonPage(orderedNames, current.page);
   const listQuery = usePokemonList(current.page);
-
   const isSelecting = selection.names !== null;
-
-  const featured = useFeaturedPokemon();
-  const featuredSpecies = usePokemonSpecies(featured.data?.species.url);
 
   const pokemons = isSelecting ? selected.pokemons : listQuery.data?.pokemons ?? [];
   const totalPages = isSelecting ? selected.totalPages : listQuery.data?.totalPages ?? 1;
-  const isLoading = isSelecting
-    ? selection.isLoading || selected.isLoading
-    : listQuery.isLoading;
-  const isError = isSelecting
-    ? selection.isError || selected.isError
-    : listQuery.isError;
-  const notFound =
-    isSelecting && !isLoading && !isError && (selection.names?.length ?? 0) === 0;
+  const isLoading = isSelecting ? selection.isLoading || selected.isLoading : listQuery.isLoading;
+  const isError = isSelecting ? selection.isError || selected.isError : listQuery.isError;
   const total = isSelecting ? selected.total : undefined;
 
-  const featuredFlavor = pickLocalized(
-    featuredSpecies.data?.flavor_text_entries,
-    (e) => e.flavor_text
-  );
-  const featuredGenus =
-    pickLocalized(featuredSpecies.data?.genera, (g) => g.genus) || "Pokémon";
+  // Sem seleção no endereço, a ficha abre no pokémon do dia.
+  const featured = useFeaturedPokemon();
+  const shown = nameOrId ?? featured.data?.name;
+  // A mesma consulta que a ficha faz (o cache é compartilhado): daqui sai o
+  // número para o rodapé e o nome canônico para marcar a linha da lista.
+  const shownDetail = usePokemonDetail(shown);
+  const shownName = shownDetail.data?.name ?? shown?.toLowerCase();
+
+  const names = pokemons.map((p) => p.name);
+  const go = (name: string) => navigate({ pathname: `/pokemon/${name}`, search: location.search });
+  const step = (dir: 1 | -1) => {
+    const alvo = neighbor(names, shownName, dir);
+    if (alvo) return go(alvo);
+    // Ponta da página: a seta vira a página, e a próxima entra pela ponta.
+    const pagina = current.page + dir;
+    if (pagina >= 0 && pagina < totalPages) update({ page: pagina });
+  };
+
+  const { setPane } = useDevicePage({
+    labels: [t("LISTA", "LIST"), t("FICHA", "ENTRY")],
+    footer: shownDetail.data ? `NO. ${String(shownDetail.data.id).padStart(4, "0")}` : "NO. ----",
+    hint: t("↑ ↓ NAVEGAR", "↑ ↓ BROWSE"),
+    onUp: () => step(-1),
+    onDown: () => step(1),
+    onLeft: current.page > 0 ? () => update({ page: current.page - 1 }) : undefined,
+    onRight: current.page + 1 < totalPages ? () => update({ page: current.page + 1 }) : undefined,
+  });
+
+  // Chegar por link direto numa ficha (`/pokemon/x`) abre a ficha no celular.
+  useEffect(() => {
+    if (nameOrId) setPane("right");
+  }, [nameOrId, setPane]);
 
   return (
-    <>
-      {featured.data && (
-        <section className="home-featured">
-          <div className="home-featured-copy">
-            <div className="home-featured-daily">
-              {t("Pokémon do dia", "Pokémon of the day")} ·{" "}
-              {new Date().toLocaleDateString(localeOf(lang), { day: "2-digit", month: "long" })}
-            </div>
-            {featuredSpecies.data && (
-              <div className="home-featured-genus">{tGenus(featuredGenus)}</div>
-            )}
-            <h2>
-              <Link to={`/pokemon/${featured.data.name}`} className="home-featured-link">
-                {featured.data.name}
-              </Link>
-            </h2>
-            <div className="pokemon-type">
-              {featured.data.types.map((t) => (
-                <span
-                  key={t.type.name}
-                  className="card-type-dot-lg"
-                  data-type={t.type.name}
-                >
-                  {tType(t.type.name)}
-                </span>
-              ))}
-            </div>
-            {featuredFlavor && <p>"{featuredFlavor}"</p>}
-          </div>
-          <CardHero pokemon={featured.data} />
-        </section>
-      )}
-
-
-
-      <div className="home-layout">
-        <aside className="home-sidebar">
-          <h3>{t("Buscar", "Search")}</h3>
-          <Searchbar value={searchInput} onChange={setSearchInput} />
-          <h3>{t("Tipo", "Type")}</h3>
-          <TypeFilter
-            value={current.type}
-            onChange={(v) => update({ type: v })}
-          />
-          <h3>{t("Geração ou região", "Generation or region")}</h3>
-          <DexFilter
-            generation={current.generation}
-            pokedex={current.pokedex}
-            onChange={(next) =>
-              // Exclusivos: escolher um limpa o outro.
-              update({ generation: next.generation, pokedex: next.pokedex })
-            }
-          />
-          <h3>{t("Raridade", "Rarity")}</h3>
-          <RarityFilter
-            value={current.rarity}
-            onChange={(v) => update({ rarity: v })}
-          />
-          <h3>{t("Ordenar", "Sort")}</h3>
-          <div className="type-filter">
-            <label htmlFor="sort-select">{t("Ordem:", "Order:")}</label>
-            <select
-              id="sort-select"
-              value={current.sort}
-              onChange={(e) =>
-                update({ sort: e.target.value as HomeParams["sort"] })
-              }
-            >
-              {SORTS.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {lang === "en" ? s.labelEn : s.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </aside>
-        <div>
-          {isError ? (
-            <div className="not-found-text">
-              {t(
-                "Não foi possível consultar a PokéAPI. Verifique sua conexão e tente de novo.",
-                "Couldn't reach the PokéAPI. Check your connection and try again."
-              )}
-            </div>
-          ) : notFound ? (
-            <div className="not-found-text">{t("Nenhum pokémon encontrado.", "No Pokémon found.")}</div>
-          ) : isLoading ? (
-            <CardSkeleton count={10} />
-          ) : (
-            <Pokedex
-              pokemons={pokemons}
-              loading={selected.isLoading && pokemons.length === 0}
-              page={current.page}
-              setPage={(p) => update({ page: p })}
-              totalPages={totalPages}
-              total={total}
-            />
-          )}
-        </div>
-      </div>
-    </>
+    <Panes
+      leftLabel={t("Lista de Pokémon", "Pokémon list")}
+      rightLabel={t("Ficha", "Entry")}
+      left={
+        <DexList
+          current={current}
+          update={update}
+          searchInput={searchInput}
+          onSearch={setSearchInput}
+          pokemons={pokemons}
+          total={total}
+          totalPages={totalPages}
+          isLoading={isLoading}
+          isError={isError}
+          selected={shownName}
+          search={location.search}
+          onPick={() => setPane("right")}
+        />
+      }
+      right={<DexEntry nameOrId={shown} featured={!nameOrId} search={location.search} />}
+    />
   );
 };
 

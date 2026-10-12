@@ -35,7 +35,7 @@ const CryButton = ({ src, name }: Props) => {
         aria-label={t(`Ouvir o som de ${name}`, `Play ${name}'s cry`)}
         title={t(`Ouvir o som de ${name}`, `Play ${name}'s cry`)}
       >
-        🔊
+        {t("GRITO", "CRY")}
       </button>
       <audio
         ref={ref}

@@ -44,8 +44,14 @@ const Device = ({ children }: { children: ReactNode }) => {
   const handlersRef = useRef<DeviceHandlers>({});
 
   // Trocar de aba volta para a tela da esquerda; andar dentro da mesma aba
-  // (lista → ficha) não mexe em nada.
-  useEffect(() => setPane("left"), [section]);
+  // (lista → ficha) não mexe em nada. Feito durante o render, e não num
+  // efeito: o efeito do aparelho roda DEPOIS dos da página, e desfaria o
+  // "abrir a ficha" de quem chega por link direto em /pokemon/x.
+  const [paneSection, setPaneSection] = useState(section);
+  if (paneSection !== section) {
+    setPaneSection(section);
+    setPane("left");
+  }
 
   const register = useCallback((c: DevicePageConfig | null) => setConfig(c), []);
   const ctx = useMemo<DeviceContextValue>(
