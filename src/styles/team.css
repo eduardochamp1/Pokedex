@@ -200,3 +200,45 @@
 .team-sugestao-especies button:hover:not(:disabled),
 .team-sugestao-especies button:focus-visible { border-color: var(--accent); }
 .team-sugestao-especies img { image-rendering: pixelated; }
+
+/* ---------- Aparelho: os seis slots na faixa verde ---------- */
+.team-slots6 {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+.team-slots6 li { aspect-ratio: 1; }
+.team-slots6 button,
+.team-slot6-vazio {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--accent-ink);
+  border-radius: var(--radius-sm);
+  background: radial-gradient(circle at 50% 60%, var(--accent-hover) 0, var(--accent) 70%);
+  color: var(--accent-ink);
+  padding: 0;
+  box-shadow: none;
+}
+.team-slots6 button { cursor: pointer; }
+.team-slots6 button:hover { background: var(--accent-hover); }
+.team-slots6 img { width: 100%; height: 100%; object-fit: contain; }
+.team-slot6-vazio { border-style: dashed; opacity: 0.6; }
+.team-slots6-nomes {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+}
+.team-analise h2 {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  font-weight: 400;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin: 0 0 8px;
+}

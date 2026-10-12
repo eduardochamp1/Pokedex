@@ -1,0 +1,12 @@
+/* Tamanhos — handoff, seção 7 (com o SizeCanvas atual, decisão 5 do plano). */
+.sizes-preset { font-size: 8px; min-height: 36px; }
+.sizes-stage {
+  background: var(--surface-1);
+  border: 2px solid var(--border);
+  border-bottom: 4px solid var(--accent);
+  border-radius: var(--radius-card);
+  padding: 10px;
+  overflow-x: auto;
+}
+.sizes-stage svg,
+.sizes-stage canvas { max-width: 100%; height: auto; display: block; }

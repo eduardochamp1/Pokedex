@@ -1,189 +1,183 @@
-import { useMemo, useState } from "react";
-import CardHero from "../components/CardHero";
-import TypeMatchup from "../components/TypeMatchup";
-import { usePokemonDetail, usePokemonIndex } from "../hooks/usePokemon";
-import { useDebounce } from "../hooks/useDebounce";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { Panes } from "../components/device/Panes";
+import { useDevicePage } from "../components/device/DeviceContext";
+import RosterList from "../components/device/RosterList";
+import { usePokemonDetail } from "../hooks/usePokemon";
+import { attackMultiplier, type TypeName } from "../data/typeMatchups";
+import { tType } from "../data/i18n";
+import { pixelSpriteUrl } from "../lib/sprites";
+import { pokemonLabel } from "../lib/pokemonLabel";
 import type { Pokemon } from "../types/pokemon";
-import { useLang, tr } from "../i18n/lang";
+import { useLang, tr, type Lang } from "../i18n/lang";
 import { statLabel } from "../i18n/common";
+import "../styles/compare.css";
 
 const totalOf = (p: Pokemon) => p.stats.reduce((s, x) => s + x.base_stat, 0);
+const semAcento = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase();
 
+type Slot = "a" | "b";
+
+const Fighter = ({ pokemon, lang }: { pokemon: Pokemon | null | undefined; lang: Lang }) =>
+  pokemon ? (
+    <Link to={`/pokemon/${pokemon.name}`} className="cmp-fighter">
+      <img className="pixelated" src={pixelSpriteUrl(pokemon.id)} width={112} height={112} alt="" />
+      <strong>{pokemonLabel(pokemon.name, lang)}</strong>
+      <span className="cmp-types">
+        {pokemon.types.map((x) => (
+          <span key={x.type.name} className="type-tag" style={{ background: `var(--t-${x.type.name})` }}>
+            {semAcento(tType(x.type.name, lang))}
+          </span>
+        ))}
+      </span>
+    </Link>
+  ) : (
+    <span className="cmp-fighter cmp-fighter-vazio px">…</span>
+  );
+
+/** Cada tipo do atacante contra o defensor. */
+const Effect = ({ atk, def, lang }: { atk: Pokemon; def: Pokemon; lang: Lang }) => (
+  <div className="pane-card">
+    <span className="pane-card-tag">
+      {semAcento(pokemonLabel(atk.name, lang))} {tr(lang, "ATACA", "ATTACKS")}
+    </span>
+    <ul className="cmp-effect">
+      {atk.types.map((x) => {
+        const m = attackMultiplier(
+          x.type.name as TypeName,
+          def.types.map((d) => d.type.name) as TypeName[]
+        );
+        return (
+          <li key={x.type.name}>
+            <span className="type-tag" style={{ background: `var(--t-${x.type.name})` }}>
+              {semAcento(tType(x.type.name, lang))}
+            </span>
+            <strong className={m > 1 ? "is-forte" : m < 1 ? "is-fraco" : ""}>
+              {m === 0 ? tr(lang, "sem efeito", "no effect") : `×${m}`}
+            </strong>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+);
+
+/**
+ * Comparar: dois pokémon lado a lado.
+ *
+ * À esquerda o elenco; tocar num pokémon o põe no slot ativo e passa a vez
+ * para o outro slot — dois toques montam o duelo.
+ */
 const ComparePage = () => {
   const lang = useLang();
   const t = (pt: string, en: string) => tr(lang, pt, en);
-  const [left, setLeft] = useState("bulbasaur");
-  const [right, setRight] = useState("charmander");
-  const leftDeb = useDebounce(left.trim(), 350);
-  const rightDeb = useDebounce(right.trim(), 350);
-  const leftQ = usePokemonDetail(leftDeb || undefined);
-  const rightQ = usePokemonDetail(rightDeb || undefined);
-  const both = leftQ.data && rightQ.data ? ([leftQ.data, rightQ.data] as const) : null;
-  const { index } = usePokemonIndex();
-  const suggestions = useMemo(
-    () => (index ? [...index.keys()] : []),
-    [index]
-  );
+  const [a, setA] = useState("bulbasaur");
+  const [b, setB] = useState("charmander");
+  const [slot, setSlot] = useState<Slot>("a");
+  const aQ = usePokemonDetail(a);
+  const bQ = usePokemonDetail(b);
+  const both = aQ.data && bQ.data ? ([aQ.data, bQ.data] as const) : null;
 
-  const slotStatus = (
-    query: typeof leftQ,
-    term: string
-  ): string | null => {
-    if (!term) return t("Digite um nome ou id.", "Type a name or number.");
-    if (query.isLoading) return t("Carregando…", "Loading…");
-    if (query.isError) return t("Não foi possível consultar a PokéAPI.", "Couldn't reach the PokéAPI.");
-    if (query.isSuccess && !query.data) return t(`Nada encontrado para "${term}".`, `Nothing found for "${term}".`);
-    return null;
+  useDevicePage({ labels: [t("ESCOLHER", "PICK"), t("DUELO", "DUEL")] });
+
+  const pick = (name: string) => {
+    if (slot === "a") setA(name);
+    else setB(name);
+    setSlot(slot === "a" ? "b" : "a");
   };
-  const leftStatus = slotStatus(leftQ, leftDeb);
-  const rightStatus = slotStatus(rightQ, rightDeb);
-
   const swap = () => {
-    setLeft(right);
-    setRight(left);
+    setA(b);
+    setB(a);
   };
+
+  const linhas = both
+    ? [
+        ...both[0].stats.map((s, i) => ({
+          label: semAcento(statLabel(s.stat.name, lang)),
+          l: s.base_stat,
+          r: both[1].stats[i]?.base_stat ?? 0,
+        })),
+        { label: "TOTAL", l: totalOf(both[0]), r: totalOf(both[1]) },
+      ]
+    : [];
 
   return (
-    <div className="compare-shell">
-      <h1 className="compare-title">Arena</h1>
-
-      <div className="compare-inputs">
-        <input
-          value={left}
-          onChange={(e) => setLeft(e.target.value)}
-          placeholder="Pokémon 1"
-          aria-label={t("Selecionar pokémon 1", "Choose Pokémon 1")}
-          list="compare-names"
-        />
-        <button
-          type="button"
-          className="compare-swap"
-          onClick={swap}
-          aria-label={t("Trocar posições", "Swap sides")}
-        >
-          ⇄
-        </button>
-        <input
-          value={right}
-          onChange={(e) => setRight(e.target.value)}
-          placeholder="Pokémon 2"
-          aria-label={t("Selecionar pokémon 2", "Choose Pokémon 2")}
-          list="compare-names"
-        />
-        <datalist id="compare-names">
-          {suggestions.map((n) => (
-            <option key={n} value={n} />
-          ))}
-        </datalist>
-      </div>
-
-      <div className="compare-arena">
-        <div className="compare-slot">
-          {leftQ.data ? (
-            <CardHero pokemon={leftQ.data} />
-          ) : (
-            <p className="compare-slot-status">{leftStatus}</p>
-          )}
-        </div>
-        <div className="compare-slot">
-          {rightQ.data ? (
-            <CardHero pokemon={rightQ.data} />
-          ) : (
-            <p className="compare-slot-status">{rightStatus}</p>
-          )}
-        </div>
-      </div>
-
-      {both && (
+    <Panes
+      leftLabel={t("Elenco", "Roster")}
+      rightLabel={t("Duelo", "Duel")}
+      left={
         <>
-          <section className="compare-section">
-            <h2>{t("Status base", "Base stats")}</h2>
-            <ul className="compare-stats">
-              {both[0].stats.map((s, i) => {
-                const label = statLabel(s.stat.name, lang);
-                const lv = s.base_stat;
-                const rv = both[1].stats[i]?.base_stat ?? 0;
-                const max = Math.max(lv, rv, 1);
-                return (
-                  <li key={s.stat.name}>
-                    <span
-                      className={
-                        "compare-value left" + (lv > rv ? " winner" : "")
-                      }
-                    >
-                      {lv}
-                    </span>
-                    <span className="compare-bar-wrap">
-                      <span className="compare-bar left">
-                        <span style={{ width: `${(lv / max) * 100}%` }} />
-                      </span>
-                      <span className="compare-label">{label}</span>
-                      <span className="compare-bar right">
-                        <span style={{ width: `${(rv / max) * 100}%` }} />
-                      </span>
-                    </span>
-                    <span
-                      className={
-                        "compare-value right" + (rv > lv ? " winner" : "")
-                      }
-                    >
-                      {rv}
-                    </span>
-                  </li>
-                );
-              })}
-              <li className="compare-total-row">
-                <span
-                  className={
-                    "compare-value left" +
-                    (totalOf(both[0]) > totalOf(both[1]) ? " winner" : "")
-                  }
-                >
-                  {totalOf(both[0])}
-                </span>
-                <span className="compare-bar-wrap">
-                  <span className="compare-label compare-total-label">TOTAL</span>
-                </span>
-                <span
-                  className={
-                    "compare-value right" +
-                    (totalOf(both[1]) > totalOf(both[0]) ? " winner" : "")
-                  }
-                >
-                  {totalOf(both[1])}
-                </span>
-              </li>
-            </ul>
-          </section>
-
-          <section className="compare-section">
-            <h2>{t("Efetividade", "Effectiveness")}</h2>
-            <div className="matchup-grid">
-              <div>
-                <h3 className="matchup-title">
-                  {both[0].name} {t("ataca", "attacks")}
-                </h3>
-                <TypeMatchup
-                  attacker={both[0].types.map((t) => t.type.name)}
-                  defender={both[1].types.map((t) => t.type.name)}
-                  side="left"
-                />
-              </div>
-              <div>
-                <h3 className="matchup-title">
-                  {both[1].name} {t("ataca", "attacks")}
-                </h3>
-                <TypeMatchup
-                  attacker={both[1].types.map((t) => t.type.name)}
-                  defender={both[0].types.map((t) => t.type.name)}
-                  side="right"
-                />
-              </div>
+          <div className="pane-bar">
+            <h1 className="pane-h">ARENA</h1>
+            <div className="pane-bar-row">
+              <button type="button" className="pane-btn" aria-pressed={slot === "a"} onClick={() => setSlot("a")}>
+                SLOT A
+              </button>
+              <button type="button" className="pane-btn" aria-pressed={slot === "b"} onClick={() => setSlot("b")}>
+                SLOT B
+              </button>
+              <button type="button" className="pane-btn" onClick={swap} aria-label={t("Trocar posições", "Swap sides")}>
+                ⇄ {t("TROCAR", "SWAP")}
+              </button>
             </div>
-          </section>
+          </div>
+          <RosterList
+            onPick={pick}
+            isOn={(n) => n === a || n === b}
+            mark={(n) => (
+              <>
+                {n === a && <span className="cmp-mark">A</span>}
+                {n === b && <span className="cmp-mark">B</span>}
+              </>
+            )}
+          />
         </>
-      )}
-    </div>
+      }
+      right={
+        <>
+          <header className="pane-band cmp-band">
+            <Fighter pokemon={aQ.data} lang={lang} />
+            <span className="cmp-vs px">VS</span>
+            <Fighter pokemon={bQ.data} lang={lang} />
+          </header>
+          <div className="pane-scroll pane-scroll-loose">
+            {!both ? (
+              <p className="pane-empty">
+                {aQ.isError || bQ.isError
+                  ? t("SEM SINAL DA POKEAPI", "NO SIGNAL FROM POKEAPI")
+                  : t("CARREGANDO…", "LOADING…")}
+              </p>
+            ) : (
+              <>
+                <ul className="cmp-stats">
+                  {linhas.map((x) => {
+                    const max = Math.max(x.l, x.r, 1);
+                    return (
+                      <li key={x.label} className={x.label === "TOTAL" ? "cmp-total" : undefined}>
+                        <strong className={x.l > x.r ? "is-win" : ""}>{x.l}</strong>
+                        <span className="cmp-bar cmp-bar-l">
+                          <span className={x.l >= x.r ? "is-win" : ""} style={{ width: `${(x.l / max) * 100}%` }} />
+                        </span>
+                        <span className="px">{x.label}</span>
+                        <span className="cmp-bar">
+                          <span className={x.r >= x.l ? "is-win" : ""} style={{ width: `${(x.r / max) * 100}%` }} />
+                        </span>
+                        <strong className={x.r > x.l ? "is-win" : ""}>{x.r}</strong>
+                      </li>
+                    );
+                  })}
+                </ul>
+                <h2 className="pane-h">{t("EFETIVIDADE", "EFFECTIVENESS")}</h2>
+                <div className="cmp-effects">
+                  <Effect atk={both[0]} def={both[1]} lang={lang} />
+                  <Effect atk={both[1]} def={both[0]} lang={lang} />
+                </div>
+              </>
+            )}
+          </div>
+        </>
+      }
+    />
   );
 };
 

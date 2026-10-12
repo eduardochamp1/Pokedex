@@ -1,9 +1,12 @@
-import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import Card from "../components/Card";
+import { Link } from "react-router-dom";
+import { Panes } from "../components/device/Panes";
+import { useDevicePage } from "../components/device/DeviceContext";
+import RosterList from "../components/device/RosterList";
 import TeamSuggestions from "../components/TeamSuggestions";
 import { usePokemonIndex, usePokemonsByNames } from "../hooks/usePokemon";
-import { namesForIds } from "../lib/filters";
+import { pixelSpriteUrl } from "../lib/sprites";
+import { pokemonLabel } from "../lib/pokemonLabel";
 import { tType } from "../data/i18n";
 import { multiplierLabel } from "../lib/typeDefense";
 import {
@@ -36,6 +39,8 @@ function tomDe(m: number): string {
 /**
  * Montador de time: até seis pokémon, e o que o time aguenta e o que ele
  * acerta. O time fica na URL (`?time=`), então dá para mandar o link.
+ *
+ * À esquerda o elenco (tocar põe ou tira); à direita os seis slots e a análise.
  */
 const TeamBuilderPage = () => {
   const [params, setParams] = useSearchParams();
@@ -50,27 +55,17 @@ const TeamBuilderPage = () => {
   };
 
   const { index } = usePokemonIndex();
-  const sugestoes = useMemo(() => (index ? [...index.keys()] : []), [index]);
   const { pokemons, isLoading } = usePokemonsByNames(names);
+  const cheio = names.length >= MAX_TEAM;
 
-  const [entrada, setEntrada] = useState("");
-  const [aviso, setAviso] = useState<string | null>(null);
-  const adicionar = () => {
-    const nome = entrada.trim().toLowerCase();
-    if (!nome) return;
-    const porId = /^\d+$/.test(nome) && index ? namesForIds([Number(nome)], index)[0] : undefined;
-    const final = porId ?? nome;
-    if (index && !index.has(final)) {
-      setAviso(t(`Não achei "${entrada.trim()}".`, `Couldn't find "${entrada.trim()}".`));
-      return;
-    }
-    if (names.includes(final)) {
-      setAviso(t(`${final} já está no time.`, `${final} is already on the team.`));
-      return;
-    }
-    setAviso(null);
-    setNames([...names, final]);
-    setEntrada("");
+  useDevicePage({
+    labels: [t("ELENCO", "ROSTER"), t("TIME", "TEAM")],
+    footer: `${names.length} / ${MAX_TEAM}`,
+  });
+
+  const alternar = (nome: string) => {
+    if (names.includes(nome)) setNames(names.filter((n) => n !== nome));
+    else if (!cheio) setNames([...names, nome]);
   };
 
   const membros: TeamMember[] = pokemons
@@ -81,83 +76,79 @@ const TeamBuilderPage = () => {
   const lacunas = teamGaps(membros);
 
   return (
-    <div className="team-shell">
-      <header className="team-header">
-        <h1>{t("Time", "Team")}</h1>
-        <span className="team-count">
-          {names.length} / {MAX_TEAM}
-        </span>
-      </header>
-
-      <form
-        className="team-add"
-        onSubmit={(e) => {
-          e.preventDefault();
-          adicionar();
-        }}
-      >
-        <input
-          value={entrada}
-          onChange={(e) => setEntrada(e.target.value)}
-          placeholder={t("Nome ou número", "Name or number")}
-          aria-label={t("Pokémon para adicionar ao time", "Pokémon to add to the team")}
-          list="team-names"
-          disabled={names.length >= MAX_TEAM}
-        />
-        <datalist id="team-names">
-          {sugestoes.map((n) => (
-            <option key={n} value={n} />
-          ))}
-        </datalist>
-        <button type="submit" disabled={names.length >= MAX_TEAM || !entrada.trim()}>
-          {t("Adicionar", "Add")}
-        </button>
-        {names.length > 0 && (
-          <button type="button" className="team-secundario" onClick={() => setNames([])}>
-            {t("Limpar", "Clear")}
-          </button>
-        )}
-      </form>
-      {aviso && (
-        <p className="team-aviso" role="status">
-          {aviso}
-        </p>
-      )}
-
-      {names.length === 0 ? (
-        <p className="team-vazio">
-          {t(
-            "Adicione até seis pokémon para ver o que o time aguenta e o que ele acerta.",
-            "Add up to six Pokémon to see what the team can take and what it hits hard."
-          )}
-        </p>
-      ) : (
+    <Panes
+      leftLabel={t("Elenco", "Roster")}
+      rightLabel={t("Time", "Team")}
+      left={
         <>
-          <ul className="team-slots">
-            {names.map((nome, i) => {
-              const p = pokemons[i];
-              return (
-                <li key={nome}>
-                  {p ? (
-                    <Card pokemon={p} variant="mini" linkTo={`/pokemon/${p.name}`} />
-                  ) : (
-                    <div className="team-slot-vazio">{isLoading ? "…" : nome}</div>
-                  )}
-                  <button
-                    type="button"
-                    className="team-remover"
-                    onClick={() => setNames(names.filter((n) => n !== nome))}
-                    aria-label={t(`Tirar ${nome} do time`, `Remove ${nome} from the team`)}
-                  >
-                    ×
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-
-          {membros.length > 0 && (
-            <>
+          <div className="pane-bar">
+            <div className="pane-bar-row">
+              <h1 className="pane-h" style={{ flex: 1 }}>
+                {t("MONTAR TIME", "BUILD TEAM")} · {names.length}/{MAX_TEAM}
+              </h1>
+              <button type="button" className="pane-btn" disabled={names.length === 0} onClick={() => setNames([])}>
+                {t("LIMPAR", "CLEAR")}
+              </button>
+            </div>
+          </div>
+          <RosterList
+            onPick={alternar}
+            isOn={(n) => names.includes(n)}
+            mark={(n) => (names.includes(n) ? "✓" : cheio ? "" : "+")}
+          />
+        </>
+      }
+      right={
+        <>
+          <header className="pane-band">
+            <ul className="team-slots6">
+              {Array.from({ length: MAX_TEAM }, (_, i) => {
+                const nome = names[i];
+                const p = nome ? pokemons[i] : undefined;
+                return (
+                  <li key={i}>
+                    {nome ? (
+                      <button
+                        type="button"
+                        onClick={() => setNames(names.filter((n) => n !== nome))}
+                        aria-label={t(`Tirar ${nome} do time`, `Remove ${nome} from the team`)}
+                        title={pokemonLabel(nome, lang)}
+                      >
+                        {p ? (
+                          <img className="pixelated" src={pixelSpriteUrl(p.id)} width={72} height={72} alt="" />
+                        ) : (
+                          <span className="px">{isLoading ? "…" : "?"}</span>
+                        )}
+                      </button>
+                    ) : (
+                      <span className="team-slot6-vazio px" aria-hidden="true">
+                        {i + 1}
+                      </span>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+            {names.length > 0 && (
+              <p className="team-slots6-nomes">
+                {names.map((n, i) => (
+                  <span key={n}>
+                    {i > 0 && " · "}
+                    <Link to={`/pokemon/${n}`}>{pokemonLabel(n, lang)}</Link>
+                  </span>
+                ))}
+              </p>
+            )}
+          </header>
+          <div className="pane-scroll pane-scroll-loose team-analise">
+            {membros.length === 0 ? (
+              <p className="pane-empty">
+                {t("ESCOLHA ATE SEIS POKEMON", "PICK UP TO SIX POKEMON")}
+                <br />
+                {t("NO ELENCO", "FROM THE ROSTER")}
+              </p>
+            ) : (
+              <>
               <section className="team-resumo" aria-label={t("Resumo", "Summary")}>
                 <div>
                   <h2>{t("Pontos fracos", "Weak spots")}</h2>
@@ -257,11 +248,12 @@ const TeamBuilderPage = () => {
                   ))}
                 </ul>
               </section>
-            </>
-          )}
+              </>
+            )}
+          </div>
         </>
-      )}
-    </div>
+      }
+    />
   );
 };
 

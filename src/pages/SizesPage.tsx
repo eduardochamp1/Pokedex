@@ -1,19 +1,23 @@
 import { useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { searchPokemon } from "../api";
+import { Panes } from "../components/device/Panes";
+import { useDevicePage } from "../components/device/DeviceContext";
+import RosterList from "../components/device/RosterList";
 import SizeCanvas from "../components/SizeCanvas";
-import { add, clear, useComparator } from "../lib/comparatorStore";
+import { MAX, add, clear, remove, useComparator } from "../lib/comparatorStore";
 import { parseTamanhosParams, toSearchParams } from "../lib/tamanhosParams";
 import { useT } from "../i18n/lang";
+import "../styles/sizes.css";
 
 const PRESETS: { title: [string, string]; names: string[] }[] = [
-  { title: ["Wailord vs Joltik", "Wailord vs Joltik"], names: ["wailord", "joltik"] },
+  { title: ["WAILORD VS JOLTIK", "WAILORD VS JOLTIK"], names: ["wailord", "joltik"] },
   {
-    title: ["Lendários de Kanto", "Kanto legendaries"],
+    title: ["LENDARIOS DE KANTO", "KANTO LEGENDARIES"],
     names: ["articuno", "zapdos", "moltres", "mewtwo"],
   },
   {
-    title: ["Do menor ao maior", "Smallest to largest"],
+    title: ["DO MENOR AO MAIOR", "SMALLEST TO LARGEST"],
     names: ["joltik", "pikachu", "charizard", "onix", "wailord"],
   },
 ];
@@ -34,11 +38,21 @@ async function loadNames(names: string[]) {
   }
 }
 
+/**
+ * Tamanhos: até seis pokémon em escala, lado a lado.
+ *
+ * À esquerda as comparações prontas e o elenco (tocar põe ou tira); à direita
+ * o comparador. A seleção fica na URL, então dá para mandar o link.
+ */
 const SizesPage = () => {
   const [params, setParams] = useSearchParams();
   const cart = useComparator();
   const hydrated = useRef(false);
   const t = useT();
+  const naLista = (n: string) => cart.some((c) => c.name === n);
+  const cheio = cart.length >= MAX;
+
+  useDevicePage({ labels: [t("ELENCO", "ROSTER"), t("COMPARAR", "COMPARE")], footer: `${cart.length} / ${MAX}` });
 
   // Sincroniza URL -> cart no mount
   useEffect(() => {
@@ -71,40 +85,64 @@ const SizesPage = () => {
     await loadNames(names);
   };
 
+  const alternar = (name: string) => {
+    if (naLista(name)) remove(name);
+    else if (!cheio) void loadNames([name]);
+  };
+
   return (
-    <div className="sizes-page">
-      <h1 className="sizes-titulo">{t("Comparador de tamanho", "Size comparison")}</h1>
-      {cart.length === 0 ? (
-        <div className="sizes-empty">
-          <p>{t("Escolha uma comparação pra começar:", "Pick a comparison to start:")}</p>
-          <div className="sizes-presets">
-            {PRESETS.map((p) => (
-              <button
-                key={p.title[0]}
-                type="button"
-                onClick={() => loadPreset(p.names)}
-              >
-                {t(...p.title)}
-              </button>
-            ))}
-          </div>
-          <p className="sizes-hint">
-            {t(
-              "Ou adicione pokémons a partir da listagem clicando no botão 📏 de cada card.",
-              "Or add Pokémon from the list by clicking the 📏 button on each card."
-            )}
-          </p>
-        </div>
-      ) : (
+    <Panes
+      leftLabel={t("Elenco", "Roster")}
+      rightLabel={t("Comparador de tamanho", "Size comparison")}
+      left={
         <>
-          <SizeCanvas items={cart} />
-          <div className="sizes-actions">
-            <button type="button" onClick={share}>{t("Copiar link", "Copy link")}</button>
-            <button type="button" onClick={clear}>{t("Limpar", "Clear")}</button>
+          <div className="pane-bar">
+            <h1 className="pane-h">{t("COMPARACOES PRONTAS", "READY-MADE COMPARISONS")}</h1>
+            <div className="pane-bar-row">
+              {PRESETS.map((p) => (
+                <button key={p.title[0]} type="button" className="pane-btn sizes-preset" onClick={() => loadPreset(p.names)}>
+                  {t(...p.title)}
+                </button>
+              ))}
+            </div>
+          </div>
+          <RosterList onPick={alternar} isOn={naLista} mark={(n) => (naLista(n) ? "✓" : cheio ? "" : "+")} />
+        </>
+      }
+      right={
+        <>
+          <header className="pane-band">
+            <span className="px">{t("COMPARADOR DE TAMANHO", "SIZE COMPARISON")}</span>
+            <h2>
+              {cart.length} / {MAX}
+            </h2>
+          </header>
+          <div className="pane-scroll pane-scroll-loose">
+            {cart.length === 0 ? (
+              <p className="pane-empty">
+                {t("ESCOLHA UMA COMPARACAO PRONTA", "PICK A READY-MADE COMPARISON")}
+                <br />
+                {t("OU POKEMON DO ELENCO", "OR POKEMON FROM THE ROSTER")}
+              </p>
+            ) : (
+              <>
+                <div className="sizes-stage">
+                  <SizeCanvas items={cart} />
+                </div>
+                <div className="pane-bar-row">
+                  <button type="button" className="pane-btn" onClick={share}>
+                    {t("COPIAR LINK", "COPY LINK")}
+                  </button>
+                  <button type="button" className="pane-btn" onClick={clear}>
+                    {t("LIMPAR", "CLEAR")}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </>
-      )}
-    </div>
+      }
+    />
   );
 };
 

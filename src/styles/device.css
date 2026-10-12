@@ -542,3 +542,45 @@
   color: var(--accent-ink);
 }
 .dev-tools .scanline-toggle { width: 40px; padding: 0; }
+
+/* ---------- Elenco (RosterList): Comparar, Time, Tamanhos ---------- */
+.roster {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.roster-row { padding: 2px 12px 2px 6px; gap: 10px; }
+.roster-row img { flex: none; margin: -4px 0; }
+.roster-num {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  color: var(--text-dim);
+  width: 40px;
+  flex: none;
+}
+.roster-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.roster-mark {
+  display: flex;
+  gap: 4px;
+  flex: none;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  color: var(--accent);
+  min-width: 18px;
+  justify-content: flex-end;
+}
+.pane-bar h1.pane-h { color: var(--text); font-size: 10px; }
+/* Na faixa em coluna, `flex: 1` do campo achatava a altura dele. */
+.roster-bar .pane-input { flex: none; width: 100%; }

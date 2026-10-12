@@ -145,33 +145,33 @@ só com o dono pedindo.
 
 ## Fase 2 — Comparar, Time, Favoritos, Tamanhos
 
-- [ ] **2.1 Seletor de elenco compartilhado.**
+- [x] **2.1 Seletor de elenco compartilhado.**
   Criar `src/components/device/RosterList.tsx`: lista rolável de pokémon com busca, usada
   por Comparar, Time e Tamanhos. Props: `marks(name) → ReactNode` (A/B, ✓/+), `onPick`.
   Fonte: o índice de nomes que `TeamBuilderPage` já usa (`usePokemonIndex` ou equivalente)
   com paginação/virtualização simples (render de 60 por vez, "MAIS").
 
-- [ ] **2.2 Comparar.** 👁 `ComparePage.tsx` + `src/styles/compare.css`, seção 2 do handoff.
+- [x] **2.2 Comparar.** 👁 `ComparePage.tsx` + `src/styles/compare.css`, seção 2 do handoff.
   Esquerda: ARENA, SLOT A / SLOT B / ⇄ TROCAR, `RosterList` com marcas A/B (tocar atribui
   ao slot ativo e alterna). Direita: faixa verde com os dois sprites e VS; 7 linhas
   espelhadas; dois cartões de EFETIVIDADE (`TypeMatchup`). Manter os parâmetros de URL
   atuais. Rótulos ESCOLHER/DUELO.
 
-- [ ] **2.3 Time.** 👁 `TeamBuilderPage.tsx` + `team.css` reescrito, seção 3. Esquerda:
+- [x] **2.3 Time.** 👁 `TeamBuilderPage.tsx` + `team.css` reescrito, seção 3. Esquerda:
   MONTAR TIME, LIMPAR, `RosterList` com ✓/+ (máx. `MAX_TEAM`). Direita: 6 slots (clicar
   remove), cartões PONTOS FRACOS e NINGUEM ACERTA FORTE, tabela de defesa 18 × membros,
   `TeamSuggestions`. `?time=` continua. Rótulos ELENCO/TIME.
 
-- [ ] **2.4 Favoritos.** 👁 `FavoritesPage.tsx` + `favorites.css`, seção 8. Esquerda:
+- [x] **2.4 Favoritos.** 👁 `FavoritesPage.tsx` + `favorites.css`, seção 8. Esquerda:
   COLECAO (tocar remove). Direita: "SUA COLECAO N CARTAS", grade `minmax(168px,1fr)` de
   fichas (sprite 112 px, nome, tipos, barras PS/ATK/DEF); tocar abre `/pokemon/:nome`.
   Estado vazio. Rótulos COLECAO/FICHAS.
 
-- [ ] **2.5 Tamanhos.** 👁 `SizesPage.tsx` + `sizes.css`, seção 7 e decisão 5. Esquerda:
+- [x] **2.5 Tamanhos.** 👁 `SizesPage.tsx` + `sizes.css`, seção 7 e decisão 5. Esquerda:
   comparações prontas e `RosterList` com ✓/+. Direita: faixa "COMPARADOR DE TAMANHO" e
   `SizeCanvas`. `comparatorStore` e `tamanhosParams` continuam. Rótulos ELENCO/COMPARAR.
 
-- [ ] **2.6 REVISÃO da Fase 2.** Verificação + build + navegador nas quatro abas, desktop
+- [x] **2.6 REVISÃO da Fase 2.** Verificação + build + navegador nas quatro abas, desktop
   e 375 px. Notas de revisão. **Parar o loop.**
 
 ## Fase 3 — Mapa, Lore, Quiz
@@ -253,6 +253,25 @@ Diferenças em relação ao handoff:
 - **Teste de componente** do aparelho não foi escrito (a suíte roda sem jsdom); há testes
   das funções puras `sectionOf` e `neighbor`.
 - A transição de virada da carta para a ficha saiu junto com a página de detalhe.
+
+### Fase 2 (2026-10-11)
+
+Conferido no navegador (desktop): `/comparar`, `/time?time=…`, `/favoritos` (favoritar,
+abrir e remover) e `/tamanhos?p=…`. O modo celular usa a mesma moldura da Fase 1 e não foi
+reconferido aba por aba.
+
+Diferenças em relação ao handoff:
+
+- **Elenco** (`RosterList`) lista o índice inteiro da PokéAPI, 60 por vez, com botão MAIS e
+  busca por nome ou número; o sprite sai do id, sem consulta por linha, então a lista não
+  mostra bolinhas de tipo.
+- **Comparar** continua sem guardar a dupla na URL (já era assim). As barras comparam os dois
+  entre si (o maior enche a barra), como na página antiga.
+- **Time**: os nomes do time aparecem abaixo dos seis slots, com link para a ficha. A análise
+  (pontos fracos, sugestões, defesa, ataque) reaproveita a marcação e o `team.css` atuais.
+- **Favoritos**: as fichas mostram as bolinhas de tipo e as três barras, sem número.
+- **Tamanhos** usa o `SizeCanvas` atual (decisão 5). O botão 📏 das cartas sumiu junto com
+  elas; pôr e tirar agora é pelo elenco.
 
 ## Bloqueios
 

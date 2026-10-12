@@ -54,15 +54,15 @@ function App() {
         <Suspense fallback={<SinglePane><RouteFallback /></SinglePane>}>
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/favoritos" element={<SinglePane><FavoritesPage /></SinglePane>} />
-            <Route path="/comparar" element={<SinglePane><ComparePage /></SinglePane>} />
+            <Route path="/favoritos" element={<FavoritesPage />} />
+            <Route path="/comparar" element={<ComparePage />} />
             <Route path="/lore" element={<SinglePane><LorePage /></SinglePane>} />
             <Route path="/mapa" element={<SinglePane><MapPage /></SinglePane>} />
-            <Route path="/tamanhos" element={<SinglePane><SizesPage /></SinglePane>} />
+            <Route path="/tamanhos" element={<SizesPage />} />
             <Route path="/evolucoes" element={<SinglePane><EvolutionsPage /></SinglePane>} />
             <Route path="/jogos" element={<SinglePane><GamesPage /></SinglePane>} />
             <Route path="/dados" element={<SinglePane><DataPage /></SinglePane>} />
-            <Route path="/time" element={<SinglePane><TeamBuilderPage /></SinglePane>} />
+            <Route path="/time" element={<TeamBuilderPage />} />
             <Route path="/habilidade/:slug" element={<SinglePane><AbilityPage /></SinglePane>} />
             <Route path="/quiz" element={<SinglePane><QuizPage /></SinglePane>} />
             <Route path="/pokemon/:nameOrId" element={<HomePage />} />
