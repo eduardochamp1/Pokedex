@@ -247,6 +247,8 @@ implementação e o que divergiu dele, em `docs/superpowers/plans/2026-10-11-pok
 - **Duas slots** com busca independente e autocomplete de todos os nomes
 - **Status lado a lado** com barras espelhadas e vencedor por atributo
 - **Efetividade de tipo** nos dois sentidos, via matriz canônica 18×18 local
+- **O duelo fica no endereço** (`/comparar?a=charizard&b=blastoise`) — escolher e trocar
+  atualizam a URL, então o link leva a comparação junto
 
 ### Time (`/time`)
 - **Até seis pokémon**, guardados na URL (`?time=mudkip,torchic`) — o link
