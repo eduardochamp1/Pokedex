@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Panes } from "../components/device/Panes";
 import { useDevicePage } from "../components/device/DeviceContext";
 import RosterList from "../components/device/RosterList";
@@ -8,6 +8,7 @@ import { attackMultiplier, type TypeName } from "../data/typeMatchups";
 import { tType } from "../data/i18n";
 import { pixelSpriteUrl } from "../lib/sprites";
 import { pokemonLabel } from "../lib/pokemonLabel";
+import { parseCompareParams, toCompareSearch } from "../lib/compareParams";
 import type { Pokemon } from "../types/pokemon";
 import { useLang, tr, type Lang } from "../i18n/lang";
 import { statLabel } from "../i18n/common";
@@ -66,29 +67,31 @@ const Effect = ({ atk, def, lang }: { atk: Pokemon; def: Pokemon; lang: Lang }) 
  * Comparar: dois pokémon lado a lado.
  *
  * À esquerda o elenco; tocar num pokémon o põe no slot ativo e passa a vez
- * para o outro slot — dois toques montam o duelo.
+ * para o outro slot — dois toques montam o duelo. O duelo fica na URL
+ * (`?a=charizard&b=blastoise`), então dá para mandar o link.
  */
 const ComparePage = () => {
   const lang = useLang();
   const t = (pt: string, en: string) => tr(lang, pt, en);
-  const [a, setA] = useState("bulbasaur");
-  const [b, setB] = useState("charmander");
+  const [params, setParams] = useSearchParams();
+  const { a, b } = parseCompareParams(params);
+  const duelo = (proximo: { a: string; b: string }) =>
+    setParams(toCompareSearch(params, proximo), { replace: true });
   const [slot, setSlot] = useState<Slot>("a");
   const aQ = usePokemonDetail(a);
   const bQ = usePokemonDetail(b);
   const both = aQ.data && bQ.data ? ([aQ.data, bQ.data] as const) : null;
+  // O endereço pode trazer o número (`?a=25`); o elenco marca pelo nome.
+  const nomeA = aQ.data?.name ?? a;
+  const nomeB = bQ.data?.name ?? b;
 
   useDevicePage({ labels: [t("ESCOLHER", "PICK"), t("DUELO", "DUEL")] });
 
   const pick = (name: string) => {
-    if (slot === "a") setA(name);
-    else setB(name);
+    duelo(slot === "a" ? { a: name, b } : { a, b: name });
     setSlot(slot === "a" ? "b" : "a");
   };
-  const swap = () => {
-    setA(b);
-    setB(a);
-  };
+  const swap = () => duelo({ a: b, b: a });
 
   const linhas = both
     ? [
@@ -123,11 +126,11 @@ const ComparePage = () => {
           </div>
           <RosterList
             onPick={pick}
-            isOn={(n) => n === a || n === b}
+            isOn={(n) => n === nomeA || n === nomeB}
             mark={(n) => (
               <>
-                {n === a && <span className="cmp-mark">A</span>}
-                {n === b && <span className="cmp-mark">B</span>}
+                {n === nomeA && <span className="cmp-mark">A</span>}
+                {n === nomeB && <span className="cmp-mark">B</span>}
               </>
             )}
           />
