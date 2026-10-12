@@ -5,11 +5,18 @@
  * Toca baixinho e em laço. O navegador só libera som depois de um gesto da
  * pessoa, então quem chama `startMusic` é o primeiro clique ou tecla (ver
  * `MusicToggle`). A preferência fica no localStorage, como a da scanline.
+ *
+ * Se existir um arquivo em `public/audio/tema.mp3`, é ele que toca, e a
+ * melodia sintetizada fica de reserva (ver `public/audio/LEIA-ME.txt`).
  */
 const KEY = "pokedex:musica";
 
 /** Volume do conjunto: som de fundo, abaixo do grito dos Pokémon. */
 const VOLUME = 0.05;
+/** Faixa opcional, posta por quem mantém o site; sem ela vale a síntese. */
+const ARQUIVO = "/audio/tema.mp3";
+/** Volume do arquivo: uma gravação soa mais alta que três osciladores. */
+const VOLUME_ARQUIVO = 0.15;
 /** Duração de um passo (colcheia), em segundos — cerca de 86 bpm. */
 const PASSO = 0.35;
 const PASSOS_POR_COMPASSO = 8;
@@ -57,6 +64,11 @@ function saveMusic(on: boolean): void {
   }
 }
 
+/** O que a pessoa pediu: ligada ou muda, toque o que tocar. */
+let ligada = false;
+/** Decidido na primeira partida: o arquivo, se carregar; senão a síntese. */
+let fonte: "arquivo" | "sintese" | null = null;
+let faixa: HTMLAudioElement | null = null;
 let ctx: AudioContext | null = null;
 let saida: GainNode | null = null;
 let relogio: number | null = null;
@@ -97,6 +109,31 @@ function agendar() {
 /** Liga a trilha. Precisa vir de um gesto da pessoa, ou o navegador barra. */
 export function startMusic(): void {
   saveMusic(true);
+  ligada = true;
+  if (fonte === "sintese") return ligarSintese();
+  if (fonte === "arquivo") {
+    void faixa?.play();
+    return;
+  }
+  // Primeira partida: tenta o arquivo. Se não existir (ou vier o index.html
+  // do fallback da SPA no lugar), o play rejeita e a síntese assume.
+  const audio = new Audio(ARQUIVO);
+  audio.loop = true;
+  audio.volume = VOLUME_ARQUIVO;
+  audio.play().then(
+    () => {
+      fonte = "arquivo";
+      faixa = audio;
+      if (!ligada) audio.pause();
+    },
+    () => {
+      fonte = "sintese";
+      if (ligada) ligarSintese();
+    }
+  );
+}
+
+function ligarSintese(): void {
   const Ctor =
     window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
   if (!Ctor) return;
@@ -123,6 +160,8 @@ export function startMusic(): void {
 /** Muta: some em fade e para de agendar notas. */
 export function stopMusic(): void {
   saveMusic(false);
+  ligada = false;
+  faixa?.pause();
   if (relogio !== null) {
     window.clearInterval(relogio);
     relogio = null;
@@ -133,10 +172,17 @@ export function stopMusic(): void {
   }
 }
 
-export const isMusicPlaying = () => relogio !== null;
+export const isMusicPlaying = () => ligada;
+/** De onde vem o som nesta visita; `null` antes da primeira partida. */
+export const musicSource = () => fonte;
 
 /** Aba escondida: suspende o áudio; de volta à vista, retoma. */
 export function pauseForHiddenTab(hidden: boolean): void {
+  if (!ligada) return;
+  if (faixa) {
+    if (hidden) faixa.pause();
+    else void faixa.play();
+  }
   if (!ctx || relogio === null) return;
   if (hidden) void ctx.suspend();
   else void ctx.resume();

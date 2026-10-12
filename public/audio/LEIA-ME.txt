@@ -1,0 +1,17 @@
+Trilha ambiente do site
+=======================
+
+Sem nenhum arquivo aqui, o site toca a melodia original sintetizada
+(src/lib/ambientMusic.ts).
+
+Para tocar uma faixa sua, salve-a nesta pasta com o nome:
+
+    tema.mp3
+
+Ela passa a tocar em laco, em volume baixo, com o mesmo botao de mutar.
+
+Atencao: use apenas audio que voce tenha o direito de usar e publicar.
+Os arquivos de audio desta pasta estao no .gitignore de proposito, para
+que nada va para o repositorio publico nem para o deploy sem voce decidir.
+Para publicar a faixa junto com o site, remova a regra "public/audio/*"
+do .gitignore.

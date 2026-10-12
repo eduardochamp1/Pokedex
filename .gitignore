@@ -40,3 +40,7 @@ pnpm-debug.log*
 # Claude Code local session files
 .claude/
 CLAUDE.md
+
+# Faixa de audio opcional da trilha ambiente (ver public/audio/LEIA-ME.txt)
+public/audio/*
+!public/audio/LEIA-ME.txt
