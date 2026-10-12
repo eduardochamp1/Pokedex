@@ -9,6 +9,7 @@
  *                      partir da entrada em inglês do jogo mais recente
  * - `abilities.json` — nome, resumo e efeito completo (slug → …)
  * - `moves.json`     — nome de cada golpe (slug → nome)
+ * - `move-desc.json` — descrição de cada golpe (slug → texto)
  *
  * Não são traduções oficiais: os jogos nunca saíram em português. Por isso o
  * nome original em inglês de golpes e habilidades continua à vista ao lado do
@@ -30,12 +31,12 @@ export interface AbilityPt {
 
 type Mapa<T> = Record<string, T>;
 
-function usePt<T>(chave: string, carregar: () => Promise<Mapa<T>>): Mapa<T> | undefined {
+function usePt<T>(chave: string, carregar: () => Promise<Mapa<T>>, ativo = true): Mapa<T> | undefined {
   const lang = useLang();
   const { data } = useQuery({
     queryKey: ["pt-data", chave],
     queryFn: carregar,
-    enabled: lang === "pt",
+    enabled: lang === "pt" && ativo,
     staleTime: Infinity,
     gcTime: Infinity,
   });
@@ -55,3 +56,10 @@ export const usePtAbilities = () =>
 /** slug do golpe → nome. */
 export const usePtMoves = () =>
   usePt<string>("moves", () => import("../data/pt/moves.json").then((m) => m.default as Mapa<string>));
+
+/**
+ * slug do golpe → descrição. Só baixa quando `ativo`: a descrição aparece ao
+ * abrir um golpe da lista, e não vale carregar 110 kB antes disso.
+ */
+export const usePtMoveDesc = (ativo: boolean) =>
+  usePt<string>("move-desc", () => import("../data/pt/move-desc.json").then((m) => m.default as Mapa<string>), ativo);

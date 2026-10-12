@@ -1,4 +1,4 @@
-import { usePtMoves } from "../i18n/ptData";
+import { usePtMoveDesc, usePtMoves } from "../i18n/ptData";
 import { useMemo, useState } from "react";
 import { useMoveDetail } from "../hooks/usePokemon";
 import { pickLocalized } from "../lib/localize";
@@ -34,7 +34,8 @@ const MoveRow = ({ move }: { move: LearnedMove }) => {
   const detail = useMoveDetail(open ? move.name : undefined);
   const data = detail.data;
 
-  const flavor = pickLocalized(data?.flavor_text_entries, (e) => e.flavor_text);
+  const ptDesc = usePtMoveDesc(open);
+  const flavor = ptDesc?.[move.name] || pickLocalized(data?.flavor_text_entries, (e) => e.flavor_text);
   const original = pickLocalized(data?.names, (n) => n.name) || prettyMoveName(move.name);
   const localizedName = ptMoves?.[move.name] ?? original;
 

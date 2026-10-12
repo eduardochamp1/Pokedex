@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import flavor from "./flavor.json";
 import abilities from "./abilities.json";
 import moves from "./moves.json";
+import moveDesc from "./move-desc.json";
 
 const INGLES = /\b(the|with|this|that|when|which|their|from)\b/i;
 
@@ -36,5 +37,16 @@ describe("traduções do que a PokéAPI não tem em português", () => {
     expect(m["thunder-shock"]).toBe("Choque do Trovão");
     expect(m["flamethrower"]).toBe("Lança-Chamas");
     expect(m["tackle"]).toBe("Investida");
+  });
+
+  it("as descrições de golpe existem, em português, só para golpes conhecidos", () => {
+    const m = moves as Record<string, string>;
+    const d = moveDesc as Record<string, string>;
+    expect(Object.keys(d).length).toBeGreaterThanOrEqual(900);
+    for (const [slug, texto] of Object.entries(d)) {
+      expect(m[slug], slug).toBeTruthy();
+      expect(texto.trim().length, slug).toBeGreaterThan(10);
+      expect(INGLES.test(texto), slug + ": " + texto).toBe(false);
+    }
   });
 });
