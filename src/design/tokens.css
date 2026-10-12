@@ -76,6 +76,14 @@
   --paper-edge: #b8892b;      /* filete dourado entre moldura e miolo */
   --paper-line: #d9c9a6;      /* divisoria e bloco de stat vazio */
 
+  /* Carcaca do aparelho — o vermelho pokebola da Pokedex dobravel. So a
+     carcaca usa: dentro das telas o acento continua sendo o fosforo. */
+  --shell: #c8202f;
+  --shell-dark: #8f1523;    /* dobradica e filete interno */
+  --shell-border: #7a1220;  /* contorno de botao e sombra de texto */
+  --shell-frame: #5c0d18;   /* moldura das telas e parafusos */
+  --shell-btn: #a8192a;     /* aba e botao em repouso */
+
   /* Fontes */
   --font-display: "Space Grotesk", system-ui, sans-serif;
   --font-body: system-ui, -apple-system, "Segoe UI", sans-serif;

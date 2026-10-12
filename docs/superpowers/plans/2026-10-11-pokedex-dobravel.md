@@ -65,7 +65,7 @@ só com o dono pedindo.
 
 ## Fase 1 — Aparelho + Pokédex
 
-- [ ] **1.1 Tokens e primitivas de estilo.**
+- [x] **1.1 Tokens e primitivas de estilo.**
   Acrescentar em `src/design/tokens.css`: `--shell #c8202f`, `--shell-dark #8f1523`,
   `--shell-border #7a1220`, `--shell-frame #5c0d18`, `--shell-btn #a8192a`.
   Criar `src/styles/device.css` com as classes do aparelho e as primitivas reutilizadas por

@@ -1,0 +1,513 @@
+/* ==========================================================================
+   O aparelho — a Pokédex dobrável.
+
+   Carcaça vermelha, duas telas com uma dobradiça no meio, D-pad e A/B no
+   rodapé. Toda aba do site mora dentro dele, no mesmo arranjo: controles e
+   lista à esquerda, resultado à direita. Medidas e cores vêm do handoff em
+   docs/design_handoff_pokedex_dobravel/.
+
+   Abaixo de 860px a dobradiça some e aparece um painel por vez.
+   ========================================================================== */
+
+.dev {
+  min-height: 100vh;
+  background: var(--bg);
+  padding: 32px 24px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.dev-shell {
+  width: 100%;
+  max-width: 1280px;
+  background: var(--shell);
+  border-radius: 22px;
+  box-shadow: 8px 8px 0 var(--shadow-hard), inset 0 0 0 3px var(--shell-dark);
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ---------- Barra superior ---------- */
+.dev-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.dev-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+.dev-lens {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 50%;
+  background: #9ad8ff;
+  border: 4px solid var(--text);
+  box-shadow: 0 0 0 3px var(--shell-border);
+  position: relative;
+}
+.dev-lens::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 7px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0.85;
+}
+.dev-lights {
+  display: flex;
+  gap: 6px;
+}
+.dev-lights span {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--shell-border);
+  background: var(--pokeball-red);
+}
+.dev-lights span:nth-child(2) { background: var(--accent-alt); }
+.dev-lights span:nth-child(3) { background: var(--accent); }
+.dev-title {
+  font-family: var(--font-pixel);
+  font-size: 14px;
+  color: var(--text);
+  text-shadow: 2px 2px 0 var(--shell-border);
+}
+
+.dev-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+}
+.dev-tab {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  min-height: 36px;
+  padding: 9px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--shell-btn);
+  color: var(--text);
+  border: 2px solid var(--shell-border);
+  text-decoration: none;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.dev-tab:hover { background: var(--shell); color: var(--text); }
+.dev-tab.is-active {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent-ink);
+}
+
+.dev-tools {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+/* Os controles que já existiam (busca, idioma, instalar, scanline) vestem a
+   mesma pele: tecla escura sobre a carcaça. */
+.dev-tools button {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  min-height: 36px;
+  padding: 9px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  border: 2px solid var(--border-strong);
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: none;
+}
+.dev-tools button:hover { color: var(--text); border-color: var(--accent); }
+.dev-tools button[aria-pressed="true"],
+.dev-tools .is-on { color: var(--accent); }
+
+/* ---------- Abas do celular (um painel por vez) ---------- */
+.dev-mtabs {
+  display: none;
+  gap: 8px;
+}
+.dev-mtab {
+  flex: 1;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  padding: 12px;
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--shell-border);
+  background: var(--shell-btn);
+  color: var(--text);
+  cursor: pointer;
+}
+.dev-mtab[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent-ink);
+}
+
+/* ---------- Corpo: as duas telas ---------- */
+.dev-body {
+  display: flex;
+  height: 760px;
+  align-items: stretch;
+  min-height: 0;
+}
+.dev-pane {
+  flex: 1;
+  min-width: 0;
+  background: var(--surface-2);
+  border: 4px solid var(--shell-frame);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.dev-pane-left { border-radius: 14px 0 0 14px; }
+.dev-pane-right { border-radius: 0 14px 14px 0; }
+/* Página que ainda não se dividiu em dois painéis: uma tela só, rolável. */
+.dev-pane-single {
+  border-radius: 14px;
+  overflow: auto;
+}
+
+.dev-hinge {
+  width: 26px;
+  flex: none;
+  background: var(--shell-dark);
+  border-top: 2px solid var(--shell-border);
+  border-bottom: 2px solid var(--shell-border);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  margin: 14px 0;
+}
+.dev-hinge span {
+  width: 14px;
+  height: 34px;
+  border-radius: 4px;
+  background: var(--shell-frame);
+}
+
+/* ---------- Rodapé do aparelho ---------- */
+.dev-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 0 6px;
+}
+.dev-dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 44px);
+  grid-template-rows: repeat(3, 44px);
+}
+.dev-dpad button,
+.dev-dpad .dev-dpad-mid {
+  border: 0;
+  background: var(--surface-3);
+  color: var(--text);
+  font-size: 14px;
+  padding: 0;
+}
+.dev-dpad button { cursor: pointer; }
+.dev-dpad button:active:not(:disabled) {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.dev-dpad button:disabled { color: var(--border-strong); cursor: default; }
+.dev-dpad-up { border-radius: 6px 6px 0 0; }
+.dev-dpad-down { border-radius: 0 0 6px 6px; }
+.dev-dpad-left { border-radius: 6px 0 0 6px; }
+.dev-dpad-right { border-radius: 0 6px 6px 0; }
+
+.dev-foot-label {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  color: var(--text);
+  text-align: center;
+  line-height: 1.8;
+  text-shadow: 1px 1px 0 var(--shell-border);
+}
+.dev-foot-label small {
+  display: block;
+  font-size: inherit;
+  opacity: 0.85;
+}
+
+.dev-ab {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  transform: rotate(-18deg);
+}
+.dev-ab button {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 3px solid var(--shell-border);
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+}
+.dev-ab-b {
+  background: var(--border);
+  color: var(--text);
+  margin-top: 18px;
+}
+.dev-ab-a {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* ==========================================================================
+   Primitivas de painel — o vocabulário que todas as abas compartilham.
+   ========================================================================== */
+
+/* Texto bitmap: rótulo, número, estado. Sem acento — a fonte não tem. */
+.px {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  line-height: 1.6;
+  letter-spacing: 0;
+}
+
+/* Faixa de controles no topo de um painel. */
+.pane-bar {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-bottom: 2px solid var(--border);
+  background: var(--surface-1);
+  flex: none;
+}
+.pane-bar-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* O miolo rolável. */
+.pane-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.pane-scroll-loose {
+  padding: 18px 22px 22px;
+  gap: 18px;
+}
+
+/* Rodapé de painel: contagem à esquerda, paginação à direita. */
+.pane-foot {
+  padding: 10px 14px;
+  border-top: 2px solid var(--border);
+  background: var(--surface-1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+/* Faixa verde: o cabeçalho do painel de resultado. */
+.pane-band {
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: none;
+}
+.pane-band h1,
+.pane-band h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 1.1;
+  color: inherit;
+}
+.pane-band a { color: inherit; }
+
+/* Cartão de leitura. */
+.pane-card {
+  background: var(--surface-1);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pane-card-tag {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  color: var(--accent-alt);
+}
+.pane-card h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--text);
+}
+.pane-card p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+/* Título de seção dentro de um painel. */
+.pane-h {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  font-weight: 400;
+  color: var(--text-dim);
+}
+
+/* Linha de lista com estado de seleção. */
+.pane-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px 6px 8px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 2px solid transparent;
+  color: var(--text);
+  text-decoration: none;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  width: 100%;
+}
+.pane-row:hover { background: var(--surface-3); color: var(--text); }
+.pane-row.is-selected,
+.pane-row[aria-current="true"],
+.pane-row[aria-pressed="true"] {
+  background: var(--surface-3);
+  border-color: var(--accent);
+}
+
+/* Botão de tela (não da carcaça). */
+.pane-btn {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border-strong);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: none;
+}
+.pane-btn:hover:not(:disabled) { border-color: var(--accent); }
+.pane-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.pane-btn.is-active,
+.pane-btn[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent-ink);
+}
+
+/* Campo de texto de painel. */
+.pane-input {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border-strong);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 15px;
+}
+.pane-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.pane-empty {
+  padding: 40px 12px;
+  text-align: center;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  color: var(--text-dim);
+  line-height: 1.8;
+  margin: auto 0;
+}
+
+/* Bolinha de tipo. */
+.type-dot {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+  outline: 1px solid var(--border-strong);
+  background: var(--t-normal);
+}
+
+/* Etiqueta de tipo (fundo na cor do tipo). */
+.type-tag {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  padding: 7px 9px;
+  border-radius: var(--radius-sm);
+  color: var(--accent-ink);
+  border: 2px solid var(--accent-ink);
+  background: var(--t-normal);
+  text-transform: uppercase;
+}
+
+.pixelated { image-rendering: pixelated; }
+
+/* ---------- Celular ---------- */
+@media (max-width: 859px) {
+  .dev { padding: 0; }
+  .dev-shell {
+    border-radius: 0;
+    box-shadow: none;
+    padding: 14px;
+    min-height: 100vh;
+  }
+  .dev-mtabs { display: flex; }
+  .dev-body { height: auto; min-height: 60vh; }
+  .dev-hinge { display: none; }
+  .dev-pane { border-radius: 10px; }
+  .dev-pane[data-hidden="true"] { display: none; }
+  .dev-pane-single { overflow: visible; }
+  .pane-scroll { overflow: visible; }
+  .pane-band h1,
+  .pane-band h2 { font-size: 26px; }
+}
