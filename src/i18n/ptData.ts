@@ -7,7 +7,8 @@
  *
  * - `flavor.json`    — o texto da Pokédex de cada espécie (id → texto), a
  *                      partir da entrada em inglês do jogo mais recente
- * - `abilities.json` — nome, resumo e efeito completo (slug → …)
+ * - `abilities.json` — nome, resumo, efeito completo e texto de sabor
+ *                      (slug → …)
  * - `moves.json`     — nome de cada golpe (slug → nome)
  * - `move-desc.json` — descrição de cada golpe (slug → texto)
  *
@@ -27,6 +28,8 @@ export interface AbilityPt {
   short: string;
   /** Ausente quando o texto longo é igual ao resumo. */
   effect?: string;
+  /** O texto de sabor do jogo, a frase curta entre aspas no topo da página. */
+  flavor?: string;
 }
 
 type Mapa<T> = Record<string, T>;

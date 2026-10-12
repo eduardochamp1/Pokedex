@@ -30,6 +30,13 @@ describe("traduções do que a PokéAPI não tem em português", () => {
     }
   });
 
+  it("toda habilidade tem texto de sabor, em português", () => {
+    for (const [slug, a] of Object.entries(abilities as Record<string, { flavor?: string }>)) {
+      expect((a.flavor ?? "").trim().length, slug).toBeGreaterThan(10);
+      expect(INGLES.test(a.flavor ?? ""), slug + ": " + a.flavor).toBe(false);
+    }
+  });
+
   it("os golpes têm nome, e os clássicos saem como o público conhece", () => {
     const m = moves as Record<string, string>;
     expect(Object.keys(m).length).toBeGreaterThanOrEqual(900);

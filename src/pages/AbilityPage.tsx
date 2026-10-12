@@ -63,9 +63,9 @@ const AbilityPage = () => {
   const nome = traduzida?.name ?? original;
   const curto = traduzida?.short ?? pickLocalized(data.effect_entries, (e) => e.short_effect);
   const longo = traduzida ? traduzida.effect ?? traduzida.short : pickLocalized(data.effect_entries, (e) => e.effect);
-  // O texto de sabor do jogo só existe em inglês; com a tradução do efeito em
-  // mãos, ele sai da tela em português em vez de misturar os idiomas.
-  const flavor = traduzida ? "" : pickLocalized(data.flavor_text_entries, (f) => f.flavor_text);
+  // O texto de sabor do jogo só existe em inglês na PokéAPI; em português sai
+  // o traduzido, e nunca o original, para não misturar os idiomas.
+  const flavor = traduzida ? traduzida.flavor ?? "" : pickLocalized(data.flavor_text_entries, (f) => f.flavor_text);
   const geracao = data.generation ? generationNumberFromName(data.generation.name) : undefined;
   const { regular, hidden } = abilityHolders(data);
 
