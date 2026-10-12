@@ -1,3 +1,4 @@
+import { tType } from "../data/i18n";
 import { Panes } from "../components/device/Panes";
 import { useDevicePage } from "../components/device/DeviceContext";
 import { useCallback, useMemo, useState } from "react";
@@ -449,7 +450,13 @@ const LorePage = () => {
                     {region.eliteFour && region.eliteFour.length > 0 && (
                       <>
                         <dt>Elite Four</dt>
-                        <dd>{region.eliteFour.join(" · ")}</dd>
+                        {/* O dado guarda o tipo em inglês ("Will (Psychic)"): aqui ele sai no
+                            idioma do site, pelo mesmo dicionário dos chips de tipo. */}
+                        <dd>
+                          {region.eliteFour
+                            .map((m) => m.replace(/\(([A-Za-z]+)\)$/, (_, tipo: string) => `(${tType(tipo.toLowerCase(), lang)})`))
+                            .join(" · ")}
+                        </dd>
                       </>
                     )}
                     {region.cities && region.cities.length > 0 && (
