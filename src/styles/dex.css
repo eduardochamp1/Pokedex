@@ -374,7 +374,7 @@
   font-size: 14px;
   color: var(--text-dim);
 }
-.entry-defense .is-x4 .entry-defense-mult { background: var(--pokeball-red); color: #fff; }
+.entry-defense .is-x4 .entry-defense-mult { background: var(--shell-dark); color: #fff; }
 .entry-defense .is-x2 .entry-defense-mult { background: var(--fav); color: var(--accent-ink); }
 .entry-defense .is-resist .entry-defense-mult { background: #1d3a24; color: var(--accent-hover); }
 .entry-defense .is-immune .entry-defense-mult { background: var(--bg); color: var(--text); }

@@ -213,7 +213,7 @@ só com o dono pedindo.
   classe com `grep` em `src/**/*.tsx` antes de apagar. Remover testes só dos arquivos
   apagados.
 
-- [ ] **4.3 Acessibilidade e offline.** 👁 Ordem de foco, `aria-current`/`aria-selected`
+- [x] **4.3 Acessibilidade e offline.** 👁 Ordem de foco, `aria-current`/`aria-selected`
   nas listas e abas, contraste dos textos sobre a faixa verde e sobre a carcaça, alvos de
   44 px no toque, `prefers-reduced-motion`. Rodar a auditoria axe (nota de memória
   `auditoria-a11y-axe-via-cdp`) em `/`, `/lore`, `/quiz`. `npm run build` + preview:

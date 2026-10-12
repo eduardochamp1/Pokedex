@@ -200,7 +200,7 @@ const DexEntry = ({ nameOrId, featured = false, search }: Props) => {
             <h1>{nome}</h1>
             <div className="entry-types">
               {tipos.map((tp) => (
-                <span key={tp} className="type-tag" style={{ background: `var(--t-${tp})` }}>
+                <span key={tp} className="type-tag" data-type={tp} style={{ background: `var(--t-${tp})` }}>
                   {semAcento(tType(tp, lang))}
                 </span>
               ))}
@@ -298,7 +298,7 @@ const DexEntry = ({ nameOrId, featured = false, search }: Props) => {
                   const m = attackMultiplier(atk as TypeName, tipos as TypeName[]);
                   return (
                     <li key={atk} className={defenseTone(m)} title={`${tType(atk, lang)} ${multiplierLabel(m)}`}>
-                      <span className="entry-defense-type" style={{ background: `var(--t-${atk})` }}>
+                      <span className="entry-defense-type" data-type={atk} style={{ background: `var(--t-${atk})` }}>
                         {semAcento(tType(atk, lang)).slice(0, 3)}
                       </span>
                       <span className="entry-defense-mult">{m === 1 ? "" : multiplierLabel(m)}</span>

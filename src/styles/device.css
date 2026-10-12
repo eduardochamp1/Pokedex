@@ -584,3 +584,41 @@
 .pane-bar h1.pane-h { color: var(--text); font-size: 10px; }
 /* Na faixa em coluna, `flex: 1` do campo achatava a altura dele. */
 .roster-bar .pane-input { flex: none; width: 100%; }
+
+/* ---------- Contraste e foco ---------- */
+/* Nos cinco tipos escuros a tinta não passa de 3,5:1; o branco passa de 5,7:1. */
+:is(.type-tag, .entry-defense-type):is(
+    [data-type="dark"],
+    [data-type="ghost"],
+    [data-type="dragon"],
+    [data-type="fighting"],
+    [data-type="poison"]
+  ) {
+  color: #fff;
+}
+/* O anel de foco precisa aparecer sobre o verde, o vermelho e o escuro: tinta
+   por dentro, claro por fora. */
+.dev :focus-visible {
+  outline: 2px solid var(--accent-ink);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 4px var(--text);
+}
+@media (prefers-reduced-motion: reduce) {
+  .dev *,
+  .dev *::before,
+  .dev *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+/* Alvos de toque: 44px nas teclas pequenas da barra e da lista. */
+@media (hover: none) and (pointer: coarse) {
+  .dev-tab,
+  .dev-tools button,
+  .dex-chip,
+  .dex-pager button,
+  .dex-view button {
+    min-height: 44px;
+  }
+  .dex-pager button { width: 44px; }
+}

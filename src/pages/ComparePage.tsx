@@ -25,7 +25,7 @@ const Fighter = ({ pokemon, lang }: { pokemon: Pokemon | null | undefined; lang:
       <strong>{pokemonLabel(pokemon.name, lang)}</strong>
       <span className="cmp-types">
         {pokemon.types.map((x) => (
-          <span key={x.type.name} className="type-tag" style={{ background: `var(--t-${x.type.name})` }}>
+          <span key={x.type.name} className="type-tag" data-type={x.type.name} style={{ background: `var(--t-${x.type.name})` }}>
             {semAcento(tType(x.type.name, lang))}
           </span>
         ))}
@@ -49,7 +49,7 @@ const Effect = ({ atk, def, lang }: { atk: Pokemon; def: Pokemon; lang: Lang }) 
         );
         return (
           <li key={x.type.name}>
-            <span className="type-tag" style={{ background: `var(--t-${x.type.name})` }}>
+            <span className="type-tag" data-type={x.type.name} style={{ background: `var(--t-${x.type.name})` }}>
               {semAcento(tType(x.type.name, lang))}
             </span>
             <strong className={m > 1 ? "is-forte" : m < 1 ? "is-fraco" : ""}>
