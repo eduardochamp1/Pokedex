@@ -78,7 +78,7 @@ só com o dono pedindo.
   estado selecionado), `.pane-empty`. Breakpoint 860 px. Respeitar
   `prefers-reduced-motion`. Sem componente ainda.
 
-- [ ] **1.2 Componente do aparelho.** 👁
+- [x] **1.2 Componente do aparelho.** 👁
   Criar `src/components/device/Device.tsx` (carcaça, barra superior, corpo, rodapé) e
   `src/components/device/DeviceContext.tsx`. O contexto expõe:
   `pane: "left" | "right"`, `setPane`, e um registro que a página preenche com
@@ -94,8 +94,8 @@ só com o dono pedindo.
   `CommandLauncher`); remover `ComparatorButton`. Páginas ainda não migradas renderizam
   dentro do corpo do aparelho em painel único (`.dev-body-single`, rolável) — o site
   continua utilizável.
-  Teste: `Device.test.tsx` cobrindo troca de painel por A/B e chamada de `onDown` pelo
-  D-pad.
+  Teste: `src/lib/deviceNav.test.ts` (a aba de um endereço). O teste de componente ficou de
+  fora: a suíte roda em ambiente node, sem jsdom; A/B e D-pad foram conferidos no navegador.
 
 - [ ] **1.3 Pokédex — painel esquerdo.** 👁
   Criar `src/components/dex/DexList.tsx` e `src/styles/dex.css`. Recebe o mesmo estado que

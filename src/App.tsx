@@ -1,14 +1,14 @@
 import { Suspense, lazy } from "react";
 import { Route, Routes } from "react-router-dom";
 import "./App.css";
-import Navbar from "./components/Navbar";
+import Device from "./components/device/Device";
+import { SinglePane } from "./components/device/Panes";
 import CommandLauncher from "./components/CommandLauncher";
 import { OfflineBanner } from "./components/AppStatus";
 import { useT } from "./i18n/lang";
 import HomePage from "./pages/HomePage";
 import { RouteFallback } from "./components/Skeleton";
 import ErrorBoundary from "./components/ErrorBoundary";
-import ComparatorButton from "./components/ComparatorButton";
 import { FavoriteProvider } from "./contexts/favoritesContext";
 import { useFavorites } from "./hooks/useFavorites";
 import { DetailPage } from "./pages/routeModules";
@@ -46,34 +46,32 @@ function App() {
       <a className="skip-link" href="#conteudo">
         {t("Pular para o conteúdo", "Skip to content")}
       </a>
-      <Navbar />
       <CommandLauncher />
       <OfflineBanner />
-      {/* O único <main> do site: é o landmark que leitor de tela procura, e
-          o destino do link acima (tabIndex -1 para ele poder receber o foco). */}
-      <main id="conteudo" tabIndex={-1}>
+      {/* O <main> do site mora dentro do aparelho (ver Device). Página que ainda
+          não se dividiu em dois painéis entra numa tela só. */}
+      <Device>
       <ErrorBoundary>
-        <Suspense fallback={<RouteFallback />}>
+        <Suspense fallback={<SinglePane><RouteFallback /></SinglePane>}>
           <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/favoritos" element={<FavoritesPage />} />
-            <Route path="/comparar" element={<ComparePage />} />
-            <Route path="/lore" element={<LorePage />} />
-            <Route path="/mapa" element={<MapPage />} />
-            <Route path="/tamanhos" element={<SizesPage />} />
-            <Route path="/evolucoes" element={<EvolutionsPage />} />
-            <Route path="/jogos" element={<GamesPage />} />
-            <Route path="/dados" element={<DataPage />} />
-            <Route path="/time" element={<TeamBuilderPage />} />
-            <Route path="/habilidade/:slug" element={<AbilityPage />} />
-            <Route path="/quiz" element={<QuizPage />} />
-            <Route path="/pokemon/:nameOrId" element={<DetailPage />} />
-            <Route path="*" element={<NotFoundPage />} />
+            <Route path="/" element={<SinglePane><HomePage /></SinglePane>} />
+            <Route path="/favoritos" element={<SinglePane><FavoritesPage /></SinglePane>} />
+            <Route path="/comparar" element={<SinglePane><ComparePage /></SinglePane>} />
+            <Route path="/lore" element={<SinglePane><LorePage /></SinglePane>} />
+            <Route path="/mapa" element={<SinglePane><MapPage /></SinglePane>} />
+            <Route path="/tamanhos" element={<SinglePane><SizesPage /></SinglePane>} />
+            <Route path="/evolucoes" element={<SinglePane><EvolutionsPage /></SinglePane>} />
+            <Route path="/jogos" element={<SinglePane><GamesPage /></SinglePane>} />
+            <Route path="/dados" element={<SinglePane><DataPage /></SinglePane>} />
+            <Route path="/time" element={<SinglePane><TeamBuilderPage /></SinglePane>} />
+            <Route path="/habilidade/:slug" element={<SinglePane><AbilityPage /></SinglePane>} />
+            <Route path="/quiz" element={<SinglePane><QuizPage /></SinglePane>} />
+            <Route path="/pokemon/:nameOrId" element={<SinglePane><DetailPage /></SinglePane>} />
+            <Route path="*" element={<SinglePane><NotFoundPage /></SinglePane>} />
           </Routes>
         </Suspense>
       </ErrorBoundary>
-      </main>
-      <ComparatorButton />
+      </Device>
     </FavoriteProvider>
   );
 }
