@@ -641,3 +641,42 @@
     min-height: 0;
   }
 }
+
+/* ---------- Proporção das telas ---------- */
+/* A tela da direita (ficha, duelo, dossiê, leitura) leva 60% e a da esquerda
+   (lista e controles) 40%: quem escolhe precisa de menos espaço do que quem
+   lê. Só no desktop — no celular aparece uma tela por vez. */
+@media (min-width: 860px) {
+  .dev-pane-left { flex: 2 1 0; }
+  .dev-pane-right { flex: 3 1 0; }
+}
+
+/* ---------- A tela da direita desce até a base da carcaça ---------- */
+/* Com duas telas, os controles (D-pad, rótulo, A/B) ficam embaixo só da tela
+   da esquerda, e a da direita ganha essa altura. O rodapé sai do fluxo e é
+   ancorado no canto: a largura dele é a mesma conta da tela esquerda (40% do
+   miolo, descontada a dobradiça). Página de tela única continua com o rodapé
+   embaixo, na largura toda. */
+@media (min-width: 860px) {
+  .dev-shell:has(.dev-pane-right) { position: relative; }
+  .dev-shell:has(.dev-pane-right) .dev-pane-left { margin-bottom: 146px; }
+  .dev-shell:has(.dev-pane-right) .dev-foot {
+    position: absolute;
+    left: 24px;
+    bottom: 22px;
+    width: calc((100% - 48px - 26px) * 0.4);
+    gap: 8px;
+  }
+  .dev-foot-label { min-width: 0; }
+}
+/* Janela estreita: a tela esquerda não comporta o D-pad de 132px, o rótulo e
+   os dois botões lado a lado. */
+@media (min-width: 860px) and (max-width: 1279px) {
+  .dev-shell:has(.dev-pane-right) .dev-dpad {
+    grid-template-columns: repeat(3, 36px);
+    grid-template-rows: repeat(3, 36px);
+  }
+  .dev-shell:has(.dev-pane-right) .dev-pane-left { margin-bottom: 122px; }
+  .dev-shell:has(.dev-pane-right) .dev-ab button { width: 42px; height: 42px; }
+  .dev-shell:has(.dev-pane-right) .dev-foot-label { font-size: 8px; }
+}
