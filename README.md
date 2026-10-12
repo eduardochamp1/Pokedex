@@ -4,15 +4,12 @@ Uma Pokédex web em forma de **aparelho dobrável**: carcaça vermelha, duas tel
 
 Feita em **React + TypeScript + Vite**, sobre os dados da [PokéAPI](https://pokeapi.co).
 
-![A Pokédex aberta: lista à esquerda, ficha do Pikachu à direita](docs/screenshots/pokedex.png)
-
 > O emulador de GB/GBC/GBA e tudo o que lia o save (treinador, ginásios, calculadora
 > de dano) saíram daqui para um projeto próprio, o **[Pokemu](https://github.com/eduardochamp1/pokemu)**, em outubro de 2026.
 
 ## Sumário
 
 - [O que é](#-o-que-é)
-- [Tour em imagens](#-tour-em-imagens)
 - [O aparelho](#-o-aparelho)
 - [Funcionalidades](#-funcionalidades)
 - [Stack](#️-stack)
@@ -40,55 +37,6 @@ Três ideias seguram o desenho:
   time montado, região do mapa e aba da ficha são links que dá para mandar a alguém.
 - **Português de verdade.** A PokéAPI não tem pt-BR para os textos da Pokédex, as habilidades
   nem os golpes; os três foram traduzidos aqui, e o nome original em inglês segue ao lado.
-
----
-
-## 📸 Tour em imagens
-
-### A ficha de cada Pokémon
-
-Cinco abas: **Sobre** (texto da Pokédex, medidas, habilidades, formas e sprites), **Status**
-(atributos base e fraquezas), **Evol.** (a cadeia com a condição de cada passo), **Golpes**
-(por jogo e por método) e **Local** (onde encontrar e a chance de captura).
-
-| Status | Evolução |
-|---|---|
-| ![Aba Status do Charizard: atributos base e tabela de defesas](docs/screenshots/status.png) | ![Aba Evol. do Eevee: as oito evoluções e a condição de cada uma](docs/screenshots/evolucao.png) |
-
-| Golpes | Local |
-|---|---|
-| ![Aba Golpes do Gengar: golpes por nível, MT e ovo, com nome em português e em inglês](docs/screenshots/golpes.png) | ![Aba Local do Snorlax: onde encontrar em cada jogo e calculadora de captura](docs/screenshots/local.png) |
-
-### Comparar, montar time e medir
-
-| Comparar | Time |
-|---|---|
-| ![Comparador: dois Pokémon lado a lado, com barras de atributo e efetividade de tipo](docs/screenshots/comparar.png) | ![Montador de time: seis Pokémon e a análise de defesa e ataque por tipo](docs/screenshots/time.png) |
-
-![Tamanhos: Joltik, Pikachu, Charizard e Onix na mesma régua](docs/screenshots/tamanhos.png)
-
-### O mundo: mapa e lore
-
-| Mapa | Lore |
-|---|---|
-| ![Mapa-múndi das nove regiões, com o dossiê de Kanto aberto](docs/screenshots/mapa.png) | ![Lore: a cronologia do universo, por eras](docs/screenshots/lore.png) |
-
-### Quiz, árvores de evolução e habilidades
-
-| Quiz | Evoluções |
-|---|---|
-| ![Quiz: quem é esse Pokémon?, pela silhueta](docs/screenshots/quiz.png) | ![Todas as árvores de evolução, filtráveis por método](docs/screenshots/evolucoes.png) |
-
-![Página da habilidade Static: efeito traduzido e os Pokémon que a têm](docs/screenshots/habilidade.png)
-
-### No celular
-
-Abaixo de 860 px a dobradiça some e o aparelho mostra **uma tela por vez**: A abre a ficha, B volta para a lista.
-
-<p>
-  <img src="docs/screenshots/celular-lista.png" alt="No celular: a lista da Pokédex" width="300" />
-  <img src="docs/screenshots/celular.png" alt="No celular: a ficha do Pikachu" width="300" />
-</p>
 
 ---
 
