@@ -45,49 +45,147 @@ Três ideias seguram o desenho:
 
 ## 📸 Tour em imagens
 
-### A ficha de cada Pokémon
+Um passeio pelo site, tela por tela. Todas as capturas são do aparelho em português, a 1360 px
+de largura; as três últimas mostram o celular.
 
-Cinco abas: **Sobre** (texto da Pokédex, medidas, habilidades, formas e sprites), **Status**
-(atributos base e fraquezas), **Evol.** (a cadeia com a condição de cada passo), **Golpes**
-(por jogo e por método) e **Local** (onde encontrar e a chance de captura).
+### 1. A Pokédex
 
-| Status | Evolução |
-|---|---|
-| ![Aba Status do Charizard: atributos base e tabela de defesas](docs/screenshots/status.png) | ![Aba Evol. do Eevee: as oito evoluções e a condição de cada uma](docs/screenshots/evolucao.png) |
+É a tela inicial e o coração do site. À esquerda, a lista das espécies com busca e filtros; à
+direita, a ficha de quem está selecionado. A faixa verde traz o número, a categoria, o nome e os
+tipos, com os botões de ouvir o grito e favoritar.
 
-| Golpes | Local |
-|---|---|
-| ![Aba Golpes do Gengar: golpes por nível, MT e ovo, com nome em português e em inglês](docs/screenshots/golpes.png) | ![Aba Local do Snorlax: onde encontrar em cada jogo e calculadora de captura](docs/screenshots/local.png) |
+![A Pokédex aberta: lista à esquerda, ficha do Pikachu à direita](docs/screenshots/pokedex.png)
 
-### Comparar, montar time e medir
+Na aba **Sobre** ficam o texto da Pokédex, altura, peso e taxa de captura, as habilidades (cada
+uma com o nome em português, o original em inglês e o resumo do efeito) e, mais abaixo, a ficha
+completa, as formas alternativas e o visualizador de sprites.
 
-| Comparar | Time |
-|---|---|
-| ![Comparador: dois Pokémon lado a lado, com barras de atributo e efetividade de tipo](docs/screenshots/comparar.png) | ![Montador de time: seis Pokémon e a análise de defesa e ataque por tipo](docs/screenshots/time.png) |
+Os chips de tipo e o painel de filtros se combinam com a busca. Aqui, só os Pokémon do tipo
+Fantasma — a lista mostra o total e pagina o resultado:
+
+![A lista filtrada pelo tipo Fantasma, com o Gengar aberto](docs/screenshots/filtros.png)
+
+### 2. As abas da ficha
+
+**Status** — os seis atributos base em barras, o total, e a tabela de defesas: quanto dano o
+Pokémon leva de cada um dos 18 tipos (¼×, ½×, 2×, 4× ou imune).
+
+![Aba Status do Charizard: atributos base e tabela de defesas](docs/screenshots/status.png)
+
+**Evol.** — a cadeia de evolução inteira, com a condição de cada passo escrita na seta: nível,
+pedra, amizade, hora do dia, lugar. No Eevee, as oito ramificações de uma vez.
+
+![Aba Evol. do Eevee: as oito evoluções e a condição de cada uma](docs/screenshots/evolucao.png)
+
+**Golpes** — tudo o que a espécie aprende, separado por nível, MT/MO e ovo, com seletor de jogo.
+Cada golpe aparece com o nome em português e o original; tocar em um abre a descrição.
+
+![Aba Golpes do Gengar: golpes por nível, MT e ovo, com nome em português e em inglês](docs/screenshots/golpes.png)
+
+**Local** — onde encontrar em cada jogo (área, método, nível e chance) e uma calculadora de
+captura com as oito bolas, que reage ao nível, ao status e aos PS restantes do Pokémon selvagem.
+
+![Aba Local do Snorlax: onde encontrar em cada jogo e calculadora de captura](docs/screenshots/local.png)
+
+### 3. Comparar
+
+Dois Pokémon lado a lado. As barras são espelhadas e o lado vencedor de cada atributo acende;
+embaixo, a efetividade dos tipos de um contra o outro, nos dois sentidos. O duelo fica no
+endereço (`/comparar?a=charizard&b=blastoise`), então dá para mandar o link.
+
+![Comparador: Charizard contra Blastoise, com barras de atributo e efetividade de tipo](docs/screenshots/comparar.png)
+
+### 4. Time
+
+Até seis Pokémon, também guardados no endereço. A tela da direita analisa o conjunto: de que
+tipos o time apanha, que tipos ele acerta com vantagem e quais combinações de tipo consertariam
+os pontos fracos, com sugestões para adicionar num clique.
+
+![Montador de time: seis Pokémon e a análise de defesa e ataque por tipo](docs/screenshots/time.png)
+
+### 5. Tamanhos
+
+Os Pokémon escolhidos desenhados na mesma escala, sobre uma régua — de um Joltik de 10 cm a um
+Onix de quase 9 m.
 
 ![Tamanhos: Joltik, Pikachu, Charizard e Onix na mesma régua](docs/screenshots/tamanhos.png)
 
-### O mundo: mapa e lore
+### 6. Mapa
 
-| Mapa | Lore |
+Um mapa-múndi desenhado em SVG com as nove regiões. Tocar numa região abre o dossiê dela: a
+descrição, os Pokémon emblemáticos, as ilhas e os locais notáveis, cada um com fonte citada.
+
+![Mapa-múndi das nove regiões, com o dossiê de Kanto aberto](docs/screenshots/mapa.png)
+
+![O dossiê de Paldea no mapa](docs/screenshots/mapa-paldea.png)
+
+### 7. Lore
+
+A história do universo em 13 abas. A **Cronologia** organiza os eventos em eras, do Ovo Original
+aos jogos mais recentes, e pode ser filtrada por era ou por Pokémon.
+
+![Lore: a cronologia do universo, por eras](docs/screenshots/lore.png)
+
+A **Genealogia** é uma árvore: quem criou ou moldou quem, a partir de Arceus.
+
+![Lore: a genealogia, com Arceus no topo e o trio da criação](docs/screenshots/lore-genealogia.png)
+
+As **Regiões** trazem cidades, professor, campeão, Elite Four e líderes de ginásio; os **Itens**,
+os artefatos da história com sprite, nome original e jogo de estreia.
+
+| Regiões | Itens |
 |---|---|
-| ![Mapa-múndi das nove regiões, com o dossiê de Kanto aberto](docs/screenshots/mapa.png) | ![Lore: a cronologia do universo, por eras](docs/screenshots/lore.png) |
+| ![Lore: as regiões, com professor, campeão e líderes](docs/screenshots/lore-regioes.png) | ![Lore: os itens e artefatos, por categoria](docs/screenshots/lore-itens.png) |
 
-### Quiz, árvores de evolução e habilidades
+### 8. Quiz
 
-| Quiz | Evoluções |
+Quatro modos e um desafio do dia. No clássico, a silhueta e quatro alternativas; no modo **tipo**,
+o Pokémon aparece e a pergunta é a combinação de tipos dele.
+
+| Silhueta | Tipo |
 |---|---|
-| ![Quiz: quem é esse Pokémon?, pela silhueta](docs/screenshots/quiz.png) | ![Todas as árvores de evolução, filtráveis por método](docs/screenshots/evolucoes.png) |
+| ![Quiz: quem é esse Pokémon?, pela silhueta](docs/screenshots/quiz.png) | ![Quiz no modo tipo: escolher a combinação de tipos certa](docs/screenshots/quiz-tipo.png) |
+
+### 9. Evoluções, jogos e habilidades
+
+**Evoluções** reúne todas as árvores de evolução, filtráveis por método (nível, pedra, troca,
+amizade…), por geração e por nome. **Jogos** é a linha do tempo dos títulos principais, com
+plataforma, geração e região.
+
+| Evoluções | Jogos |
+|---|---|
+| ![Todas as árvores de evolução, filtráveis por método](docs/screenshots/evolucoes.png) | ![A linha do tempo dos jogos principais](docs/screenshots/jogos.png) |
+
+Cada **habilidade** tem página própria: o texto de sabor, o efeito completo e a lista de quem a
+tem, separando a habilidade comum da oculta.
 
 ![Página da habilidade Static: efeito traduzido e os Pokémon que a têm](docs/screenshots/habilidade.png)
 
-### No celular
+### 10. Busca, idioma e seus dados
 
-Abaixo de 860 px a dobradiça some e o aparelho mostra **uma tela por vez**: A abre a ficha, B volta para a lista.
+**Ctrl+K** abre a busca do site inteiro — Pokémon, habilidades, regiões, verbetes da lore e
+páginas —, toda pelo teclado.
+
+![A busca com Ctrl+K, com os resultados para char](docs/screenshots/busca.png)
+
+O seletor **PT | EN** troca o idioma do site inteiro, dos rótulos do aparelho aos textos da lore.
+
+![A mesma ficha do Pikachu com o site em inglês](docs/screenshots/ingles.png)
+
+Em **Seus dados**, os favoritos, recordes e preferências guardados no navegador saem num arquivo
+`.json` e podem ser importados em outro aparelho — sem conta e sem servidor.
+
+![Seus dados: exportar e importar o que o site guarda no navegador](docs/screenshots/dados.png)
+
+### 11. No celular
+
+Abaixo de 860 px a dobradiça some e o aparelho mostra **uma tela por vez**, com duas abas grandes
+no topo: A abre a tela da direita, B volta para a da esquerda.
 
 <p>
-  <img src="docs/screenshots/celular-lista.png" alt="No celular: a lista da Pokédex" width="300" />
-  <img src="docs/screenshots/celular.png" alt="No celular: a ficha do Pikachu" width="300" />
+  <img src="docs/screenshots/celular-lista.png" alt="No celular: a lista da Pokédex" width="270" />
+  <img src="docs/screenshots/celular.png" alt="No celular: a ficha do Pikachu" width="270" />
+  <img src="docs/screenshots/celular-mapa.png" alt="No celular: o mapa com o dossiê de Hoenn" width="270" />
 </p>
 
 ---
