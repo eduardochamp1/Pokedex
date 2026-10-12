@@ -7,13 +7,15 @@ import DexEntry from "../components/dex/DexEntry";
 import { useDebounce } from "../hooks/useDebounce";
 import { useFeaturedPokemon } from "../hooks/useFeaturedPokemon";
 import {
+  ITEMS_PER_PAGE,
   usePokemonDetail,
   usePokemonList,
   usePokemonPage,
   usePokemonSelection,
 } from "../hooks/usePokemon";
 import { sortNamesAlphabetically } from "../lib/filters";
-import { neighbor } from "../lib/dexNav";
+import { farStep, neighbor } from "../lib/dexNav";
+import { TOTAL_SPECIES } from "../lib/daily";
 import { useLang, tr } from "../i18n/lang";
 import { parseHomeParams, toSearchParams, type HomeParams } from "../lib/homeParams";
 import "../styles/dex.css";
@@ -86,6 +88,22 @@ const HomePage = () => {
   const names = pokemons.map((p) => p.name);
   const go = (name: string) => navigate({ pathname: `/pokemon/${name}`, search: location.search });
   const step = (dir: 1 | -1) => {
+    // A ficha aberta pode estar fora da página visível da lista (link direto
+    // em /pokemon/eevee, lista na página 1): aí a seta anda a partir dela e
+    // leva a lista junto, em vez de entrar pela ponta da página errada.
+    if (shownName && names.length > 0 && !names.includes(shownName)) {
+      const longe = farStep(
+        { order: orderedNames, current: shownName, id: shownDetail.data?.id, total: TOTAL_SPECIES },
+        dir,
+        ITEMS_PER_PAGE
+      );
+      if (longe) {
+        const busca = new URLSearchParams(location.search);
+        if (longe.page > 0) busca.set("p", String(longe.page + 1));
+        else busca.delete("p");
+        return navigate({ pathname: `/pokemon/${longe.target}`, search: busca.toString() });
+      }
+    }
     const alvo = neighbor(names, shownName, dir);
     if (alvo) return go(alvo);
     // Ponta da página: a seta vira a página, e a próxima entra pela ponta.
