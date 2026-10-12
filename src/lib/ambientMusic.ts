@@ -16,7 +16,7 @@ const VOLUME = 0.05;
 /** Faixa opcional, posta por quem mantém o site; sem ela vale a síntese. */
 const ARQUIVOS = ["/audio/tema.mp3", "/audio/tema.m4a"];
 /** Volume do arquivo: uma gravação soa mais alta que três osciladores. */
-const VOLUME_ARQUIVO = 0.05;
+const VOLUME_ARQUIVO = 0.02;
 /** Segundos de fade no começo e no fim da faixa, para o laço não estalar. */
 const FADE = 2.5;
 /** Duração de um passo (colcheia), em segundos — cerca de 86 bpm. */
