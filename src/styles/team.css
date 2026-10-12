@@ -138,3 +138,6 @@
   text-transform: uppercase;
   margin: 0 0 8px;
 }
+/* Os slots são quadrados e crescem com a largura: sem teto, numa tela larga
+   viravam seis blocos de 150 px e empurravam a análise para baixo. */
+.team-slots6 { max-width: 600px; }
