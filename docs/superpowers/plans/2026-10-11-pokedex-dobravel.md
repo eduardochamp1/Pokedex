@@ -219,10 +219,10 @@ só com o dono pedindo.
   `auditoria-a11y-axe-via-cdp`) em `/`, `/lore`, `/quiz`. `npm run build` + preview:
   o service worker instala e as rotas abrem sem rede.
 
-- [ ] **4.4 README e fechamento.** Atualizar `README.md` (funcionalidades, estrutura,
+- [x] **4.4 README e fechamento.** Atualizar `README.md` (funcionalidades, estrutura,
   design tokens) para o aparelho. Verificação completa + build.
 
-- [ ] **4.5 REVISÃO FINAL.** **Parar o loop.** Resumir para o dono o que foi feito e as
+- [x] **4.5 REVISÃO FINAL.** **Parar o loop.** Resumir para o dono o que foi feito e as
   diferenças em relação ao handoff, e perguntar se pode fazer o merge na `main` e o push.
 
 ---
@@ -290,6 +290,23 @@ Diferenças em relação ao handoff:
   por pokémon fica na faixa da esquerda; os filtros de era continuam dentro da Cronologia.
 - **Quiz**: o seletor de geração e o placar ficam na tela da esquerda, abaixo dos modos; no
   desafio do dia, o progresso fica ali também. A marcação das rodadas é a atual.
+
+### Fase 4 (2026-10-11)
+
+- **Páginas fora do protótipo** (Habilidade, Dados, Evoluções, Jogos): ganharam a faixa verde
+  e os cartões por CSS (`pages.css`), sem mudar a marcação, numa tela única. A 404 foi
+  reescrita.
+- **Poda**: 12 componentes e hooks apagados; `App.css` de 4.004 para 2.361 linhas, por script
+  que confere cada classe contra o código (classe montada em código, como `"card-" + x`,
+  conta como usada).
+- **Acessibilidade**: contraste calculado para os pares novos de cor; tipos escuros com texto
+  branco; anel de foco de duas cores; alvos de 44 px no toque.
+- **Não feito**: a auditoria com axe-core e o teste de abrir as rotas sem rede no preview.
+  O precache do service worker lista os 36 arquivos do build, mas ninguém abriu o site
+  offline depois da repaginada.
+- **Não visto**: desde a Fase 3 as capturas de tela não responderam; Mapa, Lore, Quiz e as
+  páginas da Fase 4 foram conferidas por inspeção da página (estrutura, cores computadas,
+  ausência de erro e de rolagem lateral), não pelo olho.
 
 ## Bloqueios
 

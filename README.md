@@ -7,6 +7,28 @@ Uma Pokédex web completa em **React + TypeScript + Vite**, consumindo a [PokéA
 
 ---
 
+## 📟 O aparelho
+
+O site inteiro é uma **Pokédex dobrável aberta**: carcaça vermelha, duas telas com uma
+dobradiça no meio, D-pad e botões A/B no rodapé. Toda aba segue o mesmo arranjo —
+**controles e lista à esquerda, resultado à direita**.
+
+- **Barra superior** — lente, luzes, as oito abas (Pokédex, Comparar, Time, Mapa, Lore, Quiz,
+  Tamanhos, Favoritos), a busca (`Ctrl+K`), idioma, instalar e scanline
+- **Pokédex** — `/` e `/pokemon/:nome` são a mesma tela: a lista (ou grade) à esquerda e a
+  ficha à direita, com as abas Sobre, Status, Evol., Golpes e Local. Sem seleção, a ficha
+  abre no Pokémon do dia
+- **D-pad e teclado** — ↑ ↓ andam pela lista e viram a página nas pontas; ← → trocam de página
+- **Celular** (abaixo de 860 px) — uma tela por vez, com duas abas grandes (LISTA/FICHA,
+  ESCOLHER/DUELO…); A abre a tela da direita, B volta para a da esquerda
+- **Rótulos em fonte bitmap vão sem acento** (`PSIQUICO`, `ELETRICO`): a Press Start 2P não
+  tem os glifos. Texto corrido fica em Space Grotesk
+
+O conceito e as medidas estão em `docs/design_handoff_pokedex_dobravel/`; o plano de
+implementação e o que divergiu dele, em `docs/superpowers/plans/2026-10-11-pokedex-dobravel.md`.
+
+---
+
 ## ✨ Funcionalidades
 
 ### Pokédex principal
@@ -16,16 +38,15 @@ Uma Pokédex web completa em **React + TypeScript + Vite**, consumindo a [PokéA
 - **Filtro por geração** (I — Kanto até IX — Paldea)
 - **Filtro por raridade** (lendários, míticos, bebês, iniciais)
 - **Cross-filter** — busca + tipo + geração + raridade se combinam por interseção, com o total de resultados visível e paginação real
-- **Favoritos persistentes** no `localStorage` com contador no navbar
+- **Favoritos persistentes** no `localStorage` com contador na aba Favoritos
 - **Pokémon do dia** no topo — o mesmo para todo mundo no mesmo dia, sem
   servidor: `(dia × 389 + 25) mod 1025` passa pelas 1025 espécies antes de repetir
 
 - **Visualizador de sprites** com quatro modos: normal, shiny ✨, animado (GIF), animado shiny ✨
-- **Card 3D** com foil e tilt seguindo o mouse (desligado sob `prefers-reduced-motion`)
 - **Status base** com barras animadas
 - **Lore** — texto oficial da Pokédex (PT-BR quando disponível, com fallback em inglês)
 - **Badge de raridade** — Lendário 👑, Mítico ✨, Bebê 🍼
-- **Evoluções** — chain completa com cards clicáveis
+- **Evoluções** — a cadeia completa em linha, cada estágio clicável
 - **Habilidades clicáveis** — cada uma leva a `/habilidade/:slug`, com o efeito,
   a geração e todos os pokémon que a têm, comum e oculta separadas
 - **Formas alternativas** — Mega X/Y, Gigantamax, Origin, Regional, Therian, Ultra, etc.
@@ -120,10 +141,10 @@ Página com **13 abas** cobrindo a mitologia oficial:
 A busca da sidebar filtra as 13 abas simultaneamente. Todo verbete cita sua fonte na Bulbapedia. Chips de pokémon são clicáveis (link para o detail) e têm botão de filtro.
 
 ### Em todo o site
-- **Busca com Ctrl+K** (ou `/`, e o botão ⌕ na navbar) — Pokémon, habilidades,
+- **Busca com Ctrl+K** (ou `/`, e o botão CTRL K na barra do aparelho) — Pokémon, habilidades,
   regiões, verbetes da lore e páginas num lugar só, só pelo teclado. Carrega na
   primeira abertura, porque indexa a lore inteira
-- **Português e inglês** — seletor PT | EN na navbar; o padrão sai do navegador.
+- **Português e inglês** — seletor PT | EN na barra do aparelho; o padrão sai do navegador.
   Tradução em linha (`t("Buscar", "Search")`), ao lado do original. A PokéAPI
   responde no idioma escolhido, sem misturar os dois. A **lore inteira** tem
   versão em inglês em `src/data/en/`, só com os campos de texto, e
@@ -141,7 +162,7 @@ A busca da sidebar filtra as 13 abas simultaneamente. Todo verbete cita sua font
 - **Paleta canônica por tipo** — cores oficiais para os 18 tipos
 - **Responsivo** — grid adapta de 4 → 1 colunas, sidebar vira barra horizontal no mobile
 - **Skeleton loaders** durante o fetch inicial; spinner nas rotas carregadas sob demanda
-- **`prefers-reduced-motion`** respeitado em tilt e animações
+- **`prefers-reduced-motion`** respeitado nas transições e animações
 - **Cache inteligente** — trocar de página é instantâneo após a primeira visita
 - **404** próprio para rotas inexistentes
 
@@ -214,33 +235,25 @@ src/
 ├── api.ts                      Wrappers da PokéAPI (fetchJson<T> genérico, mapa de aliases)
 │
 ├── pages/
-│   ├── HomePage.tsx            Lista + busca + 3 filtros combináveis
-│   ├── DetailPage.tsx          Sprite viewer, lore, evoluções, formas
+│   ├── HomePage.tsx            A Pokédex: lista à esquerda, ficha à direita (serve / e /pokemon/:nome)
 │   ├── ComparePage.tsx         Comparador de 2 pokémons + efetividade
 │   ├── FavoritesPage.tsx       Grid dos favoritos
 │   ├── LorePage.tsx            13 abas de lore
 │   ├── MapPage.tsx             Mapa-múndi + dossiê por região
 │   ├── PlayPage.tsx            Emulador GB/GBC/GBA + saves
 │   ├── NotFoundPage.tsx        404 na carcaça do aparelho
-│   └── routeModules.ts         Ficha em lazy + preload (a virada de carta precisa do módulo antes de navegar)
 │
 ├── components/
-│   ├── Navbar.tsx              Logo Pokéball + nav links
-│   ├── Searchbar.tsx           Input debounce
-│   ├── Pokedex.tsx             Grid + contador + paginação
-│   ├── Card.tsx                Card 2:3 com foil, tilt e badges
-│   ├── CardHero.tsx            Versão ampliada do card
-│   ├── Pagination.tsx          Desabilita nos limites
+│   ├── device/                 O aparelho: Device (carcaça, abas, rodapé), Panes (as duas telas), RosterList (elenco)
+│   ├── dex/                    DexList (lista e grade) e DexEntry (a ficha)
 │   ├── Skeleton.tsx            Placeholders + fallback de rota lazy
-│   ├── TypeFilter.tsx / DexFilter.tsx / RarityFilter.tsx
+│   ├── DexFilter.tsx / RarityFilter.tsx
 │   ├── SpriteViewer.tsx        Toggle normal/shiny/animado
 │   ├── VarietySwitcher.tsx     Mega, Gigantamax, formas regionais
-│   ├── EvolutionChain.tsx
 │   ├── PokemonLore.tsx
 │   ├── PokemonChip.tsx         Chip de pokémon (lore e mapa)
 │   ├── ItemSprite.tsx          Sprite oficial de item, com fallback em emblema
 │   ├── WikiSource.tsx          Chip "fonte: Bulbapedia" dos verbetes
-│   ├── TypeMatchup.tsx         Efetividade de tipos
 │   ├── GenealogyTree.tsx       Árvore de criação: Arceus + painéis de clã
 │   ├── WorldMap.tsx            Mapa em papel (folha 1000x640) + legenda acessível
 │   ├── ScanlineToggle.tsx      Liga/desliga a scanline, guardada no localStorage
@@ -251,9 +264,7 @@ src/
 │   ├── useFavorites.ts         localStorage sync
 │   ├── useFeaturedPokemon.ts   Lendário em destaque na Home
 │   ├── useDebounce.ts          Debounce genérico
-│   ├── useTiltEffect.ts        Tilt 3D seguindo o mouse
 │   ├── useTypewriter.ts        Verbete da dex se escrevendo, uma vez por visita
-│   └── useReducedMotion.ts     prefers-reduced-motion
 │
 ├── lib/                        Lógica pura, com testes
 │   ├── filters.ts              Índice, busca parcial, interseção, paginação
@@ -313,14 +324,15 @@ Tudo em `src/design/tokens.css`, importado pelo `App.css`:
 - Texto: `--text`, `--text-muted`, `--text-dim`
 - Acentos: `--accent` (fósforo do Game Boy, **o único acento de sistema**: foco, seleção, progresso, cursor), `--accent-hover`, `--accent-ink` (tinta escura legível sobre o fósforo)
 - `--accent-alt` é o dourado: destaque secundário e **moldura de raridade**. `--fav` é o vermelho, reservado ao coração de favorito, e `--pokeball-red` guarda o vermelho da marca no ícone
-- Papel da carta e do mapa: `--paper`, `--paper-ink`, `--paper-ink-soft`, `--paper-ps`, `--paper-edge`, `--paper-line`
-- **Paleta de tipos**: `--t-fire`, `--t-water`, `--t-grass` etc. (18 tipos) — a única cor saturada da tela, e a que desenha a moldura da carta
+- Carcaça do aparelho: `--shell`, `--shell-dark`, `--shell-border`, `--shell-frame`, `--shell-btn` — o vermelho pokébola, usado só na carcaça
+- Papel do mapa: `--paper`, `--paper-ink`, `--paper-ink-soft`, `--paper-ps`, `--paper-edge`, `--paper-line`
+- **Paleta de tipos**: `--t-fire`, `--t-water`, `--t-grass` etc. (18 tipos) — a única cor saturada dentro das telas
 - Sombras sólidas (`--shadow-card`, `--shadow-hero`, sobre `--shadow-hard`) no lugar de blur, raios (`--radius-card`, `--radius-sm`, `--radius-pill`) e motion (`--dur-*`, `--ease-*`)
 - Fontes: `--font-display`, `--font-body` e `--font-pixel` — a bitmap fica em número, rótulo e estado; nunca em texto corrido
 
-O cromo é dark-only por decisão de design. As duas exceções são superfícies de
-artefato, não temas: a **carta** e o **mapa** são papel creme, com a moldura da
-carta na cor do tipo e o dourado reservado a raridade.
+As telas são dark-only por decisão de design. As exceções são superfícies de
+artefato, não temas: a **carcaça** vermelha em volta, a **faixa verde** que abre cada
+painel de resultado e o **mapa**, que é papel creme.
 
 ---
 
@@ -340,9 +352,9 @@ carta na cor do tipo e o dourado reservado a raridade.
 - **Aliases**: nomes canônicos que a API não aceita direto (`giratina` → `giratina-altered`) passam por `resolveName`, usado tanto no fetch quanto na normalização dos filtros.
 - **Nomes de lugar, em português ou em inglês**: a mistura é deliberada, não inconsistência. Cada lugar entra pelo nome que o público brasileiro reconhece — os que ficaram conhecidos pela dublagem do anime aparecem traduzidos ("Ilhas Seafoam", "Floresta Viridian", "Planalto Indigo", "Templo de Snowpoint"), e os que circularam só pelos jogos mantêm o original ("Sky Pillar", "Hall of Origin", "Brass Tower", "Silph Co."). Vale para todos os acervos da Lore; não uniformize.
 - **Lore data**: os arquivos em `src/data/*.ts` são curados manualmente. As listas de lendários/míticos podem defasar a cada nova geração; para produção, considere buscar `is_legendary`/`is_mythical` via species endpoint.
-- **Virada de carta**: a transição da grade para a ficha usa a View Transitions API direto, não o `viewTransition` do react-router — o app monta o `BrowserRouter` clássico, e aquele hook exige data router. Como a ficha é lazy, a carta pré-carrega o módulo antes de começar a transição; sem isso o retrato novo pegaria o esqueleto do Suspense no lugar do hero.
+- **Aparelho e páginas**: a página fala com o aparelho por `useDevicePage` (rótulos do celular, texto do rodapé e o que cada seta faz). Os handlers das setas vão por ref, não por estado — eles mudam a cada render, e registrá-los como estado renderizaria o aparelho inteiro a cada tecla. Trocar de aba volta para a tela da esquerda durante o render, não num efeito: o efeito do aparelho roda depois dos da página e desfaria o "abrir a ficha" de quem chega por link direto.
 - **Costa do mapa**: os nove paths do `regionMap` são curvas suaves, legíveis no arquivo; o recorte de costa é calculado em runtime por `roughenPath`, com semente fixa — determinístico, então não muda entre renders nem entre visitas.
-- **Scanline**: ligada por padrão e desligável pela navbar. O estado mora num atributo do `<html>` aplicado antes do primeiro render, para a página não aparecer lisa e só depois ganhar a textura.
+- **Scanline**: ligada por padrão e desligável pela barra do aparelho. O estado mora num atributo do `<html>` aplicado antes do primeiro render, para a página não aparecer lisa e só depois ganhar a textura.
 - **`nav` é seletor de elemento**: a regra da navbar era `nav { position: sticky; z-index: 100; height: 56px }` e pegava **qualquer** `<nav>` da página. Os índices de grupo da Lore (Humanos, Locais) são `<nav>` por semântica e herdavam tudo isso — as fichas boiavam por cima dos cards assim que a página rolava, sem fundo próprio. A regra agora é `.navbar`. Vale a lição para `section`, `header` e `aside`.
 - **Porcentagem dentro de custom property**: `--unidade: min(96px, calc((100% - 32px) / N))` é substituída como **texto** e resolvida por propriedade — a porcentagem resolve contra a largura no `width` e contra a **altura** no `height`. Usar a mesma variável nos dois dava uma caixa de 144×59 e o sprite encolhia para caber na menor. A arte de Humanos tira só a largura da variável e deixa a altura para o `aspect-ratio`. Mesma família da armadilha do `color-mix`: variável derivada tem que ser declarada onde a fonte existe.
 - **Slug não é nome**: os verbetes curados guardam o slug da PokéAPI (`tapu-koko`, `great-tusk`, `ponyta-galar`) porque é ele que resolve o sprite e a rota da ficha. O chip escrevia esse slug com `text-transform: capitalize`, e saía "Tapu-Koko", "Great-Tusk", "Ponyta-Galar" — nenhum é o nome da criatura. Quem traduz agora é `pokemonLabel`: hífen vira espaço, sufixo regional vira "de Galar", e os nomes de pontuação própria (Ho-Oh, Type: Null, Farfetch'd) ficam numa lista de exceções, porque a regra geral os estragaria.
