@@ -17,6 +17,8 @@ const VOLUME = 0.05;
 const ARQUIVOS = ["/audio/tema.mp3", "/audio/tema.m4a"];
 /** Volume do arquivo: uma gravação soa mais alta que três osciladores. */
 const VOLUME_ARQUIVO = 0.08;
+/** Segundos de fade no começo e no fim da faixa, para o laço não estalar. */
+const FADE = 2.5;
 /** Duração de um passo (colcheia), em segundos — cerca de 86 bpm. */
 const PASSO = 0.35;
 const PASSOS_POR_COMPASSO = 8;
@@ -69,6 +71,8 @@ let ligada = false;
 /** Decidido na primeira partida: o arquivo, se carregar; senão a síntese. */
 let fonte: "arquivo" | "sintese" | null = null;
 let faixa: HTMLAudioElement | null = null;
+/** Arquivo ainda carregando: enquanto houver um, não se começa outro. */
+let candidata: HTMLAudioElement | null = null;
 let ctx: AudioContext | null = null;
 let saida: GainNode | null = null;
 let relogio: number | null = null;
@@ -106,6 +110,31 @@ function agendar() {
   }
 }
 
+/**
+ * Volume da faixa conforme a posição: sobe nos primeiros segundos, desce nos
+ * últimos. Assim a volta ao início passa pelo silêncio em vez de cortar.
+ */
+export function volumeNoLaco(tempo: number, duracao: number, cheio: number, fade = FADE): number {
+  // Faixa curta demais para dois fades, ou duração ainda desconhecida.
+  if (!Number.isFinite(duracao) || duracao < fade * 2) return cheio;
+  const borda = Math.min(tempo, duracao - tempo);
+  return cheio * Math.min(1, Math.max(0, borda / fade));
+}
+
+function prepararLaco(audio: HTMLAudioElement): void {
+  // Sem `loop`: o laço nativo emenda o fim no começo no volume cheio.
+  audio.loop = false;
+  const ajustar = () => {
+    audio.volume = volumeNoLaco(audio.currentTime, audio.duration, VOLUME_ARQUIVO);
+  };
+  audio.addEventListener("timeupdate", ajustar);
+  audio.addEventListener("ended", () => {
+    audio.currentTime = 0;
+    if (ligada) void audio.play();
+  });
+  ajustar();
+}
+
 /** Liga a trilha. Precisa vir de um gesto da pessoa, ou o navegador barra. */
 export function startMusic(): void {
   saveMusic(true);
@@ -115,6 +144,9 @@ export function startMusic(): void {
     void faixa?.play();
     return;
   }
+  // Dois gestos seguidos (clique e tecla) não podem abrir duas faixas: a
+  // segunda ficaria tocando sem que o botão de mutar a alcançasse.
+  if (candidata) return;
   // Primeira partida: tenta os arquivos, um por vez. Se nenhum existir (ou
   // vier o index.html do fallback da SPA no lugar), o play rejeita e a
   // síntese assume.
@@ -123,20 +155,29 @@ export function startMusic(): void {
 
 function tentarArquivo(i: number): void {
   if (i >= ARQUIVOS.length) {
+    candidata = null;
     fonte = "sintese";
     if (ligada) ligarSintese();
     return;
   }
   const audio = new Audio(ARQUIVOS[i]);
-  audio.loop = true;
-  audio.volume = VOLUME_ARQUIVO;
+  candidata = audio;
+  // Começa em silêncio; o fade de entrada sobe o volume.
+  audio.volume = 0;
+  prepararLaco(audio);
   audio.play().then(
     () => {
+      candidata = null;
       fonte = "arquivo";
       faixa = audio;
       if (!ligada) audio.pause();
     },
-    () => tentarArquivo(i + 1)
+    () => {
+      // Arquivo que não tocou não fica pendurado à espera de dados.
+      audio.pause();
+      audio.removeAttribute("src");
+      tentarArquivo(i + 1);
+    }
   );
 }
 
@@ -169,6 +210,7 @@ export function stopMusic(): void {
   saveMusic(false);
   ligada = false;
   faixa?.pause();
+  candidata?.pause();
   if (relogio !== null) {
     window.clearInterval(relogio);
     relogio = null;
@@ -193,4 +235,16 @@ export function pauseForHiddenTab(hidden: boolean): void {
   if (!ctx || relogio === null) return;
   if (hidden) void ctx.suspend();
   else void ctx.resume();
+}
+
+// Em desenvolvimento, o HMR troca este módulo por uma cópia nova, de estado
+// zerado. Sem calar a antiga, a faixa seguiria tocando órfã, fora do alcance
+// do botão de mutar.
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    faixa?.pause();
+    candidata?.pause();
+    if (relogio !== null) window.clearInterval(relogio);
+    void ctx?.close();
+  });
 }
