@@ -20,7 +20,7 @@ const MARCA_VERSAO = '"__SW_VERSION__"';
 const MARCA_LISTA = "/*__SW_PRECACHE__*/ []";
 
 /** Arquivos de `public/` que o app usa fora do bundle. */
-const DO_PUBLIC = ["/favicon.ico", "/logo192.png", "/logo512.png", "/manifest.json"];
+const DO_PUBLIC = ["/favicon.ico", "/favicon.svg", "/logo192.png", "/logo512.png", "/manifest.json"];
 
 export function precacheList(bundleFiles: string[]): string[] {
   const doBuild = bundleFiles.filter((f) => !f.endsWith(".map")).map((f) => `/${f}`);

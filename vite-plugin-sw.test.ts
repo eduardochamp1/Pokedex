@@ -28,6 +28,7 @@ describe("precacheList", () => {
       "/assets/b.css",
       "/assets/m.wasm",
       "/favicon.ico",
+      "/favicon.svg",
       "/index.html",
       "/logo192.png",
       "/logo512.png",
