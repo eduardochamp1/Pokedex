@@ -42,5 +42,4 @@ pnpm-debug.log*
 CLAUDE.md
 
 # Faixa de audio opcional da trilha ambiente (ver public/audio/LEIA-ME.txt)
-public/audio/*
-!public/audio/LEIA-ME.txt
+# (a trilha tema.m4a vai versionada, para tocar no site publicado)
