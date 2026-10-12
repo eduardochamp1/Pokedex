@@ -20,6 +20,7 @@ import { pixelSpriteUrl } from "../../lib/sprites";
 import { pokemonLabel } from "../../lib/pokemonLabel";
 import { statLabel } from "../../i18n/common";
 import { useLang, tr, type Lang } from "../../i18n/lang";
+import { usePtFlavor } from "../../i18n/ptData";
 import AbilityList from "../AbilityList";
 import CapturePanel from "../CapturePanel";
 import CryButton from "../CryButton";
@@ -119,6 +120,7 @@ const DexEntry = ({ nameOrId, featured = false, search }: Props) => {
   const species = usePokemonSpecies(pokemon?.species.url);
   const evolution = useEvolutionChain(pokemon?.species.url);
   const { favoritePokemons, updateFavoritePokemons } = useContext(FavoriteContext);
+  const ptFlavor = usePtFlavor();
   const [spriteOverride, setSpriteOverride] = useState<string | undefined>();
   useEffect(() => setSpriteOverride(undefined), [pokemon?.id]);
 
@@ -151,7 +153,10 @@ const DexEntry = ({ nameOrId, featured = false, search }: Props) => {
   const tipos = pokemon.types.map((x) => x.type.name);
   const total = pokemon.stats.reduce((s, x) => s + x.base_stat, 0);
   const genus = pickLocalized(species.data?.genera, (g) => g.genus);
-  const flavor = pickLocalized(species.data?.flavor_text_entries, (e) => e.flavor_text);
+  // Em português, a tradução da casa; a PokéAPI só tem este texto em inglês.
+  const flavor =
+    (species.data && ptFlavor?.[species.data.id]) ||
+    pickLocalized(species.data?.flavor_text_entries, (e) => e.flavor_text);
   const raridade = MYTHICAL.includes(pokemon.name)
     ? t("✦ MITICO", "✦ MYTHICAL")
     : LEGENDARY.includes(pokemon.name)

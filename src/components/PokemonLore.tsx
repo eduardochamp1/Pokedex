@@ -5,6 +5,7 @@ import { pickLocalized } from "../lib/localize";
 import { regionIdForPokemon } from "../lib/regionForPokemon";
 import { useTypewriter } from "../hooks/useTypewriter";
 import { useT } from "../i18n/lang";
+import { usePtFlavor } from "../i18n/ptData";
 
 interface Props {
   species: PokemonSpecies;
@@ -12,7 +13,8 @@ interface Props {
 
 const PokemonLore = ({ species }: Props) => {
   const t = useT();
-  const flavor = pickLocalized(species.flavor_text_entries, (e) => e.flavor_text);
+  const ptFlavor = usePtFlavor();
+  const flavor = ptFlavor?.[species.id] || pickLocalized(species.flavor_text_entries, (e) => e.flavor_text);
   const genus = pickLocalized(species.genera, (g) => g.genus);
   const rarity: string[] = [];
   if (species.is_mythical) rarity.push(t("Mítico ✦", "Mythical ✦"));

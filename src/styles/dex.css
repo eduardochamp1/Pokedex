@@ -494,3 +494,14 @@
   font-size: 14px;
 }
 .dex-filtros select:focus { outline: none; border-color: var(--accent); }
+
+/* O nome original em inglês, ao lado do traduzido (golpes e habilidades). */
+.nome-original {
+  margin-left: 8px;
+  font-family: var(--font-display);
+  font-size: 0.78em;
+  font-weight: 400;
+  color: var(--text-dim);
+}
+.pane-band .nome-original,
+.ability-header .nome-original { color: inherit; opacity: 0.8; }

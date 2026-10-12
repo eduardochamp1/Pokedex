@@ -1,3 +1,4 @@
+import { usePtMoves } from "../i18n/ptData";
 import { useMemo, useState } from "react";
 import { useMoveDetail } from "../hooks/usePokemon";
 import { pickLocalized } from "../lib/localize";
@@ -29,11 +30,13 @@ const MoveRow = ({ move }: { move: LearnedMove }) => {
   const [open, setOpen] = useState(false);
   const lang = useLang();
   const t = (pt: string, en: string) => tr(lang, pt, en);
+  const ptMoves = usePtMoves();
   const detail = useMoveDetail(open ? move.name : undefined);
   const data = detail.data;
 
   const flavor = pickLocalized(data?.flavor_text_entries, (e) => e.flavor_text);
-  const localizedName = pickLocalized(data?.names, (n) => n.name);
+  const original = pickLocalized(data?.names, (n) => n.name) || prettyMoveName(move.name);
+  const localizedName = ptMoves?.[move.name] ?? original;
 
   return (
     <li className={"move-row" + (open ? " is-open" : "")}>
@@ -45,7 +48,12 @@ const MoveRow = ({ move }: { move: LearnedMove }) => {
       >
         {move.level > 0 && <span className="move-level">{move.level}</span>}
         <span className="move-name">
-          {localizedName || prettyMoveName(move.name)}
+          {localizedName}
+          {localizedName !== original && (
+            <span className="nome-original" lang="en">
+              {original}
+            </span>
+          )}
         </span>
         {data && (
           <span className="move-chip" data-type={data.type.name}>

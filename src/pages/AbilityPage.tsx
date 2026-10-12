@@ -1,3 +1,4 @@
+import { usePtAbilities } from "../i18n/ptData";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchJsonPublic } from "../api";
@@ -24,6 +25,7 @@ const humanize = (slug: string) =>
  * `useAbilities`: quem chega pela ficha já tem a resposta em cache.
  */
 const AbilityPage = () => {
+  const pt = usePtAbilities();
   const { slug = "" } = useParams<{ slug: string }>();
   const lang = useLang();
   const t = (pt: string, en: string) => tr(lang, pt, en);
@@ -56,10 +58,14 @@ const AbilityPage = () => {
     );
   }
 
-  const nome = pickLocalized(data.names, (n) => n.name) || humanize(data.name);
-  const curto = pickLocalized(data.effect_entries, (e) => e.short_effect);
-  const longo = pickLocalized(data.effect_entries, (e) => e.effect);
-  const flavor = pickLocalized(data.flavor_text_entries, (f) => f.flavor_text);
+  const original = pickLocalized(data.names, (n) => n.name) || humanize(data.name);
+  const traduzida = pt?.[data.name];
+  const nome = traduzida?.name ?? original;
+  const curto = traduzida?.short ?? pickLocalized(data.effect_entries, (e) => e.short_effect);
+  const longo = traduzida ? traduzida.effect ?? traduzida.short : pickLocalized(data.effect_entries, (e) => e.effect);
+  // O texto de sabor do jogo só existe em inglês; com a tradução do efeito em
+  // mãos, ele sai da tela em português em vez de misturar os idiomas.
+  const flavor = traduzida ? "" : pickLocalized(data.flavor_text_entries, (f) => f.flavor_text);
   const geracao = data.generation ? generationNumberFromName(data.generation.name) : undefined;
   const { regular, hidden } = abilityHolders(data);
 
@@ -75,6 +81,11 @@ const AbilityPage = () => {
     <div className="ability-shell">
       <header className="ability-header">
         <h1>{nome}</h1>
+        {nome !== original && (
+          <span className="nome-original" lang="en">
+            {original}
+          </span>
+        )}
         {geracao && (
           <span className="ability-gen">
             {t("desde a", "since")}{" "}

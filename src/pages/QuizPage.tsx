@@ -1,3 +1,4 @@
+import { usePtFlavor } from "../i18n/ptData";
 import { Panes } from "../components/device/Panes";
 import { useDevicePage } from "../components/device/DeviceContext";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
@@ -282,6 +283,8 @@ const Rodada = ({ mode, round, onResolve }: RodadaProps) => {
   const [escolha, setEscolha] = useState<string | null>(null);
   const audio = useRef<HTMLAudioElement>(null);
 
+  const ptFlavor = usePtFlavor();
+
   const tiposCertos = useMemo(
     () => (poke ? [...poke.types].sort((a, b) => a.slot - b.slot).map((x) => x.type.name) : undefined),
     [poke]
@@ -343,9 +346,9 @@ const Rodada = ({ mode, round, onResolve }: RodadaProps) => {
 
   const texto = useMemo(() => {
     if (mode !== "descricao" || !species) return "";
-    const bruto = pickLocalized(species.flavor_text_entries, (e) => e.flavor_text, lang);
+    const bruto = ptFlavor?.[species.id] || pickLocalized(species.flavor_text_entries, (e) => e.flavor_text, lang);
     return redactName(bruto, [species.name, ...(species.names ?? []).map((n) => n.name)]);
-  }, [mode, species, lang]);
+  }, [mode, species, lang, ptFlavor]);
 
   const sprite = (silhueta: boolean) => (
     <img

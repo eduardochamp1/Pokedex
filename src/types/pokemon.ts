@@ -77,6 +77,8 @@ export interface Genus {
 }
 
 export interface PokemonSpecies {
+  /** Número da espécie na dex nacional. */
+  id: number;
   name: string;
   /** O nome em cada idioma — o quiz esconde todos no texto da Pokédex. */
   names?: { name: string; language: { name: string } }[];
