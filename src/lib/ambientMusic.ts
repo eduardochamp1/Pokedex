@@ -238,13 +238,21 @@ export function pauseForHiddenTab(hidden: boolean): void {
 }
 
 // Em desenvolvimento, o HMR troca este módulo por uma cópia nova, de estado
-// zerado. Sem calar a antiga, a faixa seguiria tocando órfã, fora do alcance
-// do botão de mutar.
-if (import.meta.hot) {
-  import.meta.hot.dispose(() => {
-    faixa?.pause();
-    candidata?.pause();
-    if (relogio !== null) window.clearInterval(relogio);
-    void ctx?.close();
-  });
-}
+// zerado, e a antiga seguiria tocando órfã, fora do alcance do botão de mutar.
+// O `hot.dispose` não serve aqui: ele só roda no módulo que aceita a troca, e
+// quem aceita é o componente que importa este. Por isso a cópia nova cala a
+// anterior ao nascer, por um gancho guardado no `window`.
+const global = globalThis as { __pokedexMusicaCalar?: () => boolean };
+const tocavaAntes = global.__pokedexMusicaCalar?.() ?? false;
+global.__pokedexMusicaCalar = () => {
+  const tocava = ligada;
+  ligada = false;
+  faixa?.pause();
+  candidata?.pause();
+  if (relogio !== null) window.clearInterval(relogio);
+  relogio = null;
+  void ctx?.close();
+  return tocava;
+};
+// A página já recebeu o gesto que libera o áudio: a cópia nova retoma sozinha.
+if (tocavaAntes) startMusic();

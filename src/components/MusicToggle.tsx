@@ -3,14 +3,15 @@ import { isMusicPlaying, pauseForHiddenTab, readMusic, startMusic, stopMusic } f
 import { useT } from "../i18n/lang";
 
 /**
- * Liga e muta a trilha ambiente. A trilha vem ligada, mas o navegador só
+ * Liga e muta o som do aparelho: a trilha ambiente e os bipes das transições
+ * (`lib/sfx.ts`). A trilha vem ligada, mas o navegador só
  * deixa tocar depois de um gesto: o primeiro clique ou tecla em qualquer
  * lugar da página é quem dá a partida.
  */
 const MusicToggle = () => {
   const [on, setOn] = useState(readMusic);
   const t = useT();
-  const rotulo = on ? t("Mutar a música", "Mute the music") : t("Ligar a música", "Turn the music on");
+  const rotulo = on ? t("Mutar o som", "Mute the sound") : t("Ligar o som", "Turn the sound on");
 
   useEffect(() => {
     if (!on || isMusicPlaying()) return;

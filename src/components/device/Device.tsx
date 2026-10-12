@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from "react-router-dom";
 import FavoriteContext from "../../contexts/favoritesContext";
 import { openSearch } from "../../lib/searchEvents";
 import { sectionOf } from "../../lib/deviceNav";
+import { playSfx } from "../../lib/sfx";
 import { useT } from "../../i18n/lang";
 import { InstallButton } from "../AppStatus";
 import LangToggle from "../LangToggle";
@@ -38,7 +39,7 @@ const SETAS: Record<string, keyof DeviceHandlers> = {
 const Device = ({ children }: { children: ReactNode }) => {
   const t = useT();
   const { favoritePokemons } = useContext(FavoriteContext);
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const section = sectionOf(pathname);
 
   const [pane, setPane] = useState<PaneSide>("left");
@@ -55,6 +56,19 @@ const Device = ({ children }: { children: ReactNode }) => {
     setPane("left");
   }
 
+  // Os bipes das transições. Aba do aparelho, ficha e sub-aba da ficha mudam
+  // a URL, então é por ela que o som sabe o que aconteceu — venha de clique,
+  // de seta ou do botão voltar do navegador. A chegada ao site fica calada.
+  const subAba = new URLSearchParams(search).get("aba") ?? "";
+  const anterior = useRef({ section, pathname, subAba });
+  useEffect(() => {
+    const antes = anterior.current;
+    anterior.current = { section, pathname, subAba };
+    if (antes.section !== section) playSfx("aba");
+    else if (antes.pathname !== pathname) playSfx("abrir");
+    else if (antes.subAba !== subAba) playSfx("mover");
+  }, [section, pathname, subAba]);
+
   const register = useCallback((c: DevicePageConfig | null) => setConfig(c), []);
   const ctx = useMemo<DeviceContextValue>(
     () => ({ pane, setPane, register, handlersRef }),
@@ -66,6 +80,7 @@ const Device = ({ children }: { children: ReactNode }) => {
     const onKey = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey || digitando(e.target)) return;
       if (e.key === "Escape") {
+        playSfx("voltar");
         setPane("left");
         return;
       }
@@ -73,6 +88,7 @@ const Device = ({ children }: { children: ReactNode }) => {
       const handler = nome && handlersRef.current[nome];
       if (!handler) return;
       e.preventDefault();
+      playSfx("mover");
       handler();
     };
     window.addEventListener("keydown", onKey);
@@ -96,7 +112,12 @@ const Device = ({ children }: { children: ReactNode }) => {
       className={classe}
       aria-label={rotulo}
       // A página pode não ter o que fazer com esta seta; aí ela só não responde.
-      onClick={() => handlersRef.current[nome]?.()}
+      onClick={() => {
+        const handler = handlersRef.current[nome];
+        if (!handler) return;
+        playSfx("mover");
+        handler();
+      }}
     >
       {glifo}
     </button>
@@ -187,7 +208,10 @@ const Device = ({ children }: { children: ReactNode }) => {
                 type="button"
                 className="dev-ab-b"
                 aria-label={t("B: voltar para a tela da esquerda", "B: back to the left screen")}
-                onClick={() => setPane("left")}
+                onClick={() => {
+                  playSfx("voltar");
+                  setPane("left");
+                }}
               >
                 B
               </button>
@@ -195,7 +219,10 @@ const Device = ({ children }: { children: ReactNode }) => {
                 type="button"
                 className="dev-ab-a"
                 aria-label={t("A: abrir a tela da direita", "A: open the right screen")}
-                onClick={() => setPane("right")}
+                onClick={() => {
+                  playSfx("abrir");
+                  setPane("right");
+                }}
               >
                 A
               </button>
