@@ -6,7 +6,7 @@
  * pessoa, então quem chama `startMusic` é o primeiro clique ou tecla (ver
  * `MusicToggle`). A preferência fica no localStorage, como a da scanline.
  *
- * Se existir um arquivo em `public/audio/tema.mp3`, é ele que toca, e a
+ * Se existir um arquivo `tema.mp3` ou `tema.m4a` em `public/audio/`, é ele que toca, e a
  * melodia sintetizada fica de reserva (ver `public/audio/LEIA-ME.txt`).
  */
 const KEY = "pokedex:musica";
@@ -14,7 +14,7 @@ const KEY = "pokedex:musica";
 /** Volume do conjunto: som de fundo, abaixo do grito dos Pokémon. */
 const VOLUME = 0.05;
 /** Faixa opcional, posta por quem mantém o site; sem ela vale a síntese. */
-const ARQUIVO = "/audio/tema.mp3";
+const ARQUIVOS = ["/audio/tema.mp3", "/audio/tema.m4a"];
 /** Volume do arquivo: uma gravação soa mais alta que três osciladores. */
 const VOLUME_ARQUIVO = 0.15;
 /** Duração de um passo (colcheia), em segundos — cerca de 86 bpm. */
@@ -115,9 +115,19 @@ export function startMusic(): void {
     void faixa?.play();
     return;
   }
-  // Primeira partida: tenta o arquivo. Se não existir (ou vier o index.html
-  // do fallback da SPA no lugar), o play rejeita e a síntese assume.
-  const audio = new Audio(ARQUIVO);
+  // Primeira partida: tenta os arquivos, um por vez. Se nenhum existir (ou
+  // vier o index.html do fallback da SPA no lugar), o play rejeita e a
+  // síntese assume.
+  tentarArquivo(0);
+}
+
+function tentarArquivo(i: number): void {
+  if (i >= ARQUIVOS.length) {
+    fonte = "sintese";
+    if (ligada) ligarSintese();
+    return;
+  }
+  const audio = new Audio(ARQUIVOS[i]);
   audio.loop = true;
   audio.volume = VOLUME_ARQUIVO;
   audio.play().then(
@@ -126,10 +136,7 @@ export function startMusic(): void {
       faixa = audio;
       if (!ligada) audio.pause();
     },
-    () => {
-      fonte = "sintese";
-      if (ligada) ligarSintese();
-    }
+    () => tentarArquivo(i + 1)
   );
 }
 

@@ -6,7 +6,7 @@ Sem nenhum arquivo aqui, o site toca a melodia original sintetizada
 
 Para tocar uma faixa sua, salve-a nesta pasta com o nome:
 
-    tema.mp3
+    tema.mp3   (ou tema.m4a)
 
 Ela passa a tocar em laco, em volume baixo, com o mesmo botao de mutar.
 
