@@ -1,3 +1,5 @@
+import { Panes } from "../components/device/Panes";
+import { useDevicePage } from "../components/device/DeviceContext";
 import { useCallback, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import "../styles/lore.css";
@@ -88,6 +90,7 @@ const LorePage = () => {
    * depois de recarregar.
    */
   const [params, setParams] = useSearchParams();
+  const { setPane } = useDevicePage({ labels: [tx("SECOES", "SECTIONS"), tx("LEITURA", "READING")] });
   const tab = parseLoreTab(params);
   const setTab = (nova: Tab) => setParams(serializeLoreTab(nova));
   // A posição da era, não o texto: o texto muda com o idioma, a posição não.
@@ -171,9 +174,13 @@ const LorePage = () => {
   };
 
   return (
-    <div className="lore-shell">
-      <aside className="lore-sidebar">
-        <h1 className="lore-sidebar-title">{tx("Universo Pokémon", "Pokémon universe")}</h1>
+    <Panes
+      leftLabel={tx("Seções da lore", "Lore sections")}
+      rightLabel={tx(...TAB_LABELS[tab])}
+      left={
+        <>
+        <div className="pane-bar">
+        <h1 className="pane-h">{tx("UNIVERSO POKEMON", "POKEMON UNIVERSE")}</h1>
 
         <div className="lore-search">
           <input
@@ -191,19 +198,36 @@ const LorePage = () => {
           </datalist>
         </div>
 
+        </div>
+        <nav className="pane-scroll lore-secoes" aria-label={tx("Seções", "Sections")}>
         {(Object.keys(TAB_LABELS) as Tab[]).map((t) => (
           <button
             key={t}
-            className={"lore-sidebar-btn" + (tab === t ? " active" : "")}
-            onClick={() => setTab(t)}
+            type="button"
+            className="pane-row lore-secao"
+            aria-current={tab === t ? "true" : undefined}
+            onClick={() => {
+              setTab(t);
+              // No celular, escolher a seção já abre a leitura.
+              setPane("right");
+            }}
           >
+            <span className="lore-secao-cursor" aria-hidden="true">
+              {tab === t ? "▶" : ""}
+            </span>
             {tx(...TAB_LABELS[t])}
           </button>
         ))}
-      </aside>
-
-      <div className="lore-main">
-        <h2 className="lore-tab-title">{tx(...TAB_LABELS[tab])}</h2>
+        </nav>
+        </>
+      }
+      right={
+        <>
+        <header className="pane-band">
+          <span className="px">LORE</span>
+          <h2>{tx(...TAB_LABELS[tab])}</h2>
+        </header>
+        <div className="pane-scroll pane-scroll-loose lore-main">
         {tab === "timeline" && (
           <>
             <div className="lore-filters">
@@ -1030,8 +1054,10 @@ const LorePage = () => {
             ))}
           </div>
         )}
-      </div>
-    </div>
+        </div>
+        </>
+      }
+    />
   );
 };
 

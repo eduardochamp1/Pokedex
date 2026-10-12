@@ -56,15 +56,15 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/favoritos" element={<FavoritesPage />} />
             <Route path="/comparar" element={<ComparePage />} />
-            <Route path="/lore" element={<SinglePane><LorePage /></SinglePane>} />
-            <Route path="/mapa" element={<SinglePane><MapPage /></SinglePane>} />
+            <Route path="/lore" element={<LorePage />} />
+            <Route path="/mapa" element={<MapPage />} />
             <Route path="/tamanhos" element={<SizesPage />} />
             <Route path="/evolucoes" element={<SinglePane><EvolutionsPage /></SinglePane>} />
             <Route path="/jogos" element={<SinglePane><GamesPage /></SinglePane>} />
             <Route path="/dados" element={<SinglePane><DataPage /></SinglePane>} />
             <Route path="/time" element={<TeamBuilderPage />} />
             <Route path="/habilidade/:slug" element={<SinglePane><AbilityPage /></SinglePane>} />
-            <Route path="/quiz" element={<SinglePane><QuizPage /></SinglePane>} />
+            <Route path="/quiz" element={<QuizPage />} />
             <Route path="/pokemon/:nameOrId" element={<HomePage />} />
             <Route path="*" element={<SinglePane><NotFoundPage /></SinglePane>} />
           </Routes>

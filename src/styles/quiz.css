@@ -192,3 +192,59 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
 }
+
+/* ==========================================================================
+   Aparelho — o quiz em duas telas (handoff, seção 6).
+   ========================================================================== */
+.dev-pane .quiz-modos {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  background: none;
+}
+.dev-pane .quiz-modos button {
+  min-height: 44px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  gap: 8px;
+  box-shadow: none;
+}
+.dev-pane .quiz-modos button[aria-pressed="true"] {
+  background: var(--surface-3);
+  border-color: var(--accent);
+  color: var(--text);
+}
+.quiz-modo-cursor {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  width: 14px;
+  flex: none;
+  color: var(--accent);
+}
+.dev-pane .quiz-recorte,
+.dev-pane .quiz-placar,
+.dev-pane .quiz-progresso {
+  margin: 0;
+  background: var(--surface-1);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 12px 14px;
+}
+.dev-pane .quiz-placar dt {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+.dev-pane .quiz-placar dd {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--accent);
+}
+.quiz-palco-pane { align-items: center; }
+.quiz-palco-pane > * { width: 100%; max-width: 520px; }

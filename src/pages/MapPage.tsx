@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import WorldMap from "../components/WorldMap";
+import { Panes } from "../components/device/Panes";
+import { useDevicePage } from "../components/device/DeviceContext";
 import { REGION_SHAPES } from "../data/regionMap";
 import { useLore } from "../i18n/lore";
 import { useLang, tr } from "../i18n/lang";
@@ -8,6 +10,7 @@ import { generationLabel } from "../i18n/common";
 import { usePokemonIndex } from "../hooks/usePokemon";
 import PokemonChip from "../components/PokemonChip";
 import WikiSource from "../components/WikiSource";
+import "../styles/map.css";
 
 const MapPage = () => {
   const [params, setParams] = useSearchParams();
@@ -15,9 +18,13 @@ const MapPage = () => {
   const lang = useLang();
   const t = (pt: string, en: string) => tr(lang, pt, en);
   const selectedId = params.get("region") ?? undefined;
+  const { setPane } = useDevicePage({ labels: [t("MAPA", "MAP"), t("DOSSIE", "DOSSIER")] });
   const setSelectedId = (id: string | undefined) => {
-    if (id) setParams({ region: id });
-    else setParams({});
+    if (id) {
+      setParams({ region: id });
+      // No celular, escolher uma região já abre o dossiê.
+      setPane("right");
+    } else setParams({});
   };
 
   const region = lore.regions.find((r) => r.id === selectedId);
@@ -54,61 +61,39 @@ const MapPage = () => {
   const unknownRegion = Boolean(selectedId) && !region;
 
   return (
-    <div className="mappage-container">
-      <header className="mappage-header">
-        <h1>{t("Mapa do Mundo Pokémon", "Map of the Pokémon world")}</h1>
-        <p className="mappage-intro">
-          {t(
-            "Passe o mouse sobre uma região para ver detalhes; clique para explorar sua lore, pokémons lendários, humanos e vilões.",
-            "Hover over a region to see details; click to explore its lore, legendary Pokémon, humans and villains."
-          )}
-        </p>
-      </header>
-
-      {unknownRegion && (
-        <p className="mappage-notice" role="status">
-          {t("Não encontramos a região", "We couldn't find the region")} <b>{selectedId}</b>.{" "}
-          {t("Escolha uma no mapa abaixo.", "Pick one on the map below.")}
-        </p>
-      )}
-
-      <WorldMap onSelect={setSelectedId} selectedId={selectedId} />
-
-      {region && shape && (
-        <section
-          className="mappage-detail"
-          style={{ ["--region-color" as string]: shape.color }}
-          aria-live="polite"
-        >
-          <div className="mappage-dossier-head">
-            <svg
-              viewBox="0 0 1000 600"
-              className="mappage-dossier-map"
-              aria-hidden="true"
-            >
-              <path d={shape.path} fill={shape.color} opacity="0.9" />
-            </svg>
-            <div className="mappage-dossier-title">
-              <span className="mappage-dossier-stamp">DOSSIER</span>
-              <h2 className="mappage-detail-name">{region.name}</h2>
-              <p className="mappage-detail-sub">
-                {generationLabel(region.generation, lang)} · {region.inspiration}
-              </p>
-              <button
-                type="button"
-                className="mappage-close"
-                onClick={() => setSelectedId(undefined)}
-                aria-label={t("Fechar detalhes", "Close details")}
-              >
-                ✕
-              </button>
-            </div>
+    <Panes
+      leftLabel={t("Mapa do mundo Pokémon", "Map of the Pokémon world")}
+      rightLabel={t("Dossiê da região", "Region dossier")}
+      left={
+        <>
+          <div className="pane-bar">
+            <h1 className="pane-h">{t("MAPA DO MUNDO POKEMON", "MAP OF THE POKEMON WORLD")}</h1>
+            <p className="map-hint">
+              {t("Toque numa região para abrir o dossiê.", "Tap a region to open its dossier.")}
+            </p>
           </div>
-
+          <div className="pane-scroll map-stage">
+            <WorldMap onSelect={setSelectedId} selectedId={selectedId} />
+          </div>
+        </>
+      }
+      right={
+        region && shape ? (
+          <>
+            <header className="pane-band" style={{ ["--region-color" as string]: shape.color }}>
+              <span className="px">
+                {t("DOSSIE", "DOSSIER")} · {t("GERACAO", "GENERATION")} {region.generation}
+              </span>
+              <h2>{region.name}</h2>
+              <span className="map-inspiracao">
+                {generationLabel(region.generation, lang)} · {region.inspiration}
+              </span>
+            </header>
+            <div className="pane-scroll pane-scroll-loose map-dossie" aria-live="polite">
           <p className="mappage-detail-summary">{region.summary}</p>
           <WikiSource wiki={region.wiki} />
 
-          <section className="mappage-block">
+          <section className="pane-card mappage-block">
             <h3>{t("Pokémons emblemáticos", "Signature Pokémon")}</h3>
             <div className="mappage-chips">
               {region.signature.map((name) => (
@@ -118,7 +103,7 @@ const MapPage = () => {
           </section>
 
           {landmarks.length > 0 && (
-            <section className="mappage-block">
+            <section className="pane-card mappage-block">
               <h3>{t("Ilhas e locais notáveis", "Islands and notable places")}</h3>
               <ul className="mappage-landmarks">
                 {landmarks.map((l) => (
@@ -137,7 +122,7 @@ const MapPage = () => {
           )}
 
           {relatedEvents.length > 0 && (
-            <section className="mappage-block">
+            <section className="pane-card mappage-block">
               <h3>{t("Eventos da mitologia local", "Local mythology events")}</h3>
               <ul className="mappage-events">
                 {relatedEvents.slice(0, 4).map((e) => (
@@ -156,7 +141,7 @@ const MapPage = () => {
           )}
 
           {relatedHumans.length > 0 && (
-            <section className="mappage-block">
+            <section className="pane-card mappage-block">
               <h3>{t("Figuras humanas", "Human figures")}</h3>
               <ul className="mappage-list">
                 {relatedHumans.map((h) => (
@@ -169,7 +154,7 @@ const MapPage = () => {
           )}
 
           {relatedVillains.length > 0 && (
-            <section className="mappage-block">
+            <section className="pane-card mappage-block">
               <h3>{t("Organizações antagonistas", "Antagonist organizations")}</h3>
               <ul className="mappage-list">
                 {relatedVillains.map((v) => (
@@ -181,14 +166,27 @@ const MapPage = () => {
             </section>
           )}
 
-          <div className="mappage-actions">
-            <Link to="/lore" className="mappage-cta">
-              {t("Explorar a lore completa →", "Explore the full lore →")}
-            </Link>
-          </div>
-        </section>
-      )}
-    </div>
+
+              <Link to="/lore?aba=regions" className="pane-btn map-cta">
+                {t("EXPLORAR A LORE →", "EXPLORE THE LORE →")}
+              </Link>
+            </div>
+          </>
+        ) : (
+          <p className="pane-empty" role="status">
+            {unknownRegion ? (
+              <>
+                {t("REGIAO NAO ENCONTRADA", "REGION NOT FOUND")}
+                <br />
+              </>
+            ) : null}
+            {t("SELECIONE UMA REGIAO", "SELECT A REGION")}
+            <br />
+            {t("NO MAPA", "ON THE MAP")}
+          </p>
+        )
+      }
+    />
   );
 };
 

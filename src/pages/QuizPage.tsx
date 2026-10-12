@@ -1,3 +1,5 @@
+import { Panes } from "../components/device/Panes";
+import { useDevicePage } from "../components/device/DeviceContext";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { usePokemonDetail, usePokemonIndex, usePokemonSpecies } from "../hooks/usePokemon";
@@ -76,30 +78,77 @@ const QuizPage = () => {
     setParams(p, { replace: true });
   };
 
+  useDevicePage({ labels: [t("MODOS", "MODES"), t("RODADA", "ROUND")] });
+
+  const modos = (
+    <nav className="quiz-modos" aria-label={t("Modos do quiz", "Quiz modes")}>
+      {ABAS.map((a) => (
+        <button
+          key={a.mode}
+          type="button"
+          className="pane-row"
+          aria-pressed={a.mode === mode}
+          onClick={() => trocarModo(a.mode)}
+        >
+          <span className="quiz-modo-cursor" aria-hidden="true">
+            {a.mode === mode ? "▶" : ""}
+          </span>
+          {lang === "en" ? a.en : a.pt}
+        </button>
+      ))}
+    </nav>
+  );
+  const nomeDoModo = ABAS.find((a) => a.mode === mode);
+  const titulo = (lang === "en" ? nomeDoModo?.en : nomeDoModo?.pt) ?? "Quiz";
+
+  return mode === "diario" ? (
+    <DesafioDoDia modos={modos} titulo={titulo} />
+  ) : (
+    <Livre key={mode} mode={mode} modos={modos} titulo={titulo} />
+  );
+};
+
+interface TelaProps {
+  modos: ReactNode;
+  titulo: string;
+  /** O que fica na tela da esquerda, abaixo dos modos (recorte, placar). */
+  lateral?: ReactNode;
+  children: ReactNode;
+}
+
+/** As duas telas do quiz: modos e placar à esquerda, a rodada à direita. */
+const Tela = ({ modos, titulo, lateral, children }: TelaProps) => {
+  const lang = useLang();
   return (
-    <div className="quiz-shell">
-      <header className="quiz-header">
-        <h1>{mode === "diario" ? t("Desafio do dia", "Daily challenge") : t("Quem é esse Pokémon?", "Who's that Pokémon?")}</h1>
-      </header>
-      <nav className="quiz-modos" aria-label={t("Modos do quiz", "Quiz modes")}>
-        {ABAS.map((a) => (
-          <button
-            key={a.mode}
-            type="button"
-            aria-pressed={a.mode === mode}
-            onClick={() => trocarModo(a.mode)}
-          >
-            {lang === "en" ? a.en : a.pt}
-          </button>
-        ))}
-      </nav>
-      {mode === "diario" ? <DesafioDoDia /> : <Livre key={mode} mode={mode} />}
-    </div>
+    <Panes
+      leftLabel={tr(lang, "Modos e placar", "Modes and score")}
+      rightLabel={tr(lang, "Rodada", "Round")}
+      left={
+        <>
+          <div className="pane-bar">
+            <h1 className="pane-h">{tr(lang, "QUEM E ESSE POKEMON?", "WHO'S THAT POKEMON?")}</h1>
+          </div>
+          <div className="pane-scroll">
+            {modos}
+            {lateral}
+          </div>
+        </>
+      }
+      right={
+        <>
+          <header className="pane-band">
+            <span className="px">QUIZ</span>
+            <h2>{titulo}</h2>
+          </header>
+          <div className="pane-scroll pane-scroll-loose quiz-palco-pane">{children}</div>
+        </>
+      }
+    />
   );
 };
 
 /** Rodadas sem fim num modo, com sequência e recorde. */
-const Livre = ({ mode }: { mode: RoundMode }) => {
+const Livre = ({ mode, modos, titulo }: { mode: RoundMode; modos: ReactNode; titulo: string }) => {
   const [params, setParams] = useSearchParams();
   const lang = useLang();
   const t = (pt: string, en: string) => tr(lang, pt, en);
@@ -147,7 +196,11 @@ const Livre = ({ mode }: { mode: RoundMode }) => {
   }, [pool]);
 
   return (
-    <>
+    <Tela
+      modos={modos}
+      titulo={titulo}
+      lateral={
+        <>
       <label className="quiz-recorte">
         <span>{t("Gerações", "Generations")}</span>
         <select value={String(gen)} onChange={(e) => trocarRecorte(parseQuizGen(e.target.value))}>
@@ -176,10 +229,12 @@ const Livre = ({ mode }: { mode: RoundMode }) => {
           </dd>
         </div>
       </dl>
-
+        </>
+      }
+    >
       <Rodada key={round.answer} mode={mode} round={round} onResolve={resolver} />
       {respondida && <Depois answer={round.answer} onNext={proximo} />}
-    </>
+    </Tela>
   );
 };
 
@@ -381,7 +436,7 @@ const Rodada = ({ mode, round, onResolve }: RodadaProps) => {
 };
 
 /** Cinco rodadas, iguais para todo mundo hoje; uma tentativa por dia. */
-const DesafioDoDia = () => {
+const DesafioDoDia = ({ modos, titulo }: { modos: ReactNode; titulo: string }) => {
   const lang = useLang();
   const t = (pt: string, en: string) => tr(lang, pt, en);
   const dia = useMemo(() => dayNumber(new Date()), []);
@@ -403,6 +458,7 @@ const DesafioDoDia = () => {
   if (acabou) {
     const texto = shareText(dia, resultados, lang);
     return (
+      <Tela modos={modos} titulo={titulo}>
       <section className="quiz-fim" aria-labelledby="quiz-fim-titulo">
         <h2 id="quiz-fim-titulo">
           {resultados.filter(Boolean).length}/{DAILY_ROUNDS}
@@ -429,13 +485,17 @@ const DesafioDoDia = () => {
         </button>
         <p className="quiz-resultado">{t("Um desafio novo amanhã.", "A new challenge tomorrow.")}</p>
       </section>
+      </Tela>
     );
   }
 
   const atual = rodadas[i];
   const nomeDoModo = ABAS.find((a) => a.mode === atual.mode);
   return (
-    <>
+    <Tela
+      modos={modos}
+      titulo={titulo}
+      lateral={
       <p className="quiz-progresso">
         {t("Rodada", "Round")} {i + 1}/{DAILY_ROUNDS} · {lang === "en" ? nomeDoModo?.en : nomeDoModo?.pt}
         <span aria-hidden="true">
@@ -443,6 +503,8 @@ const DesafioDoDia = () => {
           {resultados.map((r) => (r ? "🟩" : "🟥")).join("")}
         </span>
       </p>
+      }
+    >
       <Rodada key={i} mode={atual.mode} round={atual.round} onResolve={resolver} />
       {respondida && (
         <Depois
@@ -451,7 +513,7 @@ const DesafioDoDia = () => {
           label={i + 1 >= DAILY_ROUNDS ? t("Ver resultado →", "See result →") : undefined}
         />
       )}
-    </>
+    </Tela>
   );
 };
 

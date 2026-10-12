@@ -176,30 +176,30 @@ só com o dono pedindo.
 
 ## Fase 3 — Mapa, Lore, Quiz
 
-- [ ] **3.1 Mapa.** 👁 `MapPage.tsx`, seção 4. Esquerda: `WorldMap` (com `roughenPath` e a
+- [x] **3.1 Mapa.** 👁 `MapPage.tsx`, seção 4. Esquerda: `WorldMap` (com `roughenPath` e a
   emenda Johto/Kanto que já existem) sobre fundo papel. Direita: vazio = "SELECIONE UMA
   REGIAO NO MAPA"; com seleção = faixa verde (DOSSIE · GERACAO N, nome, inspiração) e os
   blocos atuais do dossiê em cartões. `?region=` continua; selecionar no celular abre o
   painel direito. Rótulos MAPA/DOSSIE.
 
-- [ ] **3.2 Lore — estrutura.** 👁 Em `LorePage.tsx`: as 13 abas viram lista de botões à
+- [x] **3.2 Lore — estrutura.** 👁 Em `LorePage.tsx`: as 13 abas viram lista de botões à
   esquerda (44 px, ativa com ▶ e borda verde), junto com a busca e os filtros que já
   existem; a direita ganha a faixa verde com o título da seção e passa a ser o contêiner
   de leitura. `parseLoreTab` e os demais parâmetros continuam. Rótulos SECOES/LEITURA.
   Extrair cada aba para `src/components/lore/<Aba>.tsx` **só se** isso for necessário para
   o arquivo caber na tarefa; não reescrever conteúdo.
 
-- [ ] **3.3 Lore — padrão de leitura.** 👁 `lore.css`: cartões `#151823`, tag em `#e8c33c`,
+- [x] **3.3 Lore — padrão de leitura.** 👁 `lore.css`: cartões `#151823`, tag em `#e8c33c`,
   título 18 px, corpo 15 px, aplicados às 13 seções. Manter `GenealogyTree`,
   `PokemonChip`, `WikiSource`, `LoreArt` e os filtros de era e de pokémon.
 
-- [ ] **3.4 Quiz.** 👁 `QuizPage.tsx` + `quiz.css`, seção 6. Esquerda: modos, seletor de
+- [x] **3.4 Quiz.** 👁 `QuizPage.tsx` + `quiz.css`, seção 6. Esquerda: modos, seletor de
   geração (`GEN_RANGES`), placar (SEQUENCIA, RECORDE, ACERTOS). Direita: faixa com o
   título do modo, palco 240×240, 4 opções 2×2, resultado + PROXIMO, e a tela final do
   desafio do dia. Lógica (`makeRound`, `quizModes`, `dailyRounds`, `loadBest/saveBest`,
   grito real) intocada. Rótulos MODOS/RODADA.
 
-- [ ] **3.5 REVISÃO da Fase 3.** Verificação + build + navegador. Notas. **Parar o loop.**
+- [x] **3.5 REVISÃO da Fase 3.** Verificação + build + navegador. Notas. **Parar o loop.**
 
 ## Fase 4 — Restante, limpeza e publicação
 
@@ -272,6 +272,24 @@ Diferenças em relação ao handoff:
 - **Favoritos**: as fichas mostram as bolinhas de tipo e as três barras, sem número.
 - **Tamanhos** usa o `SizeCanvas` atual (decisão 5). O botão 📏 das cartas sumiu junto com
   elas; pôr e tirar agora é pelo elenco.
+
+### Fase 3 (2026-10-11)
+
+Conferido por inspeção da página (as capturas de tela não responderam nesta sessão, então o
+**acabamento visual das três abas não foi visto** e precisa do olho do dono): `/mapa` (vazio,
+clique numa região, `?region=`), `/lore` (13 seções, troca de seção, leitura rolando sem
+transbordar de lado), `/quiz` (modos, placar, 4 opções, responder, PROXIMO) e o desafio do dia.
+
+Diferenças em relação ao handoff:
+
+- **Mapa**: o `WorldMap` atual entra inteiro (papel, costa recortada, emenda Johto/Kanto).
+  O dossiê traz todos os blocos que a página já tinha, cada um num cartão.
+- **Lore**: só a moldura mudou (seções à esquerda, faixa verde e leitura à direita). O
+  conteúdo das 13 seções não foi reescrito nem extraído em componentes: um bloco de CSS em
+  `lore.css` (`.dev-pane .lore-main …`) converge os verbetes para o padrão de cartão. A busca
+  por pokémon fica na faixa da esquerda; os filtros de era continuam dentro da Cronologia.
+- **Quiz**: o seletor de geração e o placar ficam na tela da esquerda, abaixo dos modos; no
+  desafio do dia, o progresso fica ali também. A marcação das rodadas é a atual.
 
 ## Bloqueios
 

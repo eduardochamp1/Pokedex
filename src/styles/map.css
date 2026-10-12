@@ -1,0 +1,40 @@
+/* Mapa — handoff, seção 4. O WorldMap já traz o papel e a costa recortada. */
+.map-hint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.map-stage {
+  padding: 10px;
+  justify-content: center;
+}
+.map-stage svg { width: 100%; height: auto; display: block; }
+.map-inspiracao {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+}
+.map-dossie .mappage-detail-summary {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--text);
+}
+.map-dossie .mappage-block { margin: 0; }
+.map-dossie .mappage-block h3 {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  font-weight: 400;
+  color: var(--accent-alt);
+  text-transform: uppercase;
+  margin: 0;
+}
+.map-dossie ul { margin: 0; padding-left: 18px; }
+.map-dossie li { font-size: 15px; line-height: 1.55; color: var(--text-muted); }
+.map-dossie li strong { color: var(--text); }
+.map-cta {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  text-decoration: none;
+}
