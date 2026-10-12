@@ -1,7 +1,7 @@
 import { useQueries } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { searchPokemon } from "../api";
-import Card from "./Card";
+import { pixelSpriteUrl } from "../lib/sprites";
 import type { Pokemon, PokemonVariety } from "../types/pokemon";
 import { getLang, tr } from "../i18n/lang";
 
@@ -51,22 +51,24 @@ const VarietySwitcher = ({ varieties, currentName }: Props) => {
             key={v.pokemon.name}
             className={"variety-item" + (isCurrent ? " active" : "")}
           >
-            {data ? (
-              <Card
-                pokemon={data}
-                variant="mini"
-                linkTo={`/pokemon/${v.pokemon.name}`}
-                showActions={false}
-              />
-            ) : (
-              <Link
-                to={`/pokemon/${v.pokemon.name}`}
-                className="variety-fallback"
-              />
-            )}
-            <span className="variety-label">
-              {labelFor(v.pokemon.name, v.is_default)}
-            </span>
+            <Link
+              to={`/pokemon/${v.pokemon.name}`}
+              className="pane-row variety-link"
+              aria-current={isCurrent ? "true" : undefined}
+            >
+              {data && (
+                <img
+                  className="pixelated"
+                  // As formas têm sprite próprio na PokéAPI; o local cobre a espécie.
+                  src={data.sprites.front_default ?? pixelSpriteUrl(data.id)}
+                  width={72}
+                  height={72}
+                  alt=""
+                  loading="lazy"
+                />
+              )}
+              <span className="variety-label">{labelFor(v.pokemon.name, v.is_default)}</span>
+            </Link>
           </li>
         );
       })}

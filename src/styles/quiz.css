@@ -1,25 +1,4 @@
-/* ========= /quiz: Quem é esse Pokémon? ========= */
-.quiz-shell {
-  max-width: 640px;
-  margin: 0 auto;
-  padding: 32px 24px 60px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-.quiz-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: end;
-  justify-content: space-between;
-  gap: 12px;
-}
-.quiz-header h1 {
-  font-family: var(--font-display);
-  font-size: 1.9rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
+
 .quiz-recorte {
   display: flex;
   flex-direction: column;
@@ -139,7 +118,6 @@
 }
 
 @media (max-width: 480px) {
-  .quiz-shell { padding: 20px 16px 48px; }
   .quiz-opcoes { grid-template-columns: 1fr; }
 }
 

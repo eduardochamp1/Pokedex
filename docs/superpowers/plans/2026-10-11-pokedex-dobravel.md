@@ -207,7 +207,7 @@ só com o dono pedindo.
   `GamesPage`, `NotFoundPage`: mesma linguagem (faixa verde + cartões), em dois painéis
   quando houver lista + detalhe, senão painel único.
 
-- [ ] **4.2 Poda.** Apagar o que ninguém mais importa: `Navbar`, `ComparatorButton`,
+- [x] **4.2 Poda.** Apagar o que ninguém mais importa: `Navbar`, `ComparatorButton`,
   `Card`, `CardHero`, `Pokedex`, `holo.css`, `useTiltEffect` etc. (confirmar com busca de
   imports antes de cada remoção). Remover do `App.css` as regras sem uso — conferir cada
   classe com `grep` em `src/**/*.tsx` antes de apagar. Remover testes só dos arquivos

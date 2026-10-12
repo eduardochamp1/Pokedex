@@ -40,58 +40,6 @@
   background: var(--surface-2);
   border-radius: var(--radius-sm);
 }
-
-/* ========= Lore shell ========= */
-.lore-shell {
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  gap: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px;
-  min-height: calc(100vh - 56px);
-}
-.lore-sidebar {
-  position: sticky;
-  top: 80px;
-  align-self: start;
-  background: var(--surface-1);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-card);
-  padding: 20px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-/* O nome da aba, entre o titulo da pagina e o conteudo. Discreto de
-   proposito: ele existe para dar pe na navegacao por heading e para dizer
-   onde voce esta quando a barra lateral vira menu no celular. */
-.lore-tab-title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: var(--accent);
-  margin: 0 0 18px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid color-mix(in srgb, var(--accent) 28%, transparent);
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-.lore-tab-title::before { content: "\25B8"; }
-
-.lore-sidebar-title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--text-muted);
-  padding: 0 12px;
-  margin-bottom: 12px;
-}
 .lore-search {
   padding: 0 4px 12px;
   margin-bottom: 4px;
@@ -120,21 +68,6 @@
   background: var(--text-muted);
   mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path d='M6 6l8 8M14 6l-8 8' stroke='black' stroke-width='2' fill='none' stroke-linecap='round'/></svg>") center/contain no-repeat;
   cursor: pointer;
-}
-.lore-sidebar-btn {
-  padding: 10px 12px;
-  text-align: left;
-  border-radius: var(--radius-sm);
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  transition: background var(--dur-fast), color var(--dur-fast);
-}
-.lore-sidebar-btn:hover { background: var(--surface-2); color: var(--text); }
-.lore-sidebar-btn.active {
-  background: var(--surface-3);
-  color: var(--accent-alt);
 }
 .lore-main { min-width: 0; }
 
@@ -320,14 +253,7 @@
 }
 .lore-art-emblem { max-width: 140px; padding: 20px; }
 .lore-art-region { width: 100%; height: 140px; }
-.lore-art-portal { width: 100%; height: 120px; }
-.lore-art-human { max-width: 100px; padding: 16px; }@media (max-width: 900px) {
-  .lore-shell { grid-template-columns: 1fr; }
-  .lore-sidebar {
-    position: static;
-    flex-direction: row;
-    overflow-x: auto;
-  }
+.lore-art-portal { width: 100%; height: 120px; }@media (max-width: 900px) {
   .lore-timeline-editorial { padding-left: 22px; }
   .lore-event-editorial::before { left: -21px; }
 }

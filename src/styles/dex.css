@@ -446,3 +446,51 @@
   .dex-row img { width: 56px; height: 56px; margin: -4px 0; }
   .dex-num { width: 38px; }
 }
+
+/* Formas alternativas: uma fileira de sprites com o nome da forma. */
+.dev-pane .variety-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.dev-pane .variety-item { border: 0; background: none; padding: 0; }
+.variety-link {
+  flex-direction: column;
+  gap: 2px;
+  width: 112px;
+  padding: 8px;
+  text-align: center;
+  border-color: var(--border);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* Os filtros do bloco recolhível: rótulo em cima, seletor embaixo. */
+.dex-filtros .type-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 140px;
+  flex: 1;
+}
+.dex-filtros .type-filter label {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+.dex-filtros select {
+  height: 40px;
+  padding: 0 8px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border-strong);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 14px;
+}
+.dex-filtros select:focus { outline: none; border-color: var(--accent); }
