@@ -7,6 +7,8 @@ import { serviceWorkerPrecache } from "./vite-plugin-sw.ts";
  * saiu daqui), porque os saves dele moram no IndexedDB daquela origem.
  */
 export default defineConfig({
+  // No GitHub Pages o site mora em /Pokedex/; o workflow define VITE_BASE.
+  base: process.env.VITE_BASE ?? "/",
   plugins: [react(), serviceWorkerPrecache()],
   server: {
     port: 3001,

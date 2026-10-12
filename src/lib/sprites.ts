@@ -10,8 +10,8 @@
  * dariam ~176 MB. Ele continua vindo do objeto `Pokemon` que a PokeAPI ja
  * devolve nas telas que buscam o detalhe (card do grid, hero, sprite viewer).
  */
-const POKEMON_SPRITES = "/sprites/pokemon";
-const ITEM_SPRITES = "/sprites/items";
+const POKEMON_SPRITES = `${import.meta.env.BASE_URL}sprites/pokemon`;
+const ITEM_SPRITES = `${import.meta.env.BASE_URL}sprites/items`;
 
 /**
  * Sprite pixelado local de um pokemon, por id da Pokedex. Usado em chips,

@@ -16,14 +16,16 @@
  *  - API: respostas da PokéAPI, com teto de entradas.
  */
 const VERSION = "__SW_VERSION__";
-const PRECACHE = /*__SW_PRECACHE__*/ [];
+// O worker fica na raiz do app; no Pages isso é /Pokedex/, não /.
+const BASE = new URL("./", self.location).pathname;
+const PRECACHE = /*__SW_PRECACHE__*/ [].map((u) => BASE + u.slice(1));
 
 const BUILD = `pokedex-build-${VERSION}`;
 const RUNTIME = "pokedex-runtime-v1";
 const API = "pokedex-api-v1";
 const NOSSOS = [BUILD, RUNTIME, API];
 
-const SHELL_URL = "/index.html";
+const SHELL_URL = BASE + "index.html";
 
 /**
  * Teto do cache da PokéAPI. A ficha de um pokémon tem 100–300 KB (a lista de
@@ -128,7 +130,7 @@ self.addEventListener("fetch", (event) => {
           const cache = await caches.open(BUILD);
           return (
             (await cache.match(SHELL_URL, { ignoreVary: true })) ??
-            (await cache.match("/", { ignoreVary: true })) ??
+            (await cache.match(BASE, { ignoreVary: true })) ??
             Response.error()
           );
         })
