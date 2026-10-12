@@ -623,3 +623,21 @@
   }
   .dex-pager button { width: 44px; }
 }
+
+/* ---------- Altura: o aparelho acompanha a janela ---------- */
+/* Só no desktop: no celular a página rola inteira e as telas têm a altura do
+   conteúdo. A carcaça ocupa a janela menos o respiro de .dev (32px em cima e
+   embaixo), e as telas ficam com o que sobra entre a barra e o rodapé. O piso
+   de 640px evita telas espremidas numa janela baixa — aí a página rola. */
+@media (min-width: 860px) {
+  .dev-shell {
+    height: calc(100vh - 64px);
+    height: calc(100dvh - 64px);
+    min-height: 640px;
+  }
+  .dev-body {
+    flex: 1 1 0;
+    height: auto;
+    min-height: 0;
+  }
+}
