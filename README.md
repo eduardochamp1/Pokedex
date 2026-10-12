@@ -1,9 +1,94 @@
 # Pokédex
 
-Uma Pokédex web completa em **React + TypeScript + Vite**, consumindo a [PokéAPI](https://pokeapi.co) — com filtros combináveis, busca parcial, comparador, favoritos, sprites shiny/animados, formas alternativas (Mega, Gigantamax), evoluções, um mapa-múndi interativo e uma seção completa de **lore** do universo Pokémon.
+Uma Pokédex web em forma de **aparelho dobrável**: carcaça vermelha, duas telas, D-pad e botões A/B. Dentro dela, as 1.025 espécies com ficha completa, a lore do universo organizada em 13 abas, um mapa-múndi das nove regiões, quiz, montador de time, comparador e régua de tamanhos — em português e em inglês, instalável e funcionando sem rede.
+
+Feita em **React + TypeScript + Vite**, sobre os dados da [PokéAPI](https://pokeapi.co).
+
+![A Pokédex aberta: lista à esquerda, ficha do Pikachu à direita](docs/screenshots/pokedex.png)
 
 > O emulador de GB/GBC/GBA e tudo o que lia o save (treinador, ginásios, calculadora
 > de dano) saíram daqui para um projeto próprio, o **[Pokemu](https://github.com/eduardochamp1/pokemu)**, em outubro de 2026.
+
+## Sumário
+
+- [O que é](#-o-que-é)
+- [Tour em imagens](#-tour-em-imagens)
+- [O aparelho](#-o-aparelho)
+- [Funcionalidades](#-funcionalidades)
+- [Stack](#️-stack)
+- [Rodando localmente](#-rodando-localmente)
+- [Estrutura](#-estrutura)
+- [Design tokens](#-design-tokens)
+- [Notas técnicas](#-notas-técnicas)
+- [Licença](#-licença)
+
+---
+
+## 💡 O que é
+
+O projeto nasceu como uma Pokédex comum — uma lista e uma página de detalhe — e virou um
+site para **ler o universo Pokémon com calma**: cada espécie com tudo o que os jogos dizem
+dela, e ao redor disso a história do mundo, contada com fonte citada.
+
+Três ideias seguram o desenho:
+
+- **Um objeto, não um site.** Tudo acontece dentro do aparelho. Toda aba tem o mesmo
+  arranjo — escolher à esquerda, ver à direita —, e o D-pad, o A e o B funcionam de verdade.
+  Há som: bipes nas transições e uma trilha ambiente, com botão de mudo.
+- **Sem conta e sem servidor.** Favoritos, recordes e preferências ficam no navegador e
+  saem num arquivo `.json` quando você quiser levá-los. O endereço guarda o resto: filtros,
+  time montado, região do mapa e aba da ficha são links que dá para mandar a alguém.
+- **Português de verdade.** A PokéAPI não tem pt-BR para os textos da Pokédex, as habilidades
+  nem os golpes; os três foram traduzidos aqui, e o nome original em inglês segue ao lado.
+
+---
+
+## 📸 Tour em imagens
+
+### A ficha de cada Pokémon
+
+Cinco abas: **Sobre** (texto da Pokédex, medidas, habilidades, formas e sprites), **Status**
+(atributos base e fraquezas), **Evol.** (a cadeia com a condição de cada passo), **Golpes**
+(por jogo e por método) e **Local** (onde encontrar e a chance de captura).
+
+| Status | Evolução |
+|---|---|
+| ![Aba Status do Charizard: atributos base e tabela de defesas](docs/screenshots/status.png) | ![Aba Evol. do Eevee: as oito evoluções e a condição de cada uma](docs/screenshots/evolucao.png) |
+
+| Golpes | Local |
+|---|---|
+| ![Aba Golpes do Gengar: golpes por nível, MT e ovo, com nome em português e em inglês](docs/screenshots/golpes.png) | ![Aba Local do Snorlax: onde encontrar em cada jogo e calculadora de captura](docs/screenshots/local.png) |
+
+### Comparar, montar time e medir
+
+| Comparar | Time |
+|---|---|
+| ![Comparador: dois Pokémon lado a lado, com barras de atributo e efetividade de tipo](docs/screenshots/comparar.png) | ![Montador de time: seis Pokémon e a análise de defesa e ataque por tipo](docs/screenshots/time.png) |
+
+![Tamanhos: Joltik, Pikachu, Charizard e Onix na mesma régua](docs/screenshots/tamanhos.png)
+
+### O mundo: mapa e lore
+
+| Mapa | Lore |
+|---|---|
+| ![Mapa-múndi das nove regiões, com o dossiê de Kanto aberto](docs/screenshots/mapa.png) | ![Lore: a cronologia do universo, por eras](docs/screenshots/lore.png) |
+
+### Quiz, árvores de evolução e habilidades
+
+| Quiz | Evoluções |
+|---|---|
+| ![Quiz: quem é esse Pokémon?, pela silhueta](docs/screenshots/quiz.png) | ![Todas as árvores de evolução, filtráveis por método](docs/screenshots/evolucoes.png) |
+
+![Página da habilidade Static: efeito traduzido e os Pokémon que a têm](docs/screenshots/habilidade.png)
+
+### No celular
+
+Abaixo de 860 px a dobradiça some e o aparelho mostra **uma tela por vez**: A abre a ficha, B volta para a lista.
+
+<p>
+  <img src="docs/screenshots/celular-lista.png" alt="No celular: a lista da Pokédex" width="300" />
+  <img src="docs/screenshots/celular.png" alt="No celular: a ficha do Pikachu" width="300" />
+</p>
 
 ---
 
@@ -14,11 +99,13 @@ dobradiça no meio, D-pad e botões A/B no rodapé. Toda aba segue o mesmo arran
 **controles e lista à esquerda, resultado à direita**.
 
 - **Barra superior** — lente, luzes, as oito abas (Pokédex, Comparar, Time, Mapa, Lore, Quiz,
-  Tamanhos, Favoritos), a busca (`Ctrl+K`), idioma, instalar e scanline
+  Tamanhos, Favoritos), a busca (`Ctrl+K`), idioma, instalar, som e scanline
 - **Pokédex** — `/` e `/pokemon/:nome` são a mesma tela: a lista (ou grade) à esquerda e a
   ficha à direita, com as abas Sobre, Status, Evol., Golpes e Local. Sem seleção, a ficha
   abre no Pokémon do dia
-- **D-pad e teclado** — ↑ ↓ andam pela lista e viram a página nas pontas; ← → trocam de página
+- **D-pad e teclado** — ↑ ↓ andam pela lista e viram a página nas pontas; ← → trocam de página.
+  Com uma ficha aberta por link direto, as setas andam a partir dela e a lista acompanha
+- **Som** — bipes nas transições e uma trilha ambiente; o botão ♪ muta tudo
 - **Celular** (abaixo de 860 px) — uma tela por vez, com duas abas grandes (LISTA/FICHA,
   ESCOLHER/DUELO…); A abre a tela da direita, B volta para a da esquerda
 - **Rótulos em fonte bitmap vão sem acento** (`PSIQUICO`, `ELETRICO`): a Press Start 2P não
@@ -32,7 +119,7 @@ implementação e o que divergiu dele, em `docs/superpowers/plans/2026-10-11-pok
 ## ✨ Funcionalidades
 
 ### Pokédex principal
-- **Listagem paginada** dos 1.300+ pokémons (25 por página) com cache automático via React Query
+- **Listagem paginada** dos 1.300+ pokémons (48 por página) com cache automático via React Query
 - **Busca parcial** com debounce de 350 ms — `pika` encontra os 17 Pikachus; também aceita id (`25`)
 - **Filtro por tipo** (18 tipos canônicos) — lista completa, não truncada
 - **Filtro por geração** (I — Kanto até IX — Paldea)
@@ -44,7 +131,7 @@ implementação e o que divergiu dele, em `docs/superpowers/plans/2026-10-11-pok
 
 - **Visualizador de sprites** com quatro modos: normal, shiny ✨, animado (GIF), animado shiny ✨
 - **Status base** com barras animadas
-- **Lore** — texto oficial da Pokédex (PT-BR quando disponível, com fallback em inglês)
+- **Texto da Pokédex** em português, traduzido aqui a partir da entrada do jogo mais recente (ver [Notas técnicas](#-notas-técnicas))
 - **Badge de raridade** — Lendário 👑, Mítico ✨, Bebê 🍼
 - **Evoluções** — a cadeia completa em linha, cada estágio clicável
 - **Habilidades clicáveis** — cada uma leva a `/habilidade/:slug`, com o efeito,
@@ -52,11 +139,11 @@ implementação e o que divergiu dele, em `docs/superpowers/plans/2026-10-11-pok
 - **Formas alternativas** — Mega X/Y, Gigantamax, Origin, Regional, Therian, Ultra, etc.
 - **Link para o mapa** — resolve a região de origem pela lista de emblemáticos ou pela geração da espécie
 - **Onde encontrar** — rotas, método, nível e chance jogo a jogo, de
-  `/pokemon/{id}/encounters`, com os slots de cada área somados numa linha. Abre
-  no jogo do seu save (Emerald, FireRed, LeafGreen, Ruby ou Sapphire)
+  `/pokemon/{id}/encounters`, com os slots de cada área somados numa linha e o
+  método de encontro em português
 - **Chance de captura** — as oito bolas com as regras de Gen 3, em aritmética
-  inteira como em pokeemerald (taxa 45 com HP cheio dá os 6,25% clássicos). A
-  Repeat Ball olha a sua dex
+  inteira como em pokeemerald (taxa 45 com PS cheios dá os 6,25% clássicos). A
+  Repeat Ball vale mais quando você marca que já capturou a espécie
 
 ### Comparador (`/comparar`)
 - **Duas slots** com busca independente e autocomplete de todos os nomes
@@ -65,7 +152,7 @@ implementação e o que divergiu dele, em `docs/superpowers/plans/2026-10-11-pok
 
 ### Time (`/time`)
 - **Até seis pokémon**, guardados na URL (`?time=mudkip,torchic`) — o link
-  leva o time junto; importa o time do save com um clique
+  leva o time junto
 - **Defesa** — quanto cada tipo de golpe causa em cada membro, com as linhas de
   perigo marcadas (dois ou mais fracos, e mais fracos do que quem resiste)
 - **Ataque** — que tipos o time acerta 2×, contando os tipos de cada membro
@@ -240,7 +327,6 @@ src/
 │   ├── FavoritesPage.tsx       Grid dos favoritos
 │   ├── LorePage.tsx            13 abas de lore
 │   ├── MapPage.tsx             Mapa-múndi + dossiê por região
-│   ├── PlayPage.tsx            Emulador GB/GBC/GBA + saves
 │   ├── NotFoundPage.tsx        404 na carcaça do aparelho
 │
 ├── components/
