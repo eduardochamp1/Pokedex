@@ -6,6 +6,7 @@ import { sectionOf } from "../../lib/deviceNav";
 import { useT } from "../../i18n/lang";
 import { InstallButton } from "../AppStatus";
 import LangToggle from "../LangToggle";
+import MusicToggle from "../MusicToggle";
 import ScanlineToggle from "../ScanlineToggle";
 import {
   DeviceContext,
@@ -141,6 +142,7 @@ const Device = ({ children }: { children: ReactNode }) => {
               </button>
               <LangToggle />
               <InstallButton />
+              <MusicToggle />
               <ScanlineToggle />
             </div>
             {config && (

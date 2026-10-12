@@ -95,6 +95,9 @@ describe("rótulos", () => {
     expect(methodLabel("walk", "pt")).toBe("Andando na grama");
     expect(methodLabel("walk", "en")).toBe("Walking in grass");
     expect(methodLabel("super-rod", "pt")).toBe("Super Rod");
+    expect(methodLabel("snag", "pt")).toBe("Capturado de um treinador");
+    expect(versionLabel("xd")).toBe("XD: Gale of Darkness");
+    expect(versionLabel("red-japan")).toBe("Red (JP)");
     expect(methodLabel("metodo-novo", "en")).toBe("Metodo Novo");
   });
 

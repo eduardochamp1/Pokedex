@@ -7,6 +7,7 @@
  *
  * - `flavor.json`    — o texto da Pokédex de cada espécie (id → texto), a
  *                      partir da entrada em inglês do jogo mais recente
+ * - `genus.json`     — a categoria da espécie ("Seed" → "Semente")
  * - `abilities.json` — nome, resumo, efeito completo e texto de sabor
  *                      (slug → …)
  * - `moves.json`     — nome de cada golpe (slug → nome)
@@ -51,6 +52,10 @@ function usePt<T>(chave: string, carregar: () => Promise<Mapa<T>>, ativo = true)
 /** id da espécie → texto da Pokédex. */
 export const usePtFlavor = () =>
   usePt<string>("flavor", () => import("../data/pt/flavor.json").then((m) => m.default as Mapa<string>));
+
+/** categoria em inglês, sem o "Pokémon" ("Evolution") → em português. */
+export const usePtGenus = () =>
+  usePt<string>("genus", () => import("../data/pt/genus.json").then((m) => m.default as Mapa<string>));
 
 /** slug da habilidade → nome, resumo e efeito. */
 export const usePtAbilities = () =>

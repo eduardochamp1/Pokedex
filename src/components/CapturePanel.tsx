@@ -91,7 +91,7 @@ const CapturePanel = ({ national, captureRate, baseHp, types }: Props) => {
           />
         </label>
         <label className="capture-hp">
-          HP {umPs ? "1" : hp}/{maxHp}
+          {t("PS", "HP")} {umPs ? "1" : hp}/{maxHp}
           <input
             type="range"
             min={1}
@@ -99,7 +99,7 @@ const CapturePanel = ({ national, captureRate, baseHp, types }: Props) => {
             value={hpPct}
             disabled={umPs}
             onChange={(e) => setHpPct(Number(e.target.value))}
-            aria-label={t("HP restante, em porcentagem", "Remaining HP, in percent")}
+            aria-label={t("PS restantes, em porcentagem", "Remaining HP, in percent")}
           />
         </label>
         <label className="capture-check">
@@ -148,7 +148,7 @@ const CapturePanel = ({ national, captureRate, baseHp, types }: Props) => {
       </table>
       <p className="detail-muted capture-rodape">
         {t(
-          `HP calculado com IV ${IV_MEDIO} e sem EV. "Bolas" é quantas, em média, até capturar.`,
+          `PS calculados com IV ${IV_MEDIO} e sem EV. "Bolas" é quantas, em média, até capturar.`,
           `HP computed with IV ${IV_MEDIO} and no EVs. "Balls" is how many, on average, until the catch.`
         )}
       </p>

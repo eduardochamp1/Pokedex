@@ -56,6 +56,16 @@ const V: Record<string, Version> = {
   "legends-arceus": { label: "Legends: Arceus", group: "legends-arceus", region: "sinnoh" },
   scarlet: { label: "Scarlet", group: "scarlet-violet", region: "paldea" },
   violet: { label: "Violet", group: "scarlet-violet", region: "paldea" },
+  "the-teal-mask-scarlet": { label: "The Teal Mask (Scarlet)", group: "the-teal-mask", region: "paldea" },
+  "the-teal-mask-violet": { label: "The Teal Mask (Violet)", group: "the-teal-mask", region: "paldea" },
+  "the-indigo-disk-scarlet": { label: "The Indigo Disk (Scarlet)", group: "the-indigo-disk", region: "paldea" },
+  "the-indigo-disk-violet": { label: "The Indigo Disk (Violet)", group: "the-indigo-disk", region: "paldea" },
+  colosseum: { label: "Colosseum", group: "colosseum" },
+  xd: { label: "XD: Gale of Darkness", group: "xd" },
+  "red-japan": { label: "Red (JP)", group: "red-green-japan", region: "kanto" },
+  "green-japan": { label: "Green (JP)", group: "red-green-japan", region: "kanto" },
+  "blue-japan": { label: "Blue (JP)", group: "blue-japan", region: "kanto" },
+  "legends-za": { label: "Legends: Z-A", group: "legends-za", region: "kalos" },
 };
 
 const tituloDe = (slug: string) =>

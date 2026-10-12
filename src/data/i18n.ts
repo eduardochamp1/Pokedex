@@ -148,7 +148,13 @@ export function tHabitat(name: string | undefined | null, lang: Lang = getLang()
 
 // Se o genus veio em inglês (ex: "Seed Pokémon"), tenta converter para
 // "Pokémon Semente". Se qualquer palavra não estiver no mapa, retorna o original.
-export function tGenus(genus: string | undefined | null, lang: Lang = getLang()): string {
+// `mapa` é o dicionário completo de `data/pt/genus.json` ("Evolution" ->
+// "Evolução"), quando já carregou; sem ele vale o palavra por palavra abaixo.
+export function tGenus(
+  genus: string | undefined | null,
+  lang: Lang = getLang(),
+  mapa?: Record<string, string>
+): string {
   if (!genus) return "";
   // Em inglês o genus já vem certo da PokéAPI ("Seed Pokémon").
   if (lang === "en") return genus;
@@ -158,6 +164,7 @@ export function tGenus(genus: string | undefined | null, lang: Lang = getLang())
   const m = genus.match(/^(.+?)\s+Pok[eé]mon$/i);
   if (m) {
     const descriptor = m[1].trim();
+    if (mapa?.[descriptor]) return `Pokémon ${mapa[descriptor]}`;
     // Tenta traduzir cada palavra do descriptor
     const words = descriptor.split(/\s+/);
     const translated = words.map((w) => GENUS_WORDS_PT[w] ?? w);

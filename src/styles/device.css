@@ -543,6 +543,13 @@
   color: var(--accent-ink);
 }
 .dev-tools .scanline-toggle { width: 40px; padding: 0; }
+/* Trilha ambiente: a nota acesa quando toca, riscada quando muda. */
+.dev-tools .music-toggle { width: 40px; padding: 0; font-size: 16px; line-height: 1; }
+.dev-tools .music-toggle:not(.is-on) span {
+  opacity: 0.55;
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
 
 /* ---------- Elenco (RosterList): Comparar, Time, Tamanhos ---------- */
 .roster {

@@ -20,7 +20,7 @@ import { pixelSpriteUrl } from "../../lib/sprites";
 import { pokemonLabel } from "../../lib/pokemonLabel";
 import { statLabel } from "../../i18n/common";
 import { useLang, tr, type Lang } from "../../i18n/lang";
-import { usePtFlavor } from "../../i18n/ptData";
+import { usePtFlavor, usePtGenus } from "../../i18n/ptData";
 import AbilityList from "../AbilityList";
 import CapturePanel from "../CapturePanel";
 import CryButton from "../CryButton";
@@ -121,6 +121,7 @@ const DexEntry = ({ nameOrId, featured = false, search }: Props) => {
   const evolution = useEvolutionChain(pokemon?.species.url);
   const { favoritePokemons, updateFavoritePokemons } = useContext(FavoriteContext);
   const ptFlavor = usePtFlavor();
+  const ptGenus = usePtGenus();
   const [spriteOverride, setSpriteOverride] = useState<string | undefined>();
   useEffect(() => setSpriteOverride(undefined), [pokemon?.id]);
 
@@ -201,7 +202,7 @@ const DexEntry = ({ nameOrId, featured = false, search }: Props) => {
             />
           </div>
           <div className="entry-id">
-            {genus && <div className="px">{semAcento(tGenus(genus, lang))}</div>}
+            {genus && <div className="px">{semAcento(tGenus(genus, lang, ptGenus))}</div>}
             <h2>{nome}</h2>
             <div className="entry-types">
               {tipos.map((tp) => (

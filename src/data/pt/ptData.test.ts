@@ -3,6 +3,8 @@ import flavor from "./flavor.json";
 import abilities from "./abilities.json";
 import moves from "./moves.json";
 import moveDesc from "./move-desc.json";
+import genus from "./genus.json";
+import { tGenus } from "../i18n";
 
 const INGLES = /\b(the|with|this|that|when|which|their|from)\b/i;
 
@@ -35,6 +37,15 @@ describe("traduções do que a PokéAPI não tem em português", () => {
       expect((a.flavor ?? "").trim().length, slug).toBeGreaterThan(10);
       expect(INGLES.test(a.flavor ?? ""), slug + ": " + a.flavor).toBe(false);
     }
+  });
+
+  it("toda categoria de espécie tem tradução, e ela entra no lugar do palavra por palavra", () => {
+    const g = genus as Record<string, string>;
+    expect(Object.keys(g).length).toBeGreaterThanOrEqual(700);
+    for (const [en, pt] of Object.entries(g)) expect(pt.trim(), en).toBeTruthy();
+    expect(tGenus("Evolution Pokémon", "pt", g)).toBe("Pokémon Evolução");
+    expect(tGenus("Sleeping Pokémon", "pt", g)).toBe("Pokémon Dorminhoco");
+    expect(tGenus("Evolution Pokémon", "en", g)).toBe("Evolution Pokémon");
   });
 
   it("os golpes têm nome, e os clássicos saem como o público conhece", () => {

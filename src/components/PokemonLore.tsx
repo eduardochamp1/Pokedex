@@ -4,8 +4,8 @@ import { tGenus, tHabitat } from "../data/i18n";
 import { pickLocalized } from "../lib/localize";
 import { regionIdForPokemon } from "../lib/regionForPokemon";
 import { useTypewriter } from "../hooks/useTypewriter";
-import { useT } from "../i18n/lang";
-import { usePtFlavor } from "../i18n/ptData";
+import { useLang, useT } from "../i18n/lang";
+import { usePtFlavor, usePtGenus } from "../i18n/ptData";
 
 interface Props {
   species: PokemonSpecies;
@@ -13,7 +13,9 @@ interface Props {
 
 const PokemonLore = ({ species }: Props) => {
   const t = useT();
+  const lang = useLang();
   const ptFlavor = usePtFlavor();
+  const ptGenus = usePtGenus();
   const flavor = ptFlavor?.[species.id] || pickLocalized(species.flavor_text_entries, (e) => e.flavor_text);
   const genus = pickLocalized(species.genera, (g) => g.genus);
   const rarity: string[] = [];
@@ -30,7 +32,7 @@ const PokemonLore = ({ species }: Props) => {
   return (
     <div className="lore-block">
       <div className="lore-tags">
-        {genus && <span className="lore-tag lore-genus">{tGenus(genus)}</span>}
+        {genus && <span className="lore-tag lore-genus">{tGenus(genus, lang, ptGenus)}</span>}
         {rarity.map((r) => (
           <span key={r} className="lore-tag lore-rarity">
             {r}

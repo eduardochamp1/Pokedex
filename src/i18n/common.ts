@@ -5,7 +5,7 @@
 import type { Lang } from "./lang";
 
 const STATS: Record<string, [string, string]> = {
-  hp: ["HP", "HP"],
+  hp: ["PS", "HP"],
   attack: ["Atq", "Atk"],
   defense: ["Def", "Def"],
   "special-attack": ["Atq Esp", "Sp. Atk"],
