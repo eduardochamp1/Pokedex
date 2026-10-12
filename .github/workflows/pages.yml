@@ -25,7 +25,7 @@ jobs:
       - run: npm ci
       - run: npm run build
         env:
-          VITE_BASE: /Pokedex/
+          VITE_BASE: /pokedex/
       # Pages não tem rewrite de SPA: o 404.html (cópia do index) resolve links diretos.
       - run: cp dist/index.html dist/404.html
       - uses: actions/upload-pages-artifact@v3

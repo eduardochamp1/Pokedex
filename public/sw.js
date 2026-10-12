@@ -16,7 +16,7 @@
  *  - API: respostas da PokéAPI, com teto de entradas.
  */
 const VERSION = "__SW_VERSION__";
-// O worker fica na raiz do app; no Pages isso é /Pokedex/, não /.
+// O worker fica na raiz do app; no Pages isso é /pokedex/, não /.
 const BASE = new URL("./", self.location).pathname;
 const PRECACHE = /*__SW_PRECACHE__*/ [].map((u) => BASE + u.slice(1));
 
