@@ -15,6 +15,7 @@ import {
   type PaneSide,
 } from "./DeviceContext";
 import "../../styles/device.css";
+import "../../styles/pages.css";
 
 const digitando = (el: EventTarget | null) =>
   el instanceof HTMLElement &&

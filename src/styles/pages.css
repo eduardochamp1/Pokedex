@@ -1,0 +1,76 @@
+/* ==========================================================================
+   Páginas de uma tela só — Habilidade, Dados, Evoluções, Jogos, 404.
+   O protótipo não as desenhou; ganham a mesma linguagem das outras: faixa
+   verde no topo e cartões escuros. A marcação delas não mudou: o cabeçalho
+   que já existia vira a faixa.
+   ========================================================================== */
+.dev-pane-single > :is(.trainer-shell, .ability-shell) {
+  max-width: none;
+  margin: 0;
+  padding: 0 22px 22px;
+  gap: 18px;
+}
+.dev-pane-single :is(.trainer-header, .ability-header) {
+  background: var(--accent);
+  color: var(--accent-ink);
+  margin: 0 -22px;
+  padding: 14px 18px;
+  border: 0;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.dev-pane-single :is(.trainer-header, .ability-header) h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 1.1;
+  color: inherit;
+}
+.dev-pane-single :is(.trainer-header, .ability-header) :is(span, a) {
+  color: inherit;
+  font-family: var(--font-pixel);
+  font-size: 9px;
+}
+/* Página sem cabeçalho próprio (estado de erro): o título faz as vezes. */
+.dev-pane-single > :is(.trainer-shell, .ability-shell) > h1:first-child {
+  background: var(--accent);
+  color: var(--accent-ink);
+  margin: 0 -22px;
+  padding: 14px 18px;
+  font-family: var(--font-display);
+  font-size: 32px;
+}
+.dev-pane-single :is(.trainer-shell, .ability-shell) h2 {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--accent-alt);
+}
+.dev-pane-single :is(.dados-bloco, .jogos-cartao, .ability-texto, .evo-lista > li) {
+  background: var(--surface-1);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 14px 16px;
+  box-shadow: none;
+}
+.dev-pane-single .trainer-sub { font-size: 15px; line-height: 1.55; }
+
+/* Link com cara de botão de tela. */
+.page-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+.page-link:hover { color: var(--text); }
+.page-link.is-active:hover { color: var(--accent-ink); }
+
+@media (max-width: 859px) {
+  .dev-pane-single > :is(.trainer-shell, .ability-shell) { padding: 0 14px 18px; }
+  .dev-pane-single :is(.trainer-header, .ability-header),
+  .dev-pane-single > :is(.trainer-shell, .ability-shell) > h1:first-child { margin: 0 -14px; }
+  .dev-pane-single :is(.trainer-header, .ability-header) h1 { font-size: 26px; }
+}

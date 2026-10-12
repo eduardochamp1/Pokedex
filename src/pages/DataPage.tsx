@@ -97,8 +97,8 @@ const DataPage = () => {
       </header>
       <p className="trainer-sub">
         {t(
-          "Tudo fica neste navegador — não há conta nem servidor. Para usar em outro aparelho, exporte aqui e importe o arquivo lá. Os saves do emulador não entram: eles têm o próprio backup em Jogar.",
-          "Everything lives in this browser — no account, no server. To use it on another device, export here and import the file there. Emulator saves aren't included: they have their own backup in Play."
+          "Tudo fica neste navegador — não há conta nem servidor. Para usar em outro aparelho, exporte aqui e importe o arquivo lá.",
+          "Everything lives in this browser — no account, no server. To use it on another device, export here and import the file there."
         )}
       </p>
 

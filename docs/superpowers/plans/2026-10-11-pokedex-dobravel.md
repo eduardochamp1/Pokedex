@@ -203,7 +203,7 @@ só com o dono pedindo.
 
 ## Fase 4 — Restante, limpeza e publicação
 
-- [ ] **4.1 Páginas fora do protótipo.** 👁 `AbilityPage`, `DataPage`, `EvolutionsPage`,
+- [x] **4.1 Páginas fora do protótipo.** 👁 `AbilityPage`, `DataPage`, `EvolutionsPage`,
   `GamesPage`, `NotFoundPage`: mesma linguagem (faixa verde + cartões), em dois painéis
   quando houver lista + detalhe, senão painel único.
 

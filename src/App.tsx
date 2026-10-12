@@ -66,7 +66,7 @@ function App() {
             <Route path="/habilidade/:slug" element={<SinglePane><AbilityPage /></SinglePane>} />
             <Route path="/quiz" element={<QuizPage />} />
             <Route path="/pokemon/:nameOrId" element={<HomePage />} />
-            <Route path="*" element={<SinglePane><NotFoundPage /></SinglePane>} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
       </ErrorBoundary>
